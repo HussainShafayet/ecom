@@ -2,7 +2,7 @@ import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import './App.css';
 import {Layout} from './components/layout';
 import { Login, Register } from './pages/user';
-import {Home, Products, ProductDetails, Cart} from './pages';
+import {Home, Products, ProductDetails, Cart, NotFound} from './pages';
 
 function App() {
   return (
@@ -19,6 +19,9 @@ function App() {
            {/* Pages without Layout (e.g., Login page) */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          {/* Catch-all Not Found Route */}
+          <Route path="*" element={<LayoutWrapper><NotFound /></LayoutWrapper>} />
         </Routes>
       </Router>
     </>
