@@ -1,24 +1,53 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { getCategories } from '../../services/categoryService'; // Assume you have a service to fetch categories
 
 const CategoriesSection = () => {
-  const categories = [
-    { name: 'Electronics', image: '/path-to-electronics.jpg', link: '/products?category=electronics' },
-    { name: 'Clothing', image: '/path-to-clothing.jpg', link: '/products?category=clothing' },
-    { name: 'Home Decor', image: '/path-to-home-decor.jpg', link: '/products?category=home-decor' },
-    // Add more categories as needed
-  ];
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories(); // Fetch categories from the API
+        setCategories(data);
+        setLoading(false);
+      } catch (error) {
+        setError('Failed to load categories');
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center">Loading categories...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>;
+  }
 
   return (
     <div className="container mx-auto my-12">
       <h2 className="text-3xl font-bold mb-6 text-center">Shop by Category</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {categories.map((category) => (
-          <div key={category.name} className="relative group">
-            <img src={category.image} alt={category.name} className="w-full h-48 object-cover rounded-lg" />
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <a href={category.link} className="text-white text-xl font-bold">{category.name}</a>
+          <Link to={`/products?category=${category.slug}`} key={category.id}>
+            <div className="relative group cursor-pointer">
+              {/* Category Image */}
+              <img
+                src={category.image}
+                alt={category.name}
+                className="w-full h-48 object-cover rounded-lg transition-transform transform group-hover:scale-105"
+              />
+              {/* Overlay with Category Name */}
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-white text-xl font-bold">{category.name}</span>
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
