@@ -11,7 +11,6 @@ const FeaturedProducts = () => {
     const fetchProducts = async () => {
       try {
         const data = await getProducts();  // Call the API using productService
-        console.log(data);
         
         setProducts(data.products.slice(0, 8));  // Display only 8 featured products
         setLoading(false);
