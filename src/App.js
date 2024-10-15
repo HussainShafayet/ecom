@@ -16,9 +16,9 @@ function App() {
           <Route path="/cart" element={<LayoutWrapper><Cart /></LayoutWrapper>} />
           {/*<Route path="/checkout" element={<LayoutWrapper><Checkout /></LayoutWrapper>} />*/}
 
-           {/* Pages without Layout (e.g., Login page) */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+           {/* user */}
+          <Route path="/login" element={<LayoutWrapper><Login /></LayoutWrapper>} />
+          <Route path="/register" element={<LayoutWrapper><Register /></LayoutWrapper>} />
 
           {/* Catch-all Not Found Route */}
           <Route path="*" element={<LayoutWrapper><NotFound /></LayoutWrapper>} />
