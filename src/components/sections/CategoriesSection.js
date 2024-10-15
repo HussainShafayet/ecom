@@ -34,7 +34,7 @@ const CategoriesSection = () => {
       <h2 className="text-3xl font-bold mb-6 text-center">Shop by Category</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {categories.map((category) => (
-          <Link to={`/products?category=${category.slug}`} key={category.id}>
+          <Link to={`/products?category=${category.slug}`} key={Math.random()*10}>
             <div className="relative group cursor-pointer">
               {/* Category Image */}
               <img
