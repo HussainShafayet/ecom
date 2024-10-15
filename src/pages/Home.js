@@ -1,8 +1,13 @@
-import React from 'react'
+import React from 'react';
+import { HeroSection, FeaturedProducts, CategoriesSection } from '../components/sections';
 
 const Home = () => {
   return (
-    <div>Home</div>
+    <>
+      <HeroSection />
+      <FeaturedProducts />
+      <CategoriesSection />
+    </>
   )
 }
 
