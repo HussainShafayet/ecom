@@ -12,12 +12,16 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1); 
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedColor, setSelectedColor] = useState('');
+  const [mainImage, setMainImage] = useState(''); // Manage main image displayed
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const data = await getProductById(id);
+        console.log('data', data);
+        
         setProduct(data);
+        setMainImage(data.images[0]); // Set the initial main image to the first product image
         setLoading(false);
 
         const relatedData = await getProductsByCategory(data.category);
@@ -30,6 +34,10 @@ const ProductDetails = () => {
     fetchProduct();
   }, [id]);
 
+  const handleImageClick = (image) => {
+    setMainImage(image); // Update main image when a category image is clicked
+  };
+
   const incrementQuantity = () => {
     setQuantity(prevQuantity => prevQuantity + 1);
   };
@@ -37,7 +45,7 @@ const ProductDetails = () => {
   const decrementQuantity = () => {
     setQuantity(prevQuantity => Math.max(1, prevQuantity - 1)); 
   };
-
+ 
   if (loading) {
     return <div className="text-center">Loading product details...</div>;
   }
@@ -59,7 +67,7 @@ const ProductDetails = () => {
         <div className="flex flex-col">
           <div className="relative group">
             <img
-              src={product.images[0]}
+              src={mainImage}
               alt={product.title}
               className="w-full h-auto object-cover rounded-lg shadow-lg mb-4 cursor-zoom-in"
             />
@@ -71,6 +79,7 @@ const ProductDetails = () => {
                 src={image}
                 alt={`Product Image ${index + 1}`}
                 className="w-24 h-24 object-cover rounded-lg cursor-pointer border-2 border-gray-300 hover:border-blue-500 transition"
+                onClick={() => handleImageClick(image)} // Change main image on click
               />
             ))}
           </div>
@@ -181,7 +190,7 @@ const ProductDetails = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {relatedProducts.map((relatedProduct) => (
             <div key={relatedProduct.id} className="border rounded-lg p-4">
-              <Link to={`/products/${relatedProduct.id}`}>
+              <Link to={`/product/${relatedProduct.id}`}>
                 <img src={relatedProduct.images[0]} alt={relatedProduct.title} className="w-full h-40 object-cover mb-2" />
                 <h3 className="font-semibold">{relatedProduct.title}</h3>
                 <p className="text-gray-700">${relatedProduct.price.toFixed(2)}</p>
