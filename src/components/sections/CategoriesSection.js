@@ -11,7 +11,7 @@ const CategoriesSection = () => {
     const fetchCategories = async () => {
       try {
         const data = await getCategories(); // Fetch categories from the API
-        setCategories(data);
+        setCategories(data.slice(0, 4));
         setLoading(false);
       } catch (error) {
         setError('Failed to load categories');
@@ -34,11 +34,11 @@ const CategoriesSection = () => {
       <h2 className="text-3xl font-bold mb-6 text-center">Shop by Category</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {categories.map((category) => (
-          <Link to={`/products?category=${category.slug}`} key={Math.random()*10}>
+          <Link to={`/products?category=${category.slug}`} key={Math.ceil(Math.random()*1000)}>
             <div className="relative group cursor-pointer">
               {/* Category Image */}
               <img
-                src={category.image}
+                src={'https://images.unsplash.com/photo-1523275335684-37898b6baf30'}
                 alt={category.name}
                 className="w-full h-48 object-cover rounded-lg transition-transform transform group-hover:scale-105"
               />

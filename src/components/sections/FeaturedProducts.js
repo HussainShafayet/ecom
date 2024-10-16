@@ -12,7 +12,7 @@ const FeaturedProducts = () => {
       try {
         const data = await getProducts();  // Call the API using productService
         
-        setProducts(data.products.slice(0, 8));  // Display only 8 featured products
+        setProducts(data.products.slice(0, 4));  // Display only 8 featured products
         setLoading(false);
       } catch (error) {
         setError('Failed to load products');

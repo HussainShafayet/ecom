@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { getProductsByCategory } from '../services/productService';  // Service to fetch products by category
 import {ProductCard} from '../components/common';  // Reusable ProductCard component
+import { FaHome, FaMobileAlt,FaTshirt, FaCouch, FaGamepad } from 'react-icons/fa';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -41,14 +42,42 @@ const Products = () => {
   }
 
   return (
-    <div className="container mx-auto my-12">
-      <h2 className="text-3xl font-bold mb-6 text-center">Products</h2>
+    <div className="flex  gap-4">
+    {/* Enhanced Sidebar */}
+    <aside className="bg-gray-200 p-4 w-full md:w-1/6 rounded-lg shadow-lg">
+      <ul>
+        <li className="flex items-center mb-2">
+          <FaHome className="mr-2 text-blue-500" />
+          <Link to="/products?category=all" className="hover:text-blue-600 transition">All Products</Link>
+        </li>
+        <li className="flex items-center mb-2">
+          <FaMobileAlt className="mr-2 text-blue-500" />
+          <Link to="/products?category=electronics" className="hover:text-blue-600 transition">Electronics</Link>
+        </li>
+        <li className="flex items-center mb-2">
+          <FaTshirt className="mr-2 text-blue-500" />
+          <Link to="/products?category=clothing" className="hover:text-blue-600 transition">Clothing</Link>
+        </li>
+        <li className="flex items-center mb-2">
+          <FaCouch className="mr-2 text-blue-500" />
+          <Link to="/products?category=home-decor" className="hover:text-blue-600 transition">Home Decor</Link>
+        </li>
+        <li className="flex items-center mb-2">
+          <FaGamepad className="mr-2 text-blue-500" />
+          <Link to="/products?category=toys" className="hover:text-blue-600 transition">Toys</Link>
+        </li>
+      </ul>
+    </aside>
+
+    {/* Products Display Area */}
+    <main className="w-full md:w-3/3">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-    </div>
+    </main>
+  </div>
   );
 };
 
