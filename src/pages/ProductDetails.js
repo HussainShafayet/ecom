@@ -45,7 +45,15 @@ const ProductDetails = () => {
   const decrementQuantity = () => {
     setQuantity(prevQuantity => Math.max(1, prevQuantity - 1)); 
   };
- 
+
+  // Calculate the discounted price
+  const calculateDiscountedPrice = (price, discountPercentage) => {
+    if (discountPercentage && discountPercentage > 0) {
+      return price - (price * (discountPercentage / 100));
+    }
+    return price;
+  };
+
   if (loading) {
     return <div className="text-center">Loading product details...</div>;
   }
@@ -59,6 +67,10 @@ const ProductDetails = () => {
   }
 
   const colors = ['Red', 'Blue', 'Green', 'Black', 'White'];
+
+  // Assume discountPercentage is a property of the product (e.g., product.discountPercentage)
+  const discountPercentage = product.discountPercentage || 0;
+  const discountedPrice = calculateDiscountedPrice(product.price, discountPercentage);
 
   return (
     <div className="container my-6">
@@ -77,12 +89,12 @@ const ProductDetails = () => {
             ))}
           </div>
           <div className="relative group w-full">
-          <img
-            src={mainImage || 'fallback-image-url.jpg'}
-            alt={product.title}
-            className="w-full h-96 object-contain object-center rounded-lg shadow-lg mb-4 cursor-zoom-in"
-          />
-        </div>
+            <img
+              src={mainImage || 'fallback-image-url.jpg'}
+              alt={product.title}
+              className="w-full h-96 object-contain object-center rounded-lg shadow-lg mb-4 cursor-zoom-in"
+            />
+          </div>
         </div>
 
         {/* Product Information */}
@@ -90,9 +102,20 @@ const ProductDetails = () => {
           <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
 
           {/* Product Price */}
-          <p className="text-2xl text-green-600 font-semibold mb-4">
-            ${product.price.toFixed(2)}
-          </p>
+          {discountPercentage > 0 ? (
+            <div className="mb-4">
+              <p className=" text-gray-500 line-through">
+                ${product.price.toFixed(2)}
+              </p>
+              <p className="text-2x text-green-600 font-semibold">
+                ${discountedPrice.toFixed(2)} <span className="text-red-500">({discountPercentage}% OFF)</span>
+              </p>
+            </div>
+          ) : (
+            <p className="text-2xl text-green-600 font-semibold mb-4">
+              ${product.price.toFixed(2)}
+            </p>
+          )}
 
           {/* Choose Color */}
           <div className="mb-4">
@@ -118,8 +141,6 @@ const ProductDetails = () => {
           <div className="flex items-center mb-4">
             <label className="mr-4 text-gray-700">Quantity:</label>
             <div className='border flex rounded'>
-
-           
               <button onClick={decrementQuantity} className="p-2 bg-gray-200 hover:bg-gray-300">
                 -
               </button>
@@ -133,7 +154,7 @@ const ProductDetails = () => {
               <button onClick={incrementQuantity} className="p-2 bg-gray-200 hover:bg-gray-300">
                 +
               </button>
-             </div>
+            </div>
           </div>
 
           {/* Product Description */}
