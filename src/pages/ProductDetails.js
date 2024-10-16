@@ -1,29 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getProductById, getProductsByCategory } from '../services/productService'; // Fetch product details and related products from the API
+import { getProductById, getProductsByCategory } from '../services/productService'; 
 import { FaArrowRight, FaShareAlt } from 'react-icons/fa';
+import InputField from '../components/common/InputField'; // Import the InputField component
 
 const ProductDetails = () => {
-  const { id } = useParams();  // Get the product ID from the URL
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [quantity, setQuantity] = useState(1); // Manage product quantity
-  const [relatedProducts, setRelatedProducts] = useState([]); // Manage related products
-  const [selectedColor, setSelectedColor] = useState(''); // Manage selected color
+  const [quantity, setQuantity] = useState(1); 
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [selectedColor, setSelectedColor] = useState('');
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const data = await getProductById(id);  // Fetch product details by ID
-        
+        const data = await getProductById(id);
         setProduct(data);
         setLoading(false);
 
-        // Fetch related products based on the current product's category or tags
-        const relatedData = await getProductsByCategory(data.category); // Assuming category is a property in the product object
-        
-        setRelatedProducts(relatedData.products.slice(0,8));
+        const relatedData = await getProductsByCategory(data.category);
+        setRelatedProducts(relatedData.products.slice(0, 8));
       } catch (error) {
         setError('Failed to load product details');
         setLoading(false);
@@ -31,6 +29,14 @@ const ProductDetails = () => {
     };
     fetchProduct();
   }, [id]);
+
+  const incrementQuantity = () => {
+    setQuantity(prevQuantity => prevQuantity + 1);
+  };
+
+  const decrementQuantity = () => {
+    setQuantity(prevQuantity => Math.max(1, prevQuantity - 1)); 
+  };
 
   if (loading) {
     return <div className="text-center">Loading product details...</div>;
@@ -44,7 +50,7 @@ const ProductDetails = () => {
     return <div className="text-center">Product not found</div>;
   }
 
-  const colors = ['Red', 'Blue', 'Green', 'Black', 'White']; // Define available colors
+  const colors = ['Red', 'Blue', 'Green', 'Black', 'White'];
 
   return (
     <div className="container mx-auto my-12 px-4">
@@ -99,16 +105,26 @@ const ProductDetails = () => {
             {selectedColor && <p className="mt-2 text-gray-700">Selected Color: {selectedColor}</p>}
           </div>
 
-          {/* Quantity Selector */}
+          {/* Quantity Selector using InputField */}
           <div className="flex items-center mb-4">
             <label className="mr-4 text-gray-700">Quantity:</label>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, e.target.value))}
-              className="border rounded-lg p-2 w-16"
-              min="1"
-            />
+            <div className='border flex rounded'>
+
+           
+              <button onClick={decrementQuantity} className="p-2 bg-gray-200 hover:bg-gray-300">
+                -
+              </button>
+              <InputField
+                type="number"
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
+                className="-gray-300 w-12 text-center"
+                min="1"
+              />
+              <button onClick={incrementQuantity} className="p-2 bg-gray-200 hover:bg-gray-300">
+                +
+              </button>
+             </div>
           </div>
 
           {/* Product Description */}
