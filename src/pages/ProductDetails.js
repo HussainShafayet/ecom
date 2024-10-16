@@ -61,28 +61,28 @@ const ProductDetails = () => {
   const colors = ['Red', 'Blue', 'Green', 'Black', 'White'];
 
   return (
-    <div className="container mx-auto my-12 px-4">
+    <div className="container my-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Product Image Gallery */}
-        <div className="flex flex-col">
-          <div className="relative group">
-            <img
-              src={mainImage}
-              alt={product.title}
-              className="w-full h-auto object-cover rounded-lg shadow-lg mb-4 cursor-zoom-in"
-            />
-          </div>
-          <div className="flex space-x-2">
+        <div className="flex gap-3">
+          <div className="flex flex-col space-y-2">
             {product.images.map((image, index) => (
               <img
                 key={index}
                 src={image}
                 alt={`Product Image ${index + 1}`}
-                className="w-24 h-24 object-cover rounded-lg cursor-pointer border-2 border-gray-300 hover:border-blue-500 transition"
+                className="w-20 h-20 object-cover rounded-lg cursor-pointer p-1 border-2 border-gray-300 hover:border-blue-500 transition"
                 onClick={() => handleImageClick(image)} // Change main image on click
               />
             ))}
           </div>
+          <div className="relative group w-full">
+          <img
+            src={mainImage || 'fallback-image-url.jpg'}
+            alt={product.title}
+            className="w-full h-96 object-contain object-center rounded-lg shadow-lg mb-4 cursor-zoom-in"
+          />
+        </div>
         </div>
 
         {/* Product Information */}
