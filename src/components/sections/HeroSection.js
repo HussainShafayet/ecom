@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(1);
-  const totalSlides = 3;
+  const totalSlides = 5;
 
   const slides = [
     {
@@ -35,6 +35,22 @@ const HeroSection = () => {
       subheading: 'Stylish and affordable pieces to transform your home.',
       buttonText: 'Shop Home Decor',
       buttonLink: '/products?category=home-decor',
+    },,
+    {
+      id: 4,
+      image: 'https://images.unsplash.com/photo-1531545514256-b1400bc00f31',
+      heading: 'Find Your Perfect Electronics',
+      subheading: 'Top gadgets and accessories at unbeatable prices.',
+      buttonText: 'Explore Electronics',
+      buttonLink: '/products?category=electronics',
+    },
+    {
+      id: 5,
+      image: 'https://images.unsplash.com/photo-1567016545219-d03b237921b1',
+      heading: 'Upgrade Your Home Decor',
+      subheading: 'Stylish and affordable pieces to transform your home.',
+      buttonText: 'Shop Home Decor',
+      buttonLink: '/products?category=home-decor',
     },
   ];
 
@@ -46,11 +62,6 @@ const HeroSection = () => {
           className="bg-blue-500 h-full"
           style={{ width: `${(currentSlide / totalSlides) * 100}%`, transition: 'width 3s' }}
         ></div>
-      </div>
-
-      {/* Slide counter */}
-      <div className="absolute top-2 right-2 text-white z-20">
-        <span>{currentSlide} / {totalSlides}</span>
       </div>
 
       <Swiper
