@@ -10,7 +10,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-md fixed w-full z-50">
+    <nav className="bg-white shadow-md sticky top-0 w-full z-50">
       {/* Top Promo Bar */}
       <div className="bg-blue-600 text-white text-center py-2 text-sm">
         <Link to="/deals">Flash Sale! Up to 50% Off Selected Items</Link>
