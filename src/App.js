@@ -1,39 +1,34 @@
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import {Layout} from './components/layout';
+import { Layout } from './components/layout';
 import { Login, Register } from './pages/user';
-import {Home, Products, ProductDetails, Cart, NotFound} from './pages';
+import { Home, Products, ProductDetails, Cart, NotFound } from './pages';
+import { CartProvider } from './context/CartContext'; // Import CartProvider
 
 function App() {
   return (
-    <>
+    <CartProvider> {/* Wrap the Router with CartProvider for global access */}
       <Router>
-        <Routes>
-          {/* Pages with Layout */}
-          <Route path="/" element={<LayoutWrapper><Home /></LayoutWrapper>} />
-          <Route path="/products" element={<LayoutWrapper><Products /></LayoutWrapper>} />
-          <Route path="/product/:id" element={<LayoutWrapper><ProductDetails /></LayoutWrapper>} />
-          <Route path="/cart" element={<LayoutWrapper><Cart /></LayoutWrapper>} />
-          {/*<Route path="/checkout" element={<LayoutWrapper><Checkout /></LayoutWrapper>} />*/}
+        <Layout> {/* Directly wrap Layout around Routes */}
+          <Routes>
+            {/* Pages */}
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
+            <Route path="/cart" element={<Cart />} />
+            {/*<Route path="/checkout" element={<Checkout />} />*/}
 
-           {/* user */}
-          <Route path="/login" element={<LayoutWrapper><Login /></LayoutWrapper>} />
-          <Route path="/register" element={<LayoutWrapper><Register /></LayoutWrapper>} />
+            {/* User Pages */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* Catch-all Not Found Route */}
-          <Route path="*" element={<LayoutWrapper><NotFound /></LayoutWrapper>} />
-        </Routes>
+            {/* Catch-all Not Found Route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Layout>
       </Router>
-    </>
+    </CartProvider>
   );
-}
-
-function LayoutWrapper({children}) {
-  return(
-    <Layout>
-      {children}
-    </Layout>
-  )
 }
 
 export default App;
