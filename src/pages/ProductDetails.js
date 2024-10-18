@@ -196,7 +196,7 @@ const ProductDetails = () => {
             className="relative mb-4"
           >
             <button
-              className="flex items-center bg-gray-100 p-2 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex items-center p-2 rounded-lg "
               onClick={toggleDropdown}
               onMouseEnter={handleMouseEnter}
              
