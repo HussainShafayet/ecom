@@ -33,7 +33,7 @@ const Navbar = () => {
           <Link to="/products" className="text-gray-700 hover:text-blue-500 transition">
             Shop
           </Link>
-          <Link to="/deals" className="text-gray-700 hover:text-blue-500 transition">
+          {/*<Link to="/deals" className="text-gray-700 hover:text-blue-500 transition">
             Deals
           </Link>
           <Link to="/new-arrivals" className="text-gray-700 hover:text-blue-500 transition">
@@ -41,7 +41,7 @@ const Navbar = () => {
           </Link>
           <Link to="/best-sellers" className="text-gray-700 hover:text-blue-500 transition">
             Best Sellers
-          </Link>
+          </Link>*/}
         </div>
 
         {/* Search Bar */}
@@ -96,7 +96,7 @@ const Navbar = () => {
             <Link to="/products" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
               Shop
             </Link>
-            <Link to="/deals" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
+            {/*<Link to="/deals" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
               Deals
             </Link>
             <Link to="/new-arrivals" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
@@ -104,7 +104,7 @@ const Navbar = () => {
             </Link>
             <Link to="/best-sellers" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
               Best Sellers
-            </Link>
+            </Link>*/}
 
             {/* Mobile Search Bar */}
             <div className="flex items-center">
