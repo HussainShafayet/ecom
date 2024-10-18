@@ -1,27 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getProductById, getProductsByCategory } from '../services/productService'; 
-import { FaArrowRight, FaShareAlt } from 'react-icons/fa';
-import InputField from '../components/common/InputField'; // Import the InputField component
+import { getProductById, getProductsByCategory } from '../services/productService';
+import { FaStar, FaChevronDown, FaShareAlt } from 'react-icons/fa';
+import {InputField} from '../components/common/' ;// Star and dropdown icons
 
 const ProductDetails = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [quantity, setQuantity] = useState(1); 
+  const [quantity, setQuantity] = useState(1);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedColor, setSelectedColor] = useState('');
-  const [mainImage, setMainImage] = useState(''); // Manage main image displayed
+  const [mainImage, setMainImage] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown open/close state
+  const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // Filter reviews by rating
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const data = await getProductById(id);
-        console.log('data', data);
+        console.log('product', data);
         
         setProduct(data);
-        setMainImage(data.images[0]); // Set the initial main image to the first product image
+        setMainImage(data.images[0]);
         setLoading(false);
 
         const relatedData = await getProductsByCategory(data.category);
@@ -35,7 +37,7 @@ const ProductDetails = () => {
   }, [id]);
 
   const handleImageClick = (image) => {
-    setMainImage(image); // Update main image when a category image is clicked
+    setMainImage(image);
   };
 
   const incrementQuantity = () => {
@@ -43,10 +45,32 @@ const ProductDetails = () => {
   };
 
   const decrementQuantity = () => {
-    setQuantity(prevQuantity => Math.max(1, prevQuantity - 1)); 
+    setQuantity(prevQuantity => Math.max(1, prevQuantity - 1));
   };
 
-  // Calculate the discounted price
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen); // Toggle dropdown visibility on click
+  };
+
+  const handleRatingClick = (rating) => {
+    setSelectedRatingFilter(rating); // Set the filter for selected rating
+    setDropdownOpen(false); // Close dropdown after selecting
+  };
+
+  const filterReviews = (reviews) => {
+    if (!selectedRatingFilter) {
+      return reviews; // Show all reviews if no filter is selected
+    }
+    return reviews.filter(review => review.rating === selectedRatingFilter); // Filter by selected rating
+  };
+
+  const handleMouseEnter = () => {
+    setDropdownOpen(true); // Show dropdown on hover
+  };
+
+  const handleMouseLeave = () => {
+    setDropdownOpen(false); // Hide dropdown when mouse leaves
+  };
   const calculateDiscountedPrice = (price, discountPercentage) => {
     if (discountPercentage && discountPercentage > 0) {
       return price - (price * (discountPercentage / 100));
@@ -68,9 +92,19 @@ const ProductDetails = () => {
 
   const colors = ['Red', 'Blue', 'Green', 'Black', 'White'];
 
-  // Assume discountPercentage is a property of the product (e.g., product.discountPercentage)
-  const discountPercentage = product.discountPercentage || 0;
-  const discountedPrice = calculateDiscountedPrice(product.price, discountPercentage);
+  const ratingBreakdown = {
+    5: 80,
+    4: 11,
+    3: 4,
+    2: 2,
+    1: 3,
+  };
+
+  const filteredReviews = filterReviews(product.reviews || []); // Filter reviews based on selected rating
+
+    // Assume discountPercentage is a property of the product (e.g., product.discountPercentage)
+    const discountPercentage = product.discountPercentage || 0;
+    const discountedPrice = calculateDiscountedPrice(product.price, discountPercentage);
 
   return (
     <div className="container my-6">
@@ -84,7 +118,7 @@ const ProductDetails = () => {
                 src={image}
                 alt={`Product Image ${index + 1}`}
                 className="w-20 h-20 object-cover rounded-lg cursor-pointer p-1 border-2 border-gray-300 hover:border-blue-500 transition"
-                onClick={() => handleImageClick(image)} // Change main image on click
+                onClick={() => handleImageClick(image)}
               />
             ))}
           </div>
@@ -117,7 +151,6 @@ const ProductDetails = () => {
             </p>
           )}
 
-          {/* Choose Color */}
           <div className="mb-4">
             <h2 className="text-lg font-semibold mb-2">Choose Color:</h2>
             <div className="flex space-x-2">
@@ -137,10 +170,9 @@ const ProductDetails = () => {
             {selectedColor && <p className="mt-2 text-gray-700">Selected Color: {selectedColor}</p>}
           </div>
 
-          {/* Quantity Selector using InputField */}
           <div className="flex items-center mb-4">
             <label className="mr-4 text-gray-700">Quantity:</label>
-            <div className='border flex rounded'>
+            <div className="border flex rounded">
               <button onClick={decrementQuantity} className="p-2 bg-gray-200 hover:bg-gray-300">
                 -
               </button>
@@ -157,12 +189,19 @@ const ProductDetails = () => {
             </div>
           </div>
 
-          {/* Product Description */}
           <p className="text-gray-700 mb-6">{product.description}</p>
 
-          {/* Ratings */}
-          <div className="flex items-center mb-4">
-            <div className="flex">
+          {/* Ratings Dropdown Button */}
+          <div
+            className="relative mb-4"
+          >
+            <button
+              className="flex items-center bg-gray-100 p-2 rounded-lg hover:bg-gray-200 transition-colors"
+              onClick={toggleDropdown}
+              onMouseEnter={handleMouseEnter}
+             
+            >
+              <div className="flex">
               {Array(Math.ceil(product.rating))
                 .fill(0)
                 .map((_, i) => (
@@ -176,10 +215,53 @@ const ProductDetails = () => {
                   </svg>
                 ))}
             </div>
-            <span className="ml-2 text-gray-600">{product.rating} / 5</span>
+              <span className="font-bold">{product.rating.toFixed(1)} / 5</span>
+              <FaChevronDown className="ml-2" />
+            </button>
+
+            {/* Enhanced Dropdown menu */}
+            {dropdownOpen && (
+              <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-300 shadow-lg rounded-lg p-4 z-20" onMouseLeave={handleMouseLeave}>
+                <div className="flex items-center mb-2">
+                <div className="flex">
+                  {Array(Math.ceil(product.rating))
+                    .fill(0)
+                    .map((_, i) => (
+                      <svg
+                        key={i}
+                        className="h-5 w-5 text-yellow-500"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 17.27L18.18 21 16.54 14.24 22 9.27 14.81 8.63 12 2 9.19 8.63 2 9.27 7.46 14.24 5.82 21z" />
+                      </svg>
+                    ))}
+                </div>
+                  <span className="font-bold text-lg">{product.rating.toFixed(1)} out of 5</span>
+                </div>
+                {Object.keys(ratingBreakdown).reverse().map(star => (
+                  <div
+                    key={star}
+                    className="flex items-center mb-2 cursor-pointer hover:bg-gray-100 p-1 rounded transition-colors"
+                    onClick={() => handleRatingClick(parseInt(star))} // Filter reviews by rating
+                  >
+                    <span className="w-12 text-nowrap font-semibold text-gray-800">{star} star</span>
+                    <div className="relative w-full h-3 bg-gray-200 rounded-full mx-2">
+                      <div
+                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-500 to-yellow-300 rounded-full"
+                        style={{ width: `${ratingBreakdown[star]}%` }}
+                      ></div>
+                    </div>
+                    <span className="font-medium text-gray-700">{ratingBreakdown[star]}%</span>
+                  </div>
+                ))}
+                <Link to="/reviews" className="block text-center text-blue-500 hover:text-blue-700 font-semibold mt-4 transition">
+                  See customer reviews &gt;
+                </Link>
+              </div>
+            )}
           </div>
 
-          {/* Add to Cart Button */}
           <button
             className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors mb-4"
             onClick={() => alert(`Added ${quantity} of ${product.title} in ${selectedColor} color to cart`)}
@@ -187,7 +269,6 @@ const ProductDetails = () => {
             Add to Cart
           </button>
 
-          {/* Link to More Products */}
           <Link
             to="/products"
             className="text-blue-500 hover:text-blue-600 font-bold"
