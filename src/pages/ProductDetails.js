@@ -111,8 +111,9 @@ const ProductDetails = () => {
     const discountedPrice = calculateDiscountedPrice(product.price, discountPercentage);
 
   const handleAddToCart = () => {
-    addToCart(product, quantity, selectedColor);  // Add product to cart with selected quantity and color
-    alert(`Added ${quantity} of ${product.title} in ${selectedColor} to cart`);
+    product.quantity = quantity;
+    product.selectedColor = selectedColor;
+    addToCart(product, quantity, selectedColor);
   };
 
   return (

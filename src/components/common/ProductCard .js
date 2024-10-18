@@ -1,7 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import {useCart} from '../../context/CartContext';
 
 const ProductCard = ({ product }) => {
+  // Import addToCart function from CartContext
+  const { addToCart } = useCart(); 
+
+  const handleAddToCart = () => {
+    product.quantity = 1;
+    addToCart(product);
+  };
     return (
       <div className="border rounded-lg shadow-lg overflow-hidden bg-white hover:shadow-xl transition-shadow duration-300 relative">
         {product.discountPercentage && (
@@ -40,7 +48,7 @@ const ProductCard = ({ product }) => {
           </div>
   
           <button
-            onClick={() => console.log(`Added ${product.name} to cart`)}
+            onClick={handleAddToCart}
             className="mt-4 w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
           >
             Add to Cart
