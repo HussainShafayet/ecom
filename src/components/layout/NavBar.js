@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaShoppingCart, FaUser, FaBars, FaTimes, FaSearch, FaHeart } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaBars, FaTimes, FaSearch, FaHeart, FaCartArrowDown, FaShoppingBag, FaShoppingBasket } from 'react-icons/fa';
+import {useCart} from '../../context/CartContext';
+import {FaCartFlatbed, FaCartFlatbedSuitcase, FaCartPlus, FaCartShopping, FaCarTunnel} from 'react-icons/fa6';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { cartCount } = useCart(); // Get cart count from Cart Context
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -61,9 +64,18 @@ const Navbar = () => {
           <Link to="/profile" className="text-gray-700 hover:text-blue-500">
             <FaUser size={20} />
           </Link>
-          <Link to="/cart" className="text-gray-700 hover:text-blue-500">
-            <FaShoppingCart size={20} />
-          </Link>
+          {/* Cart Icon with Badge */}
+          <div className="relative">
+            <Link to="/cart" className="text-gray-700 hover:text-blue-500">
+              <FaCartShopping size={20} />
+            </Link>
+
+            {cartCount > 0 && (
+              <span className="absolute top-[-19px] right-[-18px] inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                {cartCount}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Hamburger Icon for Mobile */}

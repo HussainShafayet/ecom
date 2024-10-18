@@ -1,15 +1,10 @@
-// src/context/CartContext.js
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 
-// Create Cart Context
+// Create a CartContext
 const CartContext = createContext();
 
-// Custom hook to use cart context
-export const useCart = () => {
-  return useContext(CartContext);
-};
+export const useCart = () => useContext(CartContext);
 
-// Cart Provider component
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
@@ -32,12 +27,27 @@ export const CartProvider = ({ children }) => {
 
   const updateQuantity = (id, quantity) => {
     setCartItems((prevItems) =>
-      prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
+      prevItems.map((item) =>
+        item.id === id ? { ...item, quantity } : item
+      )
     );
   };
 
+  const clearCart = () => setCartItems([]);
+
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        cartCount,
+        clearCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
