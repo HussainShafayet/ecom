@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getProductById, getProductsByCategory } from '../services/productService';
 import { FaStar, FaChevronDown, FaShareAlt } from 'react-icons/fa';
-import {InputField} from '../components/common/' ;// Star and dropdown icons
+import { InputField } from '../components/common/'; // Star and dropdown icons
+import { useCart } from '../context/CartContext';  // Import the useCart hook
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -15,6 +16,9 @@ const ProductDetails = () => {
   const [mainImage, setMainImage] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown open/close state
   const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // Filter reviews by rating
+
+   // Import addToCart function from CartContext
+   const { addToCart } = useCart(); 
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -106,6 +110,11 @@ const ProductDetails = () => {
     const discountPercentage = product.discountPercentage || 0;
     const discountedPrice = calculateDiscountedPrice(product.price, discountPercentage);
 
+  const handleAddToCart = () => {
+    addToCart(product, quantity, selectedColor);  // Add product to cart with selected quantity and color
+    alert(`Added ${quantity} of ${product.title} in ${selectedColor} to cart`);
+  };
+
   return (
     <div className="container my-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -170,6 +179,7 @@ const ProductDetails = () => {
             {selectedColor && <p className="mt-2 text-gray-700">Selected Color: {selectedColor}</p>}
           </div>
 
+          {/* Quantity Selector */}
           <div className="flex items-center mb-4">
             <label className="mr-4 text-gray-700">Quantity:</label>
             <div className="border flex rounded">
@@ -264,7 +274,7 @@ const ProductDetails = () => {
 
           <button
             className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors mb-4"
-            onClick={() => alert(`Added ${quantity} of ${product.title} in ${selectedColor} color to cart`)}
+            onClick={handleAddToCart}  // Add to cart functionality
           >
             Add to Cart
           </button>
