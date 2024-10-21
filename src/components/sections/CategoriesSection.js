@@ -11,7 +11,7 @@ const CategoriesSection = () => {
     const fetchCategories = async () => {
       try {
         const data = await getCategories(); // Fetch categories from the API
-        setCategories(data.slice(0, 4));
+        setCategories(data.slice(0, 8));
         setLoading(false);
       } catch (error) {
         setError('Failed to load categories');
@@ -38,7 +38,7 @@ const CategoriesSection = () => {
             <div className="relative group cursor-pointer">
               {/* Category Image */}
               <img
-                src={'https://images.unsplash.com/photo-1523275335684-37898b6baf30'}
+                src={'https://images.freeimages.com/images/large-previews/d4f/www-1242368.jpg?fmt=webp&h=350'}
                 alt={category.name}
                 className="w-full h-48 object-cover rounded-lg transition-transform transform group-hover:scale-105"
               />
