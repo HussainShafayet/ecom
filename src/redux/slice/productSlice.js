@@ -12,12 +12,12 @@ const initialState = {
 const API_URL = 'https://dummyjson.com/products';
 
 //get all products
-export const getAllPost = createAsyncThunk("product/getAllPost", async (params = {})=>{
+export const getAllPost = createAsyncThunk("product/getAllPost", async (category=null)=>{
     try {
-        const response = await axios.get(API_URL, { params });
+        const response = await axios.get(API_URL);
         console.log('get all product res', response);
         
-        return response.data.products;
+        return {data: response.data.products, category: category};
       } catch (error) {
         console.error('Error fetching products:', error);
         throw error;  // Let the caller handle the error
@@ -59,7 +59,10 @@ const productSlice = createSlice({
         });
         builder.addCase(getAllPost.fulfilled,(state, action)=>{
             state.isLoading = false;
-            state.products = action.payload;
+            state.products = action.payload.data;
+            if (action.payload.category) {
+                state.products = state.products.filter((item)=> item.category === action.payload.category);
+            }
             state.error = null
         });
         builder.addCase(getAllPost.rejected,(state, action)=>{
@@ -93,5 +96,5 @@ const productSlice = createSlice({
     }
 });
 
-export const {setMainImage,incrementQuantity, decrementQuantity} = productSlice.actions;
+export const {setMainImage,incrementQuantity, decrementQuantity, getProductsByCategory} = productSlice.actions;
 export default productSlice.reducer;

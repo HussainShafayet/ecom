@@ -4,41 +4,24 @@ import { useLocation, Link } from 'react-router-dom';
 import {ProductCard} from '../components/common';  // Reusable ProductCard component
 import { FaHome, FaMobileAlt,FaTshirt, FaCouch, FaGamepad } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {getAllPost} from '../redux/slice/productSlice';
+import {getAllPost, getProductsByCategory} from '../redux/slice/productSlice';
 
 const Products = () => {
-  //const [products, setProducts] = useState([]);
-  //const [loading, setLoading] = useState(true);
-  //const [error, setError] = useState(null);
   const {isLoading, products, error} = useSelector((state)=> state.product)
   const location = useLocation();
 
   // Function to get the category query parameter from the URL
   const getCategoryFromQuery = () => {
     const params = new URLSearchParams(location.search);
-    return params.get('category') || 'all';  // Default to 'all' if no category is selected
+    return params.get('category');
   };
   const dispatch = useDispatch();
-  useEffect(()=>{
-    dispatch(getAllPost());
-  },[dispatch])
+
 
   useEffect(() => {
-    //const fetchProducts = async () => {
-    //  const category = getCategoryFromQuery();
-    //  //setLoading(true);
-    //  try {
-    //    const data = await getProductsByCategory(category);  // Fetch products based on the category
-      
-    //    setProducts(data.products);
-    //    setLoading(false);
-    //  } catch (error) {
-    //    setError('Failed to load products');
-    //    setLoading(false);
-    //  }
-    //};
-    //fetchProducts();
-  }, [location.search]);  // Fetch new products whenever the query parameter changes
+      const category = getCategoryFromQuery();
+      dispatch(getAllPost(category));
+  }, [location.search, dispatch]);  // Fetch new products whenever the query parameter changes
 
   if (isLoading) {
     return <div className="text-center">Loading products...</div>;
@@ -56,7 +39,7 @@ const Products = () => {
       <ul>
         <li className="flex items-center mb-2">
           <FaHome className="mr-2 text-blue-500" />
-          <Link to="/products?category=all" className="hover:text-blue-600 transition">All Products</Link>
+          <Link to="/products" className="hover:text-blue-600 transition">All Products</Link>
         </li>
         <li className="flex items-center mb-2">
           <FaMobileAlt className="mr-2 text-blue-500" />
@@ -68,7 +51,7 @@ const Products = () => {
         </li>
         <li className="flex items-center mb-2">
           <FaCouch className="mr-2 text-blue-500" />
-          <Link to="/products?category=home-decor" className="hover:text-blue-600 transition">Home Decor</Link>
+          <Link to="/products?category=furniture" className="hover:text-blue-600 transition">Home Decor</Link>
         </li>
         <li className="flex items-center mb-2">
           <FaGamepad className="mr-2 text-blue-500" />
