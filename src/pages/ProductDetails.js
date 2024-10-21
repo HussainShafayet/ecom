@@ -1,55 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getProductById, getProductsByCategory } from '../services/productService';
 import { FaStar, FaChevronDown, FaShareAlt } from 'react-icons/fa';
 import { InputField } from '../components/common/'; // Star and dropdown icons
 import { useCart } from '../context/CartContext';  // Import the useCart hook
+import {useDispatch, useSelector} from 'react-redux';
+import {getProductById, setMainImage, incrementQuantity, decrementQuantity} from '../redux/slice/productSlice';
 
 const ProductDetails = () => {
   const { id } = useParams();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [quantity, setQuantity] = useState(1);
-  const [relatedProducts, setRelatedProducts] = useState([]);
+  const {isLoading, product, error, mainImage, relatedProducts, quantity} = useSelector((state)=> state.product);
+
   const [selectedColor, setSelectedColor] = useState('');
-  const [mainImage, setMainImage] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown open/close state
   const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // Filter reviews by rating
+
+  //dispatch
+  const dispatch = useDispatch();
 
    // Import addToCart function from CartContext
    const { addToCart } = useCart(); 
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const data = await getProductById(id);
-        console.log('product', data);
-        
-        setProduct(data);
-        setMainImage(data.images[0]);
-        setLoading(false);
-
-        const relatedData = await getProductsByCategory(data.category);
-        setRelatedProducts(relatedData.products.slice(0, 8));
-      } catch (error) {
-        setError('Failed to load product details');
-        setLoading(false);
-      }
-    };
-    fetchProduct();
-  }, [id]);
+    dispatch(getProductById(id));
+  }, [id, dispatch]);
 
   const handleImageClick = (image) => {
-    setMainImage(image);
+    dispatch(setMainImage(image));
   };
 
-  const incrementQuantity = () => {
-    setQuantity(prevQuantity => prevQuantity + 1);
+  const handleIncrementQuantity = () => {
+    dispatch(incrementQuantity())
   };
 
-  const decrementQuantity = () => {
-    setQuantity(prevQuantity => Math.max(1, prevQuantity - 1));
+  const handleDecrementQuantity = () => {
+    dispatch(decrementQuantity())
   };
 
   const toggleDropdown = () => {
@@ -75,6 +59,14 @@ const ProductDetails = () => {
   const handleMouseLeave = () => {
     setDropdownOpen(false); // Hide dropdown when mouse leaves
   };
+
+  const handleAddToCart = () => {
+    const extProd = {...product}
+    extProd.quantity = quantity;
+    extProd.selectedColor = selectedColor;
+    addToCart(extProd, quantity, selectedColor);
+  };
+
   const calculateDiscountedPrice = (price, discountPercentage) => {
     if (discountPercentage && discountPercentage > 0) {
       return price - (price * (discountPercentage / 100));
@@ -82,7 +74,7 @@ const ProductDetails = () => {
     return price;
   };
 
-  if (loading) {
+  if (isLoading) {
     return <div className="text-center">Loading product details...</div>;
   }
 
@@ -110,11 +102,7 @@ const ProductDetails = () => {
     const discountPercentage = product.discountPercentage || 0;
     const discountedPrice = calculateDiscountedPrice(product.price, discountPercentage);
 
-  const handleAddToCart = () => {
-    product.quantity = quantity;
-    product.selectedColor = selectedColor;
-    addToCart(product, quantity, selectedColor);
-  };
+  
 
   return (
     <div className="container my-6">
@@ -184,17 +172,17 @@ const ProductDetails = () => {
           <div className="flex items-center mb-4">
             <label className="mr-4 text-gray-700">Quantity:</label>
             <div className="border flex rounded">
-              <button onClick={decrementQuantity} className="p-2 bg-gray-200 hover:bg-gray-300">
+              <button onClick={handleDecrementQuantity} className="p-2 bg-gray-200 hover:bg-gray-300">
                 -
               </button>
               <InputField
                 type="number"
                 value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
+                onChange={(e) => e.target.value}
                 className="-gray-300 w-12 text-center"
                 min="1"
               />
-              <button onClick={incrementQuantity} className="p-2 bg-gray-200 hover:bg-gray-300">
+              <button onClick={handleIncrementQuantity} className="p-2 bg-gray-200 hover:bg-gray-300">
                 +
               </button>
             </div>
@@ -298,20 +286,22 @@ const ProductDetails = () => {
       </div>
 
       {/* Related Products Section */}
-      <section className="mt-12">
-        <h2 className="text-2xl font-bold mb-4">Related Products</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {relatedProducts.map((relatedProduct) => (
-            <div key={relatedProduct.id} className="border rounded-lg p-4">
-              <Link to={`/product/${relatedProduct.id}`}>
-                <img src={relatedProduct.images[0]} alt={relatedProduct.title} className="w-full h-40 object-cover mb-2" />
-                <h3 className="font-semibold">{relatedProduct.title}</h3>
-                <p className="text-gray-700">${relatedProduct.price.toFixed(2)}</p>
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
+      {relatedProducts.length > 0 && 
+        <section className="mt-12">
+          <h2 className="text-2xl font-bold mb-4">Related Products</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {relatedProducts.map((relatedProduct) => (
+              <div key={relatedProduct.id} className="border rounded-lg p-4">
+                <Link to={`/product/${relatedProduct.id}`}>
+                  <img src={relatedProduct.images[0]} alt={relatedProduct.title} className="w-full h-40 object-cover mb-2" />
+                  <h3 className="font-semibold">{relatedProduct.title}</h3>
+                  <p className="text-gray-700">${relatedProduct.price.toFixed(2)}</p>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+      }
     </div>
   );
 };

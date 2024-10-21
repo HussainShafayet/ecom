@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { getProductsByCategory } from '../services/productService';  // Service to fetch products by category
+//import { getProductsByCategory } from '../services/productService';  // Service to fetch products by category
 import {ProductCard} from '../components/common';  // Reusable ProductCard component
 import { FaHome, FaMobileAlt,FaTshirt, FaCouch, FaGamepad } from 'react-icons/fa';
+import {useDispatch, useSelector} from 'react-redux';
+import {getAllPost} from '../redux/slice/productSlice';
 
 const Products = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  //const [products, setProducts] = useState([]);
+  //const [loading, setLoading] = useState(true);
+  //const [error, setError] = useState(null);
+  const {isLoading, products, error} = useSelector((state)=> state.product)
   const location = useLocation();
 
   // Function to get the category query parameter from the URL
@@ -15,25 +18,29 @@ const Products = () => {
     const params = new URLSearchParams(location.search);
     return params.get('category') || 'all';  // Default to 'all' if no category is selected
   };
+  const dispatch = useDispatch();
+  useEffect(()=>{
+    dispatch(getAllPost());
+  },[dispatch])
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const category = getCategoryFromQuery();
-      setLoading(true);
-      try {
-        const data = await getProductsByCategory(category);  // Fetch products based on the category
+    //const fetchProducts = async () => {
+    //  const category = getCategoryFromQuery();
+    //  //setLoading(true);
+    //  try {
+    //    const data = await getProductsByCategory(category);  // Fetch products based on the category
       
-        setProducts(data.products);
-        setLoading(false);
-      } catch (error) {
-        setError('Failed to load products');
-        setLoading(false);
-      }
-    };
-    fetchProducts();
+    //    setProducts(data.products);
+    //    setLoading(false);
+    //  } catch (error) {
+    //    setError('Failed to load products');
+    //    setLoading(false);
+    //  }
+    //};
+    //fetchProducts();
   }, [location.search]);  // Fetch new products whenever the query parameter changes
 
-  if (loading) {
+  if (isLoading) {
     return <div className="text-center">Loading products...</div>;
   }
 
@@ -43,6 +50,7 @@ const Products = () => {
 
   return (
     <div className="flex  gap-4">
+
     {/* Enhanced Sidebar */}
     <aside className="bg-gray-200 p-4 w-full md:w-1/6 rounded-lg shadow-lg">
       <ul>
@@ -72,7 +80,7 @@ const Products = () => {
     {/* Products Display Area */}
     <main className="w-full md:w-3/3">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {products.map((product) => (
+        {products && products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
