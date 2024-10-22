@@ -157,9 +157,9 @@ const HeroSection = () => {
 
     </div>*/}
 
-    <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 min-h-[60vh]">
-      <div className="lg:w-2/3 flex h-full min-h-[60vh]">
-          <div className="relative w-full">
+    <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[60vh]">
+      <div className="lg:w-3/5 flex h-full w-full">
+          <div className="relative h-full w-full">
             <div className="absolute top-0 left-0 w-full h-1 bg-gray-300">
               <div
                 className="bg-blue-500 h-full"
@@ -197,68 +197,68 @@ const HeroSection = () => {
           </div>
       </div>
 
-  <div className="lg:w-1/3 flex flex-col space-y-4">
-    <div className="flex-grow">
-    <div className="relative w-full h-full">
-      {/* Progress bar */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gray-300">
-        <div
-          className="bg-blue-500 h-full"
-          style={{ width: `${(currentSlide / totalSlides) * 100}%`, transition: 'width 3s' }}
-        ></div>
-      </div>
-
-      {/* Swiper Slider */}
-      <Swiper
-        modules={[Navigation, Pagination, Autoplay, EffectFade, Parallax]}
-        spaceBetween={30}
-        slidesPerView={1}
-        navigation
-        pagination={{ clickable: true }}
-        effect="fade"
-        fadeEffect={{ crossFade: true }}
-        loop
-        parallax
-        className="h-full"
-        onSlideChange={(swiper) => setCurrentSlide(swiper.realIndex + 1)}
-      >
-        {videos.map((slide) => (
-          <SwiperSlide key={slide.id}>
-            <div className="relative h-full flex items-center justify-center text-center text-white">
-            <Link to={slide.buttonLink}>
-              {/* Video Background */}
-              <video
-                  className="absolute inset-0 w-full h-full object-cover"
-                  src={slide.video}
-                  autoPlay
-                  muted={muted}
-                  loop
-                ></video>
-            </Link>
-             
-               {/* Sound Toggle Button */}
-               <button
-                onClick={toggleMute}
-                className="absolute top-3 right-4 z-20 text-white bg-gray-700 p-2 rounded-full hover:bg-gray-800 transition"
-              >
-                {muted ? <FaVolumeMute className="h-6 w-6" /> : <FaVolumeUp className="h-6 w-6" />}
-              </button>
+      <div className="lg:w-2/5 flex flex-col space-y-4 h-full w-full">
+        <div className="flex-grow h-3/5">
+          <div className="relative w-full h-full">
+            {/* Progress bar */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gray-300">
+              <div
+                className="bg-blue-500 h-full"
+                style={{ width: `${(currentSlide / totalSlides) * 100}%`, transition: 'width 3s' }}
+              ></div>
             </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-    </div>
-    </div>
-    
-    <div className="flex flex-grow space-x-4">
-      <div className="flex-grow bg-yellow-200 p-4">
-        Lower left content
+
+            {/* Swiper Slider */}
+            <Swiper
+              modules={[Navigation, Pagination, Autoplay, EffectFade, Parallax]}
+              spaceBetween={30}
+              slidesPerView={1}
+              navigation
+              pagination={{ clickable: true }}
+              effect="fade"
+              fadeEffect={{ crossFade: true }}
+              loop
+              parallax
+              className="h-full"
+              onSlideChange={(swiper) => setCurrentSlide(swiper.realIndex + 1)}
+            >
+              {videos.map((slide) => (
+                <SwiperSlide key={slide.id}>
+                  <div className="relative h-full flex items-center justify-center text-center text-white">
+                  <Link to={slide.buttonLink}>
+                    {/* Video Background */}
+                    <video
+                        className="absolute inset-0 w-full h-full object-cover"
+                        src={slide.video}
+                        autoPlay
+                        muted={muted}
+                        loop
+                      ></video>
+                  </Link>
+                  
+                    {/* Sound Toggle Button */}
+                    <button
+                      onClick={toggleMute}
+                      className="absolute top-3 right-4 z-20 text-white bg-gray-700 p-2 rounded-full hover:bg-gray-800 transition"
+                    >
+                      {muted ? <FaVolumeMute className="h-6 w-6" /> : <FaVolumeUp className="h-6 w-6" />}
+                    </button>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        </div>
+        
+        <div className="flex flex-grow space-x-4 h-2/5">
+          <div className="flex-grow bg-yellow-200 p-4">
+            Lower left content
+          </div>
+          <div className="flex-grow bg-red-200 p-4">
+            Lower right content
+          </div>
+        </div>
       </div>
-      <div className="flex-grow bg-red-200 p-4">
-        Lower right content
-      </div>
-    </div>
-  </div>
 </div>
 
 
