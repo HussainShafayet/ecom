@@ -13,15 +13,10 @@ const API_URL = 'https://dummyjson.com/products';
 
 //get all products
 export const getAllPost = createAsyncThunk("product/getAllPost", async (category=null)=>{
-    try {
-        const response = await axios.get(`${API_URL}/?limit=0`);
-        console.log('get all product res', response);
-        
-        return {data: response.data.products, category: category};
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        throw error;  // Let the caller handle the error
-      }
+    const response = await axios.get(`${API_URL}/?limit=0`);
+    console.log('get all product res', response);
+    
+    return {data: response.data.products, category: category, error: response.message};
 });
 
 // Fetch a single product by its ID
@@ -68,7 +63,7 @@ const productSlice = createSlice({
         builder.addCase(getAllPost.rejected,(state, action)=>{
             state.isLoading = false;
             state.products = [];
-            state.error = action.payload.message;
+            state.error = action.error.message;
         });
 
 
