@@ -12,11 +12,11 @@ const initialState = {
 const API_URL = 'https://dummyjson.com/products';
 
 //get all products
-export const getAllPost = createAsyncThunk("product/getAllPost", async (category=null)=>{
-    const response = await axios.get(`${API_URL}/?limit=0`);
+export const getAllProducts = createAsyncThunk("product/getAllProducts", async ({limit})=>{
+    const response = await axios.get(`${API_URL}/?limit=${limit}`);
     console.log('get all product res', response);
     
-    return {data: response.data.products, category: category, error: response.message};
+    return {data: response.data.products, error: response.message};
 });
 
 // Fetch a single product by its ID
@@ -49,10 +49,10 @@ const productSlice = createSlice({
     extraReducers: (builder)=>{
 
         //get all products
-        builder.addCase(getAllPost.pending, (state)=>{
+        builder.addCase(getAllProducts.pending, (state)=>{
             state.isLoading = true;
         });
-        builder.addCase(getAllPost.fulfilled,(state, action)=>{
+        builder.addCase(getAllProducts.fulfilled,(state, action)=>{
             state.isLoading = false;
             state.products = action.payload.data;
             if (action.payload.category) {
@@ -60,7 +60,7 @@ const productSlice = createSlice({
             }
             state.error = null
         });
-        builder.addCase(getAllPost.rejected,(state, action)=>{
+        builder.addCase(getAllProducts.rejected,(state, action)=>{
             state.isLoading = false;
             state.products = [];
             state.error = action.error.message;

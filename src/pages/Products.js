@@ -4,7 +4,7 @@ import { useLocation, Link } from 'react-router-dom';
 import {ProductCard} from '../components/common';  // Reusable ProductCard component
 import { FaHome, FaMobileAlt,FaTshirt, FaCouch, FaGamepad } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {getAllPost, getProductsByCategory} from '../redux/slice/productSlice';
+import {getAllProducts, getProductsByCategory} from '../redux/slice/productSlice';
 
 const Products = () => {
   const {isLoading, products, error} = useSelector((state)=> state.product)
@@ -20,7 +20,7 @@ const Products = () => {
 
   useEffect(() => {
       const category = getCategoryFromQuery();
-      dispatch(getAllPost(category));
+      dispatch(getAllProducts({limit:30}));
   }, [location.search, dispatch]);  // Fetch new products whenever the query parameter changes
 
   if (isLoading) {

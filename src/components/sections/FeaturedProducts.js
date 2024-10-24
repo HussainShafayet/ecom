@@ -1,28 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import {ProductCard} from '../common'; // Assuming you have a ProductCard component
-import { getProducts } from '../../services/productService'; // Import the productService
+import {useDispatch, useSelector} from 'react-redux';
+import {getAllProducts} from '../../redux/slice/productSlice';
 
 const FeaturedProducts = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  //const [products, setProducts] = useState([]);
+  //const [loading, setLoading] = useState(true);
+  //const [error, setError] = useState(null);
+  const {isLoading, products, error} = useSelector((state)=> state.product);
+
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const data = await getProducts();  // Call the API using productService
-        
-        setProducts(data.products.slice(0, 4));  // Display only 8 featured products
-        setLoading(false);
-      } catch (error) {
-        setError('Failed to load products');
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
+   dispatch(getAllProducts({limit:8}));
+  }, [dispatch]);
 
-  if (loading) {
+  if (isLoading) {
     return <div>Loading products...</div>;
   }
 
