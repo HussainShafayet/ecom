@@ -292,7 +292,7 @@ const ProductDetails = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {relatedProducts.map((relatedProduct) => (
               <div key={relatedProduct.id} className="border rounded-lg p-4">
-                <Link to={`/product/${relatedProduct.id}`}>
+                <Link to={`/products/${relatedProduct.id}`}>
                   <img src={relatedProduct.images[0]} alt={relatedProduct.title} className="w-full h-40 object-cover mb-2" />
                   <h3 className="font-semibold">{relatedProduct.title}</h3>
                   <p className="text-gray-700">${relatedProduct.price.toFixed(2)}</p>
