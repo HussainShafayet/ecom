@@ -1,39 +1,29 @@
 import React, { useEffect, useState } from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import { Link } from 'react-router-dom';
-import { getCategories } from '../../services/categoryService'; // Assume you have a service to fetch categories
+import {fetchAllCategories} from '../../redux/slice/categorySlice';
 
 const CategoriesSection = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const {isLoading, categories, error} = useSelector((state)=> state.category);
 
+  const dispatch = useDispatch();
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const data = await getCategories(); // Fetch categories from the API
-        setCategories(data.slice(0, 8));
-        setLoading(false);
-      } catch (error) {
-        setError('Failed to load categories');
-        setLoading(false);
-      }
-    };
-    fetchCategories();
-  }, []);
+    dispatch(fetchAllCategories());
+  }, [dispatch]);
 
-  if (loading) {
+  if (isLoading) {
     return <div className="text-center">Loading categories...</div>;
   }
 
   if (error) {
     return <div className="text-center text-red-500">{error}</div>;
   }
-
+  const topCategories = categories.slice(0,5);
   return (
     <div className="container mx-auto my-12">
       <h2 className="text-3xl font-bold mb-6 text-center">Shop by Category</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {categories.map((category) => (
+        {topCategories&&topCategories.map((category) => (
           <Link to={`/products/category/${category.slug}`} key={Math.ceil(Math.random()*1000)}>
             <div className="relative group cursor-pointer">
               {/* Category Image */}
