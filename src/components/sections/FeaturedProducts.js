@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {ProductCard} from '../common'; // Assuming you have a ProductCard component
 import {useDispatch, useSelector} from 'react-redux';
-import {getAllProducts} from '../../redux/slice/productSlice';
+import {fetchAllProducts} from '../../redux/slice/productSlice';
 
 const FeaturedProducts = () => {
   //const [products, setProducts] = useState([]);
@@ -13,7 +13,7 @@ const FeaturedProducts = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-   dispatch(getAllProducts({limit:8}));
+   dispatch(fetchAllProducts({limit:8}));
   }, [dispatch]);
 
   if (isLoading) {

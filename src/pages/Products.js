@@ -1,27 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 //import { getProductsByCategory } from '../services/productService';  // Service to fetch products by category
 import {ProductCard} from '../components/common';  // Reusable ProductCard component
 import { FaHome, FaMobileAlt,FaTshirt, FaCouch, FaGamepad } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {getAllProducts, getProductsByCategory} from '../redux/slice/productSlice';
+import {fetchAllProducts} from '../redux/slice/productSlice';
 
 const Products = () => {
   const {isLoading, products, error} = useSelector((state)=> state.product)
-  const location = useLocation();
+  const {category} = useParams();
 
-  // Function to get the category query parameter from the URL
-  const getCategoryFromQuery = () => {
-    const params = new URLSearchParams(location.search);
-    return params.get('category');
-  };
+  
   const dispatch = useDispatch();
 
 
   useEffect(() => {
-      const category = getCategoryFromQuery();
-      dispatch(getAllProducts({limit:30}));
-  }, [location.search, dispatch]);  // Fetch new products whenever the query parameter changes
+    if (category) {
+      dispatch(fetchAllProducts({category: category, limit: 30}))
+    } else {
+      dispatch(fetchAllProducts({limit:30}));
+    }
+  }, [dispatch, category]);  // Fetch new products whenever the query parameter changes
 
   if (isLoading) {
     return <div className="text-center">Loading products...</div>;

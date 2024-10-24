@@ -4,7 +4,7 @@ import { FaStar, FaChevronDown, FaShareAlt } from 'react-icons/fa';
 import { InputField } from '../components/common/'; // Star and dropdown icons
 import { useCart } from '../context/CartContext';  // Import the useCart hook
 import {useDispatch, useSelector} from 'react-redux';
-import {getProductById, setMainImage, incrementQuantity, decrementQuantity} from '../redux/slice/productSlice';
+import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById} from '../redux/slice/productSlice';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -21,7 +21,7 @@ const ProductDetails = () => {
    const { addToCart } = useCart(); 
 
   useEffect(() => {
-    dispatch(getProductById(id));
+    dispatch(fetchProductById(id));
   }, [id, dispatch]);
 
   const handleImageClick = (image) => {

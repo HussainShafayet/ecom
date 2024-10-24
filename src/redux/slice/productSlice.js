@@ -1,5 +1,6 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import axios from "axios";
+import {getAllProducts, getProductById, getProductsByCategory} from "../../services/productService";
 const initialState = {
     isLoading: false,
     products: [],
@@ -12,17 +13,22 @@ const initialState = {
 const API_URL = 'https://dummyjson.com/products';
 
 //get all products
-export const getAllProducts = createAsyncThunk("product/getAllProducts", async ({limit})=>{
-    const response = await axios.get(`${API_URL}/?limit=${limit}`);
+export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", async ({category=null, limit=null})=>{
+    let response;
+    if (category) {
+        response = await getProductsByCategory(category, limit)
+    }else{
+        response = await getAllProducts(limit);
+    }
     console.log('get all product res', response);
     
     return {data: response.data.products, error: response.message};
 });
 
 // Fetch a single product by its ID
-export const getProductById = createAsyncThunk("post/getProductById", async (id) => {
+export const fetchProductById = createAsyncThunk("post/getProductById", async (id) => {
     try {
-      const response = await axios.get(`${API_URL}/${id}`);
+      const response = await getProductById(id);
       console.log('get product res', response);
       return response.data;
     } catch (error) {
@@ -49,18 +55,15 @@ const productSlice = createSlice({
     extraReducers: (builder)=>{
 
         //get all products
-        builder.addCase(getAllProducts.pending, (state)=>{
+        builder.addCase(fetchAllProducts.pending, (state)=>{
             state.isLoading = true;
         });
-        builder.addCase(getAllProducts.fulfilled,(state, action)=>{
+        builder.addCase(fetchAllProducts.fulfilled,(state, action)=>{
             state.isLoading = false;
             state.products = action.payload.data;
-            if (action.payload.category) {
-                state.products = state.products.filter((item)=> item.category === action.payload.category);
-            }
             state.error = null
         });
-        builder.addCase(getAllProducts.rejected,(state, action)=>{
+        builder.addCase(fetchAllProducts.rejected,(state, action)=>{
             state.isLoading = false;
             state.products = [];
             state.error = action.error.message;
@@ -68,10 +71,10 @@ const productSlice = createSlice({
 
 
         //get single product
-        builder.addCase(getProductById.pending, (state)=>{
+        builder.addCase(fetchProductById.pending, (state)=>{
             state.isLoading = true;
         });
-        builder.addCase(getProductById.fulfilled,(state, action)=>{
+        builder.addCase(fetchProductById.fulfilled,(state, action)=>{
             state.isLoading = false;
             state.product = action.payload;
             state.mainImage = action.payload.images[0];
@@ -83,7 +86,7 @@ const productSlice = createSlice({
             //set quantity initial
             state.quantity = 1;
         });
-        builder.addCase(getProductById.rejected,(state, action)=>{
+        builder.addCase(fetchProductById.rejected,(state, action)=>{
             state.isLoading = false;
             state.product = null;
             state.error = action.payload.message;
@@ -91,5 +94,5 @@ const productSlice = createSlice({
     }
 });
 
-export const {setMainImage,incrementQuantity, decrementQuantity, getProductsByCategory} = productSlice.actions;
+export const {setMainImage,incrementQuantity, decrementQuantity} = productSlice.actions;
 export default productSlice.reducer;

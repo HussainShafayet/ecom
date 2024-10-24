@@ -17,7 +17,7 @@ const ProductCard = ({ product }) => {
             {product.discountPercentage}% OFF
           </span>
         )}
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/products/${product.id}`}>
           <img
             src={product.images[0]}
             alt={product.title}
@@ -27,7 +27,7 @@ const ProductCard = ({ product }) => {
   
         <div className="p-4">
           <h3 className="text-lg font-semibold">
-            <Link to={`/product/${product.id}`} className="hover:text-blue-500">
+            <Link to={`/products/${product.id}`} className="hover:text-blue-500">
               {product.title}
             </Link>
           </h3>
