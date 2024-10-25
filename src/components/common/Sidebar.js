@@ -15,12 +15,15 @@ const Sidebar = ({ onClose }) => (
 
     {/* Filters with Accordions */}
     <div className="space-y-4">
-      {/* Categories Filter */}
+      {/* Categories with Checkboxes */}
       <Accordion title="Categories" icon={<FaTags className="text-blue-500" />}>
         <ul className="space-y-1">
-          <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-blue-500 hover:bg-gray-100 rounded-md">Electronics</a></li>
-          <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-blue-500 hover:bg-gray-100 rounded-md">Clothing</a></li>
-          <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-blue-500 hover:bg-gray-100 rounded-md">Home & Garden</a></li>
+          {['Electronics', 'Clothing', 'Home & Garden'].map((category) => (
+            <li key={category} className="flex items-center">
+              <input type="checkbox" className="form-checkbox text-blue-500 rounded-sm mr-2" />
+              <label className="text-gray-600">{category}</label>
+            </li>
+          ))}
         </ul>
       </Accordion>
 
@@ -30,12 +33,15 @@ const Sidebar = ({ onClose }) => (
         <p className="text-gray-600 mt-2">Up to $1000</p>
       </Accordion>
 
-      {/* Brands Filter */}
+      {/* Brands with Checkboxes */}
       <Accordion title="Brands" icon={<FaIndustry className="text-yellow-500" />}>
         <ul className="space-y-1">
-          <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-yellow-500 hover:bg-gray-100 rounded-md">Brand A</a></li>
-          <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-yellow-500 hover:bg-gray-100 rounded-md">Brand B</a></li>
-          <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-yellow-500 hover:bg-gray-100 rounded-md">Brand C</a></li>
+          {['Brand A', 'Brand B', 'Brand C'].map((brand) => (
+            <li key={brand} className="flex items-center">
+              <input type="checkbox" className="form-checkbox text-yellow-500 rounded-sm mr-2" />
+              <label className="text-gray-600">{brand}</label>
+            </li>
+          ))}
         </ul>
       </Accordion>
 
@@ -81,12 +87,15 @@ const Sidebar = ({ onClose }) => (
         </ul>
       </Accordion>
 
-      {/* Discounts Filter */}
+      {/* Discounts with Checkboxes */}
       <Accordion title="Discounts" icon={<FaFilter className="text-red-500" />}>
         <ul className="space-y-1">
-          <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-red-500 hover:bg-gray-100 rounded-md">10% or more</a></li>
-          <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-red-500 hover:bg-gray-100 rounded-md">20% or more</a></li>
-          <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-red-500 hover:bg-gray-100 rounded-md">50% or more</a></li>
+          {['10% or more', '20% or more', '50% or more'].map((discount) => (
+            <li key={discount} className="flex items-center">
+              <input type="checkbox" className="form-checkbox text-red-500 rounded-sm mr-2" />
+              <label className="text-gray-600">{discount}</label>
+            </li>
+          ))}
         </ul>
       </Accordion>
     </div>
