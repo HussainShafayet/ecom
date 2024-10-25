@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 //import { getProductsByCategory } from '../services/productService';  // Service to fetch products by category
 import {ProductCard, Sidebar} from '../components/common';  // Reusable ProductCard component
-import { FaHome, FaMobileAlt,FaTshirt, FaCouch, FaGamepad } from 'react-icons/fa';
+import { FaHome, FaMobileAlt,FaTshirt, FaCouch, FaGamepad, FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts} from '../redux/slice/productSlice';
 
@@ -14,7 +14,8 @@ const Products = () => {
   const dispatch = useDispatch();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+  const [sortOption, setSortOption] = useState('default');
+  const [itemsToShow, setItemsToShow] = useState(12);
 
   useEffect(() => {
     if (category) {
@@ -31,6 +32,14 @@ const Products = () => {
   if (error) {
     return <div className="text-center text-red-500">{error}</div>;
   }
+  const handleSortChange = (e) => {
+    setSortOption(e.target.value);
+    // Add sorting logic here if needed
+  };
+  const handleItemsToShowChange = (e) => {
+    setItemsToShow(parseInt(e.target.value));
+    // Add logic here if needed to update items shown
+  };
 
   return (
     <div className="min-h-screen p-4">
@@ -60,12 +69,54 @@ const Products = () => {
         >
           <Sidebar onClose={() => setIsSidebarOpen(false)} />
         </div>
+      
 
-      {/* Product List Section (Right) */}
-      <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+      <div className='lg:col-span-4'>
+        {/* Sort and Show Items Options Above Product List */}
+        <div className="flex justify-between items-center mb-4">
+          <div></div>
+          <div className='flex flex-nowrap space-x-2'>
+            {/* Show Items Dropdown */}
+            <div className="flex items-center">
+              <span className="text-gray-600 font-medium mr-2">Show</span>
+              <select
+                value={itemsToShow}
+                onChange={handleItemsToShowChange}
+                className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
+              >
+                <option value={12}>12</option>
+                <option value={24}>24</option>
+                <option value={36}>36</option>
+                <option value={48}>48</option>
+              </select>
+            </div>
+
+
+            {/* Sort by Amount Dropdown */}
+            <div className="flex items-center">
+              <span className="text-gray-600 font-medium mr-2">Sort by:</span>
+              <select
+                value={sortOption}
+                onChange={handleSortChange}
+                className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
+              >
+                <option value="default">Default</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+              </select>
+            </div>
+
+            </div>
+          </div>
+
+
+
+        {/* Product List Section (Right) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
       </div>
     </div>
   </div>
