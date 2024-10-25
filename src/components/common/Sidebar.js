@@ -4,7 +4,7 @@ import { FaTags, FaDollarSign, FaIndustry, FaStar, FaCheck, FaFilter, FaTshirt, 
 
 // Sidebar Component
 const Sidebar = ({ onClose }) => (
-    <div className="bg-gray-100 p-4 rounded-lg space-y-4 max-h-svh overflow-auto lg:sticky top-[100px]">
+    <div className="bg-gray-100 p-4 rounded-lg space-y-4 max-h-svh overflow-y-auto lg:sticky top-[100px]">
       {/* Close Icon for Mobile */}
     <div className="flex justify-between items-center lg:hidden mb-4">
       <h3 className="font-semibold text-xl text-gray-800">Filters</h3>
@@ -15,15 +15,12 @@ const Sidebar = ({ onClose }) => (
 
     {/* Filters with Accordions */}
     <div className="space-y-4">
-      {/* Categories with Checkboxes */}
+      {/* Categories Filter */}
       <Accordion title="Categories" icon={<FaTags className="text-blue-500" />}>
-        <ul className="space-y-1">
-          {['Electronics', 'Clothing', 'Home & Garden'].map((category) => (
-            <li key={category} className="flex items-center">
-              <input type="checkbox" className="form-checkbox text-blue-500 rounded-sm mr-2" />
-              <label className="text-gray-600">{category}</label>
-            </li>
-          ))}
+        <ul className="space-y-1 max-h-44 overflow-y-auto">
+          <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-blue-500 hover:bg-gray-100 rounded-md">Electronics</a></li>
+          <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-blue-500 hover:bg-gray-100 rounded-md">Clothing</a></li>
+          <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-blue-500 hover:bg-gray-100 rounded-md">Home & Garden</a></li>
         </ul>
       </Accordion>
 
