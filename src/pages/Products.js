@@ -42,7 +42,17 @@ const Products = () => {
   };
 
   return (
-    <div className="min-h-screen p-4">
+    <div className="min-h-screen">
+
+
+    {/* Responsive Breadcrumb Path */}
+    <div className="text-gray-600 text-xs sm:text-sm mb-4 truncate">
+      <span className="text-blue-500 hover:underline cursor-pointer">Home</span>
+      <span className="mx-1 hidden sm:inline"> &gt; </span>
+      <span className="text-blue-500 hover:underline cursor-pointer mx-1 hidden sm:inline">Shop</span>
+      <span className="mx-1 sm:hidden"> &gt; ... &gt; </span>
+      <span className="text-gray-700 font-semibold">Products</span>
+    </div>
   
       {/* Mobile Toggle Button for Sidebar */}
       <button
