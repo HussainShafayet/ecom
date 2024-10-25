@@ -15,10 +15,6 @@ const Products = () => {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
 
   useEffect(() => {
     if (category) {
@@ -37,15 +33,36 @@ const Products = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-    <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
-      {/* Sidebar Section (Left) */}
-      <div className="lg:col-span-1">
-        <Sidebar />
-      </div>
+    <div className="min-h-screen p-4">
+  
+      {/* Mobile Toggle Button for Sidebar */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="block lg:hidden bg-blue-500 text-white py-2 px-4 rounded-lg mb-4 z-10 relative"
+      >
+      Show Filters
+      </button>
+
+      {/* Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-10 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+
+      <div className="mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
+        {/* Sidebar (Sliding from below the Navbar on mobile) */}
+        <div
+          className={`lg:col-span-1 fixed lg:sticky top-0 left-0 h-full bg-white z-20 transform ${
+            isSidebarOpen ? 'translate-x-0 mt-[100px]' : '-translate-x-full'
+          } transition-transform duration-300 lg:translate-x-0`}
+        >
+          <Sidebar onClose={() => setIsSidebarOpen(false)} />
+        </div>
 
       {/* Product List Section (Right) */}
-      <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
