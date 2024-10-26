@@ -7,8 +7,9 @@ const ProductCard = ({ product }) => {
   const { addToCart } = useCart(); 
 
   const handleAddToCart = () => {
-    product.quantity = 1;
-    addToCart(product);
+    const extProd = {...product}
+    extProd.quantity = 1;
+    addToCart(extProd);
   };
     return (
       <div className="border rounded-lg shadow-lg overflow-hidden bg-white hover:shadow-xl transition-shadow duration-300 relative">
