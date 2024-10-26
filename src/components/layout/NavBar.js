@@ -19,11 +19,20 @@ const Navbar = () => {
         <Link to="/deals">Flash Sale! Up to 50% Off Selected Items</Link>
       </div>
 
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        {/* Logo */}
-        <div className="text-2xl font-bold text-gray-800">
-          <Link to="/">eShop</Link>
+      <div className="container mx-auto px-4 py-2 flex justify-between items-center">
+      <div className="flex items-center space-x-3 md:space-x-4">
+        {/* Logo (Replace with your logo URL) */}
+        <img
+          src="https://img.freepik.com/premium-psd/engraved-black-logo-mockup_125540-223.jpg" // Replace with actual logo URL
+          alt="Website Logo"
+          className="w-10 h-10 md:w-12 md:h-12 rounded-full hover:shadow-lg transition-shadow duration-300"
+        />
+        {/* Website Name and Tagline */}
+        <div className="flex flex-col items-start md:items-center md:text-left">
+          <span className="text-lg md:text-2xl font-bold tracking-wide">GoCart</span>
+          <p className="text-xs font-light hidden sm:block md:-mt-1">Happy To Shopping</p>
         </div>
+      </div>
 
         {/* Navigation Links */}
         <div className="hidden md:flex space-x-6">
