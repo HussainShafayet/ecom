@@ -32,7 +32,7 @@ const Sidebar = ({ onClose }) => {
           {isLoading ? <Loader />:
             <ul className="space-y-1 max-h-44 overflow-y-auto">
             {categories && categories.map((category)=>(
-              <li key={category.id}><a href={`/products/category/${category.slug}`} className="block px-3 py-1 text-gray-600 hover:text-blue-500 hover:bg-gray-100 rounded-md">{category.name}</a></li>
+              <li key={category.name}><a href={`/products/category/${category.slug}`} className="block px-3 py-1 text-gray-600 hover:text-blue-500 hover:bg-gray-100 rounded-md">{category.name}</a></li>
             ))}
             </ul>
           }
