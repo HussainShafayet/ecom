@@ -106,7 +106,7 @@ const Products = () => {
             <div className="flex items-center">
               <span className="text-gray-600 font-medium mr-2">Show</span>
               <select
-                value={searchParams.get('limit') || ''}
+                value={searchParams.get('limit') || 30}
                 onChange={handleItemsToShowChange}
                 className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
               >
