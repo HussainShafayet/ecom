@@ -18,17 +18,15 @@ const Products = () => {
 
   useEffect(() => {
     const sortBy = searchParams.get('sortBy');
-    const category = searchParams.get('category');
     const limit = searchParams.get('limit');
     const order = searchParams.get('order');
-    console.log(category, 'category');
     
     if (category) {
-      dispatch(fetchAllProducts({category: category, limit}))
+      dispatch(fetchAllProducts({category: category, limit, sortBy, order}))
     } else {
       dispatch(fetchAllProducts({limit:limit, sortBy, order}));
     }
-  }, [dispatch, searchParams]);  // Fetch new products whenever the query parameter changes
+  }, [dispatch,category, searchParams]);  // Fetch new products whenever the query parameter changes
 
   if (isLoading) {
     return <div className="text-center">Loading products...</div>;

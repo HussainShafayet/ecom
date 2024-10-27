@@ -16,9 +16,9 @@ const API_URL = 'https://dummyjson.com/products';
 export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", async ({category=null, limit=null,sortBy=null, order=null})=>{
     let response;
     if (category) {
-        response = await getProductsByCategory(category, limit)
+        response = await getProductsByCategory(category, limit, sortBy, order)
     }else{
-        response = await getAllProducts(limit,sortBy,order);
+        response = await getAllProducts(limit, sortBy, order);
     }
     console.log('get all product res', response);
     
