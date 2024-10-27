@@ -15,7 +15,7 @@ const Products = () => {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sortOption, setSortOption] = useState('default');
-  const [itemsToShow, setItemsToShow] = useState(12);
+  const [itemsToShow, setItemsToShow] = useState(30);
 
   useEffect(() => {
     if (category) {
@@ -39,6 +39,8 @@ const Products = () => {
   const handleItemsToShowChange = (e) => {
     setItemsToShow(parseInt(e.target.value));
     // Add logic here if needed to update items shown
+    dispatch(fetchAllProducts({limit: itemsToShow}));
+
   };
 
   return (
@@ -94,10 +96,10 @@ const Products = () => {
                 onChange={handleItemsToShowChange}
                 className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
               >
-                <option value={12}>12</option>
-                <option value={24}>24</option>
-                <option value={36}>36</option>
-                <option value={48}>48</option>
+                <option value={30}>30</option>
+                <option value={60}>60</option>
+                <option value={90}>90</option>
+                <option value={120}>120</option>
               </select>
             </div>
 
