@@ -4,9 +4,20 @@ import axios from 'axios';
 const API_URL = 'https://dummyjson.com'; // Replace with your API base URL
 
 // Fetch all products (you can optionally pass filters or parameters)
-export const getAllProducts = async (limit = null) => {
-  const limitQuery = limit ? `?limit=${limit}` : '';
-  return await axios.get(`${API_URL}/products${limitQuery}`);
+export const getAllProducts = async (limit = null, sortBy = null, order = null, ) => {
+  let query = '';
+ 
+  if (limit) {
+    query += `limit=${limit}&`; // Add limit
+  }
+  if (sortBy) {
+    query += `sortBy=${sortBy}&`; // Add category filter
+  }
+  if (order) {
+    query += `order=${order}&`; // Add sort order, e.g., 'price_asc' or 'price_desc'
+  }
+
+  return await axios.get(`${API_URL}/products?${query}`);
 };
 
 // Fetch a single product by its ID

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 //import { getProductsByCategory } from '../services/productService';  // Service to fetch products by category
 import {ProductCard, Sidebar} from '../components/common';  // Reusable ProductCard component
 import { FaHome, FaMobileAlt,FaTshirt, FaCouch, FaGamepad, FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa';
@@ -9,21 +9,26 @@ import {fetchAllProducts} from '../redux/slice/productSlice';
 const Products = () => {
   const {isLoading, products, error} = useSelector((state)=> state.product)
   const {category} = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   
   const dispatch = useDispatch();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [sortOption, setSortOption] = useState('default');
-  const [itemsToShow, setItemsToShow] = useState(30);
 
   useEffect(() => {
+    const sortBy = searchParams.get('sortBy');
+    const category = searchParams.get('category');
+    const limit = searchParams.get('limit');
+    const order = searchParams.get('order');
+    console.log(category, 'category');
+    
     if (category) {
-      dispatch(fetchAllProducts({category: category, limit: 30}))
+      dispatch(fetchAllProducts({category: category, limit}))
     } else {
-      dispatch(fetchAllProducts({limit:30}));
+      dispatch(fetchAllProducts({limit:limit, sortBy, order}));
     }
-  }, [dispatch, category]);  // Fetch new products whenever the query parameter changes
+  }, [dispatch, searchParams]);  // Fetch new products whenever the query parameter changes
 
   if (isLoading) {
     return <div className="text-center">Loading products...</div>;
@@ -33,13 +38,24 @@ const Products = () => {
     return <div className="text-center text-red-500">{error}</div>;
   }
   const handleSortChange = (e) => {
-    setSortOption(e.target.value);
-    // Add sorting logic here if needed
+    const selectedSort = e.target.value;
+    const limit = searchParams.get('limit');
+    if (limit) {
+      setSearchParams({limit, sortBy:'price' , order: selectedSort });
+    }else{
+      setSearchParams({sortBy:'price' , order: selectedSort });
+    }
+    
   };
   const handleItemsToShowChange = (e) => {
-    setItemsToShow(parseInt(e.target.value));
-    // Add logic here if needed to update items shown
-    dispatch(fetchAllProducts({limit: itemsToShow}));
+    const itemShow = e.target.value;
+    const sortBy = searchParams.get('sortBy');
+    const order = searchParams.get('order');
+    if (sortBy && order) {
+      setSearchParams({limit: itemShow, sortBy:'price' , order, });
+    }else{
+      setSearchParams({limit:itemShow});
+    }
 
   };
 
@@ -92,7 +108,7 @@ const Products = () => {
             <div className="flex items-center">
               <span className="text-gray-600 font-medium mr-2">Show</span>
               <select
-                value={itemsToShow}
+                value={searchParams.get('limit') || ''}
                 onChange={handleItemsToShowChange}
                 className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
               >
@@ -108,13 +124,13 @@ const Products = () => {
             <div className="flex items-center">
               <span className="text-gray-600 font-medium mr-2">Sort by:</span>
               <select
-                value={sortOption}
+                value={searchParams.get('order') || ''}
                 onChange={handleSortChange}
                 className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
               >
-                <option value="default">Default</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
+                <option value="">Default</option>
+                <option value="asc">Price: Low to High</option>
+                <option value="desc">Price: High to Low</option>
               </select>
             </div>
 
