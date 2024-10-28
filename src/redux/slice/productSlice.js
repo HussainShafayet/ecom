@@ -3,22 +3,23 @@ import axios from "axios";
 import {getAllProducts, getProductById, getProductsByCategory} from "../../services/productService";
 const initialState = {
     isLoading: false,
-    products: [],
+    items: [],
     error: null,
     product: null,
     mainImage: null,
     relatedProducts: [],
     quantity: 1,
+    hasMore: true,
 }
 const API_URL = 'https://dummyjson.com/products';
 
 //get all products
-export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", async ({category=null, limit=null,sortBy=null, order=null})=>{
+export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
     let response;
     if (category) {
         response = await getProductsByCategory(category, limit, sortBy, order)
     }else{
-        response = await getAllProducts(limit, sortBy, order);
+        response = await getAllProducts(limit, sortBy, order, page,skip);
     }
     console.log('get all product res', response);
     
@@ -60,12 +61,16 @@ const productSlice = createSlice({
         });
         builder.addCase(fetchAllProducts.fulfilled,(state, action)=>{
             state.isLoading = false;
-            state.products = action.payload.data;
-            state.error = null
+            state.items = action.meta.arg.page > 1 
+            ? [...state.items, ...action.payload.data] 
+            : action.payload.data;
+        state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            
+            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
         });
         builder.addCase(fetchAllProducts.rejected,(state, action)=>{
             state.isLoading = false;
-            state.products = [];
+            //state.products = [];
             state.error = action.error.message;
         });
 

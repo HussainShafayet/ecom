@@ -7,7 +7,7 @@ const FeaturedProducts = () => {
   //const [products, setProducts] = useState([]);
   //const [loading, setLoading] = useState(true);
   //const [error, setError] = useState(null);
-  const {isLoading, products, error} = useSelector((state)=> state.product);
+  const {isLoading, items:products, error} = useSelector((state)=> state.product);
 
 
   const dispatch = useDispatch();

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 //import { getProductsByCategory } from '../services/productService';  // Service to fetch products by category
 import {ProductCard, Sidebar} from '../components/common';  // Reusable ProductCard component
-import { FaHome, FaMobileAlt,FaTshirt, FaCouch, FaGamepad, FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa';
+
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts} from '../redux/slice/productSlice';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 const Products = () => {
-  const {isLoading, products, error} = useSelector((state)=> state.product)
   const {category} = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -16,43 +16,109 @@ const Products = () => {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+
+  const { items: products, isLoading, error, hasMore } = useSelector((state) => state.product);
+
+  // Initialize page and limit from searchParams
+  const [page, setPage] = useState(parseInt(searchParams.get('page') || 1));
+  const [limit, setLimit] = useState(parseInt(searchParams.get('limit') || 30)); // Default limit of 30
+  const [skip, setSkip] = useState(parseInt(searchParams.get('skip') || 0));
+
+  // Extract necessary parameters from searchParams
+  const sortBy = searchParams.get('sortBy');
+  const order = searchParams.get('order');
+  
+  // First useEffect: Reset values if URL parameters are missing
   useEffect(() => {
-    const sortBy = searchParams.get('sortBy');
-    const limit = searchParams.get('limit');
-    const order = searchParams.get('order');
-    
+    if (!searchParams.has('page')) setPage(1);
+    if (!searchParams.has('limit')) setLimit(30);
+    if (!searchParams.has('skip')) setSkip(0);
+  }, [searchParams]);
+
+  useEffect(() => {
+   
     if (category) {
       dispatch(fetchAllProducts({category: category, limit, sortBy, order}))
     } else {
-      dispatch(fetchAllProducts({limit:limit, sortBy, order}));
+      dispatch(fetchAllProducts({limit:limit, sortBy, order, page, skip}));
     }
-  }, [dispatch,category, searchParams]);  // Fetch new products whenever the query parameter changes
+    
+  }, [dispatch,category, sortBy, order, page, limit, skip]);  // Fetch new products whenever the query parameter changes
+  
+  const fetchMoreProducts = () => {
+    const nextPage = page + 1;
+    const nextSkip = skip + limit;
+    setPage(nextPage);
+    setSkip(nextSkip);
+    // Update searchParams to include the new page, keeping existing params
+    setSearchParams({
+      ...Object.fromEntries(searchParams),
+      page: nextPage,
+      limit, // Ensure limit stays the same
+      skip: nextSkip,
+    });
+  };
 
-  if (isLoading) {
-    return <div className="text-center">Loading products...</div>;
+  if (isLoading && page === 1) {
+    return <div className='text-center'>Loading products...</div>;
   }
 
   if (error) {
     return <div className="text-center text-red-500">{error}</div>;
   }
+
+
   const handleSortChange = (e) => {
+    //const selectedSort = e.target.value;
+    //const limit = searchParams.get('limit');
+    //setLimit(limit);
+    //setPage(1); // Reset page to 1 for the new limit
+    //setSkip(0);
+
+    //if (limit) {
+    //  setSearchParams({ ...Object.fromEntries(searchParams),limit, sortBy:'price' , order: selectedSort, page: 1, skip:0 })
+    //}else{
+    //  setSearchParams({ ...Object.fromEntries(searchParams), sortBy:'price' , order: selectedSort, page: 1, skip:0 })
+    //}
+
     const selectedSort = e.target.value;
-    const limit = searchParams.get('limit');
-    if (limit) {
-      setSearchParams({limit, sortBy:'price' , order: selectedSort });
-    }else{
-      setSearchParams({sortBy:'price' , order: selectedSort });
+    const limit = searchParams.get('limit') || 30; // Use default limit if not in searchParams
+  
+    setLimit(limit);
+    setPage(1); // Reset page to 1 for new sort
+    setSkip(0);
+  
+    // Start with all existing search params
+      const updatedParams = { ...Object.fromEntries(searchParams), limit, page: 1, skip: 0 };
+    
+  
+    // Conditionally set 'order' if it differs from the default
+    if (selectedSort !== '') {
+      updatedParams.sortBy = 'price';
+      updatedParams.order = selectedSort;
+    } else {
+      
+      delete updatedParams.sortBy;
+      delete updatedParams.order;
     }
+    
+    // Update search params in the URL
+    setSearchParams(updatedParams);
     
   };
   const handleItemsToShowChange = (e) => {
-    const itemShow = e.target.value;
+    const itemShow = parseInt(e.target.value);
     const sortBy = searchParams.get('sortBy');
     const order = searchParams.get('order');
+    
+    setLimit(itemShow);
+    setPage(1); // Reset page to 1 for the new limit
+    setSkip(0);
+    
     if (sortBy && order) {
-      setSearchParams({limit: itemShow, sortBy:'price' , order, });
+      setSearchParams({ ...Object.fromEntries(searchParams), limit: itemShow, sortBy:'price',order, page: 1, skip:0 })
     }else{
-      setSearchParams({limit:itemShow});
+      setSearchParams({ ...Object.fromEntries(searchParams), limit: itemShow, page: 1, skip:0 })
     }
 
   };
@@ -138,11 +204,21 @@ const Products = () => {
 
 
         {/* Product List Section (Right) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+
+         <InfiniteScroll
+            dataLength={products.length}
+            next={fetchMoreProducts}
+            hasMore={hasMore}
+            loader={<div className="text-center">Loading more products...</div>}
+            endMessage={<div className="text-center my-4">No more products</div>}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </InfiniteScroll>
+        
       </div>
     </div>
   </div>
