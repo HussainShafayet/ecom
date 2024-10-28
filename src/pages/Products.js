@@ -38,7 +38,7 @@ const Products = () => {
   useEffect(() => {
    
     if (category) {
-      dispatch(fetchAllProducts({category: category, limit, sortBy, order}))
+      dispatch(fetchAllProducts({category: category, limit, sortBy, order, page, skip}))
     } else {
       dispatch(fetchAllProducts({limit:limit, sortBy, order, page, skip}));
     }
@@ -106,6 +106,7 @@ const Products = () => {
     setSearchParams(updatedParams);
     
   };
+  
   const handleItemsToShowChange = (e) => {
     const itemShow = parseInt(e.target.value);
     const sortBy = searchParams.get('sortBy');
