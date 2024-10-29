@@ -8,7 +8,7 @@ const Navbar = () => {
   const [authMenuOpen, setAuthMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const { cartCount } = useCart(); // Get cart count from Cart Context
-  const isAuthenticated = false; // Replace with actual authentication status
+  const isAuthenticated = true; // Replace with actual authentication status
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleAuthMenu = () => setAuthMenuOpen(!authMenuOpen);
