@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FaFacebook, FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaPhoneAlt } from 'react-icons/fa';
 import {Loader} from '../../components/common';
 
-const Login = () => {
+const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [inputType, setInputType] = useState('email');
@@ -121,7 +121,7 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignIn;
 
 
 

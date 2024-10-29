@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { Layout } from './components/layout';
-import { Login, Register } from './pages/user';
+import { SignIn, SignUp } from './pages/user';
 import { Home, Products, ProductDetails, Cart, NotFound, Checkout } from './pages';
 import { CartProvider } from './context/CartContext'; // Import CartProvider
 
@@ -20,8 +20,8 @@ function App() {
             <Route path="/checkout" element={<Checkout />} />
 
             {/* User Pages */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
 
             {/* Catch-all Not Found Route */}
             <Route path="*" element={<NotFound />} />

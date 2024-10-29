@@ -81,7 +81,7 @@ const Navbar = () => {
                 {authMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white shadow-xl rounded-lg border border-gray-200 z-10">
                     <Link
-                      to="/login"
+                      to="/signin"
                       className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"
                       onClick={() => setAuthMenuOpen(false)}
                     >
@@ -168,7 +168,7 @@ const Navbar = () => {
             </Link>
             {!isAuthenticated ? (
               <>
-                <Link to="/login" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
+                <Link to="/signin" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
                   Sign In
                 </Link>
                 <Link to="/signup" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
