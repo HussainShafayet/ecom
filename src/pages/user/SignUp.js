@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaFacebook, FaGoogle, FaEnvelope, FaLock, FaUser, FaEye, FaEyeSlash, FaPhone, FaCheck } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const SignUp = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -11,7 +11,6 @@ const SignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState("");
   const [passwordMatch, setPasswordMatch] = useState(true);
-  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => setIsPasswordVisible(!isPasswordVisible);
   const toggleConfirmPasswordVisibility = () => setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
@@ -21,19 +20,10 @@ const SignUp = () => {
     setInputType(value.includes('@') || isNaN(value) ? "email" : "phone");
   };
 
-  //const validatePassword = (password) => {
-  //  // Simple length check
-  //  if (password.length >= 6) {
-  //    setPasswordStrength("strong");
-  //  } else {
-  //    setPasswordStrength("weak");
-  //  }
-  //};
 
   const handlePasswordChange = (e) => {
     const newPassword = e.target.value;
     setPassword(newPassword);
-    //validatePassword(newPassword);
     setPasswordMatch(newPassword === confirmPassword);
   };
 
@@ -60,14 +50,14 @@ const SignUp = () => {
         transition={{ duration: 0.6 }}
       >
         {/* Title with Sign-In Redirect */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-wrap justify-between items-center mb-6">
           <h2 className="text-3xl font-bold text-center text-blue-700">Create Account</h2>
-          <button
-            onClick={() => navigate("/signin")}
+          <Link
+            to="/signin"
             className="text-sm text-gray-500 underline hover:text-blue-600 transition"
           >
             Already a member?
-          </button>
+          </Link>
         </div>
 
         {/* Full Name */}

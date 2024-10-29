@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaFacebook, FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaPhoneAlt } from 'react-icons/fa';
 import {Loader} from '../../components/common';
+import {Link} from 'react-router-dom';
 
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -111,9 +112,9 @@ const SignIn = () => {
           {/* Register Link */}
           <p className="text-center text-gray-700 text-sm">
             Don’t have an account?{' '}
-            <a href="#" className="text-blue-800 hover:underline font-semibold">
+            <Link to="/signup" className="text-blue-800 hover:underline font-semibold">
               Sign up
-            </a>
+            </Link>
           </p>
         </div>
       </div>
