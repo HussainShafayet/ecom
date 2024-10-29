@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaFacebook, FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaPhoneAlt } from 'react-icons/fa';
+import {Loader} from '../../components/common';
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -84,10 +85,7 @@ const Login = () => {
             }`}
           >
             {isLoading ? (
-              <span className="flex items-center justify-center space-x-2">
-                <span className="animate-spin h-5 w-5 border-t-2 border-b-2 border-white rounded-full"></span>
-                <span>Signing In...</span>
-              </span>
+              <Loader message="Signing In" />
             ) : (
               "Sign In"
             )}
