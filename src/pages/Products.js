@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 //import { getProductsByCategory } from '../services/productService';  // Service to fetch products by category
-import {ProductCard, Sidebar} from '../components/common';  // Reusable ProductCard component
+import {Loader, ProductCard, Sidebar} from '../components/common';  // Reusable ProductCard component
 
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts} from '../redux/slice/productSlice';
@@ -60,7 +60,7 @@ const Products = () => {
   };
 
   if (isLoading && page === 1) {
-    return <div className='text-center'>Loading products...</div>;
+    return <div style={{display:'flex',justifyContent:'center', alignItems:"center",height:'100%'}}><Loader message='Loading products' /></div> ;
   }
 
   if (error) {
