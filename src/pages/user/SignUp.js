@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import { FaFacebook, FaGoogle, FaEnvelope, FaLock, FaUser, FaEye, FaEyeSlash, FaPhone, FaCheck } from 'react-icons/fa';
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const SignUp = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
-  const [inputType, setInputType] = useState("email");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordStrength, setPasswordStrength] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState(false);
   const [passwordMatch, setPasswordMatch] = useState(true);
 
   const togglePasswordVisibility = () => setIsPasswordVisible(!isPasswordVisible);
   const toggleConfirmPasswordVisibility = () => setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
 
-  const handleEmailOrPhoneChange = (e) => {
+  const handleEmail = (e) => {
     const value = e.target.value;
-    setInputType(value.includes('@') || isNaN(value) ? "email" : "phone");
+  };
+
+  const handlePhone = (e) => {
+    const value = e.target.value;
   };
 
 
@@ -25,6 +26,7 @@ const SignUp = () => {
     const newPassword = e.target.value;
     setPassword(newPassword);
     setPasswordMatch(newPassword === confirmPassword);
+    setPasswordStrength(newPassword.length >= 6);
   };
 
   const handleConfirmPasswordChange = (e) => {
@@ -43,11 +45,8 @@ const SignUp = () => {
       <div className="absolute bottom-0 right-1/3 w-72 h-72 bg-pink-300 opacity-20 rounded-full blur-3xl"></div>
 
       {/* Form Container */}
-      <motion.div
+      <div
         className="relative z-10 w-full max-w-lg p-8 bg-white bg-opacity-80 rounded-2xl shadow-2xl backdrop-blur-lg"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
       >
         {/* Title with Sign-In Redirect */}
         <div className="flex flex-wrap justify-between items-center mb-6">
@@ -74,21 +73,35 @@ const SignUp = () => {
           </div>
         </div>
 
-        {/* Email or Phone Number */}
+        {/* Email  */}
         <div className="mb-4">
-          <label htmlFor="emailOrPhone" className="block text-gray-700 font-medium mb-1">Email Address or Phone Number</label>
+          <label htmlFor="email" className="block text-gray-700 font-medium mb-1">Email Addressr</label>
           <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-            {inputType === "email" ? (
-              <FaEnvelope className="text-gray-400 m-3" title="Email" />
-            ) : (
-              <FaPhone className="text-gray-400 m-3" title="Phone" />
-            )}
+            <FaEnvelope className="text-gray-400 m-3" title="Email" />
             <input
-              type="text"
-              id="emailOrPhone"
-              placeholder="Enter your email or phone number"
-              onChange={handleEmailOrPhoneChange}
+              type="email"
+              id="email"
+              placeholder="Enter your email"
+              onInput={handleEmail}
               className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
+              required
+            />
+          </div>
+        </div>
+
+         {/* Phone Number */}
+         <div className="mb-4">
+          <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">Phone Number</label>
+          <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
+            
+            <FaPhone className="text-gray-400 m-3" title="Phone" />
+            <input
+              type="number"
+              id="phone"
+              placeholder="Enter your phone number"
+              onInput={handlePhone}
+              className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
+              required
             />
           </div>
         </div>
@@ -105,6 +118,7 @@ const SignUp = () => {
               value={password}
               onChange={handlePasswordChange}
               className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
+              required
             />
             <button
               type="button"
@@ -119,8 +133,8 @@ const SignUp = () => {
 
           
           {/* Password Requirements */}
-          <p style={{display: 'flex'}} className={`text-xs  mt-2 ${password.length >= 6 ? "text-green-600" : "text-gray-500"}`}>
-            {password.length >= 6 && <span className='mr-1'> <FaCheck /> </span>} Minimum 6 characters
+          <p style={{display: 'flex'}} className={`text-xs  mt-2 ${passwordStrength ? "text-green-600" : "text-gray-500"}`}>
+            {passwordStrength && <span className='mr-1'> <FaCheck /> </span>} Minimum 6 characters
             
           </p>
         </div>
@@ -137,6 +151,7 @@ const SignUp = () => {
               value={confirmPassword}
               onChange={handleConfirmPasswordChange}
               className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
+              required
             />
             <button
               type="button"
@@ -174,7 +189,7 @@ const SignUp = () => {
             <FaGoogle className="text-white text-lg" />
           </button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
