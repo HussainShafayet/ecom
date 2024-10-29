@@ -60,7 +60,7 @@ const Products = () => {
   };
 
   if (isLoading && page === 1) {
-    return <div style={{display:'flex',justifyContent:'center', alignItems:"center",height:'100%'}}><Loader message='Loading products' /></div> ;
+    return <div><Loader message='Loading products' /></div> ;
   }
 
   if (error) {
