@@ -4,8 +4,20 @@ import { Layout } from './components/layout';
 import { Profile, SignIn, SignUp, WishList } from './pages/user';
 import { Home, Products, ProductDetails, Cart, NotFound, Checkout } from './pages';
 import { CartProvider } from './context/CartContext'; // Import CartProvider
+import {useDispatch} from 'react-redux';
+import {loadUserFromStorage} from './redux/slice/authSlice';
+import {useEffect} from 'react';
+import {ProtectedRoute} from './components/common';
 
 function App() {
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(loadUserFromStorage());
+  }, [dispatch]);
+
+  
   return (
     <CartProvider> {/* Wrap the Router with CartProvider for global access */}
       <Router>
@@ -17,7 +29,9 @@ function App() {
             <Route path='/products/category/:category' element={<Products />} />
             <Route path="/products/:id" element={<ProductDetails />} />
             <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/checkout" element={<ProtectedRoute />}>
+              <Route path="" element={<Checkout />} />
+            </Route>
 
             {/* User Pages */}
             <Route path="/signin" element={<SignIn />} />

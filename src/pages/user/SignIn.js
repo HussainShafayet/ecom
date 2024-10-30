@@ -2,15 +2,26 @@ import React, { useState } from 'react';
 import { FaFacebook, FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaPhoneAlt } from 'react-icons/fa';
 import {Loader} from '../../components/common';
 import {Link} from 'react-router-dom';
+import {useDispatch, useSelector} from 'react-redux';
+import {signInUser} from '../../redux/slice/authSlice';
 
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [inputType, setInputType] = useState('email');
 
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.auth);
+  const [credentials, setCredentials] = useState({ username: 'emilys', password: 'emilyspass' });
+
+  const handleChange = (e) => setCredentials({ ...credentials, [e.target.name]: e.target.value });
+
   const handleLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1500); // Simulate login loading
+    //setIsLoading(true);
+    //setTimeout(() => setIsLoading(false), 1500); // Simulate login loading
+    console.log(credentials);
+    
+    dispatch(signInUser(credentials));
   };
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
@@ -44,6 +55,7 @@ const SignIn = () => {
               )}
               <input
                 type={inputType}
+                name='username'
                 id="emailOrPhone"
                 placeholder={`Enter your ${inputType === 'email' ? 'email' : 'phone number'}`}
                 className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
@@ -51,6 +63,7 @@ const SignIn = () => {
                 onBlur={(e) => {
                   if (e.target.value && !e.target.value.includes('@')) setInputType('tel');
                 }}
+                onChange={handleChange}
               />
             </div>
           </div>
@@ -63,9 +76,11 @@ const SignIn = () => {
             <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
               <input
                 type={showPassword ? 'text' : 'password'}
+                name='password'
                 id="password"
                 placeholder="Enter your password"
                 className="w-full px-4 py-2 border-none focus:outline-none rounded-l-md"
+                onChange={handleChange}
               />
               <button
                 type="button"

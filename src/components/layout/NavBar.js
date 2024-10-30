@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart, FaUser, FaBars, FaTimes, FaSearch, FaHeart, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext';
+import {useSelector} from 'react-redux';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [authMenuOpen, setAuthMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const { cartCount } = useCart(); // Get cart count from Cart Context
-  const isAuthenticated = true; // Replace with actual authentication status
+  //const isAuthenticated = false; // Replace with actual authentication status
+  const {isAuthenticated} = useSelector((state)=>state.auth)
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleAuthMenu = () => setAuthMenuOpen(!authMenuOpen);
