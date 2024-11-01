@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaFacebook, FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaPhoneAlt } from 'react-icons/fa';
 import {Loader} from '../../components/common';
-import {Link} from 'react-router-dom';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
 import {signInUser} from '../../redux/slice/authSlice';
 
@@ -11,19 +11,28 @@ const SignIn = () => {
   const [inputType, setInputType] = useState('email');
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const { loading, error } = useSelector((state) => state.auth);
   const [credentials, setCredentials] = useState({ username: 'emilys', password: 'emilyspass' });
 
   const handleChange = (e) => setCredentials({ ...credentials, [e.target.name]: e.target.value });
 
+  // Get the previous location from location.state
+  const from = location.state?.from?.pathname || '/';
+
   const handleLogin = () => {
-    //setIsLoading(true);
-    //setTimeout(() => setIsLoading(false), 1500); // Simulate login loading
-    credentials.expiresInMins = 1  // set expire min
-    console.log(credentials);
-    
     dispatch(signInUser(credentials));
+    // Navigate back to the previous page or default to the home page
+    navigate(from, { replace: true });
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true }); // Redirect to previous page if already authenticated
+    }
+  }, [isAuthenticated, from, navigate]);
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 

@@ -1,5 +1,7 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { FaTrashAlt, FaCartPlus, FaStar } from 'react-icons/fa';
+import {useSelector} from 'react-redux';
+import {useNavigate} from 'react-router-dom';
 
 const Wishlist = () => {
   const wishlistItems = [
@@ -49,6 +51,15 @@ const Wishlist = () => {
         description: 'Lightweight running shoes designed for comfort and durability.',
       },
   ];
+
+  const {isAuthenticated} = useSelector((state)=>state.auth);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/signin');
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-4 md:p-8">

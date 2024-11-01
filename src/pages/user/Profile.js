@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { FaUserEdit, FaBoxOpen, FaMapMarkerAlt, FaCreditCard, FaLock, FaPlus, FaHeart, FaBell, FaHistory, FaCamera } from 'react-icons/fa';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {getUser} from '../../redux/slice/authSlice';
+import {useNavigate} from 'react-router-dom';
 
 const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const dispatch = useDispatch();
+  const {isAuthenticated} = useSelector((state)=>state.auth);
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/signin');
+    }
+  }, [isAuthenticated, navigate]);
+  
   useEffect(()=>{
     dispatch(getUser());
   }, [dispatch])
