@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
-import { FaTrash, FaArrowRight } from 'react-icons/fa';
+import { FaTrash, FaArrowRight, FaInfoCircle } from 'react-icons/fa';
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity } = useCart();
@@ -24,30 +24,46 @@ const Cart = () => {
       ) : (
         <div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-           
             
             {/* Scrollable Cart Items Section */}
             <div className="lg:col-span-2 max-h-screen overflow-y-auto">
-            <div className="mb-2">
-              <h1 className="text-2xl mb-2">Shopping Cart</h1>
-              <hr className='w-full'></hr>
-            </div>
+              <div className="mb-2">
+                <h1 className="text-2xl mb-2">Shopping Cart</h1>
+                <hr className='w-full' />
+              </div>
+              
               <div className="flex flex-col gap-3">
                 {cartItems.map((item) => (
                   <div
                     key={item.id}
-                    className="relative group border rounded-lg shadow-md hover:shadow-lg transition-shadow flex flex-row items-center gap-1"
+                    className="relative group border rounded-lg shadow-md hover:shadow-lg transition-shadow flex flex-row items-start gap-4 p-4 bg-white"
                   >
                     <img
                       src={item.images ? item.images[0] : 'fallback-image-url.jpg'}
                       alt={item.title}
                       className="w-32 h-32 object-cover rounded-lg"
                     />
+
                     <div className="flex-1">
                       <h2 className="text-lg font-semibold mb-1">{item.title}</h2>
 
-                      <p className="text-green-500 font-bold mb-2 text-lg">${item.price.toFixed(2)}</p>
-                      
+                      <div className="text-sm text-gray-500 mb-2">
+                        <span className="mr-2">Category: {item.category}</span>
+                        <span className="mr-2">Brand: {item.brand}</span>
+                        <span className="mr-2">Rating: {item.rating}</span>
+                        {item.color && <span className="mr-2">Color: {item.color}</span>}
+                        {item.size && <span>Size: {item.size}</span>}
+                      </div>
+
+                      <p className="text-green-500 font-bold text-lg mb-1">
+                        ${item.price.toFixed(2)}{' '}
+                        {item.discount && (
+                          <span className="text-sm text-gray-400 line-through">
+                            ${item.originalPrice.toFixed(2)}
+                          </span>
+                        )}
+                      </p>
+
                       {/* Quantity Selector */}
                       <div className="flex items-center mb-2">
                         <div className="flex border rounded-lg">
@@ -72,13 +88,16 @@ const Cart = () => {
                             +
                           </button>
                         </div>
-                        {/* Remove Button */}
-                        <FaTrash className="ml-2 hover:bg-red-600 transition-colors"  onClick={() => setConfirmDelete(item.id)} /> 
                       </div>
-                     
                     </div>
 
-                    
+                    {/* Remove Button */}
+                    <button
+                      className="bg-red-500 text-white font-bold p-2 rounded-full hover:bg-red-600 transition-colors"
+                      onClick={() => setConfirmDelete(item.id)}
+                    >
+                      <FaTrash />
+                    </button>
 
                     {/* Confirm Delete Overlay */}
                     {confirmDelete === item.id && (
@@ -108,14 +127,6 @@ const Cart = () => {
             {/* Order Summary */}
             <div className="sticky top-[100px] bg-white shadow-lg rounded-lg p-4">
               <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
-              {/*<div className="flex flex-col space-y-4 mb-4">
-                {cartItems.map(item => (
-                  <div key={item.id} className="flex items-center">
-                    <img src={item.images[0]} alt={item.title} className="w-12 h-12 object-cover rounded-lg mr-2" />
-                    <p className="text-gray-800">{item.title}</p>
-                  </div>
-                ))}
-              </div>*/}
               <div className="flex justify-between mb-2">
                 <span>Subtotal</span>
                 <span>${totalPrice.toFixed(2)}</span>
