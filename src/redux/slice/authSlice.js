@@ -26,11 +26,26 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
   }
 });
 
-// Async action to refresh access token
-export const refreshToken = createAsyncThunk('auth/refreshToken', async (_, { rejectWithValue }) => {
+// Async action for getUser
+export const getUser = createAsyncThunk('auth/getUser', async (_, { rejectWithValue }) => {
   try {
+     // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('/auth/refresh');
+     const response = await api.get('/auth/me');
+
+    console.log('get user response',response);
+    
+    return response.data; // { accessToken, refreshToken, user }
+  } catch (error) {
+    return rejectWithValue(error.response.data);
+  }
+});
+
+// Async action to refresh access token
+export const refreshToken = createAsyncThunk('auth/refreshToken', async (credentials , { rejectWithValue }) => {
+  try {
+    const api = (await import('../../api/axiosSetup')).default;
+    const response = await api.post('/auth/refresh', credentials);
     console.log('refresh token response', response);
     
     return response.data;
@@ -45,7 +60,7 @@ export const logoutUser = createAsyncThunk('auth/logoutUser', async (_, { reject
     //await  axios.post('/api/auth/logout');
     const api = (await import('../../api/axiosSetup')).default;
     const response = await api.post('/auth/logout');
-    
+    return response.data;
   } catch (error) {
     return rejectWithValue(error.response.data);
   }
@@ -91,7 +106,10 @@ const authSlice = createSlice({
         localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-      });
+      })
+      .addCase(getUser.fulfilled, (state, action) => {
+        state.user = action.payload.user; // Update the access token
+      })
   },
 });
 

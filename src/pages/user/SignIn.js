@@ -19,6 +19,7 @@ const SignIn = () => {
   const handleLogin = () => {
     //setIsLoading(true);
     //setTimeout(() => setIsLoading(false), 1500); // Simulate login loading
+    credentials.expiresInMins = 1  // set expire min
     console.log(credentials);
     
     dispatch(signInUser(credentials));

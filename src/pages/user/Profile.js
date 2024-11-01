@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaUserEdit, FaBoxOpen, FaMapMarkerAlt, FaCreditCard, FaLock, FaPlus, FaHeart, FaBell, FaHistory, FaCamera } from 'react-icons/fa';
+import {useDispatch} from 'react-redux';
+import {getUser} from '../../redux/slice/authSlice';
 
 const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
-
+  const dispatch = useDispatch();
+  useEffect(()=>{
+    dispatch(getUser());
+  }, [dispatch])
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-4 md:p-8">
       <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
