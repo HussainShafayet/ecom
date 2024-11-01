@@ -60,6 +60,8 @@ export const logoutUser = createAsyncThunk('auth/logoutUser', async (_, { reject
     //await  axios.post('/api/auth/logout');
     const api = (await import('../../api/axiosSetup')).default;
     const response = await api.post('/auth/logout');
+    console.log('logout response', response);
+    
     return response.data;
   } catch (error) {
     return rejectWithValue(error.response.data);

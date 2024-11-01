@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaShoppingCart, FaUser, FaBars, FaTimes, FaSearch, FaHeart, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {logoutUser} from '../../redux/slice/authSlice';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -11,10 +12,19 @@ const Navbar = () => {
   const { cartCount } = useCart(); // Get cart count from Cart Context
   //const isAuthenticated = false; // Replace with actual authentication status
   const {isAuthenticated} = useSelector((state)=>state.auth)
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleAuthMenu = () => setAuthMenuOpen(!authMenuOpen);
   const toggleProfileMenu = () => setProfileMenuOpen(!profileMenuOpen);
+
+
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    setProfileMenuOpen(false);
+    navigate('/'); // Redirect to home page after logout, or choose another route
+  };
 
   return (
     <nav className="bg-white shadow-md sticky top-0 w-full z-50">
@@ -133,13 +143,12 @@ const Navbar = () => {
                       <FaHeart className="mr-2 text-pink-500" /> Wishlist
                     </Link>
                     <div className="border-t border-gray-200"></div>
-                    <Link
-                      to="/logout"
+                    <button
                       className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition"
-                      onClick={() => setProfileMenuOpen(false)}
+                      onClick={handleLogout}
                     >
                       <FaSignInAlt className="mr-2 text-red-500" /> Logout
-                    </Link>
+                    </button>
                   </div>
                 )}
               </div>
@@ -185,9 +194,9 @@ const Navbar = () => {
                 <Link to="/profile" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
                   Profile
                 </Link>
-                <Link to="/logout" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
+                <button className="text-gray-700 hover:text-blue-500" onClick={handleLogout}>
                   Logout
-                </Link>
+                </button>
               </>
             )}
             {/* Mobile Search Bar */}
