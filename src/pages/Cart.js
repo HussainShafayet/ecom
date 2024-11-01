@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
-import { FaTrash, FaArrowRight, FaInfoCircle } from 'react-icons/fa';
+import { FaTrash, FaArrowRight } from 'react-icons/fa';
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity } = useCart();
@@ -22,135 +22,139 @@ const Cart = () => {
           </Link>
         </div>
       ) : (
-        <div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            
-            {/* Scrollable Cart Items Section */}
-            <div className="lg:col-span-2 max-h-screen overflow-y-auto">
-              <div className="mb-2">
-                <h1 className="text-2xl mb-2">Shopping Cart</h1>
-                <hr className='w-full' />
-              </div>
-              
-              <div className="flex flex-col gap-3">
-                {cartItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="relative group border rounded-lg shadow-md hover:shadow-lg transition-shadow flex flex-row items-start gap-4 p-4 bg-white"
-                  >
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Scrollable Cart Items Section */}
+          <div className="lg:col-span-2 max-h-screen overflow-y-auto">
+            <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
+
+            <div className="flex flex-col gap-3">
+              {cartItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="border rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 bg-white flex flex-col md:flex-row items-center gap-3 relative"
+                >
+                  {/* Product Image */}
+                  <div className="relative w-24 h-24 md:w-32 md:h-32 overflow-hidden rounded-lg">
                     <img
                       src={item.images ? item.images[0] : 'fallback-image-url.jpg'}
                       alt={item.title}
-                      className="w-32 h-32 object-cover rounded-lg"
+                      className="w-full h-full object-cover"
                     />
+                    {item.discountPercentage && (
+                      <span className="absolute top-1 left-1 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                        {item.discountPercentage}% Off
+                      </span>
+                    )}
+                  </div>
 
-                    <div className="flex-1">
-                      <h2 className="text-lg font-semibold mb-1">{item.title}</h2>
+                  {/* Product Details */}
+                  <div className="flex-1 text-sm">
+                    <h2 className="font-semibold mb-1">{item.title}</h2>
+                    <p className="text-gray-500 mb-1">
+                      <span>{item.category}</span> • <span>{item.brand}</span> • <span>{item.rating}</span>
+                    </p>
+                    <p className="text-gray-500 mb-2">
+                      {item.color && <span>Color: {item.color}</span>}
+                      {item.size && <span> • Size: {item.size}</span>}
+                    </p>
+                    <p className="text-green-500 font-bold mb-2">
+                      ${item.price.toFixed(2)}{' '}
+                      {item.discountPercentage && (
+                        <span className="text-gray-400 line-through text-xs">
+                          ${item.discountPercentage.toFixed(2)}
+                        </span>
+                      )}
+                    </p>
 
-                      <div className="text-sm text-gray-500 mb-2">
-                        <span className="mr-2">Category: {item.category}</span>
-                        <span className="mr-2">Brand: {item.brand}</span>
-                        <span className="mr-2">Rating: {item.rating}</span>
-                        {item.color && <span className="mr-2">Color: {item.color}</span>}
-                        {item.size && <span>Size: {item.size}</span>}
-                      </div>
-
-                      <p className="text-green-500 font-bold text-lg mb-1">
-                        ${item.price.toFixed(2)}{' '}
-                        {item.discount && (
-                          <span className="text-sm text-gray-400 line-through">
-                            ${item.originalPrice.toFixed(2)}
-                          </span>
-                        )}
-                      </p>
-
-                      {/* Quantity Selector */}
-                      <div className="flex items-center mb-2">
-                        <div className="flex border rounded-lg">
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-l"
-                            disabled={item.quantity === 1}
-                          >
-                            -
-                          </button>
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => updateQuantity(item.id, Number(e.target.value))}
-                            className="w-12 text-center border-l border-r"
-                            min="1"
-                          />
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-r"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
+                    {/* Quantity Selector */}
+                    <div className="flex items-center">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-l"
+                        disabled={item.quantity === 1}
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        value={item.quantity}
+                        onChange={(e) => updateQuantity(item.id, Number(e.target.value))}
+                        className="w-10 text-center border-l border-r"
+                        min="1"
+                      />
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-r"
+                      >
+                        +
+                      </button>
                     </div>
+                  </div>
 
-                    {/* Remove Button */}
-                    <button
-                      className="bg-red-500 text-white font-bold p-2 rounded-full hover:bg-red-600 transition-colors"
-                      onClick={() => setConfirmDelete(item.id)}
-                    >
-                      <FaTrash />
-                    </button>
+                  {/* Remove Button */}
+                  <button
+                    className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                    onClick={() => setConfirmDelete(item.id)}
+                  >
+                    <FaTrash />
+                  </button>
 
-                    {/* Confirm Delete Overlay */}
-                    {confirmDelete === item.id && (
-                      <div className="absolute inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center p-4">
-                        <h3 className="text-white text-lg mb-4">Remove {item.title}?</h3>
-                        <div className="flex space-x-4">
+                  {/* Confirm Delete Warning in Card */}
+                  {confirmDelete === item.id && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
+                      <div className="text-center">
+                        <p className="text-gray-800 mb-2">Are you sure you want to remove this item?</p>
+                        <div className="flex justify-center gap-2">
                           <button
-                            className="bg-red-500 text-white px-4 py-2 rounded"
-                            onClick={() => removeFromCart(item.id)}
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
+                            onClick={() => {
+                              removeFromCart(item.id);
+                              setConfirmDelete(null);
+                            }}
                           >
-                            Yes, Remove
+                            Yes
                           </button>
                           <button
-                            className="bg-gray-300 text-gray-800 px-4 py-2 rounded"
+                            className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
                             onClick={() => setConfirmDelete(null)}
                           >
                             Cancel
                           </button>
                         </div>
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* Order Summary */}
-            <div className="sticky top-[100px] bg-white shadow-lg rounded-lg p-4">
-              <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
-              <div className="flex justify-between mb-2">
-                <span>Subtotal</span>
-                <span>${totalPrice.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span>Shipping</span>
-                <span>${shippingCost.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span>Tax (10%)</span>
-                <span>${tax.toFixed(2)}</span>
-              </div>
-              <hr className="my-4" />
-              <div className="flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span>${grandTotal.toFixed(2)}</span>
-              </div>
-              <Link
-                to="/checkout"
-                className="mt-4 block bg-blue-500 text-white text-center font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                Proceed to Checkout
-              </Link>
+          {/* Order Summary */}
+          <div className="sticky top-24 bg-white shadow-lg rounded-lg p-4">
+            <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
+            <div className="flex justify-between mb-2">
+              <span>Subtotal</span>
+              <span>${totalPrice.toFixed(2)}</span>
             </div>
+            <div className="flex justify-between mb-2">
+              <span>Shipping</span>
+              <span>${shippingCost.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span>Tax (10%)</span>
+              <span>${tax.toFixed(2)}</span>
+            </div>
+            <hr className="my-4" />
+            <div className="flex justify-between font-bold text-lg">
+              <span>Total</span>
+              <span>${grandTotal.toFixed(2)}</span>
+            </div>
+            <Link
+              to="/checkout"
+              className="mt-4 block bg-blue-500 text-white text-center font-bold py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Proceed to Checkout
+            </Link>
           </div>
 
           {/* Sticky Checkout Button for Mobile */}
@@ -175,3 +179,5 @@ const Cart = () => {
 };
 
 export default Cart;
+
+
