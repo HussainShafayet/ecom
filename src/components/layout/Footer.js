@@ -133,7 +133,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-white mb-4">My Account</h3>
             <ul className="space-y-2">
               <li><Link to="/signin" className="hover:text-gray-100 transition">Sign In</Link></li>
-              <li><Link href="/order-tracking" className="hover:text-gray-100 transition">Order Tracking</Link></li>
+              <li><Link to="/order-tracking" className="hover:text-gray-100 transition">Order Tracking</Link></li>
               <li><Link to="/wishlist" className="hover:text-gray-100 transition">Wishlist</Link></li>
               <li><Link to="/cart" className="hover:text-gray-100 transition">Shopping Cart</Link></li>
             </ul>
