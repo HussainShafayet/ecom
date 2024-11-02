@@ -8,6 +8,7 @@ import {useDispatch} from 'react-redux';
 import {loadUserFromStorage} from './redux/slice/authSlice';
 import {useEffect} from 'react';
 import {ProtectedRoute} from './components/common';
+import {Contact} from './pages/others';
 
 function App() {
 
@@ -38,6 +39,13 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/wishlist" element={<WishList />} />
+
+
+            {/* Others Pages */}
+            <Route path="/contact" element={<Contact />} />
+            {/*<Route path="/signup" element={<SignUp />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/wishlist" element={<WishList />} />*/}
 
 
             {/* Catch-all Not Found Route */}

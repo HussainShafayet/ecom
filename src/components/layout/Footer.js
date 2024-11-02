@@ -82,6 +82,7 @@
 
 import React from 'react';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaEnvelope, FaApple, FaGooglePlay } from 'react-icons/fa';
+import {Link} from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -114,7 +115,7 @@ const Footer = () => {
               <li><a href="#" className="hover:text-gray-100 transition">About Us</a></li>
               <li><a href="#" className="hover:text-gray-100 transition">Careers</a></li>
               <li><a href="#" className="hover:text-gray-100 transition">Blog</a></li>
-              <li><a href="#" className="hover:text-gray-100 transition">Contact Us</a></li>
+              <li><Link to="/contact" className="hover:text-gray-100 transition">Contact Us</Link></li>
             </ul>
           </div>
           
