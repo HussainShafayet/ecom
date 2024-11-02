@@ -132,10 +132,10 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">My Account</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-gray-100 transition">Login</a></li>
-              <li><a href="#" className="hover:text-gray-100 transition">Order Tracking</a></li>
-              <li><a href="#" className="hover:text-gray-100 transition">Wishlist</a></li>
-              <li><a href="#" className="hover:text-gray-100 transition">Shopping Cart</a></li>
+              <li><Link to="/signin" className="hover:text-gray-100 transition">Sign In</Link></li>
+              <li><Link href="/order-tracking" className="hover:text-gray-100 transition">Order Tracking</Link></li>
+              <li><Link to="/wishlist" className="hover:text-gray-100 transition">Wishlist</Link></li>
+              <li><Link to="/cart" className="hover:text-gray-100 transition">Shopping Cart</Link></li>
             </ul>
           </div>
           
