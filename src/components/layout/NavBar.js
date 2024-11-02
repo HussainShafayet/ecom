@@ -36,15 +36,18 @@ const Navbar = () => {
       <div className="container mx-auto px-4 py-2 flex justify-between items-center">
         {/* Logo Section */}
         <div className="flex items-center space-x-3 md:space-x-4">
-          <img
-            src="https://img.freepik.com/premium-psd/engraved-black-logo-mockup_125540-223.jpg"
-            alt="Website Logo"
-            className="w-10 h-10 md:w-12 md:h-12 rounded-full hover:shadow-lg transition-shadow duration-300"
-          />
-          <div className="flex flex-col items-start md:items-center">
+          <Link to='/'>
+            <img
+              src="https://img.freepik.com/premium-psd/engraved-black-logo-mockup_125540-223.jpg"
+              alt="Website Logo"
+              className="w-10 h-10 md:w-12 md:h-12 rounded-full hover:shadow-lg transition-shadow duration-300"
+            />
+          </Link>
+          
+          <Link to='/' className="flex flex-col items-start md:items-center">
             <span className="text-lg md:text-2xl font-bold tracking-wide">GoCart</span>
             <p className="text-xs font-light hidden sm:block md:-mt-1">Happy To Shopping</p>
-          </div>
+          </Link>
         </div>
 
         {/* Navigation Links */}
