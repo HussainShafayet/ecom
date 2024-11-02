@@ -1,5 +1,6 @@
 import React from 'react';
 import {NavBar,Footer} from '../layout';
+import {BackToTop} from '../common';
 
 const Layout = ({children}) => {
   return (
@@ -12,6 +13,8 @@ const Layout = ({children}) => {
         </main>
       </div>
       <Footer />
+
+      <BackToTop /> {/* Add the BackToTop component here */}
     </div>
     </>
   )

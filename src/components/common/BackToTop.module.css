@@ -1,0 +1,70 @@
+
+/* Base button styles */
+.backToTopButton {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3rem;
+    height: 3rem;
+    background-color: #4299e1;
+    color: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  
+  .backToTopButtonVisible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .backToTopButton:hover {
+    background-color: #2b6cb0;
+    transform: scale(1.1);
+  }
+  
+  /* Icon container to center the SVG and icon */
+  .iconContainer {
+    position: relative;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Circular SVG for progress */
+  .progressSvg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  /* Gray background circle */
+  .progressBackground {
+    stroke: #e2e8f0;
+  }
+  
+  /* Blue progress circle */
+  .progressCircle {
+    stroke: #4299e1;
+    transition: stroke-dasharray 0.3s ease;
+    transform: rotate(-90deg);
+    transform-origin: center;
+  }
+  
+  /* Icon styling */
+  .icon {
+    position: relative;
+    z-index: 1;
+    font-size: 1.25rem;
+  }
+  

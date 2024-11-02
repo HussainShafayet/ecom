@@ -7,7 +7,7 @@ import { CartProvider } from './context/CartContext'; // Import CartProvider
 import {useDispatch} from 'react-redux';
 import {loadUserFromStorage} from './redux/slice/authSlice';
 import {useEffect} from 'react';
-import {ProtectedRoute} from './components/common';
+import {ProtectedRoute, ScrollToTop} from './components/common';
 import {AboutUs, Contact, FAQPage, OrderTracking} from './pages/others';
 
 function App() {
@@ -22,6 +22,7 @@ function App() {
   return (
     <CartProvider> {/* Wrap the Router with CartProvider for global access */}
       <Router>
+        <ScrollToTop /> {/* Add ScrollToTop here */}
         <Layout> {/* Directly wrap Layout around Routes */}
           <Routes>
             {/* Pages */}
