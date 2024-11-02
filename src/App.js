@@ -8,7 +8,7 @@ import {useDispatch} from 'react-redux';
 import {loadUserFromStorage} from './redux/slice/authSlice';
 import {useEffect} from 'react';
 import {ProtectedRoute} from './components/common';
-import {AboutUs, Contact, OrderTracking} from './pages/others';
+import {AboutUs, Contact, FAQPage, OrderTracking} from './pages/others';
 
 function App() {
 
@@ -45,7 +45,7 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/order-tracking" element={<OrderTracking />} />
-            {/* <Route path="/wishlist" element={<WishList />} />*/}
+            <Route path="/faq" element={<FAQPage />} />
 
 
             {/* Catch-all Not Found Route */}
