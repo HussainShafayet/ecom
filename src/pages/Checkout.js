@@ -63,9 +63,7 @@ const Checkout = () => {
 
   const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   const shippingCost = 10.0;
-  const taxPercentage = 0.1;
-  const tax = totalPrice * taxPercentage;
-  const grandTotal = totalPrice + shippingCost + tax;
+  const grandTotal = totalPrice + shippingCost;
 
   return (
     <div className="container mx-auto my-12 px-4 lg:flex lg:space-x-12">
@@ -273,26 +271,22 @@ const Checkout = () => {
                 <h4 className="font-semibold">{item.title}</h4>
                 <p>Quantity: {item.quantity}</p>
               </div>
-              <p>${(item.price * item.quantity).toFixed(2)}</p>
+              <p>{(item.price * item.quantity).toFixed(2)}</p>
             </div>
           ))}
           <hr className="my-4" />
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span>${totalPrice.toFixed(2)}</span>
+            <span>{totalPrice.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
             <span>Shipping</span>
-            <span>${shippingCost.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Tax (10%)</span>
-            <span>${tax.toFixed(2)}</span>
+            <span>{shippingCost.toFixed(2)}</span>
           </div>
           <hr className="my-4" />
           <div className="flex justify-between font-bold text-lg">
             <span>Total</span>
-            <span>${grandTotal.toFixed(2)}</span>
+            <span>{grandTotal.toFixed(2)}</span>
           </div>
           <Link
             to="/cart"

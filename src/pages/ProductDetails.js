@@ -137,15 +137,15 @@ const ProductDetails = () => {
           {discountPercentage > 0 ? (
             <div className="mb-4">
               <p className=" text-gray-500 line-through">
-                ${product.price.toFixed(2)}
+                {product.price.toFixed(2)}
               </p>
               <p className="text-2x text-green-600 font-semibold">
-                ${discountedPrice.toFixed(2)} <span className="text-red-500">({discountPercentage}% OFF)</span>
+                {discountedPrice.toFixed(2)} <span className="text-red-500">({discountPercentage}% OFF)</span>
               </p>
             </div>
           ) : (
             <p className="text-2xl text-green-600 font-semibold mb-4">
-              ${product.price.toFixed(2)}
+              {product.price.toFixed(2)}
             </p>
           )}
 

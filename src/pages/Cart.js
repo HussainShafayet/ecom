@@ -8,9 +8,7 @@ const Cart = () => {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   const shippingCost = 10.0;
-  const taxPercentage = 0.1;
-  const tax = totalPrice * taxPercentage;
-  const grandTotal = totalPrice + shippingCost + tax;
+  const grandTotal = totalPrice + shippingCost;
 
   return (
     <div className="mx-auto">
@@ -58,10 +56,10 @@ const Cart = () => {
                       {item.size && <span> • Size: {item.size}</span>}
                     </p>
                     <p className="text-green-500 font-bold mb-2">
-                      ${item.price.toFixed(2)}{' '}
+                      {item.price.toFixed(2)}{' '}
                       {item.discountPercentage && (
                         <span className="text-gray-400 line-through text-xs">
-                          ${item.discountPercentage.toFixed(2)}
+                          {item.discountPercentage.toFixed(2)}
                         </span>
                       )}
                     </p>
@@ -134,20 +132,16 @@ const Cart = () => {
             <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
             <div className="flex justify-between mb-2">
               <span>Subtotal</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>{totalPrice.toFixed(2)}</span>
             </div>
             <div className="flex justify-between mb-2">
               <span>Shipping</span>
-              <span>${shippingCost.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span>Tax (10%)</span>
-              <span>${tax.toFixed(2)}</span>
+              <span>{shippingCost.toFixed(2)}</span>
             </div>
             <hr className="my-4" />
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
-              <span>${grandTotal.toFixed(2)}</span>
+              <span>{grandTotal.toFixed(2)}</span>
             </div>
             <Link
               to="/checkout"
@@ -161,7 +155,7 @@ const Cart = () => {
           <div className="fixed bottom-0 left-0 w-full bg-white p-4 lg:hidden shadow-lg">
             <div className="flex justify-between items-center">
               <div>
-                <p className="font-bold text-lg">Total: ${grandTotal.toFixed(2)}</p>
+                <p className="font-bold text-lg">Total: {grandTotal.toFixed(2)}</p>
                 <p className="text-sm text-gray-500">Shipping & tax calculated at checkout</p>
               </div>
               <Link

@@ -32,7 +32,7 @@ const ProductCard = ({ product }) => {
               {product.title}
             </Link>
           </h3>
-          <p className="text-gray-600 mt-2">${product.price.toFixed(2)}</p>
+          <p className="text-gray-600 mt-2">{product.price.toFixed(2)}</p>
   
           {/* Product Rating */}
           <div className="flex mt-2">

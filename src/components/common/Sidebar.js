@@ -41,7 +41,7 @@ const Sidebar = ({ onClose }) => {
         {/* Price Range Filter */}
         <Accordion title="Price Range" icon={<FaDollarSign className="text-green-500" />}>
           <input type="range" min="0" max="1000" className="w-full accent-green-500 cursor-pointer" />
-          <p className="text-gray-600 mt-2">Up to $1000</p>
+          <p className="text-gray-600 mt-2">Up to 1000</p>
         </Accordion>
 
         {/* Brands with Checkboxes */}
