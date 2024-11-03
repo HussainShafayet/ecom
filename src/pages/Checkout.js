@@ -113,8 +113,8 @@ const Checkout = () => {
             <h3 className="text-xl font-semibold flex items-center mb-4">
               <FaCheckCircle className="mr-2 text-green-500" /> Personal Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
                 <input
                   type="text"
                   name="name"
@@ -122,11 +122,11 @@ const Checkout = () => {
                   value={formData.name}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.name && errors.name ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
+                  className={`border ${touched.name && errors.name ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
-                {touched.name && errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                {touched.name && errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
               </div>
-              <div className="w-full">
+              <div>
                 <input
                   type="number"
                   name="mobile"
@@ -134,11 +134,11 @@ const Checkout = () => {
                   value={formData.mobile}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.mobile && errors.mobile ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
+                  className={`border ${touched.mobile && errors.mobile ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
-                {touched.mobile && errors.mobile && <p className="text-red-500 text-sm">{errors.mobile}</p>}
+                {touched.mobile && errors.mobile && <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>}
               </div>
-              <div className="w-full">
+              <div>
                 <input
                   type="email"
                   name="email"
@@ -146,9 +146,9 @@ const Checkout = () => {
                   value={formData.email}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.email && errors.email ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
+                  className={`border ${touched.email && errors.email ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
-                {touched.email && errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                {touched.email && errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               </div>
             </div>
           </div>
