@@ -5,9 +5,9 @@ import {BackToTop} from '../common';
 const Layout = ({children}) => {
   return (
     <>
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col">
       <NavBar />
-      <div className="flex flex-grow">
+      <div className="flex flex-grow min-h-screen">
         <main className={`flex-grow p-4 w-full`}>
           {children}
         </main>
