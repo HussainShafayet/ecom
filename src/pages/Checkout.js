@@ -3,6 +3,25 @@ import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
 import { FaCreditCard, FaTruck, FaCheckCircle, FaPaypal, FaMoneyBillWave, FaCheck } from 'react-icons/fa';
+//import { locations } from '../data/locations'; // Import location data
+
+// src/data/locations.js
+const locations = {
+  "Dhaka": {
+    "Dhaka": ["Dhanmondi", "Gulshan", "Banani", "Uttara"],
+    "Gazipur": ["Sreepur", "Kaliakoir", "Tongi"],
+  },
+  "Chittagong": {
+    "Chittagong": ["Pahartali", "Kotwali", "Halishahar"],
+    "Cox's Bazar": ["Cox's Bazar Sadar", "Teknaf"],
+  },
+  "Sylhet": {
+    "Sylhet": ["Sylhet Sadar", "Beanibazar"],
+    "Habiganj": ["Habiganj Sadar", "Madhabpur"],
+  },
+  // Add other divisions and districts as needed
+};
+
 
 const Checkout = () => {
   const { cartItems } = useCart();
@@ -12,8 +31,10 @@ const Checkout = () => {
     mobile:'',
     address: '',
     city: '',
-    zip: '',
-    country: '',
+    country: 'Bangladesh', // Default to Bangladesh
+    division: '',
+    district: '',
+    policeStation: '',
     cardNumber: '',
     expiryDate: '',
     cvv: '',
@@ -22,6 +43,8 @@ const Checkout = () => {
 
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [districts, setDistricts] = useState([]);
+  const [policeStations, setPoliceStations] = useState([]);
 
   useEffect(() => {
     const formErrors = validateForm();
@@ -36,6 +59,20 @@ const Checkout = () => {
     setTouched({ ...touched, [e.target.name]: true });
   };
 
+  // Handle division change and update district options
+  const handleDivisionChange = (e) => {
+    const division = e.target.value;
+    setFormData({ ...formData, division, district: '', policeStation: '' });
+    setDistricts(Object.keys(locations[division] || {}));
+    setPoliceStations([]);
+  };
+
+  // Handle district change and update police station options
+  const handleDistrictChange = (e) => {
+    const district = e.target.value;
+    setFormData({ ...formData, district, policeStation: '' });
+    setPoliceStations(locations[formData.division][district] || []);
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
     const formErrors = validateForm();
@@ -46,20 +83,16 @@ const Checkout = () => {
     }
   };
 
+  // Validate form data
   const validateForm = () => {
     const errors = {};
     if (!formData.name) errors.name = 'Name is required';
     if (!formData.email) errors.email = 'Email is required';
     if (!formData.mobile) errors.mobile = 'Mobile Number is required';
     if (!formData.address) errors.address = 'Address is required';
-    if (!formData.city) errors.city = 'City is required';
-    if (!formData.zip) errors.zip = 'ZIP code is required';
-    if (!formData.country) errors.country = 'Country is required';
-    if (formData.paymentMethod === 'credit-card') {
-      if (!formData.cardNumber) errors.cardNumber = 'Card number is required';
-      if (!formData.expiryDate) errors.expiryDate = 'Expiry date is required';
-      if (!formData.cvv) errors.cvv = 'CVV is required';
-    }
+    if (!formData.division) errors.division = 'Division is required';
+    if (!formData.district) errors.district = 'District is required';
+    if (!formData.policeStation) errors.policeStation = 'Police Station is required';
     return errors;
   };
 
@@ -71,7 +104,6 @@ const Checkout = () => {
 
   return (
     <div className="container mx-auto my-12 px-4 lg:flex lg:space-x-12">
-      {/* Left Section: User Information Form */}
       <div className="lg:w-2/3">
         <h2 className="text-3xl font-bold mb-6">Checkout</h2>
         
@@ -94,7 +126,6 @@ const Checkout = () => {
                 />
                 {touched.name && errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
               </div>
-
               <div className="w-full">
                 <input
                   type="number"
@@ -128,7 +159,7 @@ const Checkout = () => {
               <FaTruck className="mr-2 text-blue-500" /> Shipping Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="w-full">
+            <div className="w-full">
                 <input
                   type="text"
                   name="address"
@@ -140,44 +171,54 @@ const Checkout = () => {
                 />
                 {touched.address && errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
               </div>
-
-              <div className="w-full">
-                <input
-                  type="text"
-                  name="city"
-                  placeholder="City"
-                  value={formData.city}
-                  onChange={handleChange}
+              <div>
+                <select
+                  name="division"
+                  value={formData.division}
+                  onChange={handleDivisionChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.city && errors.city ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
-                />
-                {touched.city && errors.city && <p className="text-red-500 text-sm">{errors.city}</p>}
+                  className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
+                >
+                  <option value="">Select Division</option>
+                  {Object.keys(locations).map((division) => (
+                    <option key={division} value={division}>{division}</option>
+                  ))}
+                </select>
+                {touched.division && errors.division && <p className="text-red-500 text-sm">{errors.division}</p>}
               </div>
 
-              <div className="w-full">
-                <input
-                  type="text"
-                  name="zip"
-                  placeholder="ZIP Code"
-                  value={formData.zip}
-                  onChange={handleChange}
+              <div>
+                <select
+                  name="district"
+                  value={formData.district}
+                  onChange={handleDistrictChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.zip && errors.zip ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
-                />
-                {touched.zip && errors.zip && <p className="text-red-500 text-sm">{errors.zip}</p>}
+                  className={`border ${touched.district && errors.district ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
+                  disabled={!formData.division}
+                >
+                  <option value="">Select District</option>
+                  {districts.map((district) => (
+                    <option key={district} value={district}>{district}</option>
+                  ))}
+                </select>
+                {touched.district && errors.district && <p className="text-red-500 text-sm">{errors.district}</p>}
               </div>
 
-              <div className="w-full">
-                <input
-                  type="text"
-                  name="country"
-                  placeholder="Country"
-                  value={formData.country}
+              <div>
+                <select
+                  name="policeStation"
+                  value={formData.policeStation}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.country && errors.country ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
-                />
-                {touched.country && errors.country && <p className="text-red-500 text-sm">{errors.country}</p>}
+                  className={`border ${touched.policeStation && errors.policeStation ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
+                  disabled={!formData.district}
+                >
+                  <option value="">Select Police Station</option>
+                  {policeStations.map((station) => (
+                    <option key={station} value={station}>{station}</option>
+                  ))}
+                </select>
+                {touched.policeStation && errors.policeStation && <p className="text-red-500 text-sm">{errors.policeStation}</p>}
               </div>
             </div>
           </div>
