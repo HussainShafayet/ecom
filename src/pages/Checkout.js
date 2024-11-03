@@ -9,6 +9,7 @@ const Checkout = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    mobile:'',
     address: '',
     city: '',
     zip: '',
@@ -49,6 +50,7 @@ const Checkout = () => {
     const errors = {};
     if (!formData.name) errors.name = 'Name is required';
     if (!formData.email) errors.email = 'Email is required';
+    if (!formData.mobile) errors.mobile = 'Mobile Number is required';
     if (!formData.address) errors.address = 'Address is required';
     if (!formData.city) errors.city = 'City is required';
     if (!formData.zip) errors.zip = 'ZIP code is required';
@@ -93,6 +95,18 @@ const Checkout = () => {
                 {touched.name && errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
               </div>
 
+              <div className="w-full">
+                <input
+                  type="number"
+                  name="mobile"
+                  placeholder="Mobile Number"
+                  value={formData.mobile}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`border ${touched.mobile && errors.mobile ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
+                />
+                {touched.mobile && errors.mobile && <p className="text-red-500 text-sm">{errors.mobile}</p>}
+              </div>
               <div className="w-full">
                 <input
                   type="email"
