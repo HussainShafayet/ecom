@@ -240,28 +240,6 @@ const Checkout = () => {
                 <span>Cash on Delivery</span>
                 {formData.paymentMethod === 'cod' && <FaCheck className="ml-auto text-blue-500" />}
               </div>
-
-              <div
-                className={`flex items-center p-4 rounded-lg cursor-pointer transition-all ${
-                  formData.paymentMethod === 'credit-card' ? 'border-2 border-blue-500 bg-blue-50' : 'border border-gray-300'
-                }`}
-                onClick={() => setFormData({ ...formData, paymentMethod: 'credit-card' })}
-              >
-                <FaCreditCard className="text-blue-500 mr-2" />
-                <span>Credit Card</span>
-                {formData.paymentMethod === 'credit-card' && <FaCheck className="ml-auto text-blue-500" />}
-              </div>
-
-              <div
-                className={`flex items-center p-4 rounded-lg cursor-pointer transition-all ${
-                  formData.paymentMethod === 'paypal' ? 'border-2 border-blue-500 bg-blue-50' : 'border border-gray-300'
-                }`}
-                onClick={() => setFormData({ ...formData, paymentMethod: 'paypal' })}
-              >
-                <FaPaypal className="text-blue-500 mr-2" />
-                <span>PayPal</span>
-                {formData.paymentMethod === 'paypal' && <FaCheck className="ml-auto text-blue-500" />}
-              </div>
             </div>
 
             {/* Credit Card Payment Info */}
