@@ -103,7 +103,7 @@ const Checkout = () => {
   const grandTotal = totalPrice + shippingCost + tax;
 
   return (
-    <div className="container mx-auto my-12 px-4 lg:flex lg:space-x-12">
+    <div className="container mx-auto px-4 lg:flex lg:space-x-12">
       <div className="lg:w-2/3">
         <h2 className="text-3xl font-bold mb-6">Checkout</h2>
         
