@@ -1,4 +1,3 @@
-// src/pages/Checkout.js
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -12,22 +11,13 @@ import {
   setPoliceStations,
 } from '../redux/slice/checkoutSlice';
 
-import { useCart } from '../context/CartContext'; // For cart items
+import { useCart } from '../context/CartContext'; 
 
 // Import locations data
 const locations = {
-  "Dhaka": {
-    "Dhaka": ["Dhanmondi", "Gulshan", "Banani", "Uttara"],
-    "Gazipur": ["Sreepur", "Kaliakoir", "Tongi"],
-  },
-  "Chittagong": {
-    "Chittagong": ["Pahartali", "Kotwali", "Halishahar"],
-    "Cox's Bazar": ["Cox's Bazar Sadar", "Teknaf"],
-  },
-  "Sylhet": {
-    "Sylhet": ["Sylhet Sadar", "Beanibazar"],
-    "Habiganj": ["Habiganj Sadar", "Madhabpur"],
-  },
+  "Dhaka": { "Dhaka": ["Dhanmondi", "Gulshan", "Banani", "Uttara"], "Gazipur": ["Sreepur", "Kaliakoir", "Tongi"] },
+  "Chittagong": { "Chittagong": ["Pahartali", "Kotwali", "Halishahar"], "Cox's Bazar": ["Cox's Bazar Sadar", "Teknaf"] },
+  "Sylhet": { "Sylhet": ["Sylhet Sadar", "Beanibazar"], "Habiganj": ["Habiganj Sadar", "Madhabpur"] },
 };
 
 const Checkout = () => {
@@ -61,7 +51,6 @@ const Checkout = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Perform validation
     const formErrors = validateForm();
     if (Object.keys(formErrors).length === 0) {
       alert('Order placed successfully!');
@@ -87,17 +76,17 @@ const Checkout = () => {
   const grandTotal = totalPrice + shippingCost;
 
   return (
-    <div className="container mx-auto px-4 lg:flex lg:space-x-12">
+    <div className="container mx-auto px-1 lg:flex lg:space-x-3">
       <div className="lg:w-2/3">
-        <h2 className="text-3xl font-bold mb-6">Checkout</h2>
+        <h2 className="text-2xl font-bold mb-1">Checkout</h2>
         
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-2">
           {/* Personal Information */}
-          <div className="p-6 bg-white shadow rounded-lg">
-            <h3 className="text-xl font-semibold flex items-center mb-4">
+          <div className="p-2 bg-white shadow rounded-lg">
+            <h3 className="text-lg font-semibold flex items-center mb-1">
               <FaCheckCircle className="mr-2 text-green-500" /> Personal Information
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <div>
                 <input
                   type="text"
@@ -106,9 +95,9 @@ const Checkout = () => {
                   value={formData.name}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.name && errors.name ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`border ${touched.name && errors.name ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 />
-                {touched.name && errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                {touched.name && errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
               <div>
                 <input
@@ -118,9 +107,9 @@ const Checkout = () => {
                   value={formData.mobile}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.mobile && errors.mobile ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`border ${touched.mobile && errors.mobile ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 />
-                {touched.mobile && errors.mobile && <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>}
+                {touched.mobile && errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
               </div>
               <div>
                 <input
@@ -130,20 +119,20 @@ const Checkout = () => {
                   value={formData.email}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.email && errors.email ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`border ${touched.email && errors.email ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 />
-                {touched.email && errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                {touched.email && errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
             </div>
           </div>
 
           {/* Shipping Information */}
-          <div className="p-6 bg-white shadow rounded-lg">
-            <h3 className="text-xl font-semibold flex items-center mb-4">
+          <div className="p-2 bg-white shadow rounded-lg">
+            <h3 className="text-lg font-semibold flex items-center mb-1">
               <FaTruck className="mr-2 text-blue-500" /> Shipping Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="w-full">
                 <input
                   type="text"
                   name="address"
@@ -151,9 +140,9 @@ const Checkout = () => {
                   value={formData.address}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.address && errors.address ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
+                  className={`border ${touched.address && errors.address ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                 />
-                {touched.address && errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
+                {touched.address && errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
               </div>
               <div>
                 <select
@@ -161,14 +150,14 @@ const Checkout = () => {
                   value={formData.division}
                   onChange={handleDivisionChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
+                  className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                 >
                   <option value="">Select Division</option>
                   {Object.keys(locations).map((division) => (
                     <option key={division} value={division}>{division}</option>
                   ))}
                 </select>
-                {touched.division && errors.division && <p className="text-red-500 text-sm">{errors.division}</p>}
+                {touched.division && errors.division && <p className="text-red-500 text-xs">{errors.division}</p>}
               </div>
 
               <div>
@@ -177,7 +166,7 @@ const Checkout = () => {
                   value={formData.district}
                   onChange={handleDistrictChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.district && errors.district ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
+                  className={`border ${touched.district && errors.district ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                   disabled={!formData.division}
                 >
                   <option value="">Select District</option>
@@ -185,7 +174,7 @@ const Checkout = () => {
                     <option key={district} value={district}>{district}</option>
                   ))}
                 </select>
-                {touched.district && errors.district && <p className="text-red-500 text-sm">{errors.district}</p>}
+                {touched.district && errors.district && <p className="text-red-500 text-xs">{errors.district}</p>}
               </div>
 
               <div>
@@ -194,7 +183,7 @@ const Checkout = () => {
                   value={formData.policeStation}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.policeStation && errors.policeStation ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
+                  className={`border ${touched.policeStation && errors.policeStation ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                   disabled={!formData.district}
                 >
                   <option value="">Select Police Station</option>
@@ -202,78 +191,29 @@ const Checkout = () => {
                     <option key={station} value={station}>{station}</option>
                   ))}
                 </select>
-                {touched.policeStation && errors.policeStation && <p className="text-red-500 text-sm">{errors.policeStation}</p>}
+                {touched.policeStation && errors.policeStation && <p className="text-red-500 text-xs">{errors.policeStation}</p>}
               </div>
             </div>
           </div>
 
           {/* Payment Method */}
-          <div className="p-6 bg-white shadow rounded-lg">
-            <h3 className="text-xl font-semibold flex items-center mb-4">
-              <FaCreditCard className="mr-2 text-yellow-500" /> Choose Payment Method
+          <div className="p-2 bg-white shadow rounded-lg">
+            <h3 className="text-lg font-semibold flex items-center mb-1">
+              <FaCreditCard className="mr-2 text-yellow-500" />Payment Method
             </h3>
 
-            <div className="flex items-center space-x-4 mb-6">
+            <div className="flex items-center space-x-2 mb-3">
               <div
-                className={`flex items-center p-4 rounded-lg transition-all ${
-                  formData.paymentMethod === 'cod' ? 'border-2 border-blue-500 bg-blue-50' : 'border border-gray-300'
-                }`}
+                className={`flex items-center p-2 rounded-lg transition-all ${formData.paymentMethod === 'cod' ? 'border-2 border-blue-500 bg-blue-50' : 'border border-gray-300'}`}
               >
                 <FaMoneyBillWave className="text-green-500 mr-2" />
                 <span>Cash on Delivery</span>
                 {formData.paymentMethod === 'cod' && <FaCheck className="ml-auto text-blue-500" />}
               </div>
             </div>
-
-            {/* Credit Card Payment Info */}
-            {formData.paymentMethod === 'credit-card' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="w-full">
-                  <input
-                    type="text"
-                    name="cardNumber"
-                    placeholder="Card Number"
-                    value={formData.cardNumber}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`border ${touched.cardNumber && errors.cardNumber ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
-                  />
-                  {touched.cardNumber && errors.cardNumber && <p className="text-red-500 text-sm">{errors.cardNumber}</p>}
-                </div>
-
-                <div className="w-full">
-                  <input
-                    type="text"
-                    name="expiryDate"
-                    placeholder="Expiry Date (MM/YY)"
-                    value={formData.expiryDate}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`border ${touched.expiryDate && errors.expiryDate ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
-                  />
-                  {touched.expiryDate && errors.expiryDate && <p className="text-red-500 text-sm">{errors.expiryDate}</p>}
-                </div>
-
-                <div className="w-full">
-                  <input
-                    type="text"
-                    name="cvv"
-                    placeholder="CVV"
-                    value={formData.cvv}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`border ${touched.cvv && errors.cvv ? 'border-red-500' : 'border-gray-300'} p-3 rounded-lg w-full`}
-                  />
-                  {touched.cvv && errors.cvv && <p className="text-red-500 text-sm">{errors.cvv}</p>}
-                </div>
-              </div>
-            )}
           </div>
 
-          <button
-            type="submit"
-            className="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors w-full"
-          >
+          <button type="submit" className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors w-full">
             Place Order
           </button>
         </form>
@@ -281,30 +221,30 @@ const Checkout = () => {
 
       {/* Right Section: Order Summary */}
       <div className="lg:w-1/3 mt-12 lg:mt-0">
-        <h3 className="text-2xl font-bold mb-6">Order Summary</h3>
-        <div className="bg-gray-100 p-6 rounded-lg shadow-md sticky top-20">
+        <h3 className="text-2xl font-bold mb-4">Order Summary</h3>
+        <div className="bg-gray-100 p-4 rounded-lg shadow-md sticky top-20">
           {cartItems.map((item) => (
-            <div key={item.id} className="flex justify-between items-center mb-4">
+            <div key={item.id} className="flex justify-between items-center mb-3">
               <div>
                 <h4 className="font-semibold">{item.title}</h4>
                 <p>Quantity: {item.quantity}</p>
               </div>
-              <p>{(item.price * item.quantity).toFixed(2)}</p>
+              <p>${(item.price * item.quantity).toFixed(2)}</p>
             </div>
           ))}
-          <hr className="my-4" />
+          <hr className="my-3" />
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span>{totalPrice.toFixed(2)}</span>
+            <span>${totalPrice.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
             <span>Shipping</span>
-            <span>{shippingCost.toFixed(2)}</span>
+            <span>${shippingCost.toFixed(2)}</span>
           </div>
-          <hr className="my-4" />
+          <hr className="my-3" />
           <div className="flex justify-between font-bold text-lg">
             <span>Total</span>
-            <span>{grandTotal.toFixed(2)}</span>
+            <span>${grandTotal.toFixed(2)}</span>
           </div>
           <Link to="/cart" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
             Edit Cart
