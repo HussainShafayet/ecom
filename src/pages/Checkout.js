@@ -1,11 +1,20 @@
 // src/pages/Checkout.js
-import React, { useState, useEffect } from 'react';
-import { useCart } from '../context/CartContext';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { FaCreditCard, FaTruck, FaCheckCircle, FaPaypal, FaMoneyBillWave, FaCheck } from 'react-icons/fa';
-//import { locations } from '../data/locations'; // Import location data
+import { FaCreditCard, FaTruck, FaCheckCircle, FaMoneyBillWave, FaCheck } from 'react-icons/fa';
 
-// src/data/locations.js
+import {
+  updateFormData,
+  updateTouched,
+  setErrors,
+  setDistricts,
+  setPoliceStations,
+} from '../redux/slice/checkoutSlice';
+
+import { useCart } from '../context/CartContext'; // For cart items
+
+// Import locations data
 const locations = {
   "Dhaka": {
     "Dhaka": ["Dhanmondi", "Gulshan", "Banani", "Uttara"],
@@ -19,71 +28,48 @@ const locations = {
     "Sylhet": ["Sylhet Sadar", "Beanibazar"],
     "Habiganj": ["Habiganj Sadar", "Madhabpur"],
   },
-  // Add other divisions and districts as needed
 };
 
-
 const Checkout = () => {
+  const dispatch = useDispatch();
   const { cartItems } = useCart();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    mobile:'',
-    address: '',
-    city: '',
-    country: 'Bangladesh', // Default to Bangladesh
-    division: '',
-    district: '',
-    policeStation: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    paymentMethod: 'cod', // Cash on Delivery default option
-  });
 
-  const [errors, setErrors] = useState({});
-  const [touched, setTouched] = useState({});
-  const [districts, setDistricts] = useState([]);
-  const [policeStations, setPoliceStations] = useState([]);
-
-  useEffect(() => {
-    const formErrors = validateForm();
-    setErrors(formErrors);
-  }, [formData]);
+  const { formData, errors, touched, districts, policeStations } = useSelector(
+    (state) => state.checkout
+  );
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    dispatch(updateFormData({ [e.target.name]: e.target.value }));
   };
 
   const handleBlur = (e) => {
-    setTouched({ ...touched, [e.target.name]: true });
+    dispatch(updateTouched({ [e.target.name]: true }));
   };
 
-  // Handle division change and update district options
   const handleDivisionChange = (e) => {
     const division = e.target.value;
-    setFormData({ ...formData, division, district: '', policeStation: '' });
-    setDistricts(Object.keys(locations[division] || {}));
-    setPoliceStations([]);
+    dispatch(updateFormData({ division, district: '', policeStation: '' }));
+    dispatch(setDistricts(Object.keys(locations[division] || {})));
+    dispatch(setPoliceStations([]));
   };
 
-  // Handle district change and update police station options
   const handleDistrictChange = (e) => {
     const district = e.target.value;
-    setFormData({ ...formData, district, policeStation: '' });
-    setPoliceStations(locations[formData.division][district] || []);
+    dispatch(updateFormData({ district, policeStation: '' }));
+    dispatch(setPoliceStations(locations[formData.division][district] || []));
   };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Perform validation
     const formErrors = validateForm();
     if (Object.keys(formErrors).length === 0) {
       alert('Order placed successfully!');
     } else {
-      setErrors(formErrors);
+      dispatch(setErrors(formErrors));
     }
   };
 
-  // Validate form data
   const validateForm = () => {
     const errors = {};
     if (!formData.name) errors.name = 'Name is required';
@@ -229,10 +215,9 @@ const Checkout = () => {
 
             <div className="flex items-center space-x-4 mb-6">
               <div
-                className={`flex items-center p-4 rounded-lg cursor-pointer transition-all ${
+                className={`flex items-center p-4 rounded-lg transition-all ${
                   formData.paymentMethod === 'cod' ? 'border-2 border-blue-500 bg-blue-50' : 'border border-gray-300'
                 }`}
-                onClick={() => setFormData({ ...formData, paymentMethod: 'cod' })}
               >
                 <FaMoneyBillWave className="text-green-500 mr-2" />
                 <span>Cash on Delivery</span>
@@ -321,10 +306,7 @@ const Checkout = () => {
             <span>Total</span>
             <span>{grandTotal.toFixed(2)}</span>
           </div>
-          <Link
-            to="/cart"
-            className="mt-4 inline-block text-blue-500 hover:text-blue-600"
-          >
+          <Link to="/cart" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
             Edit Cart
           </Link>
         </div>
