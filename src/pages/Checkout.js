@@ -52,19 +52,36 @@ const Checkout = () => {
     dispatch(updateFormData({ division, district: '', policeStation: '' }));
     dispatch(setDistricts(Object.keys(locations[division] || {})));
     dispatch(setPoliceStations([]));
+
+    // Validate field on change and clear error if valid
+    if (division.trim()) {
+      dispatch(setErrors({ ...errors, ['division']: '' }));
+    }
   };
 
   const handleDistrictChange = (e) => {
     const district = e.target.value;
     dispatch(updateFormData({ district, policeStation: '' }));
     dispatch(setPoliceStations(locations[formData.division][district] || []));
+
+     // Validate field on change and clear error if valid
+     if (district.trim()) {
+      dispatch(setErrors({ ...errors, ['district']: '' }));
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Mark all fields as touched to show errors for untouched fields
+    const allTouchedFields = Object.keys(formData).reduce((acc, field) => {
+      acc[field] = true;
+      return acc;
+    }, {});
+    dispatch(updateTouched(allTouchedFields));
+
     const formErrors = validateForm();
-    console.log(formErrors);
-    
+
     if (Object.keys(formErrors).length === 0) {
       alert('Order placed successfully!');
     } else {
