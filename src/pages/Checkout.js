@@ -11,9 +11,8 @@ import {
   setPoliceStations,
 } from '../redux/slice/checkoutSlice';
 
-import { useCart } from '../context/CartContext'; 
+import { useCart } from '../context/CartContext';
 
-// Import locations data
 const locations = {
   "Dhaka": { "Dhaka": ["Dhanmondi", "Gulshan", "Banani", "Uttara"], "Gazipur": ["Sreepur", "Kaliakoir", "Tongi"] },
   "Chittagong": { "Chittagong": ["Pahartali", "Kotwali", "Halishahar"], "Cox's Bazar": ["Cox's Bazar Sadar", "Teknaf"] },
@@ -29,11 +28,23 @@ const Checkout = () => {
   );
 
   const handleChange = (e) => {
-    dispatch(updateFormData({ [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    dispatch(updateFormData({ [name]: value }));
+
+    // Validate field on change and clear error if valid
+    if (value.trim()) {
+      dispatch(setErrors({ ...errors, [name]: '' }));
+    }
   };
 
   const handleBlur = (e) => {
-    dispatch(updateTouched({ [e.target.name]: true }));
+    const { name } = e.target;
+    dispatch(updateTouched({ [name]: true }));
+
+    // Validate field on blur to show error if empty
+    if (!formData[name].trim()) {
+      dispatch(setErrors({ ...errors, [name]: `${name} is required` }));
+    }
   };
 
   const handleDivisionChange = (e) => {
@@ -52,6 +63,8 @@ const Checkout = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const formErrors = validateForm();
+    console.log(formErrors);
+    
     if (Object.keys(formErrors).length === 0) {
       alert('Order placed successfully!');
     } else {
@@ -60,15 +73,15 @@ const Checkout = () => {
   };
 
   const validateForm = () => {
-    const errors = {};
-    if (!formData.name) errors.name = 'Name is required';
-    if (!formData.email) errors.email = 'Email is required';
-    if (!formData.mobile) errors.mobile = 'Mobile Number is required';
-    if (!formData.address) errors.address = 'Address is required';
-    if (!formData.division) errors.division = 'Division is required';
-    if (!formData.district) errors.district = 'District is required';
-    if (!formData.policeStation) errors.policeStation = 'Police Station is required';
-    return errors;
+    const formErrors = {};
+    if (!formData.name) formErrors.name = 'Name is required';
+    if (!formData.email) formErrors.email = 'Email is required';
+    if (!formData.mobile) formErrors.mobile = 'Mobile Number is required';
+    if (!formData.address) formErrors.address = 'Address is required';
+    if (!formData.division) formErrors.division = 'Division is required';
+    if (!formData.district) formErrors.district = 'District is required';
+    if (!formData.policeStation) formErrors.policeStation = 'Police Station is required';
+    return formErrors;
   };
 
   const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
