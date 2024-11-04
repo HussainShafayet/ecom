@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaStar, FaChevronDown, FaShareAlt } from 'react-icons/fa';
-import { InputField } from '../components/common/'; // Star and dropdown icons
+import { InputField, Loader } from '../components/common/'; // Star and dropdown icons
 import { useCart } from '../context/CartContext';  // Import the useCart hook
 import {useDispatch, useSelector} from 'react-redux';
-import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById} from '../redux/slice/productSlice';
+import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts} from '../redux/slice/productSlice';
 
 const ProductDetails = () => {
   const { id } = useParams();
-  const {isLoading, product, error, mainImage, relatedProducts, quantity} = useSelector((state)=> state.product);
+  const {isLoading, product, error, mainImage, items:products, quantity} = useSelector((state)=> state.product);
 
   const [selectedColor, setSelectedColor] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown open/close state
@@ -22,7 +22,13 @@ const ProductDetails = () => {
 
   useEffect(() => {
     dispatch(fetchProductById(id));
-  }, [id, dispatch]);
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    if (product?.category) {
+      dispatch(fetchAllProducts({category: product.category, limit:30}))
+    }
+  }, [dispatch, product]);
 
   const handleImageClick = (image) => {
     dispatch(setMainImage(image));
@@ -74,9 +80,9 @@ const ProductDetails = () => {
     return price;
   };
 
-  if (isLoading) {
-    return <div className="text-center">Loading product details...</div>;
-  }
+  //if (isLoading) {
+  //  return <div className="text-center">Loading product details...</div>;
+  //}
 
   if (error) {
     return <div className="text-center text-red-500">{error}</div>;
@@ -106,6 +112,10 @@ const ProductDetails = () => {
 
   return (
     <div className="container my-6">
+
+      {isLoading?
+        <div><Loader message='Loading product details' /></div>
+      :
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Product Image Gallery */}
         <div className="flex gap-3">
@@ -284,24 +294,28 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
-
+      }
       {/* Related Products Section */}
-      {relatedProducts.length > 0 && 
         <section className="mt-12">
           <h2 className="text-2xl font-bold mb-4">Related Products</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {relatedProducts.map((relatedProduct) => (
-              <div key={relatedProduct.id} className="border rounded-lg p-4">
-                <Link to={`/products/${relatedProduct.id}`}>
-                  <img src={relatedProduct.images[0]} alt={relatedProduct.title} className="w-full h-40 object-cover mb-2" />
-                  <h3 className="font-semibold">{relatedProduct.title}</h3>
-                  <p className="text-gray-700">${relatedProduct.price.toFixed(2)}</p>
-                </Link>
-              </div>
-            ))}
+          {isLoading?
+            <div><Loader message='Loading product details' /></div>
+          :
+            <>
+                {products.map((relatedProduct) => (
+                  <div key={relatedProduct.id} className="border rounded-lg p-4">
+                    <Link to={`/products/${relatedProduct.id}`}>
+                      <img src={relatedProduct.images[0]} alt={relatedProduct.title} className="w-full h-40 object-cover mb-2" />
+                      <h3 className="font-semibold">{relatedProduct.title}</h3>
+                      <p className="text-gray-700">${relatedProduct.price.toFixed(2)}</p>
+                    </Link>
+                  </div>
+                ))}
+            </>
+          }
           </div>
         </section>
-      }
     </div>
   );
 };

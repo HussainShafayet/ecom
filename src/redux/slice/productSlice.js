@@ -7,7 +7,6 @@ const initialState = {
     error: null,
     product: null,
     mainImage: null,
-    relatedProducts: [],
     quantity: 1,
     hasMore: true,
 }
@@ -84,9 +83,6 @@ const productSlice = createSlice({
             state.product = action.payload;
             state.mainImage = action.payload.images[0];
             state.error = null
-            
-            //set releted products 
-            state.relatedProducts = state.products.filter((item)=> item.category === action.payload.category && item.id !== action.payload.id);
 
             //set quantity initial
             state.quantity = 1;
