@@ -90,7 +90,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
         
         {/* Newsletter Section */}
-        <div className="bg-gradient-to-r from-blue-700 to-purple-700 rounded-lg p-6 mb-8 text-center text-gray-100 shadow-lg">
+        {/*<div className="bg-gradient-to-r from-blue-700 to-purple-700 rounded-lg p-6 mb-8 text-center text-gray-100 shadow-lg">
           <h2 className="text-2xl font-semibold mb-4">Stay Updated with Our Latest Offers!</h2>
           <p className="text-gray-200 mb-4">Subscribe to our newsletter and receive exclusive deals right in your inbox.</p>
           <form className="flex justify-center items-center max-w-md mx-auto">
@@ -103,7 +103,7 @@ const Footer = () => {
               <FaEnvelope />
             </button>
           </form>
-        </div>
+        </div>*/}
 
         {/* Main Footer Links */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-sm">
@@ -146,7 +146,7 @@ const Footer = () => {
               <a href="#" className="hover:text-gray-100 transition"><FaInstagram size={20} /></a>
               <a href="#" className="hover:text-gray-100 transition"><FaLinkedin size={20} /></a>
             </div>
-            <p className="text-gray-200 mb-2">Download Our App</p>
+            {/*<p className="text-gray-200 mb-2">Download Our App</p>
             <div className="flex gap-3">
               <a href="#" className="flex items-center px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-md text-sm text-gray-100 transition">
                 <FaApple className="mr-2" /> App Store
@@ -154,7 +154,7 @@ const Footer = () => {
               <a href="#" className="flex items-center px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-md text-sm text-gray-100 transition">
                 <FaGooglePlay className="mr-2" /> Google Play
               </a>
-            </div>
+            </div>*/}
           </div>
         </div>
 
