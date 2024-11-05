@@ -1,16 +1,28 @@
 import React from 'react';
 import {useDispatch} from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {addToCart} from '../../redux/slice/cartSlice';
 
 const ProductCard = ({ product }) => {
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
 
   const handleAddToCart = () => {
     const extProd = {...product}
     extProd.quantity = 1;
     dispatch(addToCart(extProd));
+  };
+
+  const handleBuyNow = () => {
+    const extProd = {...product}
+    extProd.quantity = 1
+    // Dispatch addToCart with the product details and quantity
+    dispatch(addToCart(extProd));
+
+    // Redirect to the checkout page
+    navigate('/checkout');
   };
     return (
       <div className="border rounded-lg shadow-lg overflow-hidden bg-white hover:shadow-xl transition-shadow duration-300 relative">
@@ -54,6 +66,12 @@ const ProductCard = ({ product }) => {
             className="mt-4 w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
           >
             Add to Cart
+          </button>
+          <button
+            onClick={handleBuyNow}
+            className="mt-4 w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            Buy Now
           </button>
         </div>
       </div>
