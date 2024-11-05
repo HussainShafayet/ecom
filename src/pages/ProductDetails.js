@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaStar, FaChevronDown, FaShareAlt } from 'react-icons/fa';
 import { InputField, Loader } from '../components/common/'; // Star and dropdown icons
-import { useCart } from '../context/CartContext';  // Import the useCart hook
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts} from '../redux/slice/productSlice';
+import {addToCart} from '../redux/slice/cartSlice';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -16,9 +16,6 @@ const ProductDetails = () => {
 
   //dispatch
   const dispatch = useDispatch();
-
-   // Import addToCart function from CartContext
-   const { addToCart } = useCart(); 
 
   useEffect(() => {
     dispatch(fetchProductById(id));
@@ -70,7 +67,7 @@ const ProductDetails = () => {
     const extProd = {...product}
     extProd.quantity = quantity;
     extProd.selectedColor = selectedColor;
-    addToCart(extProd, quantity, selectedColor);
+    dispatch(addToCart(extProd));
   };
 
   const calculateDiscountedPrice = (price, discountPercentage) => {

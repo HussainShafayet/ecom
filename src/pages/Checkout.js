@@ -10,8 +10,9 @@ import {
   setDistricts,
   setPoliceStations,
 } from '../redux/slice/checkoutSlice';
+import {selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
 
-//import { useCart } from '../context/CartContext';
+
 
 const locations = {
   "Dhaka": { "Dhaka": ["Dhanmondi", "Gulshan", "Banani", "Uttara"], "Gazipur": ["Sreepur", "Kaliakoir", "Tongi"] },
@@ -21,8 +22,7 @@ const locations = {
 
 const Checkout = () => {
   const dispatch = useDispatch();
-  //const { cartItems } = useCart();
-  const {cartItems} = useSelector((state)=>state.cart);
+  const cartItems = useSelector(selectCartItems);
 
   const { formData, errors, touched, districts, policeStations } = useSelector(
     (state) => state.checkout
@@ -102,8 +102,8 @@ const Checkout = () => {
     return formErrors;
   };
 
-  const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  const shippingCost = 10.0;
+  const totalPrice = useSelector(selectTotalPrice);
+  const shippingCost = 60.0;
   const grandTotal = totalPrice + shippingCost;
 
   return (

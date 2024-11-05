@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
 import { FaTrash, FaArrowRight } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {removeFromCart, updateQuantity} from '../redux/slice/cartSlice';
+import {removeFromCart, updateQuantity, selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
 
 const Cart = () => {
-  //const { removeFromCart, updateQuantity } = useCart();
-  const {cartItems} = useSelector((state)=>state.cart);
+  const cartItems = useSelector(selectCartItems);
+  const totalPrice = useSelector(selectTotalPrice);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  const shippingCost = 10.0;
+  const shippingCost = 60.0;
   const grandTotal = totalPrice + shippingCost;
 
   const dispatch = useDispatch();
