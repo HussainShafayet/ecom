@@ -29,9 +29,7 @@ function App() {
             <Route path='/products/category/:category' element={<Products />} />
             <Route path="/products/:id" element={<ProductDetails />} />
             <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<ProtectedRoute />}>
-              <Route path="" element={<Checkout />} />
-            </Route>
+            <Route path="/checkout" element={<Checkout />} />
 
             {/* User Pages */}
             <Route path="/signin" element={<SignIn />} />
