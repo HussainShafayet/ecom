@@ -1,5 +1,6 @@
 // src/redux/slice/cartSlice.js
 import { createSlice } from '@reduxjs/toolkit';
+import { removeFromWishlist } from './wishlistSlice';
 
 // Load initial cart items from localStorage, or default to an empty array
 const loadCartFromLocalStorage = () => {
@@ -75,6 +76,13 @@ export const cartMiddleware = (store) => (next) => (action) => {
     saveCartToLocalStorage(store.getState().cart.cartItems);
   }
   return result;
+};
+
+
+// Thunk to handle adding to cart and removing from wishlist
+export const addToCartAndRemoveFromWishlist = (item) => (dispatch) => {
+  dispatch(addToCart(item));
+  dispatch(removeFromWishlist(item.id)); // Remove from wishlist after adding to cart
 };
 
 export default cartSlice.reducer;

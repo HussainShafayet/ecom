@@ -4,7 +4,8 @@ import { FaStar, FaChevronDown, FaShareAlt } from 'react-icons/fa';
 import { InputField, Loader } from '../components/common/'; // Star and dropdown icons
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts} from '../redux/slice/productSlice';
-import {addToCart} from '../redux/slice/cartSlice';
+//import {addToCart} from '../redux/slice/cartSlice';
+import {addToCartAndRemoveFromWishlist} from '../redux/slice/cartSlice';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -67,7 +68,8 @@ const ProductDetails = () => {
     const extProd = {...product}
     extProd.quantity = quantity;
     extProd.selectedColor = selectedColor;
-    dispatch(addToCart(extProd));
+    //dispatch(addToCart(extProd));
+    dispatch(addToCartAndRemoveFromWishlist(extProd))
   };
 
   const calculateDiscountedPrice = (price, discountPercentage) => {

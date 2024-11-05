@@ -1,8 +1,10 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToCart } from '../../redux/slice/cartSlice';
-import { FaHeart, FaEye, FaShoppingCart } from 'react-icons/fa';
+import { FaHeart, FaEye, FaShoppingCart, FaRegHeart } from 'react-icons/fa';
+import {addToWishlist, removeFromWishlist} from '../../redux/slice/wishlistSlice';
+import {addToCartAndRemoveFromWishlist} from '../../redux/slice/cartSlice';
 
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
@@ -10,13 +12,27 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = () => {
     const extProd = { ...product, quantity: 1 };
-    dispatch(addToCart(extProd));
+    //dispatch(addToCart(extProd));
+    dispatch(addToCartAndRemoveFromWishlist(extProd));
   };
 
   const handleBuyNow = () => {
     const extProd = { ...product, quantity: 1 };
     dispatch(addToCart(extProd));
     navigate('/checkout');
+  };
+
+  const wishlist = useSelector(state => state.wishList.items);
+  
+  // Check if the product is already in the wishlist
+  const isInWishlist = wishlist.some(item => item.id === product.id);
+
+  const handleWishlistToggle = () => {
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(product.id));
+    } else {
+      dispatch(addToWishlist(product));
+    }
   };
 
 
@@ -39,11 +55,11 @@ const ProductCard = ({ product }) => {
 
       {/* Wishlist Icon */}
       <button
-        className="absolute top-2 right-2 text-gray-600 hover:text-red-500"
-        aria-label="Add to Wishlist"
-      >
-        <FaHeart className="w-5 h-5" />
-      </button>
+          onClick={handleWishlistToggle}
+          className="absolute top-2 right-2 text-gray-600 hover:text-red-500"
+        >
+          {isInWishlist ? <FaHeart className="w-5 h-5" title='Remove from Wishlist' /> : <FaRegHeart className="w-5 h-5" title='Add to Wishlist' />}
+        </button>
 
       {/* Product Image */}
       <Link to={`/products/${product.id}`} className="block">
