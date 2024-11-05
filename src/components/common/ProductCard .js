@@ -1,15 +1,16 @@
 import React from 'react';
+import {useDispatch} from 'react-redux';
 import { Link } from 'react-router-dom';
-import {useCart} from '../../context/CartContext';
+import {addToCart} from '../../redux/slice/cartSlice';
 
 const ProductCard = ({ product }) => {
-  // Import addToCart function from CartContext
-  const { addToCart } = useCart(); 
+
+  const dispatch = useDispatch();
 
   const handleAddToCart = () => {
     const extProd = {...product}
     extProd.quantity = 1;
-    addToCart(extProd);
+    dispatch(addToCart(extProd));
   };
     return (
       <div className="border rounded-lg shadow-lg overflow-hidden bg-white hover:shadow-xl transition-shadow duration-300 relative">

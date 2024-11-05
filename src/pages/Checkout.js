@@ -11,7 +11,7 @@ import {
   setPoliceStations,
 } from '../redux/slice/checkoutSlice';
 
-import { useCart } from '../context/CartContext';
+//import { useCart } from '../context/CartContext';
 
 const locations = {
   "Dhaka": { "Dhaka": ["Dhanmondi", "Gulshan", "Banani", "Uttara"], "Gazipur": ["Sreepur", "Kaliakoir", "Tongi"] },
@@ -21,7 +21,8 @@ const locations = {
 
 const Checkout = () => {
   const dispatch = useDispatch();
-  const { cartItems } = useCart();
+  //const { cartItems } = useCart();
+  const {cartItems} = useSelector((state)=>state.cart);
 
   const { formData, errors, touched, districts, policeStations } = useSelector(
     (state) => state.checkout

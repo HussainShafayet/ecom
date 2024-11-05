@@ -2,13 +2,25 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
 import { FaTrash, FaArrowRight } from 'react-icons/fa';
+import {useDispatch, useSelector} from 'react-redux';
+import {removeFromCart, updateQuantity} from '../redux/slice/cartSlice';
 
 const Cart = () => {
-  const { cartItems, removeFromCart, updateQuantity } = useCart();
+  //const { removeFromCart, updateQuantity } = useCart();
+  const {cartItems} = useSelector((state)=>state.cart);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   const shippingCost = 10.0;
   const grandTotal = totalPrice + shippingCost;
+
+  const dispatch = useDispatch();
+  const handleRemoveItem = (id) =>{
+    dispatch(removeFromCart(id));
+  }
+
+  const handleUpdateQuantity = (id, quantity)=>{
+    dispatch(updateQuantity({ id, quantity })) 
+  }
 
   return (
     <div className="mx-auto">
@@ -67,7 +79,7 @@ const Cart = () => {
                     {/* Quantity Selector */}
                     <div className="flex items-center">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => handleUpdateQuantity(item.id, item.quantity -1)}
                         className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-l"
                         disabled={item.quantity === 1}
                       >
@@ -76,12 +88,12 @@ const Cart = () => {
                       <input
                         type="number"
                         value={item.quantity}
-                        onChange={(e) => updateQuantity(item.id, Number(e.target.value))}
+                        onChange={(e) => handleUpdateQuantity(item.id, e.target.value)}
                         className="w-10 text-center border-l border-r"
                         min="1"
                       />
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                         className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-r"
                       >
                         +
@@ -106,7 +118,8 @@ const Cart = () => {
                           <button
                             className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
                             onClick={() => {
-                              removeFromCart(item.id);
+                              //removeFromCart(item.id);
+                              handleRemoveItem(item.id)
                               setConfirmDelete(null);
                             }}
                           >

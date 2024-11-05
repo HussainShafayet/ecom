@@ -3,7 +3,6 @@ import './App.css';
 import { Layout } from './components/layout';
 import { Profile, SignIn, SignUp, WishList } from './pages/user';
 import { Home, Products, ProductDetails, Cart, NotFound, Checkout } from './pages';
-import { CartProvider } from './context/CartContext'; // Import CartProvider
 import {useDispatch} from 'react-redux';
 import {loadUserFromStorage} from './redux/slice/authSlice';
 import {useEffect} from 'react';
@@ -20,7 +19,6 @@ function App() {
 
   
   return (
-    <CartProvider> {/* Wrap the Router with CartProvider for global access */}
       <Router>
         <ScrollToTop /> {/* Add ScrollToTop here */}
         <Layout> {/* Directly wrap Layout around Routes */}
@@ -54,7 +52,6 @@ function App() {
           </Routes>
         </Layout>
       </Router>
-    </CartProvider>
   );
 }
 
