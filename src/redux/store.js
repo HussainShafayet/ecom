@@ -3,7 +3,7 @@ import productReducer from "./slice/productSlice";
 import categoryReducer from "./slice/categorySlice";
 import authSlice from "./slice/authSlice";
 import checkoutReducer from './slice/checkoutSlice'
-import cartReducer from './slice/cartSlice';
+import cartReducer, {cartMiddleware} from './slice/cartSlice';
 
 const store = configureStore({
     reducer: {
@@ -12,7 +12,9 @@ const store = configureStore({
         auth: authSlice,
         checkout: checkoutReducer,
         cart: cartReducer,
-    }
+    },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().concat(cartMiddleware),
 });
 
 export default store;
