@@ -21,8 +21,6 @@ const CategoriesSection = () => {
     return <div className="text-center text-red-500">{error}</div>;
   }
 
-  const topCategories = categories;
-
   const scrollLeft = () => {
     scrollRef.current.scrollBy({
       top: 0,
@@ -56,8 +54,8 @@ const CategoriesSection = () => {
           ref={scrollRef}
           className="flex overflow-x-auto space-x-4 py-2 scrollbar-custom"
         >
-          {topCategories &&
-            topCategories.map((category) => (
+          {categories &&
+            categories.map((category) => (
               <Link to={`/products/category/${category.slug}`} key={category.id}>
                 <div className="relative group cursor-pointer min-w-[150px]">
                   <img
