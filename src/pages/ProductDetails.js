@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaStar, FaChevronDown, FaShareAlt, FaTag, FaBox, FaWeightHanging, FaRulerCombined, FaCubes, FaTools } from 'react-icons/fa';
 import { InputField, Loader } from '../components/common/'; // Star and dropdown icons
@@ -15,6 +15,9 @@ const ProductDetails = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown open/close state
   const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // Filter reviews by rating
 
+  const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
+
   //dispatch
   const dispatch = useDispatch();
 
@@ -27,6 +30,30 @@ const ProductDetails = () => {
       dispatch(fetchAllProducts({category: product.category, limit:30}))
     }
   }, [dispatch, product]);
+
+   // Detect clicks outside the dropdown
+   useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current && 
+        !dropdownRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+
+    if (dropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   const handleImageClick = (image) => {
     dispatch(setMainImage(image));
@@ -41,7 +68,7 @@ const ProductDetails = () => {
   };
 
   const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen); // Toggle dropdown visibility on click
+    setDropdownOpen((prev) => !prev);; // Toggle dropdown visibility on click
   };
 
   const handleRatingClick = (rating) => {
@@ -54,14 +81,6 @@ const ProductDetails = () => {
       return reviews; // Show all reviews if no filter is selected
     }
     return reviews.filter(review => review.rating === selectedRatingFilter); // Filter by selected rating
-  };
-
-  const handleMouseEnter = () => {
-    setDropdownOpen(true); // Show dropdown on hover
-  };
-
-  const handleMouseLeave = () => {
-    setDropdownOpen(false); // Hide dropdown when mouse leaves
   };
 
   const handleAddToCart = () => {
@@ -203,9 +222,9 @@ const ProductDetails = () => {
             className="relative mb-4"
           >
             <button
+              ref={buttonRef}
               className="flex items-center p-2 rounded-lg "
               onClick={toggleDropdown}
-              onMouseEnter={handleMouseEnter}
              
             >
               <div className="flex">
@@ -228,7 +247,7 @@ const ProductDetails = () => {
 
             {/* Enhanced Dropdown menu */}
             {dropdownOpen && (
-              <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-300 shadow-lg rounded-lg p-4 z-20" onMouseLeave={handleMouseLeave}>
+              <div ref={dropdownRef} className="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-300 shadow-lg rounded-lg p-4 z-20">
                 <div className="flex items-center mb-2">
                 <div className="flex">
                   {Array(Math.ceil(product.rating))
