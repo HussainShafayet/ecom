@@ -1,41 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { FaArrowUp } from 'react-icons/fa';
-import styles from './BackToTop.module.css'; // Import the CSS module
+import styles from './BackToTop.module.css';
 
-const BackToTop = () => {
+const BackToTop = ({ scrollContainerRef }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
   const handleScroll = () => {
-    const scrollTop = window.scrollY;
-    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    const scrollPercent = (scrollTop / docHeight) * 100;
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      const scrollTop = scrollContainer.scrollTop;
+      const scrollHeight = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+      const scrollPercent = (scrollTop / scrollHeight) * 100;
 
-    setScrollProgress(scrollPercent);
+      setScrollProgress(scrollPercent);
 
-    // Dynamic threshold: e.g., 50% of the viewport height
-    const dynamicThreshold = window.innerHeight * 0.5;
-
-    if (scrollTop > dynamicThreshold) {
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
+      // Show button after scrolling 50% of viewport height
+      setIsVisible(scrollTop > window.innerHeight * 0.5);
     }
   };
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    }
   };
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
+    const scrollContainer = scrollContainerRef.current;
+    scrollContainer.addEventListener('scroll', handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      scrollContainer.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [scrollContainerRef]);
 
   return (
     <div>
@@ -47,7 +47,6 @@ const BackToTop = () => {
           title="Back to top"
         >
           <div className={styles.iconContainer}>
-            {/* Circular progress background */}
             <svg className={styles.progressSvg} viewBox="0 0 36 36">
               <path
                 className={styles.progressBackground}
@@ -58,7 +57,6 @@ const BackToTop = () => {
                    a 15.9155 15.9155 0 0 1 0 31.831
                    a 15.9155 15.9155 0 0 1 0 -31.831"
               />
-              {/* Circular progress indicator */}
               <path
                 className={styles.progressCircle}
                 strokeWidth="3"
@@ -69,7 +67,6 @@ const BackToTop = () => {
                    a 15.9155 15.9155 0 0 1 0 -31.831"
               />
             </svg>
-            {/* Icon inside the button */}
             <FaArrowUp className={styles.icon} />
           </div>
         </button>

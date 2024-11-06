@@ -1,23 +1,28 @@
-import React from 'react';
-import {NavBar,Footer} from '../layout';
-import {BackToTop} from '../common';
+import React, { useRef } from 'react';
+import { NavBar, Footer } from '../layout';
+import BackToTop from '../common/BackToTop';
 
-const Layout = ({children}) => {
+const Layout = ({ children }) => {
+  const scrollableContainerRef = useRef(null);
+
   return (
-    <>
-    <div className="flex flex-col">
+    <div ref={scrollableContainerRef} className="flex flex-col h-screen overflow-y-auto scrollbar-custom">
       <NavBar />
-      <div className="flex flex-grow min-h-screen">
-        <main className={`flex-grow p-4 w-full`}>
+      <div className="flex-grow">
+        <main className="p-4 w-full mx-auto">
           {children}
         </main>
       </div>
-      <Footer />
-
-      <BackToTop /> {/* Add the BackToTop component here */}
+      <Footer className="shadow-lg" />
+      
+      {/* Pass the scrollable container ref to BackToTop */}
+      <BackToTop scrollContainerRef={scrollableContainerRef} />
     </div>
-    </>
-  )
-}
+  );
+};
 
 export default Layout;
+
+
+
+
