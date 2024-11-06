@@ -6,6 +6,7 @@ import {Breadcrum, Loader, ProductCard, Sidebar} from '../components/common';  /
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts} from '../redux/slice/productSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import {FaArrowDown, FaArrowUp} from 'react-icons/fa';
 
 const Products = ({scrollContainerRef}) => {
   //
@@ -21,6 +22,10 @@ const Products = ({scrollContainerRef}) => {
   const pathParts = location.pathname.split('/').filter(part => part);
   // Get the last part of the path
   const lastPathSegment = pathParts[pathParts.length - 1] || 'Products'; //end last path
+
+
+  const [sortType, setSortType] = useState(''); // Track the current sort type
+  const sortOptions = ['', 'asc', 'desc']; // Define sort option
 
   // Initialize page and limit from searchParams
   const [page, setPage] = useState(parseInt(searchParams.get('page') || 1));
@@ -69,7 +74,14 @@ const Products = ({scrollContainerRef}) => {
   if (error) {
     return <div className="text-center text-red-500">{error}</div>;
   }
-
+  const toggleSortType = () => {
+    // Cycle through sort options on each button click
+    const currentIndex = sortOptions.indexOf(sortType);
+    const nextIndex = (currentIndex + 1) % sortOptions.length;
+    const nextSortType = sortOptions[nextIndex];
+    setSortType(nextSortType);
+    handleSortChange({ target: { value: nextSortType } });
+  };
 
   const handleSortChange = (e) => {
     //const selectedSort = e.target.value;
@@ -135,13 +147,7 @@ const Products = ({scrollContainerRef}) => {
       <Breadcrum />
 
 
-      {/* Mobile Toggle Button for Sidebar */}
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="block lg:hidden bg-blue-500 text-white py-2 px-4 rounded-lg mb-4 z-10 relative"
-      >
-      Show Filters
-      </button>
+      
 
       {/* Sidebar Overlay */}
       {isSidebarOpen && (
@@ -162,65 +168,93 @@ const Products = ({scrollContainerRef}) => {
         </div>
       
 
-      <div className='lg:col-span-4'>
-        {/* Sort and Show Items Options Above Product List */}
-        <div className="flex justify-between items-center mb-4">
-          <div> <h1 className="text-2xl font-bold capitalize">{lastPathSegment.replace(/-/g, ' ')}</h1></div>
-          <div className='flex flex-nowrap space-x-2'>
-            {/* Show Items Dropdown */}
-            <div className="flex items-center">
-              <span className="text-gray-600 font-medium mr-2">Show</span>
-              <select
-                value={searchParams.get('limit') || 30}
-                onChange={handleItemsToShowChange}
-                className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
+        <div className='lg:col-span-4'>
+          {/* Sort and Show Items Options Above Product List */}
+          <div className="flex justify-between items-center mb-4">
+            {/* Mobile Toggle Button for Sidebar */}
+            <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="block lg:hidden bg-blue-500 text-white py-1 px-2 rounded-lg z-10 relative"
               >
-                <option value={30}>30</option>
-                <option value={60}>60</option>
-                <option value={90}>90</option>
-                <option value={120}>120</option>
-              </select>
+              Show Filters
+            </button>
+
+            <div> <h1 className="hidden md:block text-2xl font-bold capitalize">{lastPathSegment.replace(/-/g, ' ')}</h1>
             </div>
 
+            <div className='flex flex-nowrap space-x-2'>
+              {/* Show Items Dropdown */}
+              <div className="flex items-center">
+                <span className="hidden sm:block text-gray-600 font-medium mr-2">Show</span>
+                <select
+                  value={searchParams.get('limit') || 30}
+                  onChange={handleItemsToShowChange}
+                  className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
+                >
+                  <option value={30}>30</option>
+                  <option value={60}>60</option>
+                  <option value={90}>90</option>
+                  <option value={120}>120</option>
+                </select>
+              </div>
+              {/* Sort Type Toggle for Mobile and Default Dropdown for Desktop */}
+              <div className="sm:hidden">
+                <button
+                  onClick={toggleSortType}
+                  className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
+                >
+                  {sortType === '' ? 'Default' : sortType === 'asc' ?
+                  <div className='flex flex-nowrap items-center'>
+                    <span>Price</span>
+                    <FaArrowDown className="text-blue-500 ml-1" /> 
+                  </div>
+                  : 
+                  <div className='flex flex-nowrap items-center'>
+                    <span>Price</span>
+                    <FaArrowUp className="text-blue-500 ml-1" /> 
+                  </div>
+                  }
+                </button>
+              </div>
 
-            {/* Sort by Amount Dropdown */}
-            <div className="flex items-center">
-              <span className="text-gray-600 font-medium mr-2">Sort by:</span>
-              <select
-                value={searchParams.get('order') || ''}
-                onChange={handleSortChange}
-                className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
-              >
-                <option value="">Default</option>
-                <option value="asc">Price: Low to High</option>
-                <option value="desc">Price: High to Low</option>
-              </select>
-            </div>
+              {/* Sort by Amount Dropdown */}
+              <div className="hidden sm:flex items-center">
+                <span className="text-gray-600 font-medium mr-2 text-nowrap">Sort by:</span>
+                <select
+                  value={searchParams.get('order') || ''}
+                  onChange={handleSortChange}
+                  className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
+                >
+                  <option value="">Default</option>
+                  <option value="asc">Price: Low to High</option>
+                  <option value="desc">Price: High to Low</option>
+                </select>
+              </div>
 
             </div>
           </div>
 
 
 
-        {/* Product List Section (Right) */}
+          {/* Product List Section (Right) */}
 
-         <InfiniteScroll
-            dataLength={products.length}
-            next={fetchMoreProducts}
-            hasMore={hasMore}
-            loader={<div className="text-center">Loading more products...</div>}
-            endMessage={<div className="text-center my-4">No more products</div>}
-            scrollableTarget={scrollContainerRef.current} // Set the scrollable target
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </InfiniteScroll>
-        
+          <InfiniteScroll
+              dataLength={products.length}
+              next={fetchMoreProducts}
+              hasMore={hasMore}
+              loader={<div className="text-center">Loading more products...</div>}
+              endMessage={<div className="text-center my-4">No more products</div>}
+              scrollableTarget={scrollContainerRef.current} // Set the scrollable target
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </InfiniteScroll>
+          
+        </div>
       </div>
-    </div>
   </div>
   );
 };
