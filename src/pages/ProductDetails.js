@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FaStar, FaChevronDown, FaShareAlt } from 'react-icons/fa';
+import { FaStar, FaChevronDown, FaShareAlt, FaTag, FaBox, FaWeightHanging, FaRulerCombined, FaCubes, FaTools } from 'react-icons/fa';
 import { InputField, Loader } from '../components/common/'; // Star and dropdown icons
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts} from '../redux/slice/productSlice';
@@ -115,10 +115,11 @@ const ProductDetails = () => {
       {isLoading?
         <div><Loader message='Loading product details' /></div>
       :
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Product Image Gallery */}
-        <div className="flex gap-3">
-          <div className="flex flex-col space-y-2">
+        <div className="flex gap-2">
+          <div className="flex flex-col space-y-1 h-full overflow-auto custom-scrollbar-custom">
             {product.images.map((image, index) => (
               <img
                 key={index}
@@ -129,7 +130,7 @@ const ProductDetails = () => {
               />
             ))}
           </div>
-          <div className="relative group w-full">
+          <div className="relative group w-full h-full">
             <img
               src={mainImage || 'fallback-image-url.jpg'}
               alt={product.title}
@@ -140,11 +141,11 @@ const ProductDetails = () => {
 
         {/* Product Information */}
         <div>
-          <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
+          <h1 className="text-3xl font-bold mb-1">{product.title}</h1>
 
           {/* Product Price */}
           {discountPercentage > 0 ? (
-            <div className="mb-4">
+            <div className="mb-1 flex flex-row space-x-1">
               <p className=" text-gray-500 line-through">
                 {product.price.toFixed(2)}
               </p>
@@ -153,33 +154,31 @@ const ProductDetails = () => {
               </p>
             </div>
           ) : (
-            <p className="text-2xl text-green-600 font-semibold mb-4">
+            <p className="text-2xl text-green-600 font-semibold mb-1">
               {product.price.toFixed(2)}
             </p>
           )}
 
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold mb-2">Choose Color:</h2>
-            <div className="flex space-x-2">
+         {/* Color Selector */}
+         <div className="flex items-center space-x-2 my-2">
+            <span className="font-semibold">Color:</span>
+            <div className="flex space-x-1">
               {colors.map((color) => (
                 <button
                   key={color}
                   onClick={() => setSelectedColor(color)}
-                  className={`w-8 h-8 rounded-full border-2 transition-colors ${
-                    selectedColor === color
-                      ? 'border-blue-500'
-                      : 'border-gray-300'
+                  className={`w-6 h-6 rounded-full transition-colors border ${
+                    selectedColor === color ? 'border-blue-500' : 'border-gray-300'
                   }`}
                   style={{ backgroundColor: color.toLowerCase() }}
                 />
               ))}
             </div>
-            {selectedColor && <p className="mt-2 text-gray-700">Selected Color: {selectedColor}</p>}
           </div>
 
           {/* Quantity Selector */}
-          <div className="flex items-center mb-4">
-            <label className="mr-4 text-gray-700">Quantity:</label>
+          <div className="flex items-center mb-1">
+            <label className="mr-3 text-gray-700">Quantity:</label>
             <div className="border flex rounded">
               <button onClick={handleDecrementQuantity} className="p-2 bg-gray-200 hover:bg-gray-300">
                 -
@@ -292,7 +291,47 @@ const ProductDetails = () => {
             </button>
           </div>
         </div>
+      
+
+
+        {/* Product Details Information Section */}
+      
+        <section className="mt-4">
+          <div className="bg-white shadow-lg p-6 rounded-lg border border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Specifications</h3>
+            <ul className="text-sm text-gray-700 space-y-3 ml-3">
+              <li className="flex items-center">
+                <FaTag className="text-blue-500 mr-2" />
+                <span className="font-semibold mr-1">Brand:</span> {product.brand}
+              </li>
+              <li className="flex items-center">
+                <FaBox className="text-green-500 mr-2" />
+                <span className="font-semibold mr-1">Model:</span> {product.model || 'N/A'}
+              </li>
+              <li className="flex items-center">
+                <FaWeightHanging className="text-red-500 mr-2" />
+                <span className="font-semibold mr-1">Weight:</span> {product.weight || 'N/A'}
+              </li>
+              <li className="flex items-center">
+                <FaRulerCombined className="text-purple-500 mr-2" />
+                <span className="font-semibold mr-1">Dimensions:</span> 
+                {product.dimensions
+                  ? `${product.dimensions.width || 'N/A'} x ${product.dimensions.height || 'N/A'} x ${product.dimensions.depth || 'N/A'} cm`
+                  : 'N/A'}
+              </li>
+              <li className="flex items-center">
+                <FaCubes className="text-yellow-500 mr-2" />
+                <span className="font-semibold mr-1">Materials:</span> {product.material || 'N/A'}
+              </li>
+              <li className="flex items-center">
+                <FaTools className="text-gray-500 mr-2" />
+                <span className="font-semibold mr-1">Other Features:</span> {product.features || 'N/A'}
+              </li>
+            </ul>
+          </div>
+        </section>
       </div>
+      </>
       }
       {/* Related Products Section */}
         <section className="mt-12">
