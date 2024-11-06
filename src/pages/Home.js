@@ -1,5 +1,5 @@
 import React from 'react';
-import { HeroSection, FeaturedProducts, CategoriesSection, TrendingProducts } from '../components/sections';
+import { HeroSection, FeaturedProducts, CategoriesSection, TrendingProducts, DealsAndDiscounts } from '../components/sections';
 
 const Home = () => {
   return (
@@ -8,6 +8,7 @@ const Home = () => {
       <FeaturedProducts />
       <CategoriesSection />
       <TrendingProducts />
+      <DealsAndDiscounts />
     </>
   )
 }
