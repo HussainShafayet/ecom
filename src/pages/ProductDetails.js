@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FaStar, FaChevronDown, FaShareAlt, FaTag, FaBox, FaWeightHanging, FaRulerCombined, FaCubes, FaTools } from 'react-icons/fa';
 import { InputField, Loader } from '../components/common/'; // Star and dropdown icons
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts} from '../redux/slice/productSlice';
 //import {addToCart} from '../redux/slice/cartSlice';
-import {addToCartAndRemoveFromWishlist} from '../redux/slice/cartSlice';
+import {addToCart, addToCartAndRemoveFromWishlist} from '../redux/slice/cartSlice';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -20,6 +20,8 @@ const ProductDetails = () => {
 
   //dispatch
   const dispatch = useDispatch();
+  //navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchProductById(id));
@@ -89,6 +91,12 @@ const ProductDetails = () => {
     extProd.selectedColor = selectedColor;
     //dispatch(addToCart(extProd));
     dispatch(addToCartAndRemoveFromWishlist(extProd))
+  };
+
+  const handleBuyNow = () => {
+    const extProd = { ...product, quantity: 1 };
+    dispatch(addToCart(extProd));
+    navigate('/checkout');
   };
 
   const calculateDiscountedPrice = (price, discountPercentage) => {
@@ -288,19 +296,30 @@ const ProductDetails = () => {
             )}
           </div>
 
+         
+          {/* Button Group */}
+        <div className="flex space-x-2">
           <button
-            className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors mb-4"
-            onClick={handleAddToCart}  // Add to cart functionality
+            onClick={handleBuyNow}
+            className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
+          >
+            Buy Now
+          </button>
+          <button
+            onClick={handleAddToCart}
+            className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
           >
             Add to Cart
           </button>
-
           <Link
             to="/products"
-            className="text-blue-500 hover:text-blue-600 font-bold"
+            className="text-blue-500 hover:text-blue-600 font-bold mt-2"
           >
             Back to Products
           </Link>
+        </div>
+
+          
 
           {/* Share Buttons */}
           <div className="flex items-center mt-4">
