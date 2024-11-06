@@ -6,7 +6,7 @@ import { FaHeart, FaEye, FaShoppingCart, FaRegHeart } from 'react-icons/fa';
 import {addToWishlist, removeFromWishlist} from '../../redux/slice/wishlistSlice';
 import {addToCartAndRemoveFromWishlist} from '../../redux/slice/cartSlice';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, cardForTrending }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -52,6 +52,15 @@ const ProductCard = ({ product }) => {
           {product.discountPercentage}% OFF
         </span>
       )}
+      {cardForTrending && 
+        <>
+          {/* Badge */}
+          <div className="absolute top-7 left-1 bg-red-500 text-white px-1 py-1 rounded-full text-xs font-semibold uppercase">
+            {product.isHot ? "Hot Picks" : "Trending"}
+          </div>
+        </>
+      }
+      
 
       {/* Wishlist Icon */}
       <button
