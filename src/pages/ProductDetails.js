@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FaStar, FaChevronDown, FaShareAlt, FaTag, FaBox, FaWeightHanging, FaRulerCombined, FaCubes, FaTools } from 'react-icons/fa';
-import { InputField, Loader } from '../components/common/'; // Star and dropdown icons
+import { InputField, Loader, ProductCard } from '../components/common/'; // Star and dropdown icons
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts} from '../redux/slice/productSlice';
 //import {addToCart} from '../redux/slice/cartSlice';
@@ -223,7 +223,7 @@ const ProductDetails = () => {
             </div>
           </div>
 
-          <p className="text-gray-700 mb-6">{product.description}</p>
+          <p className="text-gray-700 mb-2">{product.description}</p>
 
           {/* Ratings Dropdown Button */}
           <div
@@ -372,7 +372,7 @@ const ProductDetails = () => {
       </>
       }
       {/* Related Products Section */}
-        <section className="mt-12">
+        {/*<section className="mt-12">
           <h2 className="text-2xl font-bold mb-4">Related Products</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {isLoading?
@@ -391,7 +391,15 @@ const ProductDetails = () => {
             </>
           }
           </div>
-        </section>
+        </section>*/}
+        <div className="mx-auto my-12">
+          <h2 className="text-2xl font-bold mb-4">Related Products</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
     </div>
   );
 };
