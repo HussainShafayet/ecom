@@ -88,7 +88,7 @@ const ProductCard = ({ product, cardForTrending }) => {
         {/* Blurred Placeholder */}
         {!isImageLoaded && (
           <img
-            src={placeholderImage}
+            src={product.thumbnail}
             alt="Loading"
             className="absolute inset-0 w-full h-40 bg-gray-200 rounded-md mb-2 animate-pulse object-cover"
           />
