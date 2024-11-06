@@ -7,7 +7,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts} from '../redux/slice/productSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
-const Products = () => {
+const Products = ({scrollContainerRef}) => {
   const {category} = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -212,6 +212,7 @@ const Products = () => {
             hasMore={hasMore}
             loader={<div className="text-center">Loading more products...</div>}
             endMessage={<div className="text-center my-4">No more products</div>}
+            scrollableTarget={scrollContainerRef.current} // Set the scrollable target
           >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product) => (
