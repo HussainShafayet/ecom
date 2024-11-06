@@ -18,7 +18,7 @@ const CategoriesSection = () => {
   if (error) {
     return <div className="text-center text-red-500">{error}</div>;
   }
-  const topCategories = categories.slice(0,5);
+  const topCategories = categories.slice(0,4);
   return (
     <div className="container mx-auto my-12">
       <h2 className="text-3xl font-bold mb-6 text-center">Shop by Category</h2>

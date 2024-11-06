@@ -31,28 +31,14 @@ const Testimonials = () => {
       photoUrl: 'https://via.placeholder.com/80',
       rating: 4,
       quote: 'The product quality is excellent! I would definitely buy from here again.',
-    },
-    {
-      id: 5,
-      name: 'Sophia Brown',
-      photoUrl: 'https://via.placeholder.com/80',
-      rating: 5,
-      quote: 'Fast shipping and great communication. Very satisfied with my order!',
-    },
-    {
-      id: 6,
-      name: 'David Wilson',
-      photoUrl: 'https://via.placeholder.com/80',
-      rating: 3,
-      quote: 'Product is good, but the shipping took a bit longer than expected.',
-    },
+    }
   ];
 
   return (
     <div className="container mx-auto my-12">
       <h2 className="text-3xl font-bold text-center mb-8 text-blue-600">What Our Customers Say</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {reviews.map((review) => (
           <div key={review.id} className="p-6 bg-white shadow-lg rounded-lg hover:shadow-xl transition-shadow duration-300">
             

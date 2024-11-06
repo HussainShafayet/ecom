@@ -13,7 +13,7 @@ const FeaturedProducts = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-   dispatch(fetchAllProducts({limit:8}));
+   dispatch(fetchAllProducts({limit:4}));
   }, [dispatch]);
 
   if (isLoading) {
