@@ -10,7 +10,7 @@ const DealsAndDiscounts = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-    dispatch(fetchAllProducts({limit:8}));
+      dispatch(fetchAllProducts({limit:8}));
     }, [dispatch]);
 
 
@@ -57,7 +57,7 @@ const DealsAndDiscounts = () => {
       <h2 className="text-3xl font-bold mb-6 text-center">Deals & Discounts</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} cardForTrending={true} />
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
     </div>
