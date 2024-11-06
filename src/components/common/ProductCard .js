@@ -1,14 +1,16 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToCart } from '../../redux/slice/cartSlice';
 import { FaHeart, FaEye, FaShoppingCart, FaRegHeart } from 'react-icons/fa';
 import {addToWishlist, removeFromWishlist} from '../../redux/slice/wishlistSlice';
 import {addToCartAndRemoveFromWishlist} from '../../redux/slice/cartSlice';
+import placeholderImage from '../../assets/images/blur.jpg';
 
 const ProductCard = ({ product, cardForTrending }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
 
   const handleAddToCart = () => {
     const extProd = { ...product, quantity: 1 };
@@ -72,12 +74,27 @@ const ProductCard = ({ product, cardForTrending }) => {
 
       {/* Product Image */}
       <Link to={`/products/${product.id}`} className="block">
+        {/* Main Product Image */}
         <img
           src={product.images[0]}
           alt={product.title}
-          className="w-full h-40 object-cover rounded-md mb-2"
+          loading='lazy'
+          className={`w-full h-40 object-cover rounded-md mb-2 transition-opacity duration-500 ${
+            isImageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoad={() => setIsImageLoaded(true)} // Set image loaded state
         />
+        
+        {/* Blurred Placeholder */}
+        {!isImageLoaded && (
+          <img
+            src={placeholderImage}
+            alt="Loading"
+            className="absolute inset-0 w-full h-40 bg-gray-200 rounded-md mb-2 animate-pulse object-cover"
+          />
+        )}
       </Link>
+
 
       <div className="p-2">
         {/* Product Title */}
