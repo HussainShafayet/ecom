@@ -1,23 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useParams, useSearchParams } from 'react-router-dom';
 //import { getProductsByCategory } from '../services/productService';  // Service to fetch products by category
-import {Loader, ProductCard, Sidebar} from '../components/common';  // Reusable ProductCard component
+import {Breadcrum, Loader, ProductCard, Sidebar} from '../components/common';  // Reusable ProductCard component
 
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts} from '../redux/slice/productSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 const Products = ({scrollContainerRef}) => {
-  const {category} = useParams();
+  //
   const [searchParams, setSearchParams] = useSearchParams();
-
-  
-  const dispatch = useDispatch();
-
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-
+  const dispatch = useDispatch();
+  const {category} = useParams();
   const { items: products, isLoading, error, hasMore } = useSelector((state) => state.product);
+  
+  //get lastpath
+  const location = useLocation();
+  // Split the pathname and filter out empty strings
+  const pathParts = location.pathname.split('/').filter(part => part);
+  // Get the last part of the path
+  const lastPathSegment = pathParts[pathParts.length - 1] || 'Products'; //end last path
 
   // Initialize page and limit from searchParams
   const [page, setPage] = useState(parseInt(searchParams.get('page') || 1));
@@ -129,14 +132,9 @@ const Products = ({scrollContainerRef}) => {
 
 
     {/* Responsive Breadcrumb Path */}
-    <div className="text-gray-600 text-xs sm:text-sm mb-4 truncate">
-      <span className="text-blue-500 hover:underline cursor-pointer">Home</span>
-      <span className="mx-1 hidden sm:inline"> &gt; </span>
-      <span className="text-blue-500 hover:underline cursor-pointer mx-1 hidden sm:inline">Shop</span>
-      <span className="mx-1 sm:hidden"> &gt; ... &gt; </span>
-      <span className="text-gray-700 font-semibold">Products</span>
-    </div>
-  
+      <Breadcrum />
+
+
       {/* Mobile Toggle Button for Sidebar */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -167,7 +165,7 @@ const Products = ({scrollContainerRef}) => {
       <div className='lg:col-span-4'>
         {/* Sort and Show Items Options Above Product List */}
         <div className="flex justify-between items-center mb-4">
-          <div></div>
+          <div> <h1 className="text-2xl font-bold capitalize">{lastPathSegment.replace(/-/g, ' ')}</h1></div>
           <div className='flex flex-nowrap space-x-2'>
             {/* Show Items Dropdown */}
             <div className="flex items-center">
