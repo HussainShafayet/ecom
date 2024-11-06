@@ -2,11 +2,10 @@ import React, { useRef } from 'react';
 import { NavBar, Footer } from '../layout';
 import BackToTop from '../common/BackToTop';
 
-const Layout = ({ children }) => {
-  const scrollableContainerRef = useRef(null);
+const Layout = ({ children, scrollContainerRef}) => {
 
   return (
-    <div ref={scrollableContainerRef} className="flex flex-col h-screen overflow-y-auto scrollbar-custom">
+    <div ref={scrollContainerRef} className="flex flex-col h-screen overflow-y-auto scrollbar-custom">
       <NavBar />
       <div className="flex-grow">
         <main className="p-4 w-full mx-auto">
@@ -16,7 +15,7 @@ const Layout = ({ children }) => {
       <Footer className="shadow-lg" />
       
       {/* Pass the scrollable container ref to BackToTop */}
-      <BackToTop scrollContainerRef={scrollableContainerRef} />
+      <BackToTop scrollContainerRef={scrollContainerRef} />
     </div>
   );
 };

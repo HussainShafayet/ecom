@@ -5,12 +5,12 @@ import { Profile, SignIn, SignUp, WishList } from './pages/user';
 import { Home, Products, ProductDetails, Cart, NotFound, Checkout } from './pages';
 import {useDispatch} from 'react-redux';
 import {loadUserFromStorage} from './redux/slice/authSlice';
-import {useEffect} from 'react';
+import {useEffect, useRef} from 'react';
 import {ProtectedRoute, ScrollToTop} from './components/common';
 import {AboutUs, Contact, FAQPage, OrderTracking} from './pages/others';
 
 function App() {
-
+  const scrollContainerRef = useRef(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -20,8 +20,8 @@ function App() {
   
   return (
       <Router>
-        <ScrollToTop /> {/* Add ScrollToTop here */}
-        <Layout> {/* Directly wrap Layout around Routes */}
+        <ScrollToTop scrollContainerRef={scrollContainerRef} />{/* Add ScrollToTop here */}
+        <Layout scrollContainerRef={scrollContainerRef}> {/* Directly wrap Layout around Routes */}
           <Routes>
             {/* Pages */}
             <Route path="/" element={<Home />} />
