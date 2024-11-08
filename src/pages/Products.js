@@ -4,7 +4,7 @@ import { useLocation, useParams, useSearchParams } from 'react-router-dom';
 import {Breadcrum, Loader, ProductCard, Sidebar} from '../components/common';  // Reusable ProductCard component
 
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchAllProducts, setIsSidebarOpen} from '../redux/slice/productSlice';
+import {fetchAllProducts, setIsSidebarOpen, setSortType} from '../redux/slice/productSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {FaArrowDown, FaArrowUp} from 'react-icons/fa';
 
@@ -13,7 +13,7 @@ const Products = ({scrollContainerRef}) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
   const {category} = useParams();
-  const { items: products, isLoading, error, hasMore, isSidebarOpen } = useSelector((state) => state.product);
+  const { items: products, isLoading, error, hasMore, isSidebarOpen, sortType } = useSelector((state) => state.product);
   
   //get lastpath
   const location = useLocation();
@@ -23,7 +23,6 @@ const Products = ({scrollContainerRef}) => {
   const lastPathSegment = pathParts[pathParts.length - 1] || 'Products'; //end last path
 
 
-  const [sortType, setSortType] = useState(''); // Track the current sort type
   const sortOptions = ['', 'asc', 'desc']; // Define sort option
 
   // Initialize page and limit from searchParams
@@ -78,7 +77,7 @@ const Products = ({scrollContainerRef}) => {
     const currentIndex = sortOptions.indexOf(sortType);
     const nextIndex = (currentIndex + 1) % sortOptions.length;
     const nextSortType = sortOptions[nextIndex];
-    setSortType(nextSortType);
+    dispatch(setSortType(nextSortType));
     handleSortChange({ target: { value: nextSortType } });
   };
 

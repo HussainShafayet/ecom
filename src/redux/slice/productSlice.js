@@ -10,6 +10,7 @@ const initialState = {
     quantity: 1,
     hasMore: true,
     isSidebarOpen: false,
+    sortType: '',
 }
 const API_URL = 'https://dummyjson.com/products';
 
@@ -54,7 +55,10 @@ const productSlice = createSlice({
         },
         setIsSidebarOpen: (state, action)=>{
             state.isSidebarOpen = action.payload;
-        }
+        },
+        setSortType: (state, action)=>{
+            state.sortType = action.payload;
+        }, 
     },
     extraReducers: (builder)=>{
 
@@ -99,5 +103,5 @@ const productSlice = createSlice({
     }
 });
 
-export const {setMainImage,incrementQuantity, decrementQuantity, setIsSidebarOpen} = productSlice.actions;
+export const {setMainImage,incrementQuantity, decrementQuantity, setIsSidebarOpen, setSortType} = productSlice.actions;
 export default productSlice.reducer;
