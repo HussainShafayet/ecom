@@ -4,17 +4,16 @@ import { useLocation, useParams, useSearchParams } from 'react-router-dom';
 import {Breadcrum, Loader, ProductCard, Sidebar} from '../components/common';  // Reusable ProductCard component
 
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchAllProducts} from '../redux/slice/productSlice';
+import {fetchAllProducts, setIsSidebarOpen} from '../redux/slice/productSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {FaArrowDown, FaArrowUp} from 'react-icons/fa';
 
 const Products = ({scrollContainerRef}) => {
   //
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const dispatch = useDispatch();
   const {category} = useParams();
-  const { items: products, isLoading, error, hasMore } = useSelector((state) => state.product);
+  const { items: products, isLoading, error, hasMore, isSidebarOpen } = useSelector((state) => state.product);
   
   //get lastpath
   const location = useLocation();
@@ -139,6 +138,10 @@ const Products = ({scrollContainerRef}) => {
 
   };
 
+  const handleSidebarOpen = (value)=>{
+    dispatch(setIsSidebarOpen(value));
+  }
+
   return (
     <div className="min-h-screen">
 
@@ -153,7 +156,7 @@ const Products = ({scrollContainerRef}) => {
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-10 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
+          onClick={() => handleSidebarOpen(false)}
         ></div>
       )}
 
@@ -164,7 +167,7 @@ const Products = ({scrollContainerRef}) => {
             isSidebarOpen ? 'translate-x-0 mt-[100px]' : '-translate-x-full'
           } transition-transform duration-300 lg:translate-x-0`}
         >
-          <Sidebar onClose={() => setIsSidebarOpen(false)} />
+          <Sidebar onClose={() => handleSidebarOpen(false)} />
         </div>
       
 
@@ -173,7 +176,7 @@ const Products = ({scrollContainerRef}) => {
           <div className="flex justify-between items-center mb-4">
             {/* Mobile Toggle Button for Sidebar */}
             <button
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                onClick={() => handleSidebarOpen(true)}
                 className="block lg:hidden bg-blue-500 text-white py-1 px-2 rounded-lg z-10 relative"
               >
               Show Filters

@@ -9,6 +9,7 @@ const initialState = {
     mainImage: null,
     quantity: 1,
     hasMore: true,
+    isSidebarOpen: false,
 }
 const API_URL = 'https://dummyjson.com/products';
 
@@ -51,6 +52,9 @@ const productSlice = createSlice({
         decrementQuantity: (state, action) =>{
             state.quantity =  Math.max(1, state.quantity - 1);
         },
+        setIsSidebarOpen: (state, action)=>{
+            state.isSidebarOpen = action.payload;
+        }
     },
     extraReducers: (builder)=>{
 
@@ -95,5 +99,5 @@ const productSlice = createSlice({
     }
 });
 
-export const {setMainImage,incrementQuantity, decrementQuantity} = productSlice.actions;
+export const {setMainImage,incrementQuantity, decrementQuantity, setIsSidebarOpen} = productSlice.actions;
 export default productSlice.reducer;
