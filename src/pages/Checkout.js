@@ -11,14 +11,16 @@ import {
   setPoliceStations,
 } from '../redux/slice/checkoutSlice';
 import {selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
+import {districtsData, divisions, upazilas} from '../data/location';
 
 
+ 
 
-const locations = {
-  "Dhaka": { "Dhaka": ["Dhanmondi", "Gulshan", "Banani", "Uttara"], "Gazipur": ["Sreepur", "Kaliakoir", "Tongi"] },
-  "Chittagong": { "Chittagong": ["Pahartali", "Kotwali", "Halishahar"], "Cox's Bazar": ["Cox's Bazar Sadar", "Teknaf"] },
-  "Sylhet": { "Sylhet": ["Sylhet Sadar", "Beanibazar"], "Habiganj": ["Habiganj Sadar", "Madhabpur"] },
-};
+//const locations = {
+//  "Dhaka": { "Dhaka": ["Dhanmondi", "Gulshan", "Banani", "Uttara"], "Gazipur": ["Sreepur", "Kaliakoir", "Tongi"] },
+//  "Chittagong": { "Chittagong": ["Pahartali", "Kotwali", "Halishahar"], "Cox's Bazar": ["Cox's Bazar Sadar", "Teknaf"] },
+//  "Sylhet": { "Sylhet": ["Sylhet Sadar", "Beanibazar"], "Habiganj": ["Habiganj Sadar", "Madhabpur"] },
+//};
 
 const Checkout = () => {
   const dispatch = useDispatch();
@@ -50,9 +52,15 @@ const Checkout = () => {
 
   const handleDivisionChange = (e) => {
     const division = e.target.value;
-    dispatch(updateFormData({ division, district: '', policeStation: '' }));
-    dispatch(setDistricts(Object.keys(locations[division] || {})));
-    dispatch(setPoliceStations([]));
+    const divisionItem = divisions.find((item)=> item.name === division);
+    if (divisionItem) {
+      dispatch(updateFormData({ division:divisionItem.name, district: '', policeStation: '' }));
+      const divisionDist = districtsData.filter((item)=> item.division_id === divisionItem.id);
+      
+      dispatch(setDistricts(divisionDist|| []));
+      dispatch(setPoliceStations([]));
+    }
+    
 
     // Validate field on change and clear error if valid
     if (division.trim()) {
@@ -62,9 +70,15 @@ const Checkout = () => {
 
   const handleDistrictChange = (e) => {
     const district = e.target.value;
-    dispatch(updateFormData({ district, policeStation: '' }));
-    dispatch(setPoliceStations(locations[formData.division][district] || []));
+    const districtItem = districts.find((item)=> item.name === district);
+    if (districtItem) {
+      dispatch(updateFormData({ district:districtItem.name, policeStation: '' }));
 
+      const upzillaDist = upazilas.filter((item)=> item.district_id === districtItem.id);
+      console.log(upzillaDist);
+      
+      dispatch(setPoliceStations(upzillaDist|| []));
+    }
      // Validate field on change and clear error if valid
      if (district.trim()) {
       dispatch(setErrors({ ...errors, ['district']: '' }));
@@ -184,8 +198,8 @@ const Checkout = () => {
                   className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                 >
                   <option value="">Select Division</option>
-                  {Object.keys(locations).map((division) => (
-                    <option key={division} value={division}>{division}</option>
+                  {divisions.map((division) => (
+                    <option key={division.id} value={division.name}>{division.name}</option>
                   ))}
                 </select>
                 {touched.division && errors.division && <p className="text-red-500 text-xs">{errors.division}</p>}
@@ -202,7 +216,7 @@ const Checkout = () => {
                 >
                   <option value="">Select District</option>
                   {districts.map((district) => (
-                    <option key={district} value={district}>{district}</option>
+                    <option key={district.id} value={district.name}>{district.name}</option>
                   ))}
                 </select>
                 {touched.district && errors.district && <p className="text-red-500 text-xs">{errors.district}</p>}
@@ -219,7 +233,7 @@ const Checkout = () => {
                 >
                   <option value="">Select Police Station</option>
                   {policeStations.map((station) => (
-                    <option key={station} value={station}>{station}</option>
+                    <option key={station.id} value={station.name}>{station.name}</option>
                   ))}
                 </select>
                 {touched.policeStation && errors.policeStation && <p className="text-red-500 text-xs">{errors.policeStation}</p>}
