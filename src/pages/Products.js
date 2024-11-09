@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams, useSearchParams } from 'react-router-dom';
-//import { getProductsByCategory } from '../services/productService';  // Service to fetch products by category
 import {Breadcrum, Loader, ProductCard, Sidebar} from '../components/common';  // Reusable ProductCard component
 
 import {useDispatch, useSelector} from 'react-redux';
@@ -82,17 +81,6 @@ const Products = ({scrollContainerRef}) => {
   };
 
   const handleSortChange = (e) => {
-    //const selectedSort = e.target.value;
-    //const limit = searchParams.get('limit');
-    //setLimit(limit);
-    //setPage(1); // Reset page to 1 for the new limit
-    //setSkip(0);
-
-    //if (limit) {
-    //  setSearchParams({ ...Object.fromEntries(searchParams),limit, sortBy:'price' , order: selectedSort, page: 1, skip:0 })
-    //}else{
-    //  setSearchParams({ ...Object.fromEntries(searchParams), sortBy:'price' , order: selectedSort, page: 1, skip:0 })
-    //}
 
     const selectedSort = e.target.value;
     const limit = searchParams.get('limit') || 30; // Use default limit if not in searchParams
