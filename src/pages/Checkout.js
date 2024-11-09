@@ -8,10 +8,10 @@ import {
   updateTouched,
   setErrors,
   setDistricts,
-  setPoliceStations,
+  setUpazilas,
 } from '../redux/slice/checkoutSlice';
 import {selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
-import {districtsData, divisions, upazilas} from '../data/location';
+import {divisionsData,districtsData, upazilasData} from '../data/location';
 
 
  
@@ -26,7 +26,7 @@ const Checkout = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector(selectCartItems);
 
-  const { formData, errors, touched, districts, policeStations } = useSelector(
+  const { formData, errors, touched, districts, upazilas } = useSelector(
     (state) => state.checkout
   );
 
@@ -52,13 +52,13 @@ const Checkout = () => {
 
   const handleDivisionChange = (e) => {
     const division = e.target.value;
-    const divisionItem = divisions.find((item)=> item.name === division);
+    const divisionItem = divisionsData.find((item)=> item.name === division);
     if (divisionItem) {
-      dispatch(updateFormData({ division:divisionItem.name, district: '', policeStation: '' }));
+      dispatch(updateFormData({ division:divisionItem.name, district: '', upazila: '' }));
       const divisionDist = districtsData.filter((item)=> item.division_id === divisionItem.id);
       
       dispatch(setDistricts(divisionDist|| []));
-      dispatch(setPoliceStations([]));
+      dispatch(setUpazilas([]));
     }
     
 
@@ -72,12 +72,11 @@ const Checkout = () => {
     const district = e.target.value;
     const districtItem = districts.find((item)=> item.name === district);
     if (districtItem) {
-      dispatch(updateFormData({ district:districtItem.name, policeStation: '' }));
+      dispatch(updateFormData({ district:districtItem.name, upazila: '' }));
 
-      const upzillaDist = upazilas.filter((item)=> item.district_id === districtItem.id);
-      console.log(upzillaDist);
+      const upzillaDist = upazilasData.filter((item)=> item.district_id === districtItem.id);
       
-      dispatch(setPoliceStations(upzillaDist|| []));
+      dispatch(setUpazilas(upzillaDist|| []));
     }
      // Validate field on change and clear error if valid
      if (district.trim()) {
@@ -98,6 +97,7 @@ const Checkout = () => {
     const formErrors = validateForm();
 
     if (Object.keys(formErrors).length === 0) {
+      console.log('formData', formData)
       alert('Order placed successfully!');
     } else {
       dispatch(setErrors(formErrors));
@@ -112,7 +112,7 @@ const Checkout = () => {
     if (!formData.address) formErrors.address = 'Address is required';
     if (!formData.division) formErrors.division = 'Division is required';
     if (!formData.district) formErrors.district = 'District is required';
-    if (!formData.policeStation) formErrors.policeStation = 'Police Station is required';
+    if (!formData.upazila) formErrors.upazila = 'Upazila/thana is required';
     return formErrors;
   };
 
@@ -198,7 +198,7 @@ const Checkout = () => {
                   className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                 >
                   <option value="">Select Division</option>
-                  {divisions.map((division) => (
+                  {divisionsData.map((division) => (
                     <option key={division.id} value={division.name}>{division.name}</option>
                   ))}
                 </select>
@@ -224,19 +224,19 @@ const Checkout = () => {
 
               <div>
                 <select
-                  name="policeStation"
-                  value={formData.policeStation}
+                  name="upazila"
+                  value={formData.upazila}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.policeStation && errors.policeStation ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                  className={`border ${touched.upazila && errors.upazila ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                   disabled={!formData.district}
                 >
-                  <option value="">Select Police Station</option>
-                  {policeStations.map((station) => (
+                  <option value="">Select Upazila/thana</option>
+                  {upazilas.map((station) => (
                     <option key={station.id} value={station.name}>{station.name}</option>
                   ))}
                 </select>
-                {touched.policeStation && errors.policeStation && <p className="text-red-500 text-xs">{errors.policeStation}</p>}
+                {touched.upazila && errors.upazila && <p className="text-red-500 text-xs">{errors.upazila}</p>}
               </div>
             </div>
           </div>

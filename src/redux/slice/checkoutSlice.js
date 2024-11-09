@@ -11,7 +11,7 @@ const initialState = {
     country: 'Bangladesh',
     division: '',
     district: '',
-    policeStation: '',
+    upazila: '',
     cardNumber: '',
     expiryDate: '',
     cvv: '',
@@ -20,7 +20,7 @@ const initialState = {
   errors: {},
   touched: {},
   districts: [],
-  policeStations: [],
+  upazilas: [],
 };
 
 const checkoutSlice = createSlice({
@@ -39,8 +39,8 @@ const checkoutSlice = createSlice({
     setDistricts: (state, action) => {
       state.districts = action.payload;
     },
-    setPoliceStations: (state, action) => {
-      state.policeStations = action.payload;
+    setUpazilas: (state, action) => {
+      state.upazilas = action.payload;
     },
     resetForm: (state) => {
       state.formData = initialState.formData;
@@ -55,7 +55,7 @@ export const {
   updateTouched,
   setErrors,
   setDistricts,
-  setPoliceStations,
+  setUpazilas,
   resetForm,
 } = checkoutSlice.actions;
 

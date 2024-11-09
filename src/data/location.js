@@ -1,4 +1,4 @@
-export const divisions = [
+export const divisionsData = [
     {
       "id": "1",
       "name": "Barishal",
@@ -575,7 +575,7 @@ export const districtsData = [
     }
   ]
 
-export const upazilas =[
+export const upazilasData =[
       {
         "id": "1",
         "district_id": "34",
