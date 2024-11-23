@@ -141,9 +141,9 @@ const Checkout = () => {
 
   const getLocationType = ()=>{
     if (formData.shippingLocationType === 'dhaka') {
-      return ' grid-cols-2'
+      return 'md:grid-cols-2'
     }else if(formData.shippingLocationType === 'outsideDhaka'){
-      return 'grid-cols-4'
+      return 'md:grid-cols-4 sm:grid-cols-2'
     } else {
       return 'grid-cols-1'
     }
