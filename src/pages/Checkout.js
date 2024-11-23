@@ -11,7 +11,7 @@ import {
   setUpazilas,
 } from '../redux/slice/checkoutSlice';
 import {selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
-import {divisionsData,districtsData, upazilasData} from '../data/location';
+import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
 
 
  
@@ -49,6 +49,28 @@ const Checkout = () => {
       dispatch(setErrors({ ...errors, [name]: `${name} is required` }));
     }
   };
+
+  const handleLocationType= (e) =>{
+    //(e) => setFormData({ ...formData, shippingLocationType: e.target.value, division: '', district: '', upazila: '', address: '' })
+    const locationType = e.target.value;
+    dispatch(updateFormData({ shippingLocationType:locationType, division: '', district: '', upazila: '', address: '' }));
+
+     // Validate field on change and clear error if valid
+     if (locationType.trim()) {
+      dispatch(setErrors({ ...errors, ['shippingLocationType']: '' }));
+    }
+  }
+  
+  const handleDhakaArea = (e) => {
+    //(e) => setFormData({ ...formData, dhakaArea: e.target.value })
+    const dhakaArea = e.target.value;
+    dispatch(updateFormData({ dhakaArea:dhakaArea, division: '', district: '', upazila: '',}));
+
+     // Validate field on change and clear error if valid
+     if (dhakaArea.trim()) {
+      dispatch(setErrors({ ...errors, ['dhakaArea']: '' }));
+    }
+  }
 
   const handleDivisionChange = (e) => {
     const division = e.target.value;
@@ -109,7 +131,9 @@ const Checkout = () => {
     if (!formData.name) formErrors.name = 'Name is required';
     if (!formData.email) formErrors.email = 'Email is required';
     if (!formData.mobile) formErrors.mobile = 'Mobile Number is required';
+    if (!formData.shippingLocationType) formErrors.shippingLocationType = 'shippingLocationType is required';
     if (!formData.address) formErrors.address = 'Address is required';
+    if (!formData.dhakaArea) formErrors.dhakaArea = 'dhakaArea is required';
     if (!formData.division) formErrors.division = 'Division is required';
     if (!formData.district) formErrors.district = 'District is required';
     if (!formData.upazila) formErrors.upazila = 'Upazila/thana is required';
@@ -176,70 +200,116 @@ const Checkout = () => {
             <h3 className="text-lg font-semibold flex items-center mb-1">
               <FaTruck className="mr-2 text-blue-500" /> Shipping Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="w-full">
-                <input
-                  type="text"
-                  name="address"
-                  placeholder="Shipping Address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`border ${touched.address && errors.address ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                />
-                {touched.address && errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
-              </div>
-              <div>
+
+            <div className="mb-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className='w-full'>
                 <select
-                  name="division"
-                  value={formData.division}
-                  onChange={handleDivisionChange}
+                  name="shippingLocationType"
+                  value={formData.shippingLocationType || ''}
+                  onChange={handleLocationType}
                   onBlur={handleBlur}
-                  className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                  className="border border-gray-300 p-2 rounded-lg w-full"
                 >
-                  <option value="">Select Division</option>
-                  {divisionsData.map((division) => (
-                    <option key={division.id} value={division.name}>{division.name}</option>
-                  ))}
+                  <option value="">Select Shipping Location</option>
+                  <option value="dhaka">In Dhaka City</option>
+                  <option value="outsideDhaka">Out of Dhaka City</option>
                 </select>
-                {touched.division && errors.division && <p className="text-red-500 text-xs">{errors.division}</p>}
+                {touched.shippingLocationType && errors.shippingLocationType && <p className="text-red-500 text-xs mt-1">{errors.shippingLocationType}</p>}
               </div>
 
-              <div>
-                <select
-                  name="district"
-                  value={formData.district}
-                  onChange={handleDistrictChange}
-                  onBlur={handleBlur}
-                  className={`border ${touched.district && errors.district ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                  disabled={!formData.division}
-                >
-                  <option value="">Select District</option>
-                  {districts.map((district) => (
-                    <option key={district.id} value={district.name}>{district.name}</option>
-                  ))}
-                </select>
-                {touched.district && errors.district && <p className="text-red-500 text-xs">{errors.district}</p>}
+              {formData.shippingLocationType === 'dhaka' && (
+              <div className="grid grid-cols-1 gap-3">
+                <div className="w-full">
+                  <select
+                    name="dhakaArea"
+                    value={formData.dhakaArea || ''}
+                    onChange={handleDhakaArea}
+                    onBlur={handleBlur}
+                    className={`border ${touched.dhakaArea && errors.dhakaArea ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                  >
+                    <option value="">Select Area in Dhaka City</option>
+                    {dhakaCityData.map((area) => (
+                      <option key={area.id} value={area.name}>{area.name}</option>
+                    ))}
+                  </select>
+                  {touched.dhakaArea && errors.dhakaArea && <p className="text-red-500 text-xs mt-1">{errors.dhakaArea}</p>}
+                </div>
               </div>
+            )}
+             
+           
 
-              <div>
-                <select
-                  name="upazila"
-                  value={formData.upazila}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`border ${touched.upazila && errors.upazila ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                  disabled={!formData.district}
-                >
-                  <option value="">Select Upazila/thana</option>
-                  {upazilas.map((station) => (
-                    <option key={station.id} value={station.name}>{station.name}</option>
-                  ))}
-                </select>
-                {touched.upazila && errors.upazila && <p className="text-red-500 text-xs">{errors.upazila}</p>}
-              </div>
+            
+
+            {formData.shippingLocationType === 'outsideDhaka' && (
+              <>
+                <div>
+                  <select
+                    name="division"
+                    value={formData.division || ''}
+                    onChange={handleDivisionChange}
+                    onBlur={handleBlur}
+                    className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                  >
+                    <option value="">Select Division</option>
+                    {divisionsData.map((division) => (
+                      <option key={division.id} value={division.name}>{division.name}</option>
+                    ))}
+                  </select>
+                  {touched.division && errors.division && <p className="text-red-500 text-xs mt-1">{errors.division}</p>}
+                </div>
+
+                <div>
+                  <select
+                    name="district"
+                    value={formData.district || ''}
+                    onChange={handleDistrictChange}
+                    onBlur={handleBlur}
+                    className={`border ${touched.district && errors.district ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                    disabled={!formData.division}
+                  >
+                    <option value="">Select District</option>
+                    {districts.map((district) => (
+                      <option key={district.id} value={district.name}>{district.name}</option>
+                    ))}
+                  </select>
+                  {touched.district && errors.district && <p className="text-red-500 text-xs mt-1">{errors.district}</p>}
+                </div>
+
+                <div>
+                  <select
+                    name="upazila"
+                    value={formData.upazila || ''}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`border ${touched.upazila && errors.upazila ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                    disabled={!formData.district}
+                  >
+                    <option value="">Select Upazila/Thana</option>
+                    {upazilas.map((station) => (
+                      <option key={station.id} value={station.name}>{station.name}</option>
+                    ))}
+                  </select>
+                  {touched.upazila && errors.upazila && <p className="text-red-500 text-xs mt-1">{errors.upazila}</p>}
+                </div>
+              </>
+            )}
+            
+            </div>
+            <div className="w-full">
+              <input
+                type="text"
+                name="address"
+                placeholder="Shipping Address"
+                value={formData.address}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`border ${touched.address && errors.address ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+              />
+              {touched.address && errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
             </div>
           </div>
+
 
           {/* Payment Method */}
           <div className="p-2 bg-white shadow rounded-lg">
