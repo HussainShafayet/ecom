@@ -140,6 +140,16 @@ const Checkout = () => {
     return formErrors;
   };
 
+  const getLocationType = ()=>{
+    if (formData.shippingLocationType === 'dhaka') {
+      return ' grid-cols-2'
+    }else if(formData.shippingLocationType === 'outsideDhaka'){
+      return 'grid-cols-4'
+    } else {
+      return 'grid-cols-1'
+    }
+  }
+
   const totalPrice = useSelector(selectTotalPrice);
   const shippingCost = 60.0;
   const grandTotal = totalPrice + shippingCost;
@@ -201,8 +211,8 @@ const Checkout = () => {
               <FaTruck className="mr-2 text-blue-500" /> Shipping Information
             </h3>
 
-            <div className="mb-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className='w-full'>
+            <div className={`grid grid-cols-1 ${getLocationType()} gap-3 mb-3`}>
+              <div>
                 <select
                   name="shippingLocationType"
                   value={formData.shippingLocationType || ''}
@@ -210,7 +220,7 @@ const Checkout = () => {
                   onBlur={handleBlur}
                   className="border border-gray-300 p-2 rounded-lg w-full"
                 >
-                  <option value="">Select Shipping Location</option>
+                  <option value="">Select Shipping Area</option>
                   <option value="dhaka">In Dhaka City</option>
                   <option value="outsideDhaka">Out of Dhaka City</option>
                 </select>
