@@ -51,9 +51,9 @@ const Checkout = () => {
   };
 
   const handleLocationType= (e) =>{
-    //(e) => setFormData({ ...formData, shippingLocationType: e.target.value, division: '', district: '', upazila: '', address: '' })
     const locationType = e.target.value;
-    dispatch(updateFormData({ shippingLocationType:locationType, division: '', district: '', upazila: '', address: '' }));
+    
+    locationType && dispatch(updateFormData({ shippingLocationType:locationType, dhakaArea: '', division: '', district: '', upazila: '', address: '' }));
 
      // Validate field on change and clear error if valid
      if (locationType.trim()) {
@@ -62,7 +62,6 @@ const Checkout = () => {
   }
   
   const handleDhakaArea = (e) => {
-    //(e) => setFormData({ ...formData, dhakaArea: e.target.value })
     const dhakaArea = e.target.value;
     dispatch(updateFormData({ dhakaArea:dhakaArea, division: '', district: '', upazila: '',}));
 
@@ -248,9 +247,6 @@ const Checkout = () => {
             )}
              
            
-
-            
-
             {formData.shippingLocationType === 'outsideDhaka' && (
               <>
                 <div>
@@ -310,7 +306,7 @@ const Checkout = () => {
               <input
                 type="text"
                 name="address"
-                placeholder="Shipping Address"
+                placeholder="Delivery Address"
                 value={formData.address}
                 onChange={handleChange}
                 onBlur={handleBlur}
