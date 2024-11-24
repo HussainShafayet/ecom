@@ -27,7 +27,7 @@ const HeroSection = () => {
       heading: 'Find Your Perfect Electronics',
       subheading: 'Top gadgets and accessories at unbeatable prices.',
       buttonText: 'Explore Electronics',
-      buttonLink: '/products?category=electronics',
+      buttonLink: '/products/category/kitchen-accessories',
     },
     {
       id: 3,
@@ -35,7 +35,7 @@ const HeroSection = () => {
       heading: 'Upgrade Your Home Decor',
       subheading: 'Stylish and affordable pieces to transform your home.',
       buttonText: 'Shop Home Decor',
-      buttonLink: '/products?category=home-decor',
+      buttonLink: '/products/category/home-decoration',
     },,
     {
       id: 4,
@@ -43,7 +43,7 @@ const HeroSection = () => {
       heading: 'Find Your Perfect Electronics',
       subheading: 'Top gadgets and accessories at unbeatable prices.',
       buttonText: 'Explore Electronics',
-      buttonLink: '/products?category=electronics',
+      buttonLink: '/products/category/groceries',
     },
     {
       id: 5,
@@ -51,7 +51,7 @@ const HeroSection = () => {
       heading: 'Upgrade Your Home Decor',
       subheading: 'Stylish and affordable pieces to transform your home.',
       buttonText: 'Shop Home Decor',
-      buttonLink: '/products?category=home-decor',
+      buttonLink: '/products/category/furniture',
     },
   ];
 
