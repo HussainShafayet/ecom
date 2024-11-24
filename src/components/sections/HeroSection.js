@@ -6,12 +6,11 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 import { Link } from 'react-router-dom';
-import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import { FaChevronRight, FaChevronLeft } from 'react-icons/fa';
 
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(1);
   const totalSlides = 5;
-  const [muted, setMuted] = useState(true); // State to control mute/unmute
 
   const slides = [
     {
@@ -67,7 +66,7 @@ const HeroSection = () => {
     },
     {
       id: 2,
-      video: 'https://videos.pexels.com/video-files/5644237/5644237-sd_960_506_25fps.mp4',
+      video: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
       heading: 'Find Your Perfect Electronics',
       subheading: 'Top gadgets and accessories at unbeatable prices.',
       buttonText: 'Explore Electronics',
@@ -75,7 +74,7 @@ const HeroSection = () => {
     },
     {
       id: 3,
-      video: 'https://videos.pexels.com/video-files/5644234/5644234-sd_960_506_25fps.mp4',
+      video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
       heading: 'Upgrade Your Home Decor',
       subheading: 'Stylish and affordable pieces to transform your home.',
       buttonText: 'Shop Home Decor',
@@ -83,9 +82,20 @@ const HeroSection = () => {
     },
   ];
 
-   // Toggle mute/unmute
-   const toggleMute = () => {
-    setMuted(!muted);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const currentVideo = videos[currentVideoIndex];
+
+
+  const handleNext = () => {
+    setCurrentVideoIndex((prevIndex) =>
+      prevIndex < videos.length - 1 ? prevIndex + 1 : 0
+    );
+  };
+
+  const handlePrevious = () => {
+    setCurrentVideoIndex((prevIndex) =>
+      prevIndex > 0 ? prevIndex - 1 : videos.length - 1
+    );
   };
 
   return (
@@ -199,55 +209,33 @@ const HeroSection = () => {
 
       <div className="lg:w-2/5 flex flex-col space-y-4 h-full w-full">
         <div className="flex-grow h-3/5">
-          <div className="relative w-full h-full">
-            {/* Progress bar */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gray-300">
-              <div
-                className="bg-blue-500 h-full"
-                style={{ width: `${(currentSlide / totalSlides) * 100}%`, transition: 'width 3s' }}
-              ></div>
-            </div>
+        <div className="relative h-full w-full">
 
-            {/* Swiper Slider */}
-            <Swiper
-              modules={[Navigation, Pagination, Autoplay, EffectFade, Parallax]}
-              spaceBetween={30}
-              slidesPerView={1}
-              navigation
-              pagination={{ clickable: true }}
-              effect="fade"
-              fadeEffect={{ crossFade: true }}
-              loop
-              parallax
-              className="h-full"
-              onSlideChange={(swiper) => setCurrentSlide(swiper.realIndex + 1)}
-            >
-              {videos.map((slide) => (
-                <SwiperSlide key={slide.id}>
-                  <div className="relative h-full flex items-center justify-center text-center text-white">
-                  <Link to={slide.buttonLink}>
-                    {/* Video Background */}
-                    <video
-                        className="absolute inset-0 w-full h-full object-cover"
-                        src={slide.video}
-                        autoPlay
-                        muted={muted}
-                        loop
-                      ></video>
-                  </Link>
-                  
-                    {/* Sound Toggle Button */}
-                    <button
-                      onClick={toggleMute}
-                      className="absolute top-3 right-4 z-20 text-white bg-gray-700 p-2 rounded-full hover:bg-gray-800 transition"
-                    >
-                      {muted ? <FaVolumeMute className="h-6 w-6" /> : <FaVolumeUp className="h-6 w-6" />}
-                    </button>
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
+           {/* Left Arrow */}
+          <button
+            onClick={handlePrevious}
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white p-3 h-20 w-8 rounded-sm shadow-lg hover:scale-105 transition-transform z-10"
+          >
+            <FaChevronLeft size={16} />
+          </button>
+
+          {/* Video */}
+          <video
+            src={currentVideo.video}
+            controls
+            autoPlay
+            className="w-full h-full object-cover rounded-lg"
+          />
+
+          {/* Right Arrow */}
+         <button
+            onClick={handleNext}
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white p-3 h-20 w-8 rounded-sm shadow-lg hover:scale-105 transition-transform z-10"
+          >
+            <FaChevronRight size={16} />
+          </button>
+        </div>
+         
         </div>
         
         <div className="flex flex-grow space-x-4 h-2/5">
