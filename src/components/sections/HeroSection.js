@@ -6,7 +6,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 import { Link } from 'react-router-dom';
-import { FaChevronRight, FaChevronLeft } from 'react-icons/fa';
+import { FaChevronRight, FaChevronLeft } from 'react-icons/fa6';
 
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(1);
@@ -211,12 +211,12 @@ const HeroSection = () => {
         <div className="flex-grow h-3/5">
         <div className="relative h-full w-full">
 
-           {/* Left Arrow */}
+          {/* Left Arrow */}
           <button
             onClick={handlePrevious}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white p-3 h-20 w-8 rounded-sm shadow-lg hover:scale-105 transition-transform z-10"
+            className="absolute left-0-0 top-1/2 transform -translate-y-1/2 text-blue-500 p-1 rounded-full hover:scale-110 transition-transform z-10"
           >
-            <FaChevronLeft size={16} />
+            <FaChevronLeft size={50} className="text-blue-500" />
           </button>
 
           {/* Video */}
@@ -224,15 +224,17 @@ const HeroSection = () => {
             src={currentVideo.video}
             controls
             autoPlay
-            className="w-full h-full object-cover rounded-lg"
+            muted
+            preload
+            className="w-full h-full object-cover rounded-sm"
           />
 
           {/* Right Arrow */}
-         <button
+          <button
             onClick={handleNext}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white p-3 h-20 w-8 rounded-sm shadow-lg hover:scale-105 transition-transform z-10"
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 text-blue-500 p-1 rounded-full hover:scale-110 transition-transform z-10"
           >
-            <FaChevronRight size={16} />
+            <FaChevronRight size={50} className="text-blue-500" />
           </button>
         </div>
          
