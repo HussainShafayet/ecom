@@ -100,73 +100,6 @@ const HeroSection = () => {
 
   return (
     <>
-       {/*<div className="relative">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gray-300">
-        <div
-          className="bg-blue-500 h-full"
-          style={{ width: `${(currentSlide / totalSlides) * 100}%`, transition: 'width 3s' }}
-        ></div>
-      </div>
-
-      <Swiper
-        modules={[Navigation, Pagination, Autoplay, EffectFade, Parallax]}  // Correct module imports
-        spaceBetween={30}
-        slidesPerView={1}
-        navigation
-        pagination={{ clickable: true }}
-        autoplay={{ delay: 3000 }}
-        effect="fade"
-        fadeEffect={{ crossFade: true }}
-        loop
-        parallax
-        onSlideChange={(swiper) => setCurrentSlide(swiper.realIndex + 1)}  // Update current slide number
-      >
-        {slides.map((slide) => (
-          <SwiperSlide key={slide.id}>
-            <div
-              className="relative bg-cover bg-center h-screen flex items-center justify-center text-center text-white"
-              style={{ backgroundImage: `url(${slide.image})` }}
-              data-swiper-parallax="-100"
-            >
-              <div className="absolute inset-0 bg-black opacity-50"></div>
-              <div
-                className="relative z-10 px-4"
-                data-swiper-parallax="-50"
-              >
-                <h1
-                  className="text-4xl md:text-6xl font-bold mb-4 transition-all duration-700 ease-in-out delay-300"
-                >
-                  {slide.heading}
-                </h1>
-                <p
-                  className="text-lg md:text-2xl mb-8 transition-all duration-700 ease-in-out delay-500"
-                >
-                  {slide.subheading}
-                </p>
-
-                
-                <Link
-                  to={slide.buttonLink}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-700 ease-in-out delay-700"
-                >
-                  {slide.buttonText}
-                </Link>
-
-               
-                <Link
-                  to={slide.buttonLink}
-                  className="text-white hover:text-blue-500 font-semibold py-2 px-4 mt-4 inline-block transition-all duration-700 ease-in-out delay-1000"
-                >
-                  Learn More
-                </Link>
-              </div>
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-
-    </div>*/}
-
     <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[60vh]">
       <div className="lg:w-3/5 flex h-full w-full">
           <div className="relative h-full w-full">
@@ -225,6 +158,7 @@ const HeroSection = () => {
             controls
             autoPlay
             muted
+            loop
             preload
             className="w-full h-full object-cover rounded-sm"
           />
