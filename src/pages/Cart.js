@@ -8,8 +8,6 @@ const Cart = () => {
   const cartItems = useSelector(selectCartItems);
   const totalPrice = useSelector(selectTotalPrice);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const shippingCost = 60.0;
-  const grandTotal = totalPrice + shippingCost;
 
   const dispatch = useDispatch();
   const handleRemoveItem = (id) =>{
@@ -145,14 +143,10 @@ const Cart = () => {
               <span>Subtotal</span>
               <span>{totalPrice.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between mb-2">
-              <span>Shipping</span>
-              <span>{shippingCost.toFixed(2)}</span>
-            </div>
             <hr className="my-4" />
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
-              <span>{grandTotal.toFixed(2)}</span>
+              <span>{totalPrice.toFixed(2)}</span>
             </div>
             <Link
               to="/checkout"
@@ -166,8 +160,7 @@ const Cart = () => {
           <div className="fixed bottom-0 left-0 w-full bg-white p-4 lg:hidden shadow-lg">
             <div className="flex justify-between items-center">
               <div>
-                <p className="font-bold text-lg">Total: {grandTotal.toFixed(2)}</p>
-                <p className="text-sm text-gray-500">Shipping & tax calculated at checkout</p>
+                <p className="font-bold text-lg">Total: {totalPrice.toFixed(2)}</p>
               </div>
               <Link
                 to="/checkout"
