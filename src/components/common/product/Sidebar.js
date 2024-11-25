@@ -1,8 +1,8 @@
 import React, {useEffect} from "react";
-import {Accordion, Loader} from '../common';
+import {Accordion, Loader} from '../../common';
 import { FaTags, FaDollarSign, FaIndustry, FaStar, FaCheck, FaFilter, FaTshirt, FaPalette } from 'react-icons/fa';
 import {useDispatch, useSelector} from "react-redux";
-import {fetchAllCategories} from "../../redux/slice/categorySlice";
+import {fetchAllCategories} from "../../../redux/slice/categorySlice";
 
 
 // Sidebar Component

@@ -1,11 +1,10 @@
 import React, {useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { addToCart } from '../../redux/slice/cartSlice';
+import { addToCart } from '../../../redux/slice/cartSlice';
 import { FaHeart, FaEye, FaShoppingCart, FaRegHeart } from 'react-icons/fa';
-import {addToWishlist, removeFromWishlist} from '../../redux/slice/wishlistSlice';
-import {addToCartAndRemoveFromWishlist} from '../../redux/slice/cartSlice';
-import placeholderImage from '../../assets/images/blur.jpg';
+import {addToWishlist, removeFromWishlist} from '../../../redux/slice/wishlistSlice';
+import {addToCartAndRemoveFromWishlist} from '../../../redux/slice/cartSlice';
 
 const ProductCard = ({ product, cardForTrending }) => {
   const dispatch = useDispatch();
