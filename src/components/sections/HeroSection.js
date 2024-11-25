@@ -159,7 +159,7 @@ const HeroSection = () => {
             autoPlay
             muted
             loop
-            preload
+            preload='true'
             className="w-full h-full object-cover rounded-sm"
           />
 
