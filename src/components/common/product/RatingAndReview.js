@@ -1,16 +1,25 @@
 import React, { useState } from "react";
 import { FaStar, FaUserCircle } from "react-icons/fa";
+import {useSelector} from "react-redux";
+import {useNavigate} from "react-router-dom";
 
 const RatingAndReview = ({ reviews = [], product }) => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [reviewerName, setReviewerName] = useState("");
+  const {isAuthenticated, user} = useSelector((state)=>state.auth);
+  const navigate = useNavigate();
 
   const handleSubmitReview = () => {
-    if (rating && reviewText.trim() && reviewerName.trim()) {
+    if (!isAuthenticated) {
+      navigate('/signin'); // Redirect to login if not authenticated
+      return;
+    }
+    
+    if (rating && reviewText.trim() && user.trim()) {
       const newReview = {
-        reviewerName: reviewerName,
+        reviewerName: user,
         comment: reviewText,
         rating,
         date: new Date().toLocaleDateString(), // Add current date
@@ -21,7 +30,6 @@ const RatingAndReview = ({ reviews = [], product }) => {
       setReviewerName(""); // Reset reviewer name
     }
   };
-
   return (
     <div className="shadow-md rounded-lg p-4">
       {/* Header */}
@@ -80,15 +88,8 @@ const RatingAndReview = ({ reviews = [], product }) => {
           Write a Review
         </h4>
 
+        {isAuthenticated ?
         <div className="space-y-4">
-          {/* Name Input */}
-          <input
-            type="text"
-            placeholder="Your Name"
-            value={reviewerName}
-            onChange={(e) => setReviewerName(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
-          />
 
           {/* Rating Selector */}
           <div className="flex items-center">
@@ -123,11 +124,23 @@ const RatingAndReview = ({ reviews = [], product }) => {
           <button
             onClick={handleSubmitReview}
             className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-all disabled:opacity-50"
-            disabled={!rating || !reviewText.trim() || !reviewerName.trim()}
+            disabled={!rating || !reviewText.trim()}
           >
             Submit Review
           </button>
         </div>
+        : (
+        <p className="text-gray-600">
+          <button
+            className="text-blue-500 underline"
+            onClick={() => navigate('/signin')}
+          >
+            Sign in
+          </button>{' '}
+          to add a review.
+        </p>
+      )}
+
       </div>
     </div>
   );
