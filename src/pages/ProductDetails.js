@@ -67,8 +67,17 @@ const ProductDetails = () => {
     return <div className="text-center text-red-500">{error}</div>;
   }
 
-  if (!product) {
-    return <div className="text-center">Product not found</div>;
+  if (!isLoading && !product) {
+    return <div className="text-center text-gray-600">
+            <h1 className="text-2xl font-bold">Product Not Found</h1>
+            <p>The product you are looking for does not exist or may have been removed.</p>
+            <Link
+              to="/products"
+              className="mt-4 inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
+            >
+              Back to Products
+            </Link>
+      </div>;
   }
 
 
