@@ -3,6 +3,7 @@ import axios from "axios";
 import {getAllProducts, getProductById, getProductsByCategory} from "../../services/productService";
 const initialState = {
     isLoading: false,
+    relatedProductsLoading: false,
     items: [],
     error: null,
     product: null,
@@ -84,10 +85,10 @@ const productSlice = createSlice({
 
         //get single product
         builder.addCase(fetchProductById.pending, (state)=>{
-            state.isLoading = true;
+            state.relatedProductsLoading = true;
         });
         builder.addCase(fetchProductById.fulfilled,(state, action)=>{
-            state.isLoading = false;
+            state.relatedProductsLoading = false;
             state.product = action.payload;
             state.mainImage = action.payload.images[0];
             state.error = null
@@ -96,7 +97,7 @@ const productSlice = createSlice({
             state.quantity = 1;
         });
         builder.addCase(fetchProductById.rejected,(state, action)=>{
-            state.isLoading = false;
+            state.relatedProductsLoading = false;
             state.product = null;
             state.error = action.payload.message;
         });

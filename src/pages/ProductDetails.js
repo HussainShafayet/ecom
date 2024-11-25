@@ -9,7 +9,7 @@ import {addToCart, addToCartAndRemoveFromWishlist} from '../redux/slice/cartSlic
 
 const ProductDetails = () => {
   const { id } = useParams();
-  const {isLoading, product, error, mainImage, items:products, quantity} = useSelector((state)=> state.product);
+  const {isLoading, product, error, mainImage, items:products, quantity, relatedProductsLoading} = useSelector((state)=> state.product);
 
   const [selectedColor, setSelectedColor] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown open/close state
@@ -59,6 +59,21 @@ const ProductDetails = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [dropdownOpen]);
+
+
+  if (isLoading) {
+    return <div><Loader message='Loading product details' /></div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>;
+  }
+
+  if (!product) {
+    return <div className="text-center">Product not found</div>;
+  }
+
+
 
   const handleImageClick = (image) => {
     dispatch(setMainImage(image));
@@ -117,17 +132,6 @@ const ProductDetails = () => {
     }
   };
 
-  //if (isLoading) {
-  //  return <div className="text-center">Loading product details...</div>;
-  //}
-
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
-
-  if (!product) {
-    return <div className="text-center">Product not found</div>;
-  }
 
   const colors = ['Red', 'Blue', 'Green', 'Black', 'White'];
 
@@ -155,10 +159,6 @@ const ProductDetails = () => {
 
   return (
     <div className="container mx-auto  my-6">
-
-      {isLoading?
-        <div><Loader message='Loading product details' /></div>
-      :
       <>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Product Image Gallery */}
@@ -393,19 +393,19 @@ const ProductDetails = () => {
           <RatingAndReview reviews={product.reviews} onAddReview={handleAddReview} />
         </section>
       </>
-      }
-      
-      
-
-
       {/* Related Products Section */}
       <div className="mx-auto my-12">
         <h2 className="text-2xl font-bold mb-4">Related Products</h2>
+        {relatedProductsLoading ? <div>
+          <Loader message='Releted Products Loading' />
+        </div>:
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
+        }
       </div>
     </div>
   );
