@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaStar, FaUserCircle } from "react-icons/fa";
 
-const RatingAndReview = ({ reviews = [], onAddReview }) => {
+const RatingAndReview = ({ reviews = [], product }) => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
@@ -15,7 +15,7 @@ const RatingAndReview = ({ reviews = [], onAddReview }) => {
         rating,
         date: new Date().toLocaleDateString(), // Add current date
       };
-      onAddReview(newReview);
+    //  onAddReview(newReview);
       setRating(0); // Reset rating
       setReviewText(""); // Reset review text
       setReviewerName(""); // Reset reviewer name

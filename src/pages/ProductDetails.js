@@ -15,8 +15,6 @@ const ProductDetails = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown open/close state
   const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // Filter reviews by rating
 
-  const [reviews, setReviews] = useState(product&&product.reviews || []);
-
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const reviewsRef = useRef(null);
@@ -141,14 +139,6 @@ const ProductDetails = () => {
     3: 4,
     2: 2,
     1: 3,
-  };
-
-  const filteredReviews = filterReviews(product.reviews || []); // Filter reviews based on selected rating
-
-  
-
-  const handleAddReview = (newReview) => {
-    setReviews((prevReviews) => [newReview, ...prevReviews]);
   };
 
   // Assume discountPercentage is a property of the product (e.g., product.discountPercentage)
@@ -390,7 +380,7 @@ const ProductDetails = () => {
 
         {/* Review and Rating Section */}
         <section className='mt-4' ref={reviewsRef}>
-          <RatingAndReview reviews={product.reviews} onAddReview={handleAddReview} />
+          <RatingAndReview reviews={product.reviews} product={product} />
         </section>
       </>
       {/* Related Products Section */}
