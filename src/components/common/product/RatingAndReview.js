@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaStar, FaUserCircle } from "react-icons/fa";
 import {useSelector} from "react-redux";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 
 const RatingAndReview = ({ reviews = [], product }) => {
   const [rating, setRating] = useState(0);
@@ -10,10 +10,15 @@ const RatingAndReview = ({ reviews = [], product }) => {
   const [reviewerName, setReviewerName] = useState("");
   const {isAuthenticated, user} = useSelector((state)=>state.auth);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleRedirectSignIn = () => {
+    navigate('/signin', { state: { from: location } });
+  }
 
   const handleSubmitReview = () => {
     if (!isAuthenticated) {
-      navigate('/signin'); // Redirect to login if not authenticated
+     handleRedirectSignIn(); // Redirect to login if not authenticated
       return;
     }
     
@@ -133,7 +138,7 @@ const RatingAndReview = ({ reviews = [], product }) => {
         <p className="text-gray-600">
           <button
             className="text-blue-500 underline"
-            onClick={() => navigate('/signin')}
+            onClick={handleRedirectSignIn}
           >
             Sign in
           </button>{' '}
