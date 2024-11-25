@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FaStar, FaChevronDown, FaShareAlt, FaTag, FaBox, FaWeightHanging, FaRulerCombined, FaCubes, FaTools } from 'react-icons/fa';
-import { InputField, Loader, ProductCard } from '../components/common/'; // Star and dropdown icons
+import { InputField, Loader, ProductCard, RatingAndReview } from '../components/common/'; // Star and dropdown icons
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts} from '../redux/slice/productSlice';
 //import {addToCart} from '../redux/slice/cartSlice';
@@ -14,6 +14,8 @@ const ProductDetails = () => {
   const [selectedColor, setSelectedColor] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown open/close state
   const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // Filter reviews by rating
+
+  const [reviews, setReviews] = useState(product.reviews);
 
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
@@ -130,14 +132,20 @@ const ProductDetails = () => {
 
   const filteredReviews = filterReviews(product.reviews || []); // Filter reviews based on selected rating
 
-    // Assume discountPercentage is a property of the product (e.g., product.discountPercentage)
-    const discountPercentage = product.discountPercentage || 0;
-    const discountedPrice = calculateDiscountedPrice(product.price, discountPercentage);
+  
+
+  const handleAddReview = (newReview) => {
+    setReviews((prevReviews) => [newReview, ...prevReviews]);
+  };
+
+  // Assume discountPercentage is a property of the product (e.g., product.discountPercentage)
+  const discountPercentage = product.discountPercentage || 0;
+  const discountedPrice = calculateDiscountedPrice(product.price, discountPercentage);
 
   
 
   return (
-    <div className="container my-6">
+    <div className="container mx-auto  my-6">
 
       {isLoading?
         <div><Loader message='Loading product details' /></div>
@@ -371,35 +379,22 @@ const ProductDetails = () => {
       </div>
       </>
       }
+      
+      {/* Review and Rating Section */}
+      <section className='mt-4'>
+        <RatingAndReview reviews={reviews} onAddReview={handleAddReview} />
+      </section>
+
+
       {/* Related Products Section */}
-        {/*<section className="mt-12">
-          <h2 className="text-2xl font-bold mb-4">Related Products</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {isLoading?
-            <div><Loader message='Loading product details' /></div>
-          :
-            <>
-                {products.map((relatedProduct) => (
-                  <div key={relatedProduct.id} className="border rounded-lg p-4">
-                    <Link to={`/products/${relatedProduct.id}`}>
-                      <img src={relatedProduct.images[0]} alt={relatedProduct.title} className="w-full h-40 object-cover mb-2" />
-                      <h3 className="font-semibold">{relatedProduct.title}</h3>
-                      <p className="text-gray-700">${relatedProduct.price.toFixed(2)}</p>
-                    </Link>
-                  </div>
-                ))}
-            </>
-          }
-          </div>
-        </section>*/}
-        <div className="mx-auto my-12">
-          <h2 className="text-2xl font-bold mb-4">Related Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+      <div className="mx-auto my-12">
+        <h2 className="text-2xl font-bold mb-4">Related Products</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
         </div>
+      </div>
     </div>
   );
 };
