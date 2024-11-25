@@ -390,26 +390,32 @@ useEffect(() => {
 
           
             {/* Button Group */}
-          <div className="flex space-x-2">
-            <button
-              onClick={handleBuyNow}
-              className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
-            >
-              Buy Now
-            </button>
-            <button
-              onClick={handleAddToCart}
-              className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Add to Cart
-            </button>
-            <Link
-              to="/products"
-              className="text-blue-500 hover:text-blue-600 font-bold mt-2"
-            >
-              Back to Products
-            </Link>
-          </div>
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              {/* Buy Now Button */}
+              <button
+                onClick={handleBuyNow}
+                className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
+              >
+                Buy Now
+              </button>
+
+              {/* Add to Cart Button */}
+              <button
+                onClick={handleAddToCart}
+                className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Add to Cart
+              </button>
+
+              {/* Back to Products Link */}
+              <Link
+                to="/products"
+                className="text-center bg-gray-200 text-blue-500 hover:text-blue-600 font-bold py-2 px-4 rounded-lg transition"
+              >
+                Back to Products
+              </Link>
+            </div>
+
 
             
 
