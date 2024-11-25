@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { FaStar, FaChevronDown, FaShareAlt, FaTag, FaBox, FaWeightHanging, FaRulerCombined, FaCubes, FaTools } from 'react-icons/fa';
+import { FaStar, FaChevronDown, FaShareAlt, FaTag, FaBox, FaWeightHanging, FaRulerCombined, FaCubes, FaTools, FaCopy, FaTwitter, FaWhatsapp, FaFacebookF, FaFacebook } from 'react-icons/fa';
 import { InputField, Loader, ProductCard, RatingAndReview } from '../components/common/'; // Star and dropdown icons
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts} from '../redux/slice/productSlice';
@@ -14,11 +14,13 @@ const ProductDetails = () => {
   const {isLoading, product, error, mainImage, items:products, quantity, relatedProductsLoading} = useSelector((state)=> state.product);
 
   const [selectedColor, setSelectedColor] = useState('');
-  const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown open/close state
   const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // Filter reviews by rating
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
+  const [isRatingDropdownOpen, setIsRatingDropdownOpen] = useState(false);
+  const [isShareDropdownOpen, setIsShareDropdownOpen] = useState(false);
 
-  const dropdownRef = useRef(null);
+  const ratingDropdownRef = useRef(null);
+  const shareDropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const reviewsRef = useRef(null);
 
@@ -36,30 +38,29 @@ const ProductDetails = () => {
       dispatch(fetchAllProducts({category: product.category, limit:30}))
     }
   }, [dispatch, product]);
-
-   // Detect clicks outside the dropdown
-   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current && 
-        !dropdownRef.current.contains(event.target) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target)
-      ) {
-        setDropdownOpen(false);
-      }
-    };
-
-    if (dropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
+// Handle clicks outside each dropdown
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      ratingDropdownRef.current &&
+      !ratingDropdownRef.current.contains(event.target)
+    ) {
+      setIsRatingDropdownOpen(false);
     }
+    if (
+      shareDropdownRef.current &&
+      !shareDropdownRef.current.contains(event.target)
+    ) {
+      setIsShareDropdownOpen(false);
+    }
+  };
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [dropdownOpen]);
+  document.addEventListener('mousedown', handleClickOutside);
+
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, []);
 
 
   if (isLoading) {
@@ -97,13 +98,21 @@ const ProductDetails = () => {
     dispatch(decrementQuantity())
   };
 
-  const toggleDropdown = () => {
-    setDropdownOpen((prev) => !prev);; // Toggle dropdown visibility on click
-  };
+    // Toggle rating dropdown
+    const toggleRatingDropdown = () => {
+      setIsRatingDropdownOpen((prev) => !prev);
+      setIsShareDropdownOpen(false); // Close share dropdown if open
+    };
+  
+    // Toggle share dropdown
+    const toggleShareDropdown = () => {
+      setIsShareDropdownOpen((prev) => !prev);
+      setIsRatingDropdownOpen(false); // Close rating dropdown if open
+    };
 
   const handleRatingClick = (rating) => {
     setSelectedRatingFilter(rating); // Set the filter for selected rating
-    setDropdownOpen(false); // Close dropdown after selecting
+    setIsRatingDropdownOpen(false); // Close dropdown after selecting
   };
 
   const filterReviews = (reviews) => {
@@ -139,8 +148,56 @@ const ProductDetails = () => {
       reviewsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start'});
       //const offset = -600; // Adjust this value to your header height
       //window.scrollBy({ top: offset, behavior: 'smooth' });
+      setIsRatingDropdownOpen(false); // Close dropdown after selecting
     }
   };
+
+ 
+  const shareProduct = () => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: product.title,
+          text: `Check out this product: ${product.title}`,
+          url: window.location.href,
+        })
+        .then(() => console.log("Product shared successfully!"))
+        .catch((error) => console.error("Error sharing product:", error));
+    } else {
+      alert("Web Share API is not supported in your browser.");
+    }
+  }
+
+  const copyLinkToClipboard = () => {
+    const link = window.location.href;
+  
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      // Use Clipboard API if supported
+      navigator.clipboard
+        .writeText(link)
+        .then(() => alert('Product link copied to clipboard!'))
+        .catch((error) => console.error('Error copying link:', error));
+    } else {
+      // Fallback for unsupported browsers
+      const textarea = document.createElement('textarea');
+      textarea.value = link;
+      textarea.style.position = 'fixed'; // Avoid scrolling to bottom of page
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+  
+      try {
+        document.execCommand('copy');
+        alert('Product link copied to clipboard!');
+      } catch (error) {
+        console.error('Fallback: Error copying link', error);
+        alert('Failed to copy link. Please copy manually.');
+      }
+  
+      document.body.removeChild(textarea);
+    }
+  };
+  
 
 
   const colors = ['Red', 'Blue', 'Green', 'Black', 'White'];
@@ -262,11 +319,12 @@ const ProductDetails = () => {
             {/* Ratings Dropdown Button */}
             <div
               className="relative mb-4"
+              ref={ratingDropdownRef}
             >
               <button
                 ref={buttonRef}
                 className="flex items-center p-2 rounded-lg "
-                onClick={toggleDropdown}
+                onClick={toggleRatingDropdown}
               
               >
                 <div className="flex">
@@ -288,8 +346,8 @@ const ProductDetails = () => {
               </button>
 
               {/* Enhanced Dropdown menu */}
-              {dropdownOpen && (
-                <div ref={dropdownRef} className="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-300 shadow-md rounded-lg p-4 z-20">
+              {isRatingDropdownOpen && (
+                <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-300 shadow-md rounded-lg p-4 z-20">
                   <div className="flex items-center mb-2">
                   <div className="flex">
                     {Array(Math.ceil(product.rating))
@@ -356,11 +414,86 @@ const ProductDetails = () => {
             
 
             {/* Share Buttons */}
-            <div className="flex items-center mt-4">
-              <span className="mr-2 text-gray-700">Share:</span>
-              <button className="text-blue-500 hover:text-blue-600">
+
+            <div className="relative mt-4" ref={shareDropdownRef}>
+              {/* Dropdown Trigger */}
+              <button
+                onClick={toggleShareDropdown}
+                className="text-blue-500 hover:text-blue-600 transition"
+              >
                 <FaShareAlt />
+                {/*<span>Share</span>*/}
               </button>
+
+              {/* Dropdown Menu */}
+              {isShareDropdownOpen && (
+                <div className="absolute left-0 mt-2 w-56 bg-white border border-gray-300 rounded-lg shadow-md z-10">
+                  <ul className="py-2">
+                    {/* Web Share API */}
+                    {/*<li>
+                      <button
+                        onClick={shareProduct}
+                        className="flex items-center gap-2 px-4 py-2 w-full text-left hover:bg-gray-100 transition"
+                      >
+                        <FaShareAlt className="text-blue-500" />
+                        Share via App
+                      </button>
+                    </li>*/}
+
+                    {/* Copy Link */}
+                    <li>
+                      <button
+                        onClick={copyLinkToClipboard}
+                        className="flex items-center gap-2 px-4 py-2 w-full text-left hover:bg-gray-100 transition"
+                      >
+                        <FaCopy className="text-gray-500" />
+                        Copy Link
+                      </button>
+                    </li>
+
+                    {/* Social Media Links */}
+                    <li>
+                      <a
+                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                          window.location.href
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2 w-full text-left hover:bg-gray-100 transition"
+                      >
+                        <FaFacebook className="text-blue-700" />
+                        Facebook
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
+                          window.location.href
+                        )}&text=${encodeURIComponent(product.title)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2 w-full text-left hover:bg-gray-100 transition"
+                      >
+                        <FaTwitter className="text-blue-500" />
+                        Twitter
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                          `Check out this product: ${product.title} ${window.location.href}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2 w-full text-left hover:bg-gray-100 transition"
+                      >
+                        <FaWhatsapp className="text-green-500" />
+                        WhatsApp
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         
