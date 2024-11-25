@@ -6,6 +6,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts} from '../redux/slice/productSlice';
 //import {addToCart} from '../redux/slice/cartSlice';
 import {addToCart, addToCartAndRemoveFromWishlist} from '../redux/slice/cartSlice';
+import Zoom from 'react-medium-image-zoom'
+import 'react-medium-image-zoom/dist/styles.css'
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -14,6 +16,7 @@ const ProductDetails = () => {
   const [selectedColor, setSelectedColor] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown open/close state
   const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // Filter reviews by rating
+  const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
 
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
@@ -174,11 +177,26 @@ const ProductDetails = () => {
               ))}
             </div>
             <div className="relative group w-full h-full">
-              <img
-                src={mainImage || 'fallback-image-url.jpg'}
-                alt={product.title}
-                className="w-full h-96 object-contain object-center rounded-lg shadow-md mb-4 cursor-zoom-in"
-              />
+              <Zoom>
+                <img
+                  src={mainImage}
+                  alt={product.title}
+                  loading='lazy'
+                  className={`w-full h-96 object-contain object-center rounded-md mb-4 transition-opacity duration-500 shadow-md ${
+                    isImageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  onLoad={() => setIsImageLoaded(true)} // Set image loaded state
+                />
+
+                {/* Blurred Placeholder */}
+                {!isImageLoaded && (
+                  <img
+                    src={product.thumbnail}
+                    alt="Loading"
+                    className="absolute inset-0 w-full h-96 bg-gray-200 rounded-md mb-4 animate-pulse object-contain shadow-md"
+                  />
+                )}
+              </Zoom>
             </div>
           </div>
 
