@@ -1,15 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTrash, FaArrowRight } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
 import {removeFromCart, updateQuantity, selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
+import {fetchAllProducts} from '../redux/slice/productSlice';
+import {Loader, ProductCard} from '../components/common';
 
 const Cart = () => {
   const cartItems = useSelector(selectCartItems);
   const totalPrice = useSelector(selectTotalPrice);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const {isLoading, items:products, error} = useSelector((state)=> state.product);
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      dispatch(fetchAllProducts({limit:10}));
+    }
+    
+   }, [dispatch]);
+ 
+ 
+   if (error) {
+     return <div>{error}</div>;
+   }
   const handleRemoveItem = (id) =>{
     dispatch(removeFromCart(id));
   }
@@ -28,6 +43,7 @@ const Cart = () => {
           </Link>
         </div>
       ) : (
+        <>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Scrollable Cart Items Section */}
           <div className="lg:col-span-2 max-h-screen overflow-y-auto">
@@ -171,6 +187,24 @@ const Cart = () => {
             </div>
           </div>
         </div>
+        
+        {/* Related Products Section */}
+        {cartItems.length  >0 && 
+        <div className="mx-auto my-12">
+          <h2 className="text-2xl font-bold mb-4">Related Products</h2>
+          {isLoading ? <div>
+            <Loader message='Releted Products Loading' />
+          </div>:
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+          }
+        </div>
+        }
+      </>
       )}
     </div>
   );
