@@ -46,7 +46,7 @@ const Cart = () => {
         <>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Scrollable Cart Items Section */}
-          <div className="lg:col-span-2 max-h-screen overflow-y-auto">
+          <div className="lg:col-span-2 max-h-screen overflow-y-auto scrollbar-custom">
             <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
 
             <div className="flex flex-col gap-3">
