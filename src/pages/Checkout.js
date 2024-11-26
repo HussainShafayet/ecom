@@ -343,7 +343,8 @@ const Checkout = () => {
       {/* Right Section: Order Summary */}
       <div className="lg:w-1/3 mt-12 lg:mt-0">
         <h3 className="text-2xl font-bold mb-4">Order Summary</h3>
-        <div className="bg-gray-100 p-4 rounded-lg shadow-md sticky top-20">
+        <div className="bg-gray-100 rounded-lg shadow-md sticky top-20">
+          <div className='max-h-svh overflow-auto scrollbar-custom p-4'>
           {cartItems.map((item) => (
             <div key={item.id} className="flex justify-between items-center mb-3">
               <div>
@@ -353,23 +354,26 @@ const Checkout = () => {
               <p>{(item.price * item.quantity).toFixed(2)}</p>
             </div>
           ))}
-          <hr className="my-3" />
-          <div className="flex justify-between">
-            <span>Subtotal</span>
-            <span>{totalPrice.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between">
-            <span>Shipping</span>
-            <span>{shippingCost.toFixed(2)}</span>
+          <div className='p-4'>
+            <hr className="my-3" />
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{totalPrice.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Shipping</span>
+              <span>{shippingCost.toFixed(2)}</span>
+            </div>
+            <hr className="my-3" />
+            <div className="flex justify-between font-bold text-lg">
+              <span>Total</span>
+              <span>{grandTotal.toFixed(2)}</span>
+            </div>
+            <Link to="/cart" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
+              Edit Cart
+            </Link>
           </div>
-          <hr className="my-3" />
-          <div className="flex justify-between font-bold text-lg">
-            <span>Total</span>
-            <span>{grandTotal.toFixed(2)}</span>
-          </div>
-          <Link to="/cart" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
-            Edit Cart
-          </Link>
         </div>
       </div>
     </div>
