@@ -71,18 +71,18 @@ useEffect(() => {
     return <div className="text-center text-red-500">{error}</div>;
   }
 
-  if (!isLoading && !product) {
-    return <div className="text-center text-gray-600">
-            <h1 className="text-2xl font-bold">Product Not Found</h1>
-            <p>The product you are looking for does not exist or may have been removed.</p>
-            <Link
-              to="/products"
-              className="mt-4 inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
-            >
-              Back to Products
-            </Link>
-      </div>;
-  }
+  //if (!isLoading && !product) {
+  //  return <div className="text-center text-gray-600">
+  //          <h1 className="text-2xl font-bold">Product Not Found</h1>
+  //          <p>The product you are looking for does not exist or may have been removed.</p>
+  //          <Link
+  //            to="/products"
+  //            className="mt-4 inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
+  //          >
+  //            Back to Products
+  //          </Link>
+  //    </div>;
+  //}
 
 
 
@@ -211,13 +211,14 @@ useEffect(() => {
   };
 
   // Assume discountPercentage is a property of the product (e.g., product.discountPercentage)
-  const discountPercentage = product.discountPercentage || 0;
-  const discountedPrice = calculateDiscountedPrice(product.price, discountPercentage);
+  const discountPercentage = product && product.discountPercentage || 0;
+  const discountedPrice = product && calculateDiscountedPrice(product.price, discountPercentage) || 0;
 
   
 
   return (
     <div className="container mx-auto  my-6">
+      {product &&
       <>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Product Image Gallery */}
@@ -548,8 +549,9 @@ useEffect(() => {
         <section className='mt-4' ref={reviewsRef}>
           <RatingAndReview reviews={product.reviews} product={product} />
         </section>
-      </>
-      {/* Related Products Section */}
+
+
+        {/* Related Products Section */}
       <div className="mx-auto my-12">
         <h2 className="text-2xl font-bold mb-4">Related Products</h2>
         {relatedProductsLoading ? <div>
@@ -563,6 +565,9 @@ useEffect(() => {
         </div>
         }
       </div>
+      </> 
+      }
+      
     </div>
   );
 };

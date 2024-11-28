@@ -65,9 +65,11 @@ const productSlice = createSlice({
 
         //get all products
         builder.addCase(fetchAllProducts.pending, (state)=>{
+            state.relatedProductsLoading = true;
             state.isLoading = true;
         });
         builder.addCase(fetchAllProducts.fulfilled,(state, action)=>{
+            state.relatedProductsLoading = false;
             state.isLoading = false;
             state.items = action.meta.arg.page > 1 
             ? [...state.items, ...action.payload.data] 
@@ -77,6 +79,7 @@ const productSlice = createSlice({
             state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
         });
         builder.addCase(fetchAllProducts.rejected,(state, action)=>{
+            state.relatedProductsLoading = false;
             state.isLoading = false;
             //state.products = [];
             state.error = action.error.message;
@@ -85,10 +88,10 @@ const productSlice = createSlice({
 
         //get single product
         builder.addCase(fetchProductById.pending, (state)=>{
-            state.relatedProductsLoading = true;
+            state.isLoading = true;
         });
         builder.addCase(fetchProductById.fulfilled,(state, action)=>{
-            state.relatedProductsLoading = false;
+            state.isLoading = false;
             state.product = action.payload;
             state.mainImage = action.payload.images[0];
             state.error = null
@@ -97,7 +100,7 @@ const productSlice = createSlice({
             state.quantity = 1;
         });
         builder.addCase(fetchProductById.rejected,(state, action)=>{
-            state.relatedProductsLoading = false;
+            state.isLoading = false;
             state.product = null;
             state.error = action.payload.message;
         });
