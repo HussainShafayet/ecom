@@ -110,7 +110,7 @@ const authSlice = createSlice({
         localStorage.removeItem('refreshToken');
       })
       .addCase(getUser.fulfilled, (state, action) => {
-        state.user = action.payload.user; // Update the access token
+        state.user = action.payload; // Update the access token
       })
   },
 });

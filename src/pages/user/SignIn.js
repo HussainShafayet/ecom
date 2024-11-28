@@ -15,7 +15,7 @@ const SignIn = () => {
   const location = useLocation();
   const { isAuthenticated } = useSelector((state) => state.auth);
   const { loading, error } = useSelector((state) => state.auth);
-  const [credentials, setCredentials] = useState({ username: 'emilys', password: 'emilyspass' });
+  const [credentials, setCredentials] = useState({ username: 'emilys', password: 'emilyspass', expiresInMins: 1 });
 
   const handleChange = (e) => setCredentials({ ...credentials, [e.target.name]: e.target.value });
 

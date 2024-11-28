@@ -7,7 +7,7 @@ import {useNavigate} from 'react-router-dom';
 const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const dispatch = useDispatch();
-  const {isAuthenticated} = useSelector((state)=>state.auth);
+  const {isAuthenticated,user} = useSelector((state)=>state.auth);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -75,7 +75,7 @@ const Profile = () => {
               {/* Personal Information Card */}
               <div className="flex-1 bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <h3 className="font-semibold text-lg mb-4">Personal Information</h3>
-                <p className="mb-2"><strong>Name:</strong> John Doe</p>
+                <p className="mb-2"><strong>Name:</strong> {user && user.username}</p>
                 <p className="mb-2"><strong>Email:</strong> john.doe@example.com</p>
                 <p className="mb-2"><strong>Phone:</strong> +1 234 567 890</p>
                 <p className="mb-2"><strong>Date of Birth:</strong> Jan 15, 1990</p>
