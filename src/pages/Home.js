@@ -1,5 +1,5 @@
 import React from 'react';
-import { HeroSection, FeaturedProducts, CategoriesSection, TrendingProducts, DealsAndDiscounts, NewArrival } from '../components/sections';
+import { HeroSection, FeaturedProducts, CategoriesSection, TrendingProducts, DealsAndDiscounts, NewArrival, BestSelling } from '../components/sections';
 import Testimonials from '../components/sections/Testomonials';
 
 const Home = () => {
@@ -7,8 +7,10 @@ const Home = () => {
     <>
       <HeroSection />
       <NewArrival />
-      <FeaturedProducts />
+      <BestSelling />
       <CategoriesSection />
+      <FeaturedProducts />
+      
       <Testimonials />
       <TrendingProducts />
       <DealsAndDiscounts />
