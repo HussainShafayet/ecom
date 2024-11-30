@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts} from '../../redux/slice/productSlice';
-import {ProductCard} from '../common';
+import {Loader, ProductCard} from '../common';
 import {Link} from 'react-router-dom';
 
 const DealsAndDiscounts = () => {
@@ -46,7 +46,7 @@ const DealsAndDiscounts = () => {
 
 
     if (isLoading) {
-        return <div>Loading trending products...</div>;
+      return <div className='container h-20 flex justify-center'><Loader message='Loading Deals And Discount' /></div>
     }
 
     if (error) {
@@ -67,11 +67,16 @@ const DealsAndDiscounts = () => {
           View All
         </Link>
       </div>
+      {products.length === 0  ? <div className='text-center'>
+        <span>Not found</span>
+      </div>:
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
+      }
     </div>
 
 

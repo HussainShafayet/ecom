@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {ProductCard} from '../common'; // Assuming you have a ProductCard component
+import {Loader, ProductCard} from '../common'; // Assuming you have a ProductCard component
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts} from '../../redux/slice/productSlice';
 import {Link} from 'react-router-dom';
@@ -14,9 +14,9 @@ const NewArrival = () => {
    dispatch(fetchAllProducts({limit:4}));
   }, [dispatch]);
 
-  //if (isLoading) {
-  //  return <div>Loading products...</div>;
-  //}
+  if (isLoading) {
+    return <div className='container h-20 flex justify-center'><Loader message='Loading New Arrival' /></div>
+  }
 
   if (error) {
     return <div>{error}</div>;
@@ -29,18 +29,25 @@ const NewArrival = () => {
         <span className="text-sm md:text-base text-gray-600">
           Discover the latest trends with our New Arrival Products.
         </span>
-        <Link
-          to="/products"
-          className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
-        >
-          View All
-        </Link>
+        {!isLoading&&
+          <Link
+            to="/products"
+            className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
+          >
+            View All
+          </Link>
+        }
       </div>
+      {products.length === 0  ? <div className='text-center'>
+        <span>Not found</span>
+      </div>:
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
+      }
     </div>
   );
 };

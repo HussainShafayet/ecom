@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchAllCategories } from '../../redux/slice/categorySlice';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import {Loader} from '../common';
 
 const CategoriesSection = () => {
   const { isLoading, categories, error } = useSelector((state) => state.category);
@@ -14,7 +15,7 @@ const CategoriesSection = () => {
   }, [dispatch]);
 
   if (isLoading) {
-    return <div className="text-center">Loading categories...</div>;
+    return <div className='container h-20 flex justify-center'><Loader message='Loading Categories' /></div>
   }
 
   if (error) {
@@ -39,7 +40,18 @@ const CategoriesSection = () => {
 
   return (
     <div className="container mx-auto my-8">
-      <h2 className="text-3xl font-bold mb-4 text-center">Shop by Category</h2>
+      <h2 className="text-3xl font-bold">Shop by Category</h2>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
+        <span className="text-sm md:text-base text-gray-600">
+          Discover the latest trends with Categories.
+        </span>
+        <Link
+          to="/products"
+          className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
+        >
+          View All
+        </Link>
+      </div>
       <div className="relative">
         {/* Left Arrow */}
         <button

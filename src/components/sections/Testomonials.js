@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaStar } from 'react-icons/fa';
+import {Link} from 'react-router-dom';
 
 const Testimonials = () => {
   // Demo reviews
@@ -36,7 +37,18 @@ const Testimonials = () => {
 
   return (
     <div className="container mx-auto my-12">
-      <h2 className="text-3xl font-bold text-center mb-8 text-blue-600">What Our Customers Say</h2>
+      <h2 className="text-3xl font-bold">What Our Customers Say</h2>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
+        <span className="text-sm md:text-base text-gray-600">
+          Discover what Our Customers Say.
+        </span>
+        <Link
+          to="/products"
+          className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
+        >
+          View All
+        </Link>
+      </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {reviews.map((review) => (
