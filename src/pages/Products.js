@@ -65,7 +65,7 @@ const Products = ({scrollContainerRef}) => {
   };
 
   if (isLoading && page === 1) {
-    return <div><Loader message='Loading products' /></div> ;
+    return <div className='container h-screen flex justify-center'><Loader message='Loading Products' /></div>
   }
 
   if (error) {
