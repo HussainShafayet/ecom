@@ -7,7 +7,7 @@ import {useDispatch} from 'react-redux';
 import {loadUserFromStorage} from './redux/slice/authSlice';
 import {useEffect, useRef} from 'react';
 import {ProtectedRoute, ScrollToTop} from './components/common';
-import {AboutUs, Contact, FAQPage, OrderTracking} from './pages/others';
+import {AboutUs, Contact, FAQPage, OrderTracking, PrivacyPolicy} from './pages/others';
 
 function App() {
   const scrollContainerRef = useRef(null);
@@ -43,6 +43,7 @@ function App() {
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/order-tracking" element={<OrderTracking />} />
             <Route path="/faq" element={<FAQPage />} />
+            <Route path='privacy-policy' element={<PrivacyPolicy />} />
 
 
             {/* Catch-all Not Found Route */}

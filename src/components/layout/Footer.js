@@ -162,7 +162,7 @@ const Footer = () => {
         <div className="mt-8 border-t border-gray-700 pt-6 text-sm text-gray-400 text-center">
           <p>&copy; {new Date().getFullYear()} Your E-Commerce Site. All rights reserved.</p>
           <p className="mt-2">
-            <a href="#" className="hover:text-gray-100 mx-2">Privacy Policy</a>|
+            <a href="/privacy-policy" className="hover:text-gray-100 mx-2">Privacy Policy</a>|
             <a href="#" className="hover:text-gray-100 mx-2">Terms of Service</a>|
             <a href="#" className="hover:text-gray-100 mx-2">Cookies</a>
           </p>
