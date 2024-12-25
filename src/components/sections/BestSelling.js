@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {Loader, ProductCard} from '../common'; // Assuming you have a ProductCard component
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchAllProducts} from '../../redux/slice/productSlice';
+import {fetchBestSellingProducts} from '../../redux/slice/productSlice';
 import {Link} from 'react-router-dom';
 
 const BestSelling = () => {
-  const {isLoading, items:products, error} = useSelector((state)=> state.product);
+  const {isLoading, best_selling:products, error} = useSelector((state)=> state.product);
 
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-   dispatch(fetchAllProducts({limit:4}));
+   dispatch(fetchBestSellingProducts({}));
   }, [dispatch]);
 
   if (isLoading) {

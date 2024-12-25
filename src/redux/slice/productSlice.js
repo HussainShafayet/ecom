@@ -1,11 +1,12 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import axios from "axios";
-import {getAllProducts, getNewArrivalProducts, getProductById, getProductsByCategory} from "../../services/productService";
+import {getAllProducts, getBestSellingProducts, getNewArrivalProducts, getProductById, getProductsByCategory} from "../../services/productService";
 const initialState = {
     isLoading: false,
     relatedProductsLoading: false,
     items: [],
     new_arrival: [],
+    best_selling: [],
     error: null,
     product: null,
     mainImage: null,
@@ -31,9 +32,16 @@ export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", asy
 
 //get new arrival products
 export const fetchNewArrivalProducts = createAsyncThunk("product/fetchNewArrivalProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
-    let response;
-    response = await getNewArrivalProducts(limit, sortBy, order, page, skip);
+    let response = await getNewArrivalProducts(limit, sortBy, order, page, skip);
     console.log('get new arrival product res', response);
+    
+    return {data: response.data.data.results, error: response.message};
+});
+
+//get Best Selling products
+export const fetchBestSellingProducts = createAsyncThunk("product/fetchBestSellingProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
+    let response = await getBestSellingProducts(limit, sortBy, order, page, skip);
+    console.log('get best selling product res', response);
     
     return {data: response.data.data.results, error: response.message};
 });
@@ -112,10 +120,32 @@ const productSlice = createSlice({
             state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
             
             state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
-            
-            
         });
         builder.addCase(fetchNewArrivalProducts.rejected,(state, action)=>{
+            state.relatedProductsLoading = false;
+            state.isLoading = false;
+            //state.products = [];
+            state.error = action.error.message;
+        });
+
+
+        //get bestSelling products
+        builder.addCase(fetchBestSellingProducts.pending, (state)=>{
+            state.relatedProductsLoading = true;
+            state.isLoading = true;
+        });
+        builder.addCase(fetchBestSellingProducts.fulfilled,(state, action)=>{
+            
+            state.relatedProductsLoading = false;
+            state.isLoading = false;
+            state.best_selling = action.meta.arg.page > 1 
+            ? [...state.best_selling, ...action.payload.data] 
+            : action.payload.data;
+            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            
+            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+        });
+        builder.addCase(fetchBestSellingProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
             state.isLoading = false;
             //state.products = [];
