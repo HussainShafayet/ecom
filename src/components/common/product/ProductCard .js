@@ -5,6 +5,7 @@ import { addToCart } from '../../../redux/slice/cartSlice';
 import { FaHeart, FaEye, FaShoppingCart, FaRegHeart } from 'react-icons/fa';
 import {addToWishlist, removeFromWishlist} from '../../../redux/slice/wishlistSlice';
 import {addToCartAndRemoveFromWishlist} from '../../../redux/slice/cartSlice';
+import blurImage from '../../../assets/images/blur.jpg';
 
 const ProductCard = ({ product, cardForTrending }) => {
   const dispatch = useDispatch();
@@ -49,7 +50,7 @@ const ProductCard = ({ product, cardForTrending }) => {
       
       {/* Discount Badge */}
       {product.has_discount && (
-        <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded">
+        <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
           {product.discount_amount}{product.discount_type == 'percentage'?'%':'৳'} OFF
         </span>
       )}
@@ -72,24 +73,24 @@ const ProductCard = ({ product, cardForTrending }) => {
         </button>
 
       {/* Product Image */}
-      <Link to={`/products/${product.id}`} className="block">
+      <Link to={`/products/${product.id}`} className="block h-36">
         {/* Main Product Image */}
         <img
           src={product.image}
           alt={product.title}
-          loading='lazy'
-          className={`w-full h-40 object-cover rounded-md mb-2 transition-opacity duration-500 ${
+          loading="lazy"
+          className={`w-full h-full object-contain rounded-md mb-2 transition-opacity duration-500 ${
             isImageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           onLoad={() => setIsImageLoaded(true)} // Set image loaded state
         />
-        
+
         {/* Blurred Placeholder */}
         {!isImageLoaded && (
           <img
-            src={product.image}
+            src={blurImage}
             alt="Loading"
-            className="absolute inset-0 w-full h-40 bg-gray-200 rounded-md mb-2 animate-pulse object-cover"
+            className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
           />
         )}
       </Link>
