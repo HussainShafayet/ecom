@@ -1,18 +1,18 @@
 import React, {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchAllProducts} from '../../redux/slice/productSlice';
+import {fetchAllProducts, fetchFlashSaleProducts} from '../../redux/slice/productSlice';
 import {Loader, ProductCard} from '../common';
 import {Link} from 'react-router-dom';
 
-const TrendingProducts = () => {
+const FlashSale = () => {
 
-    const {isLoading, items:products, error} = useSelector((state)=> state.product);
+    const {isLoading, flash_sale:products, error} = useSelector((state)=> state.product);
 
 
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(fetchAllProducts({limit:4}));
+        dispatch(fetchFlashSaleProducts({}));
     }, [dispatch]);
 
     if (isLoading) {
@@ -25,10 +25,10 @@ const TrendingProducts = () => {
 
   return (
     <div className="container mx-auto my-12">
-      <h2 className="text-3xl font-bold">Trending</h2>
+      <h2 className="text-3xl font-bold">Flash Sale</h2>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
         <span className="text-sm md:text-base text-gray-600">
-          Discover the latest trends with our Trending Products.
+          Discover the latest trends with our Flash Sale Products.
         </span>
         <Link
           to="/products"
@@ -51,4 +51,4 @@ const TrendingProducts = () => {
   );
 };
 
-export default TrendingProducts;
+export default FlashSale;

@@ -1,12 +1,13 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import axios from "axios";
-import {getAllProducts, getBestSellingProducts, getNewArrivalProducts, getProductById, getProductsByCategory} from "../../services/productService";
+import {getAllProducts, getBestSellingProducts, getFlashSaleProducts, getNewArrivalProducts, getProductById, getProductsByCategory} from "../../services/productService";
 const initialState = {
     isLoading: false,
     relatedProductsLoading: false,
     items: [],
     new_arrival: [],
     best_selling: [],
+    flash_sale: [],
     error: null,
     product: null,
     mainImage: null,
@@ -42,6 +43,14 @@ export const fetchNewArrivalProducts = createAsyncThunk("product/fetchNewArrival
 export const fetchBestSellingProducts = createAsyncThunk("product/fetchBestSellingProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
     let response = await getBestSellingProducts(limit, sortBy, order, page, skip);
     console.log('get best selling product res', response);
+    
+    return {data: response.data.data.results, error: response.message};
+});
+
+//get flash Selling products
+export const fetchFlashSaleProducts = createAsyncThunk("product/fetchFlashSaleProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
+    let response = await getFlashSaleProducts(limit, sortBy, order, page, skip);
+    console.log('get flash sale product res', response);
     
     return {data: response.data.data.results, error: response.message};
 });
@@ -146,6 +155,30 @@ const productSlice = createSlice({
             state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
         });
         builder.addCase(fetchBestSellingProducts.rejected,(state, action)=>{
+            state.relatedProductsLoading = false;
+            state.isLoading = false;
+            //state.products = [];
+            state.error = action.error.message;
+        });
+
+
+         //get flash sale products
+         builder.addCase(fetchFlashSaleProducts.pending, (state)=>{
+            state.relatedProductsLoading = true;
+            state.isLoading = true;
+        });
+        builder.addCase(fetchFlashSaleProducts.fulfilled,(state, action)=>{
+            
+            state.relatedProductsLoading = false;
+            state.isLoading = false;
+            state.flash_sale = action.meta.arg.page > 1 
+            ? [...state.flash_sale, ...action.payload.data] 
+            : action.payload.data;
+            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            
+            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+        });
+        builder.addCase(fetchFlashSaleProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
             state.isLoading = false;
             //state.products = [];
