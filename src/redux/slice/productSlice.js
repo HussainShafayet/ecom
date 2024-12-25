@@ -32,11 +32,7 @@ export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", asy
 //get new arrival products
 export const fetchNewArrivalProducts = createAsyncThunk("product/fetchNewArrivalProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
     let response;
-    if (category) {
-        response = await getProductsByCategory(category, limit, sortBy, order, page, skip)
-    }else{
-        response = await getNewArrivalProducts(limit, sortBy, order, page, skip);
-    }
+    response = await getNewArrivalProducts(limit, sortBy, order, page, skip);
     console.log('get new arrival product res', response);
     
     return {data: response.data.data.results, error: response.message};
