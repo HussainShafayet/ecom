@@ -97,6 +97,30 @@ export const getFlashSaleProducts = async (limit = null, sortBy = null, order = 
 };
 
 
+// featured products
+export const getFeaturedProducts = async (limit = null, sortBy = null, order = null, page = null, skip=null) => {
+  let query = '';
+
+  if (limit) {
+    query += `limit=${limit}&`; // Add limit
+  }
+  if (sortBy) {
+    query += `sortBy=${sortBy}&`; // Add sorting
+  }
+  if (order) {
+    query += `order=${order}&`; // Add order (asc or desc)
+  }
+  if (page) {
+    query += `page=${page}&`; // Add page for pagination
+  }
+  if (skip) {
+    query += `page_size=${skip}&`; // Add skip for pagination
+  }
+
+  return await axios.get(`${API_URL}/api/products/featured?${query}`);
+};
+
+
 // Fetch a single product by its ID
 export const getProductById = async (id) => {
     return await axios.get(`${API_URL}/products/${id}`);

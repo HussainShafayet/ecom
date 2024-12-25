@@ -1,20 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {Loader, ProductCard} from '../common'; // Assuming you have a ProductCard component
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchAllProducts} from '../../redux/slice/productSlice';
+import {fetchFeaturedProducts} from '../../redux/slice/productSlice';
 import {Link} from 'react-router-dom';
 
 const FeaturedProducts = () => {
-  //const [products, setProducts] = useState([]);
-  //const [loading, setLoading] = useState(true);
-  //const [error, setError] = useState(null);
-  const {isLoading, items:products, error} = useSelector((state)=> state.product);
+  const {isLoading, featured:products, error} = useSelector((state)=> state.product);
 
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-   dispatch(fetchAllProducts({limit:4}));
+   dispatch(fetchFeaturedProducts({}));
   }, [dispatch]);
 
   if (isLoading) {

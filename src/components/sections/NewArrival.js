@@ -5,7 +5,7 @@ import {fetchAllProducts, fetchNewArrivalProducts} from '../../redux/slice/produ
 import {Link} from 'react-router-dom';
 
 const NewArrival = () => {
-  const {isLoading, new_arrival, error} = useSelector((state)=> state.product);
+  const {isLoading, new_arrival:products, error} = useSelector((state)=> state.product);
 
   const dispatch = useDispatch();
 
@@ -37,12 +37,12 @@ const NewArrival = () => {
           </Link>
         }
       </div>
-      {new_arrival.length === 0  ? <div className='text-center'>
+      {products.length === 0  ? <div className='text-center'>
         <span>Not found</span>
       </div>:
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {new_arrival.map((product) => (
+        {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>

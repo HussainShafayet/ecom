@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import axios from "axios";
-import {getAllProducts, getBestSellingProducts, getFlashSaleProducts, getNewArrivalProducts, getProductById, getProductsByCategory} from "../../services/productService";
+import {getAllProducts, getBestSellingProducts, getFeaturedProducts, getFlashSaleProducts, getNewArrivalProducts, getProductById, getProductsByCategory} from "../../services/productService";
 const initialState = {
     isLoading: false,
     relatedProductsLoading: false,
@@ -8,6 +8,7 @@ const initialState = {
     new_arrival: [],
     best_selling: [],
     flash_sale: [],
+    featured: [],
     error: null,
     product: null,
     mainImage: null,
@@ -47,10 +48,18 @@ export const fetchBestSellingProducts = createAsyncThunk("product/fetchBestSelli
     return {data: response.data.data.results, error: response.message};
 });
 
-//get flash Selling products
+//get flash sale products
 export const fetchFlashSaleProducts = createAsyncThunk("product/fetchFlashSaleProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
     let response = await getFlashSaleProducts(limit, sortBy, order, page, skip);
     console.log('get flash sale product res', response);
+    
+    return {data: response.data.data.results, error: response.message};
+});
+
+//get featured products
+export const fetchFeaturedProducts = createAsyncThunk("product/fetchFeaturedProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
+    let response = await getFeaturedProducts(limit, sortBy, order, page, skip);
+    console.log('get fetured products res', response);
     
     return {data: response.data.data.results, error: response.message};
 });
@@ -162,8 +171,8 @@ const productSlice = createSlice({
         });
 
 
-         //get flash sale products
-         builder.addCase(fetchFlashSaleProducts.pending, (state)=>{
+        //get flash sale products
+        builder.addCase(fetchFlashSaleProducts.pending, (state)=>{
             state.relatedProductsLoading = true;
             state.isLoading = true;
         });
@@ -179,6 +188,30 @@ const productSlice = createSlice({
             state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
         });
         builder.addCase(fetchFlashSaleProducts.rejected,(state, action)=>{
+            state.relatedProductsLoading = false;
+            state.isLoading = false;
+            //state.products = [];
+            state.error = action.error.message;
+        });
+
+
+        //get fetured products
+        builder.addCase(fetchFeaturedProducts.pending, (state)=>{
+            state.relatedProductsLoading = true;
+            state.isLoading = true;
+        });
+        builder.addCase(fetchFeaturedProducts.fulfilled,(state, action)=>{
+            
+            state.relatedProductsLoading = false;
+            state.isLoading = false;
+            state.featured = action.meta.arg.page > 1 
+            ? [...state.featured, ...action.payload.data] 
+            : action.payload.data;
+            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            
+            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+        });
+        builder.addCase(fetchFeaturedProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
             state.isLoading = false;
             //state.products = [];

@@ -10,9 +10,9 @@ const Home = () => {
       <CategoriesSection />
       <BestSelling /> 
       <FlashSale />
-     {/*  <FeaturedProducts />
+      <FeaturedProducts />
       
-      <Testimonials />
+       {/*   <Testimonials />
       <TrendingProducts />
       <DealsAndDiscounts />*/}
       

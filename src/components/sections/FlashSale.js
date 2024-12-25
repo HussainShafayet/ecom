@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchAllProducts, fetchFlashSaleProducts} from '../../redux/slice/productSlice';
+import {fetchFlashSaleProducts} from '../../redux/slice/productSlice';
 import {Loader, ProductCard} from '../common';
 import {Link} from 'react-router-dom';
 
