@@ -1,10 +1,11 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import axios from "axios";
-import {getAllProducts, getProductById, getProductsByCategory} from "../../services/productService";
+import {getAllProducts, getNewArrivalProducts, getProductById, getProductsByCategory} from "../../services/productService";
 const initialState = {
     isLoading: false,
     relatedProductsLoading: false,
     items: [],
+    new_arrival: [],
     error: null,
     product: null,
     mainImage: null,
@@ -25,7 +26,20 @@ export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", asy
     }
     console.log('get all product res', response);
     
-    return {data: response.data.products, error: response.message};
+    return {data: response.data.data.results, error: response.message};
+});
+
+//get new arrival products
+export const fetchNewArrivalProducts = createAsyncThunk("product/fetchNewArrivalProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
+    let response;
+    if (category) {
+        response = await getProductsByCategory(category, limit, sortBy, order, page, skip)
+    }else{
+        response = await getNewArrivalProducts(limit, sortBy, order, page, skip);
+    }
+    console.log('get new arrival product res', response);
+    
+    return {data: response.data.data.results, error: response.message};
 });
 
 // Fetch a single product by its ID
@@ -79,6 +93,33 @@ const productSlice = createSlice({
             state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
         });
         builder.addCase(fetchAllProducts.rejected,(state, action)=>{
+            state.relatedProductsLoading = false;
+            state.isLoading = false;
+            //state.products = [];
+            state.error = action.error.message;
+        });
+
+
+
+        //get NewArrival products
+        builder.addCase(fetchNewArrivalProducts.pending, (state)=>{
+            state.relatedProductsLoading = true;
+            state.isLoading = true;
+        });
+        builder.addCase(fetchNewArrivalProducts.fulfilled,(state, action)=>{
+            
+            state.relatedProductsLoading = false;
+            state.isLoading = false;
+            state.new_arrival = action.meta.arg.page > 1 
+            ? [...state.new_arrival, ...action.payload.data] 
+            : action.payload.data;
+            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            
+            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            
+            
+        });
+        builder.addCase(fetchNewArrivalProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
             state.isLoading = false;
             //state.products = [];

@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import {Loader, ProductCard} from '../common'; // Assuming you have a ProductCard component
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchAllProducts} from '../../redux/slice/productSlice';
+import {fetchAllProducts, fetchNewArrivalProducts} from '../../redux/slice/productSlice';
 import {Link} from 'react-router-dom';
 
 const NewArrival = () => {
-  const {isLoading, items:products, error} = useSelector((state)=> state.product);
-
+  const {isLoading, new_arrival, error} = useSelector((state)=> state.product);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-   dispatch(fetchAllProducts({limit:4}));
+   dispatch(fetchNewArrivalProducts({limit:10}));
   }, [dispatch]);
 
   if (isLoading) {
@@ -38,12 +37,12 @@ const NewArrival = () => {
           </Link>
         }
       </div>
-      {products.length === 0  ? <div className='text-center'>
+      {new_arrival.length === 0  ? <div className='text-center'>
         <span>Not found</span>
       </div>:
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {products.map((product) => (
+        {new_arrival.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>

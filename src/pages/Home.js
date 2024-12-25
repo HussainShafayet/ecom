@@ -7,13 +7,13 @@ const Home = () => {
     <>
       <HeroSection />
       <NewArrival />
-      <BestSelling />
+      {/*<BestSelling />
       <CategoriesSection />
       <FeaturedProducts />
       
       <Testimonials />
       <TrendingProducts />
-      <DealsAndDiscounts />
+      <DealsAndDiscounts />*/}
       
     </>
   )

@@ -41,16 +41,16 @@ const ProductCard = ({ product, cardForTrending }) => {
     <div className="border rounded-lg shadow-md bg-white hover:shadow-lg transition duration-200 relative p-3">
       
       {/* Out of Stock Overlay */}
-      {product.stock < 0 && (
+      {product.stock && product.stock < 0 && (
         <div className="absolute inset-0 bg-black bg-opacity-50 text-white flex items-center justify-center text-lg font-bold z-10">
           Out of Stock
         </div>
       )}
       
       {/* Discount Badge */}
-      {product.discountPercentage && (
+      {product.has_discount && (
         <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded">
-          {product.discountPercentage}% OFF
+          {product.discount_amount}{product.discount_type == 'percentage'?'%':'৳'} OFF
         </span>
       )}
       {cardForTrending && 
@@ -75,7 +75,7 @@ const ProductCard = ({ product, cardForTrending }) => {
       <Link to={`/products/${product.id}`} className="block">
         {/* Main Product Image */}
         <img
-          src={product.images[0]}
+          src={product.image}
           alt={product.title}
           loading='lazy'
           className={`w-full h-40 object-cover rounded-md mb-2 transition-opacity duration-500 ${
@@ -87,7 +87,7 @@ const ProductCard = ({ product, cardForTrending }) => {
         {/* Blurred Placeholder */}
         {!isImageLoaded && (
           <img
-            src={product.thumbnail}
+            src={product.image}
             alt="Loading"
             className="absolute inset-0 w-full h-40 bg-gray-200 rounded-md mb-2 animate-pulse object-cover"
           />
@@ -99,31 +99,44 @@ const ProductCard = ({ product, cardForTrending }) => {
         {/* Product Title */}
         <h3 className="text-md font-semibold mb-1">
           <Link to={`/products/${product.id}`} className="hover:text-blue-500">
-            {product.title}
+            {product.name}
           </Link>
         </h3>
 
         {/* Product Brand */}
         <p className="text-xs text-gray-500 mb-2">
-          <span className="font-semibold">{product.brand}</span>
+          <span className="font-semibold">{product.brand_name}</span>
         </p>
 
         {/* View Count and Order Count */}
         <div className="flex items-center text-xs text-gray-600 mb-2 space-x-4">
           <div className="flex items-center">
-            <FaEye className="mr-1 text-gray-500" /> {Math.ceil(Math.random()*1000)} views
+            <FaEye className="mr-1 text-gray-500" /> {product.total_views} views
           </div>
           <div className="flex items-center">
-            <FaShoppingCart className="mr-1 text-gray-500" /> {Math.ceil(Math.random()*1000)} orders
+            <FaShoppingCart className="mr-1 text-gray-500" /> {product.total_orders} orders
           </div>
         </div>
 
-        {/* Product Price */}
-        <p className="text-gray-700 text-sm font-bold mb-2">${product.price.toFixed(2)}</p>
+         {/* Product Price */}
+         {product.has_discount ? (
+              <div className="mb-2 flex flex-row space-x-1">
+                <p className="text-3x text-green-600 font-semibold">
+                  {product.discount_price}
+                </p>
+                <p className="text-gray-500 line-through">
+                  {product.base_price}
+                </p>
+              </div>
+            ) : (
+              <p className="text-2xl text-green-600 font-semibold mb-2">
+                {product.base_price}
+              </p>
+            )}
 
         {/* Product Rating */}
         <div className="flex items-center mb-2">
-          {Array(Math.ceil(product.rating))
+          {Array(Math.ceil(product.avg_rating))
             .fill(0)
             .map((_, i) => (
               <svg
@@ -135,7 +148,8 @@ const ProductCard = ({ product, cardForTrending }) => {
                 <path d="M12 17.27L18.18 21 16.54 14.24 22 9.27 14.81 8.63 12 2 9.19 8.63 2 9.27 7.46 14.24 5.82 21z" />
               </svg>
             ))}
-          <span className="ml-2 text-xs text-gray-600">({product.rating.toFixed(1)})</span>
+          <span className="ml-2 text-xs text-gray-600">({product.avg_rating.toFixed(1)})</span>
+          <span className="ml-2 text-xs text-gray-600">{product.total_reviews} reviews</span>
         </div>
 
         {/* Button Group */}

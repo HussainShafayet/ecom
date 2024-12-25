@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base API URL (you can adjust this based on your actual API endpoint)
-const API_URL = 'https://dummyjson.com'; // Replace with your API base URL
+const API_URL = 'http://192.168.0.103:8000'; // Replace with your API base URL
 
 // src/services/productService.js
 export const getAllProducts = async (limit = null, sortBy = null, order = null, page = null, skip=null) => {
@@ -23,7 +23,30 @@ export const getAllProducts = async (limit = null, sortBy = null, order = null, 
     query += `skip=${skip}&`; // Add skip for pagination
   }
 
-  return await axios.get(`${API_URL}/products?${query}`);
+  return await axios.get(`${API_URL}/api/products?${query}`);
+};
+
+// src/services/productService.js
+export const getNewArrivalProducts = async (limit = null, sortBy = null, order = null, page = null, skip=null) => {
+  let query = '';
+
+  if (limit) {
+    query += `limit=${limit}&`; // Add limit
+  }
+  if (sortBy) {
+    query += `sortBy=${sortBy}&`; // Add sorting
+  }
+  if (order) {
+    query += `order=${order}&`; // Add order (asc or desc)
+  }
+  if (page) {
+    query += `page=${page}&`; // Add page for pagination
+  }
+  if (skip) {
+    query += `page_size=${skip}&`; // Add skip for pagination
+  }
+
+  return await axios.get(`${API_URL}/api/products/new-arrivals?${query}`);
 };
 
 
