@@ -1,20 +1,19 @@
 import React from 'react';
-import { HeroSection, FeaturedProducts, CategoriesSection, DealsAndDiscounts, NewArrival, BestSelling, FlashSale } from '../components/sections';
+import { HeroSection, FeaturedProducts, CategoriesSection, DealsAndDiscounts, NewArrival, BestSelling, FlashSale, AllProducts } from '../components/sections';
 import Testimonials from '../components/sections/Testomonials';
 
 const Home = () => {
   return (
     <>
       <HeroSection />
+      <FlashSale />
       <NewArrival />
       <CategoriesSection />
-      <BestSelling /> 
-      <FlashSale />
+      <BestSelling />
       <FeaturedProducts />
+      <AllProducts />
+      <Testimonials />
       
-       {/*   <Testimonials />
-      <TrendingProducts />
-      <DealsAndDiscounts />*/}
       
     </>
   )

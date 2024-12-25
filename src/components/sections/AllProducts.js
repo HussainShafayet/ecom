@@ -4,14 +4,14 @@ import {fetchAllProducts} from '../../redux/slice/productSlice';
 import {Loader, ProductCard} from '../common';
 import {Link} from 'react-router-dom';
 
-const DealsAndDiscounts = () => {
+const AllProducts = () => {
   const {isLoading, items:products, error} = useSelector((state)=> state.product);
 
 
     const dispatch = useDispatch();
 
     useEffect(() => {
-      dispatch(fetchAllProducts({limit:4}));
+      dispatch(fetchAllProducts({limit:10}));
     }, [dispatch]);
 
 
@@ -55,10 +55,10 @@ const DealsAndDiscounts = () => {
 
   return (
     <div className="container mx-auto my-12">
-      <h2 className="text-3xl font-bold">Deals & Discounts</h2>
+      <h2 className="text-3xl font-bold">All Products</h2>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
         <span className="text-sm md:text-base text-gray-600">
-          Discover the latest trends with our Deals & Discounts Products.
+          Discover the latest trends with our All Products.
         </span>
         <Link
           to="/products"
@@ -78,27 +78,7 @@ const DealsAndDiscounts = () => {
       </div>
       }
     </div>
-
-
-      //{/* Countdown Timer */}
-      //<div className="mt-2 text-red-500 font-bold">
-      //<p>Ends in:</p>
-      //<div className="flex justify-center space-x-2">
-      //  <div className="p-1 bg-red-100 rounded">
-      //    <span>{timers[index]?.days || 0}d</span>
-      //  </div>
-      //  <div className="p-1 bg-red-100 rounded">
-      //    <span>{timers[index]?.hours || 0}h</span>
-      //  </div>
-      //  <div className="p-1 bg-red-100 rounded">
-      //    <span>{timers[index]?.minutes || 0}m</span>
-      //  </div>
-      //  <div className="p-1 bg-red-100 rounded">
-      //    <span>{timers[index]?.seconds || 0}s</span>
-      //  </div>
-      //</div>
-      //</div>
   );
 };
 
-export default DealsAndDiscounts;
+export default AllProducts;
