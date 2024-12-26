@@ -11,7 +11,7 @@ const FeaturedProducts = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-   dispatch(fetchFeaturedProducts({}));
+   dispatch(fetchFeaturedProducts({page_size:12}));
   }, [dispatch]);
 
   if (isLoading) {

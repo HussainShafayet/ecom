@@ -10,7 +10,7 @@ const NewArrival = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-   dispatch(fetchNewArrivalProducts({limit:10}));
+   dispatch(fetchNewArrivalProducts({page_size:12}));
   }, [dispatch]);
 
   if (isLoading) {

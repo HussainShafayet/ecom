@@ -33,32 +33,33 @@ export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", asy
 });
 
 //get new arrival products
-export const fetchNewArrivalProducts = createAsyncThunk("product/fetchNewArrivalProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
-    let response = await getNewArrivalProducts(limit, sortBy, order, page, skip);
+export const fetchNewArrivalProducts = createAsyncThunk("product/fetchNewArrivalProducts", async ({page=1, page_size=null})=>{
+
+    let response = await getNewArrivalProducts(page, page_size);
     console.log('get new arrival product res', response);
     
     return {data: response.data.data.results, error: response.message};
 });
 
 //get Best Selling products
-export const fetchBestSellingProducts = createAsyncThunk("product/fetchBestSellingProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
-    let response = await getBestSellingProducts(limit, sortBy, order, page, skip);
+export const fetchBestSellingProducts = createAsyncThunk("product/fetchBestSellingProducts", async ({page=1, page_size=null})=>{
+    let response = await getBestSellingProducts(page, page_size);
     console.log('get best selling product res', response);
     
     return {data: response.data.data.results, error: response.message};
 });
 
 //get flash sale products
-export const fetchFlashSaleProducts = createAsyncThunk("product/fetchFlashSaleProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
-    let response = await getFlashSaleProducts(limit, sortBy, order, page, skip);
+export const fetchFlashSaleProducts = createAsyncThunk("product/fetchFlashSaleProducts", async ({page=1, page_size=null})=>{
+    let response = await getFlashSaleProducts(page, page_size);
     console.log('get flash sale product res', response);
     
     return {data: response.data.data.results, error: response.message};
 });
 
 //get featured products
-export const fetchFeaturedProducts = createAsyncThunk("product/fetchFeaturedProducts", async ({category=null, limit=null,sortBy=null, order=null, page=1, skip=0})=>{
-    let response = await getFeaturedProducts(limit, sortBy, order, page, skip);
+export const fetchFeaturedProducts = createAsyncThunk("product/fetchFeaturedProducts", async ({page=1, page_size=null})=>{
+    let response = await getFeaturedProducts(page, page_size);
     console.log('get fetured products res', response);
     
     return {data: response.data.data.results, error: response.message};

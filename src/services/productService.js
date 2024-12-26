@@ -27,46 +27,46 @@ export const getAllProducts = async (limit = null, sortBy = null, order = null, 
 };
 
 // new arrival products
-export const getNewArrivalProducts = async (limit = null, sortBy = null, order = null, page = null, skip=null) => {
+export const getNewArrivalProducts = async (page, page_size) => {
   let query = '';
 
-  if (limit) {
-    query += `limit=${limit}&`; // Add limit
-  }
-  if (sortBy) {
-    query += `sortBy=${sortBy}&`; // Add sorting
-  }
-  if (order) {
-    query += `order=${order}&`; // Add order (asc or desc)
-  }
+  //if (limit) {
+  //  query += `limit=${limit}&`; // Add limit
+  //}
+  //if (sortBy) {
+  //  query += `sortBy=${sortBy}&`; // Add sorting
+  //}
+  //if (order) {
+  //  query += `order=${order}&`; // Add order (asc or desc)
+  //}
   if (page) {
     query += `page=${page}&`; // Add page for pagination
   }
-  if (skip) {
-    query += `page_size=${skip}&`; // Add skip for pagination
+  if (page_size) {
+    query += `page_size=${page_size}&`; // Add skip for pagination
   }
-
+  
   return await axios.get(`${API_URL}/api/products/new-arrivals?${query}`);
 };
 
 // best-selling products
-export const getBestSellingProducts = async (limit = null, sortBy = null, order = null, page = null, skip=null) => {
+export const getBestSellingProducts = async (page , page_size) => {
   let query = '';
 
-  if (limit) {
-    query += `limit=${limit}&`; // Add limit
-  }
-  if (sortBy) {
-    query += `sortBy=${sortBy}&`; // Add sorting
-  }
-  if (order) {
-    query += `order=${order}&`; // Add order (asc or desc)
-  }
+  //if (limit) {
+  //  query += `limit=${limit}&`; // Add limit
+  //}
+  //if (sortBy) {
+  //  query += `sortBy=${sortBy}&`; // Add sorting
+  //}
+  //if (order) {
+  //  query += `order=${order}&`; // Add order (asc or desc)
+  //}
   if (page) {
     query += `page=${page}&`; // Add page for pagination
   }
-  if (skip) {
-    query += `page_size=${skip}&`; // Add skip for pagination
+  if (page_size) {
+    query += `page_size=${page_size}&`; // Add skip for pagination
   }
 
   return await axios.get(`${API_URL}/api/products/best-selling?${query}`);
@@ -74,23 +74,23 @@ export const getBestSellingProducts = async (limit = null, sortBy = null, order 
 
 
 // flash sale products
-export const getFlashSaleProducts = async (limit = null, sortBy = null, order = null, page = null, skip=null) => {
+export const getFlashSaleProducts = async (page, page_size) => {
   let query = '';
 
-  if (limit) {
-    query += `limit=${limit}&`; // Add limit
-  }
-  if (sortBy) {
-    query += `sortBy=${sortBy}&`; // Add sorting
-  }
-  if (order) {
-    query += `order=${order}&`; // Add order (asc or desc)
-  }
+  //if (limit) {
+  //  query += `limit=${limit}&`; // Add limit
+  //}
+  //if (sortBy) {
+  //  query += `sortBy=${sortBy}&`; // Add sorting
+  //}
+  //if (order) {
+  //  query += `order=${order}&`; // Add order (asc or desc)
+  //}
   if (page) {
     query += `page=${page}&`; // Add page for pagination
   }
-  if (skip) {
-    query += `page_size=${skip}&`; // Add skip for pagination
+  if (page_size) {
+    query += `page_size=${page_size}&`; // Add skip for pagination
   }
 
   return await axios.get(`${API_URL}/api/products/flash-sale?${query}`);
@@ -98,23 +98,23 @@ export const getFlashSaleProducts = async (limit = null, sortBy = null, order = 
 
 
 // featured products
-export const getFeaturedProducts = async (limit = null, sortBy = null, order = null, page = null, skip=null) => {
+export const getFeaturedProducts = async (page, page_size) => {
   let query = '';
 
-  if (limit) {
-    query += `limit=${limit}&`; // Add limit
-  }
-  if (sortBy) {
-    query += `sortBy=${sortBy}&`; // Add sorting
-  }
-  if (order) {
-    query += `order=${order}&`; // Add order (asc or desc)
-  }
+  //if (limit) {
+  //  query += `limit=${limit}&`; // Add limit
+  //}
+  //if (sortBy) {
+  //  query += `sortBy=${sortBy}&`; // Add sorting
+  //}
+  //if (order) {
+  //  query += `order=${order}&`; // Add order (asc or desc)
+  //}
   if (page) {
     query += `page=${page}&`; // Add page for pagination
   }
-  if (skip) {
-    query += `page_size=${skip}&`; // Add skip for pagination
+  if (page_size) {
+    query += `page_size=${page_size}&`; // Add skip for pagination
   }
 
   return await axios.get(`${API_URL}/api/products/featured?${query}`);

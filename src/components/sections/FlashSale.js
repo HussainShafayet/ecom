@@ -12,7 +12,7 @@ const FlashSale = ({forRoute}) => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(fetchFlashSaleProducts({}));
+        dispatch(fetchFlashSaleProducts({page_size: 12}));
     }, [dispatch]);
 
     if (isLoading) {

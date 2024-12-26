@@ -11,7 +11,7 @@ const BestSelling = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-   dispatch(fetchBestSellingProducts({}));
+   dispatch(fetchBestSellingProducts({page_size:12}));
   }, [dispatch]);
 
   if (isLoading) {
