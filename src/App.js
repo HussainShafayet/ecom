@@ -8,7 +8,7 @@ import {loadUserFromStorage} from './redux/slice/authSlice';
 import {useEffect, useRef} from 'react';
 import {ProtectedRoute, ScrollToTop} from './components/common';
 import {AboutUs, Contact, FAQPage, OrderTracking, PrivacyPolicy} from './pages/others';
-import {FlashSale} from './components/sections';
+import {FlashSale, NewArrival} from './components/sections';
 
 function App() {
   const scrollContainerRef = useRef(null);
@@ -34,7 +34,7 @@ function App() {
 
             {/*home page section*/}
             <Route path='/products/flash-sale' element={<FlashSale forRoute={true} />} />
-
+            <Route path='/products/new-arrival' element={<NewArrival forRoute={true} />} />
             {/* User Pages */}
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
