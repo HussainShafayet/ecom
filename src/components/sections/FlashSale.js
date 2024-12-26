@@ -4,7 +4,7 @@ import {fetchFlashSaleProducts} from '../../redux/slice/productSlice';
 import {Loader, ProductCard} from '../common';
 import {Link} from 'react-router-dom';
 
-const FlashSale = () => {
+const FlashSale = ({forRoute}) => {
 
     const {isLoading, flash_sale:products, error} = useSelector((state)=> state.product);
 
@@ -30,12 +30,14 @@ const FlashSale = () => {
         <span className="text-sm md:text-base text-gray-600">
           Discover the latest trends with our Flash Sale Products.
         </span>
+        {!forRoute && 
         <Link
-          to="/products"
+          to="/products/flash-sale"
           className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
         >
           View All
         </Link>
+        }
       </div>
       {products.length === 0  ? <div className='text-center'>
         <span>Not found</span>
