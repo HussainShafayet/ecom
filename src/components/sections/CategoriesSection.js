@@ -11,7 +11,7 @@ const CategoriesSection = () => {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    dispatch(fetchAllCategories());
+    dispatch(fetchAllCategories({page:1, page_size:12}));
   }, [dispatch]);
 
   if (isLoading) {
@@ -68,18 +68,26 @@ const CategoriesSection = () => {
         >
           {categories &&
             categories.map((category) => (
+              <>
+              {/* Discount Badge */}
+              {category.has_discount && (
+                <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
+                  {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
+                </span>
+              )}
               <Link to={`/products/category/${category.slug}`} key={category.id}>
                 <div className="relative group cursor-pointer min-w-[150px]">
                   <img
-                    src={'https://images.freeimages.com/images/large-previews/d4f/www-1242368.jpg?fmt=webp&h=250'}
+                    src={category.image}
                     alt={category.name}
                     className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-white text-lg font-semibold">{category.name}</span>
+                  <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-lg font-semibold">{category.name}</span>
                   </div>
                 </div>
               </Link>
+              </>
             ))}
         </div>
 
