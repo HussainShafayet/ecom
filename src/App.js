@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { Layout } from './components/layout';
 import { Profile, SignIn, SignUp, WishList } from './pages/user';
-import { Home, Products, ProductDetails, Cart, NotFound, Checkout } from './pages';
+import { Home, Products, ProductDetails, Cart, NotFound, Checkout, Categories } from './pages';
 import {useDispatch} from 'react-redux';
 import {loadUserFromStorage} from './redux/slice/authSlice';
 import {useEffect, useRef} from 'react';
@@ -37,6 +37,8 @@ function App() {
             <Route path='/products/new-arrival' element={<NewArrival forRoute={true} />} />
             <Route path='/products/best-selling' element={<BestSelling forRoute={true} />} />
             <Route path='/products/featured' element={<FeaturedProducts forRoute={true} />} />
+            <Route path='/categories' element={<Categories forRoute={true} />} />
+
 
             {/* User Pages */}
             <Route path="/signin" element={<SignIn />} />
