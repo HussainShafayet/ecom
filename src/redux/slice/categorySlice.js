@@ -1,10 +1,11 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {getAllCategories, getFlashSaleCategories} from "../../services/categoryService";
+import {getAllCategories, getFlashSaleCategories, getNewArrivalCategories} from "../../services/categoryService";
 
 const initialState ={
     isLoading: false,
     categories: [],
     flash_sale: [],
+    new_arrival: [],
     error: null,
 }
 
@@ -20,6 +21,11 @@ export const fetchFlashSaleCategories = createAsyncThunk("category/fetchFlashSal
     return {data: response.data.data.results, error: response.message};
 });
 
+export const fetchNewArrivalCategories = createAsyncThunk("category/fetchNewArrivalCategories", async ({page_size=null,page=1,})=>{
+    const response =  await getNewArrivalCategories(page_size, page);
+    console.log('get new arrival categories res', response);
+    return {data: response.data.data.results, error: response.message};
+});
 const categorySlice = createSlice({
     name: 'category', 
     initialState,
@@ -40,7 +46,7 @@ const categorySlice = createSlice({
             state.error = action.error.message;
         });
 
-         //get all categories
+         //get flash_sale categories
          builder.addCase(fetchFlashSaleCategories.pending, (state)=>{
             state.isLoading = true;
         });
@@ -52,6 +58,22 @@ const categorySlice = createSlice({
         builder.addCase(fetchFlashSaleCategories.rejected,(state, action)=>{
             state.isLoading = false;
             state.flash_sale = [];
+            state.error = action.error.message;
+        });
+
+
+         //get new arrival categories
+         builder.addCase(fetchNewArrivalCategories.pending, (state)=>{
+            state.isLoading = true;
+        });
+        builder.addCase(fetchNewArrivalCategories.fulfilled,(state, action)=>{
+            state.isLoading = false;
+            state.new_arrival = action.payload.data;
+            state.error = null
+        });
+        builder.addCase(fetchNewArrivalCategories.rejected,(state, action)=>{
+            state.isLoading = false;
+            state.new_arrival = [];
             state.error = action.error.message;
         });
     }

@@ -46,7 +46,7 @@ const CategoriesSection = () => {
           Discover the latest trends with Categories.
         </span>
         <Link
-          to="/products"
+          to="/categories"
           className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
         >
           View All
