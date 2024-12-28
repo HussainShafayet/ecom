@@ -3,16 +3,18 @@ import {FaChevronLeft, FaChevronRight} from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
 import {Loader} from '../components/common';
 import {Link} from 'react-router-dom';
-import {fetchFlashSaleCategories, fetchNewArrivalCategories} from '../redux/slice/categorySlice';
+import {fetchFlashSaleCategories, fetchNewArrivalCategories, fetchBestSellingCategories} from '../redux/slice/categorySlice';
 
 const Categories = () => {
-    const { isLoading, flash_sale, new_arrival, error } = useSelector((state) => state.category);
+    const { isLoading, flash_sale, new_arrival, best_selling, error } = useSelector((state) => state.category);
     const dispatch = useDispatch();
     const scrollRef = useRef(null);
   
     useEffect(() => {
       dispatch(fetchFlashSaleCategories({page:1, page_size:12}));
       dispatch(fetchNewArrivalCategories({page:1, page_size:12}));
+      dispatch(fetchBestSellingCategories({page:1, page_size:12}));
+
     }, [dispatch]);
   
     if (isLoading) {
@@ -90,6 +92,52 @@ const Categories = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 {new_arrival.map((category) => (
+                    <>
+                    {/* Discount Badge */}
+                    {category.has_discount && (
+                    <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
+                        {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
+                    </span>
+                    )}
+                    <Link to={`/products/category/${category.slug}`} key={category.id}>
+                    <div className="relative group cursor-pointer min-w-[150px]">
+                        <img
+                        src={category.image}
+                        alt={category.name}
+                        className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-lg font-semibold">{category.name}</span>
+                        </div>
+                    </div>
+                    </Link>
+                    </>
+                ))}
+            </div>
+            }
+          
+            </div>
+        </div>
+
+        {/*Best Selling*/}
+        <div className="container mx-auto my-8">
+            <h2 className="text-3xl font-bold">Best Selling Categories</h2>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
+            <span className="text-sm md:text-base text-gray-600">
+                Discover the latest trends with Categories.
+            </span>
+            </div>
+            <div className="relative">
+           
+    
+            {/* Categories Container */}
+            
+            {best_selling.length === 0  ? <div className='text-center'>
+                <span>Not found</span>
+            </div>:
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                {best_selling.map((category) => (
                     <>
                     {/* Discount Badge */}
                     {category.has_discount && (

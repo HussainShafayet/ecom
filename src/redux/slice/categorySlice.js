@@ -1,11 +1,12 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {getAllCategories, getFlashSaleCategories, getNewArrivalCategories} from "../../services/categoryService";
+import {getAllCategories, getBestSellingCategories, getFlashSaleCategories, getNewArrivalCategories} from "../../services/categoryService";
 
 const initialState ={
     isLoading: false,
     categories: [],
     flash_sale: [],
     new_arrival: [],
+    best_selling:[],
     error: null,
 }
 
@@ -26,6 +27,13 @@ export const fetchNewArrivalCategories = createAsyncThunk("category/fetchNewArri
     console.log('get new arrival categories res', response);
     return {data: response.data.data.results, error: response.message};
 });
+
+export const fetchBestSellingCategories = createAsyncThunk("category/fetchBestSellingCategories", async ({page_size=null,page=1,})=>{
+    const response =  await getBestSellingCategories(page_size, page);
+    console.log('get best selling categories res', response);
+    return {data: response.data.data.results, error: response.message};
+});
+
 const categorySlice = createSlice({
     name: 'category', 
     initialState,
@@ -74,6 +82,22 @@ const categorySlice = createSlice({
         builder.addCase(fetchNewArrivalCategories.rejected,(state, action)=>{
             state.isLoading = false;
             state.new_arrival = [];
+            state.error = action.error.message;
+        });
+
+
+         //get best selling categories
+         builder.addCase(fetchBestSellingCategories.pending, (state)=>{
+            state.isLoading = true;
+        });
+        builder.addCase(fetchBestSellingCategories.fulfilled,(state, action)=>{
+            state.isLoading = false;
+            state.best_selling = action.payload.data;
+            state.error = null
+        });
+        builder.addCase(fetchBestSellingCategories.rejected,(state, action)=>{
+            state.isLoading = false;
+            state.best_selling = [];
             state.error = action.error.message;
         });
     }
