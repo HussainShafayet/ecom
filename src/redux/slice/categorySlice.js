@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {getAllCategories, getBestSellingCategories, getFlashSaleCategories, getNewArrivalCategories} from "../../services/categoryService";
+import {getAllCategories, getBestSellingCategories, getFeaturedCategories, getFlashSaleCategories, getNewArrivalCategories} from "../../services/categoryService";
 
 const initialState ={
     isLoading: false,
@@ -7,6 +7,7 @@ const initialState ={
     flash_sale: [],
     new_arrival: [],
     best_selling:[],
+    featured: [],
     error: null,
 }
 
@@ -31,6 +32,12 @@ export const fetchNewArrivalCategories = createAsyncThunk("category/fetchNewArri
 export const fetchBestSellingCategories = createAsyncThunk("category/fetchBestSellingCategories", async ({page_size=null,page=1,})=>{
     const response =  await getBestSellingCategories(page_size, page);
     console.log('get best selling categories res', response);
+    return {data: response.data.data.results, error: response.message};
+});
+
+export const fetchFeaturedCategories = createAsyncThunk("category/fetchFeaturedCategories", async ({page_size=null,page=1,})=>{
+    const response =  await getFeaturedCategories(page_size, page);
+    console.log('get featured categories res', response);
     return {data: response.data.data.results, error: response.message};
 });
 
@@ -98,6 +105,22 @@ const categorySlice = createSlice({
         builder.addCase(fetchBestSellingCategories.rejected,(state, action)=>{
             state.isLoading = false;
             state.best_selling = [];
+            state.error = action.error.message;
+        });
+
+
+         //get best selling categories
+         builder.addCase(fetchFeaturedCategories.pending, (state)=>{
+            state.isLoading = true;
+        });
+        builder.addCase(fetchFeaturedCategories.fulfilled,(state, action)=>{
+            state.isLoading = false;
+            state.featured = action.payload.data;
+            state.error = null
+        });
+        builder.addCase(fetchFeaturedCategories.rejected,(state, action)=>{
+            state.isLoading = false;
+            state.featured = [];
             state.error = action.error.message;
         });
     }
