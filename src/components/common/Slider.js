@@ -6,10 +6,11 @@ import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 import { Link } from 'react-router-dom';
 import {useState} from 'react';
+import {useSelector} from 'react-redux';
 
 
 const Slider = () => {
-
+    const {isLoading, image_sliders, video_sliders, left_banner, right_banner, error} = useSelector((state)=> state.content);
     const [currentSlide, setCurrentSlide] = useState(1);
     const totalSlides = 5;
 
@@ -55,6 +56,16 @@ const Slider = () => {
         buttonLink: '/products/category/furniture',
     },
     ];
+    const getLink = (slide)=>{
+        switch (slide.type) {
+            case 'product':
+                return `products/detail/${slide.link}`
+            case 'category':
+                return `category/${slide.link}`
+            default:
+               return slide.external_link;
+        }
+    }
   return (
     <>
         <div className="relative h-full w-full">
@@ -79,12 +90,12 @@ const Slider = () => {
                 className='h-full'
                 onSlideChange={(swiper) => setCurrentSlide(swiper.realIndex + 1)}  // Update current slide number
             >
-                {slides.map((slide) => (
-                <SwiperSlide key={slide.id}>
-                    <Link to={slide.buttonLink}>
+                {image_sliders.map((slide) => (
+                <SwiperSlide key={slide.order}>
+                    <Link to={getLink(slide)}>
                     <div
                         className="relative bg-cover bg-center h-full flex items-center justify-center text-center text-white"
-                        style={{ backgroundImage: `url(${slide.image})` }}
+                        style={{ backgroundImage: `url(${slide.media})` }}
                         data-swiper-parallax="-100"
                     >
                     </div>

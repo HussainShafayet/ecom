@@ -1,60 +1,55 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaChevronRight, FaChevronLeft } from 'react-icons/fa6';
-import {Slider} from '../common';
+import {Loader, Slider} from '../common';
+import {fetchHomeContent} from '../../redux/slice/contentSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {Link} from 'react-router-dom';
+import blurImage from '../../assets/images/blur.jpg';
 
 const HeroSection = () => {
-  const videos = [
-    {
-      id: 1,
-      video: 'https://www.w3schools.com/html/mov_bbb.mp4',
-      heading: 'Explore the Latest Fashion Trends',
-      subheading: 'Stay ahead with the best styles of the season.',
-      buttonText: 'Shop Now',
-      buttonLink: '/products',
-    },
-    {
-      id: 2,
-      video: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-      heading: 'Find Your Perfect Electronics',
-      subheading: 'Top gadgets and accessories at unbeatable prices.',
-      buttonText: 'Explore Electronics',
-      buttonLink: '/products?category=electronics',
-    },
-    {
-      id: 3,
-      video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      heading: 'Upgrade Your Home Decor',
-      subheading: 'Stylish and affordable pieces to transform your home.',
-      buttonText: 'Shop Home Decor',
-      buttonLink: '/products?category=home-decor',
-    },
-  ];
+  
+  const {isLoading, image_sliders, video_sliders, left_banner, right_banner, error} = useSelector((state)=> state.content);
+  const dispatch = useDispatch();
 
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const currentVideo = videos[currentVideoIndex];
+  const currentVideo = video_sliders?.[currentVideoIndex];
+   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
+  
+  useEffect(() => {
+    dispatch(fetchHomeContent());
+    
+   }, [dispatch]);
+ 
+   if (isLoading) {
+     return <div className='container h-20 flex justify-center'><Loader message='Loading' /></div>
+   }
+ 
+   if (error) {
+     return <div>{error}</div>;
+   }
 
 
   const handleNext = () => {
     setCurrentVideoIndex((prevIndex) =>
-      prevIndex < videos.length - 1 ? prevIndex + 1 : 0
+      prevIndex < video_sliders?.length - 1 ? prevIndex + 1 : 0
     );
   };
 
   const handlePrevious = () => {
     setCurrentVideoIndex((prevIndex) =>
-      prevIndex > 0 ? prevIndex - 1 : videos.length - 1
+      prevIndex > 0 ? prevIndex - 1 : video_sliders?.length - 1
     );
   };
 
   return (
     <>
-    <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[60vh]">
+    <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[40vh]">
       {/*image slider*/}
-      <div className="lg:w-3/5 flex h-full w-full">
+      <div className="lg:w-4/6 flex h-full w-full">
           <Slider />
       </div>
 
-      <div className="lg:w-2/5 flex flex-col space-y-4 h-full w-full">
+      <div className="lg:w-2/6 flex flex-col space-y-4 h-full w-full">
         <div className="flex-grow h-3/5">
         <div className="relative h-full w-full">
 
@@ -68,7 +63,7 @@ const HeroSection = () => {
 
           {/* Video */}
           <video
-            src={currentVideo.video}
+            src={currentVideo?.media}
             controls
             autoPlay
             muted
@@ -89,11 +84,53 @@ const HeroSection = () => {
         </div>
         
         <div className="flex flex-grow space-x-4 h-2/5">
-          <div className="flex-grow bg-yellow-200 p-4">
-            Lower left content
+          <div className="flex-grow border p-4">
+            {/* Product Image */}
+            <Link to={`/products/detail/${left_banner?.link}`} className="block h-full">
+              {/* Main Product Image */}
+              <img
+                src={left_banner?.media}
+                alt={left_banner?.caption}
+                loading="lazy"
+                className={`w-full h-full object-contain rounded-md transition-opacity duration-500 ${
+                  isImageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                onLoad={() => setIsImageLoaded(true)} // Set image loaded state
+              />
+
+              {/* Blurred Placeholder */}
+              {!isImageLoaded && (
+                <img
+                  src={blurImage}
+                  alt="Loading"
+                  className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
+                />
+              )}
+            </Link>
           </div>
-          <div className="flex-grow bg-red-200 p-4">
-            Lower right content
+          <div className="flex-grow p-4 border">
+            {/* Product Image */}
+            <Link to={`/products/detail/${right_banner?.link}`} className="block h-full">
+              {/* Main Product Image */}
+              <img
+                src={right_banner?.media}
+                alt={right_banner?.caption}
+                loading="lazy"
+                className={`w-full h-full object-contain rounded-md transition-opacity duration-500 ${
+                  isImageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                onLoad={() => setIsImageLoaded(true)} // Set image loaded state
+              />
+
+              {/* Blurred Placeholder */}
+              {!isImageLoaded && (
+                <img
+                  src={blurImage}
+                  alt="Loading"
+                  className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
+                />
+              )}
+            </Link>
           </div>
         </div>
       </div>
