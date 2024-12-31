@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FaStar, FaChevronDown, FaShareAlt, FaTag, FaBox, FaWeightHanging, FaRulerCombined, FaCubes, FaTools, FaCopy, FaTwitter, FaWhatsapp, FaFacebookF, FaFacebook } from 'react-icons/fa';
-import { InputField, Loader, ProductCard, RatingAndReview } from '../components/common/'; // Star and dropdown icons
+import { InputField, Loader, ProductCard, RatingAndReview, RichTextToHTML } from '../components/common/'; // Star and dropdown icons
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts} from '../redux/slice/productSlice';
 //import {addToCart} from '../redux/slice/cartSlice';
@@ -10,10 +10,10 @@ import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 
 const ProductDetails = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const {isLoading, product, error, mainImage, items:products, quantity, relatedProductsLoading} = useSelector((state)=> state.product);
 
-  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedColor, setSelectedColor] = useState(null);
   const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // Filter reviews by rating
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
   const [isRatingDropdownOpen, setIsRatingDropdownOpen] = useState(false);
@@ -30,8 +30,8 @@ const ProductDetails = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(fetchProductById(id));
-  }, [dispatch, id]);
+    dispatch(fetchProductById(slug));
+  }, [dispatch, slug]);
 
   useEffect(() => {
     if (product?.category) {
@@ -152,6 +152,12 @@ useEffect(() => {
     }
   };
 
+  const handleSelectColor = (color) =>{
+    setSelectedColor(color);
+    dispatch(setMainImage(color.media_files[0]));
+    
+  }
+
  
   const shareProduct = () => {
     if (navigator.share) {
@@ -224,21 +230,31 @@ useEffect(() => {
           {/* Product Image Gallery */}
           <div className="flex gap-2">
             <div className="flex flex-col space-y-1 h-full overflow-auto custom-scrollbar-custom">
-              {product.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`Product Image ${index + 1}`}
-                  className="w-20 h-20 object-cover rounded-lg cursor-pointer p-1 border-2 border-gray-300 hover:border-blue-500 transition"
-                  onClick={() => handleImageClick(image)}
-                />
+              {(selectedColor?selectedColor:product).media_files.map((image, index) => (
+                <div key={image.file_url}>
+                  {image.file_type === 'image'? 
+                    <img
+                      src={image.thumbnail_url}
+                      alt={`Product Image ${index + 1}`}
+                      className="w-20 h-20 object-cover rounded-lg cursor-pointer p-1 border-2 border-gray-300 hover:border-blue-500 transition"
+                      onClick={() => handleImageClick(image)}
+                    />
+                    : 
+                    <video
+                      src={image.file_url}
+                      className="w-20 h-20 object-cover rounded-sm"
+                      onClick={() => handleImageClick(image)}
+                    />
+                  }
+                </div>
               ))}
             </div>
             <div className="relative group w-full h-full">
+            {mainImage.file_type === 'image'? 
               <Zoom>
                 <img
-                  src={mainImage}
-                  alt={product.title}
+                  src={mainImage.file_url}
+                  alt={product.name}
                   loading='lazy'
                   className={`w-full h-96 object-contain object-center rounded-md mb-4 transition-opacity duration-500 shadow-md ${
                     isImageLoaded ? 'opacity-100' : 'opacity-0'
@@ -255,26 +271,35 @@ useEffect(() => {
                   />
                 )}
               </Zoom>
+              :
+                <video
+                  src={mainImage.file_url}
+                  muted
+                  controls
+                  preload='true'
+                  className={`w-full h-96 object-contain object-center rounded-md mb-4 transition-opacity duration-500 shadow-md`}
+                />
+              }
             </div>
           </div>
 
           {/* Product Information */}
           <div>
-            <h1 className="text-3xl font-bold mb-1">{product.title}</h1>
+            <h1 className="text-3xl font-bold mb-1">{product.name}</h1>
 
             {/* Product Price */}
-            {discountPercentage > 0 ? (
+            {product.has_discount ? (
               <div className="mb-1 flex flex-row space-x-1">
                 <p className=" text-gray-500 line-through">
-                  {product.price.toFixed(2)}
+                  {product.base_price}
                 </p>
                 <p className="text-2x text-green-600 font-semibold">
-                  {discountedPrice.toFixed(2)} <span className="text-red-500">({discountPercentage}% OFF)</span>
+                {product.discount_price} <span className="text-red-500">({product.discount_value}{product.discount_type == 'percentage'?'%':'৳'} OFF)</span>
                 </p>
               </div>
             ) : (
               <p className="text-2xl text-green-600 font-semibold mb-1">
-                {product.price.toFixed(2)}
+                {product.base_price}
               </p>
             )}
 
@@ -282,14 +307,14 @@ useEffect(() => {
           <div className="flex items-center space-x-2 my-2">
               <span className="font-semibold">Color:</span>
               <div className="flex space-x-1">
-                {colors.map((color) => (
+                {product.colors.map((color) => (
                   <button
-                    key={color}
-                    onClick={() => setSelectedColor(color)}
+                    key={color.name}
+                    onClick={() => handleSelectColor(color)}
                     className={`w-6 h-6 rounded-full transition-colors border ${
                       selectedColor === color ? 'border-blue-500' : 'border-gray-300'
                     }`}
-                    style={{ backgroundColor: color.toLowerCase() }}
+                    style={{ backgroundColor: color.hex_code }}
                   />
                 ))}
               </div>
@@ -315,21 +340,24 @@ useEffect(() => {
               </div>
             </div>
 
-            <p className="text-gray-700 mb-2">{product.description}</p>
+            {/*<p className="text-gray-700 mb-2">*/}
+              <RichTextToHTML content={product.short_description} />
+            {/*</p>*/}
+            
 
             {/* Ratings Dropdown Button */}
             <div
-              className="relative mb-4"
+              className="relative mb-4 mt-2 flex justify-items-center space-x-3"
               ref={ratingDropdownRef}
             >
               <button
                 ref={buttonRef}
-                className="flex items-center p-2 rounded-lg "
+                className="flex items-center rounded-lg "
                 onClick={toggleRatingDropdown}
               
               >
                 <div className="flex">
-                {Array(Math.ceil(product.rating))
+                {Array(Math.ceil(product.avg_rating))
                   .fill(0)
                   .map((_, i) => (
                     <svg
@@ -342,10 +370,14 @@ useEffect(() => {
                     </svg>
                   ))}
               </div>
-                <span className="font-bold">{product.rating.toFixed(1)} / 5</span>
+                <span className="font-bold">{product.avg_rating} / 5</span>
                 <FaChevronDown className="ml-2" />
               </button>
-
+              <div className='space-x-3 font-bold'>
+                <span>{product.total_reviews} reviews</span>
+                <span>{product.total_orders} orders</span>
+              </div>
+              
               {/* Enhanced Dropdown menu */}
               {isRatingDropdownOpen && (
                 <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-300 shadow-md rounded-lg p-4 z-20">
@@ -514,7 +546,7 @@ useEffect(() => {
               <ul className="text-sm text-gray-700 space-y-3 ml-3">
                 <li className="flex items-center">
                   <FaTag className="text-blue-500 mr-2" />
-                  <span className="font-semibold mr-1">Brand:</span> {product.brand}
+                  <span className="font-semibold mr-1">Brand:</span> {product.brand.name}
                 </li>
                 <li className="flex items-center">
                   <FaBox className="text-green-500 mr-2" />
@@ -527,8 +559,8 @@ useEffect(() => {
                 <li className="flex items-center">
                   <FaRulerCombined className="text-purple-500 mr-2" />
                   <span className="font-semibold mr-1">Dimensions:</span> 
-                  {product.dimensions
-                    ? `${product.dimensions.width || 'N/A'} x ${product.dimensions.height || 'N/A'} x ${product.dimensions.depth || 'N/A'} cm`
+                  {product.dimension
+                    ? `${product.dimension.width || 'N/A'} x ${product.dimension.height || 'N/A'} x ${product.dimension.depth || 'N/A'} cm`
                     : 'N/A'}
                 </li>
                 <li className="flex items-center">
@@ -541,6 +573,40 @@ useEffect(() => {
                 </li>
               </ul>
             </div>
+          </section>
+
+          <section className="mt-4">
+            <div className="bg-white shadow-md p-6 rounded-lg border border-gray-200">
+              <div className='flex'>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Return & Warranty</h3>
+                    <ul className="text-sm text-gray-700 space-y-3 ml-3">
+                      <li className="flex items-center">
+                        <FaTag className="text-blue-500 mr-2" />
+                        <span className="font-semibold mr-1">Warranty:</span> {product.warranty_information}
+                      </li>
+                      <li className="flex items-center">
+                        <FaBox className="text-green-500 mr-2" />
+                        <span className="font-semibold mr-1">Shipping:</span> {product.shipping_information || 'N/A'}
+                      </li>
+                      <li className="flex items-center">
+                        <FaWeightHanging className="text-red-500 mr-2" />
+                        <span className="font-semibold mr-1">Return Policy:</span> {product.return_policy || 'N/A'}
+                      </li>
+                    
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-800">Scan with mobile</h3>
+                    <img src={product.qrcode_image_url} className='w-44 h-44' />
+                  </div>
+              </div>
+              
+            </div>
+          </section>
+          
+          <section>
+            <RichTextToHTML content={product.long_description} />
           </section>
         </div>
 

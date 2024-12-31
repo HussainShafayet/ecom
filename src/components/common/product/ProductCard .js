@@ -51,7 +51,7 @@ const ProductCard = ({ product, cardForTrending }) => {
       {/* Discount Badge */}
       {product.has_discount && (
         <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-          {product.discount_amount}{product.discount_type == 'percentage'?'%':'৳'} OFF
+          {product.discount_value}{product.discount_type == 'percentage'?'%':'৳'} OFF
         </span>
       )}
       {cardForTrending && 
@@ -73,7 +73,7 @@ const ProductCard = ({ product, cardForTrending }) => {
         </button>
 
       {/* Product Image */}
-      <Link to={`/products/${product.id}`} className="block h-36">
+      <Link to={`/products/detail/${product.slug}`} className="block h-36">
         {/* Main Product Image */}
         <img
           src={product.image}
@@ -99,7 +99,7 @@ const ProductCard = ({ product, cardForTrending }) => {
       <div className="p-2">
         {/* Product Title */}
         <h3 className="text-md font-semibold mb-1">
-          <Link to={`/products/${product.id}`} className="hover:text-blue-500">
+          <Link to={`/products/detail/${product.slug}`} className="hover:text-blue-500">
             {product.name}
           </Link>
         </h3>

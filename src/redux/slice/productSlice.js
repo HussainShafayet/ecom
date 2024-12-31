@@ -65,14 +65,14 @@ export const fetchFeaturedProducts = createAsyncThunk("product/fetchFeaturedProd
     return {data: response.data.data.results, error: response.message};
 });
 
-// Fetch a single product by its ID
-export const fetchProductById = createAsyncThunk("post/getProductById", async (id) => {
+// Fetch a single product by its slug
+export const fetchProductById = createAsyncThunk("post/getProductById", async (slug) => {
     try {
-      const response = await getProductById(id);
+      const response = await getProductById(slug);
       console.log('get product res', response);
-      return response.data;
+      return response.data.data;
     } catch (error) {
-      console.error(`Error fetching product with ID ${id}:`, error);
+      console.error(`Error fetching product with ID ${slug}:`, error);
       throw error;  // Let the caller handle the error
     }
   });
@@ -227,7 +227,7 @@ const productSlice = createSlice({
         builder.addCase(fetchProductById.fulfilled,(state, action)=>{
             state.isLoading = false;
             state.product = action.payload;
-            state.mainImage = action.payload.images[0];
+            state.mainImage = action.payload.media_files[0];
             state.error = null
 
             //set quantity initial

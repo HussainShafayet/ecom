@@ -10,5 +10,7 @@ export {default as BackToTop} from './BackToTop';
 export {default as Breadcrum} from './product/Breadcrum';
 export {default as RatingAndReview} from './product/RatingAndReview';
 export {default as Slider} from './Slider';
+export {default as RichTextToHTML} from './RichTextToHTML';
+
 
 

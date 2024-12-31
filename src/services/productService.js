@@ -121,9 +121,9 @@ export const getFeaturedProducts = async (page, page_size) => {
 };
 
 
-// Fetch a single product by its ID
-export const getProductById = async (id) => {
-    return await axios.get(`${API_URL}/products/${id}`);
+// Fetch a single product by its slug
+export const getProductById = async (slug) => {
+    return await axios.get(`${API_URL}/api/products/detail/${slug}`);
 };
 
 // Fetch products by category (you can pass the category as a filter)
