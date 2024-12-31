@@ -184,14 +184,14 @@ const Categories = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 {featured.map((category) => (
-                    <>
+                    <div key={category.id}>
                     {/* Discount Badge */}
                     {category.has_discount && (
                     <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
                         {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
                     </span>
                     )}
-                    <Link to={`/products/category/${category.slug}`} key={category.id}>
+                    <Link to={`/products/category/${category.slug}`}>
                     <div className="relative group cursor-pointer min-w-[150px]">
                         <img
                         src={category.image}
@@ -203,7 +203,7 @@ const Categories = () => {
                         </div>
                     </div>
                     </Link>
-                    </>
+                    </div>
                 ))}
             </div>
             }
