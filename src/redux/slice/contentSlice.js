@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {getBestSellingContent, getFlashSaleContent, getHomeContent, getNewArrivalContent} from "../../services/contentService";
+import {getBestSellingContent, getFeaturedContent, getFlashSaleContent, getHomeContent, getNewArrivalContent} from "../../services/contentService";
 
 const initialState ={
     isLoading: false,
@@ -34,11 +34,11 @@ export const fetchBestSellingContent = createAsyncThunk("content/fetchBestSellin
     return {data: response.data.data, error: response.message};
 });
 
-//export const fetchFeaturedCategories = createAsyncThunk("category/fetchFeaturedCategories", async ({page_size=null,page=1,})=>{
-//    const response =  await getFeaturedCategories(page_size, page);
-//    console.log('get featured categories res', response);
-//    return {data: response.data.data.results, error: response.message};
-//});
+export const fetchFeaturedContent = createAsyncThunk("content/fetchFeaturedContent", async ()=>{
+    const response =  await getFeaturedContent();
+    console.log('get featured content res', response);
+    return {data: response.data.data, error: response.message};
+});
 
 const contentSlice = createSlice({
     name: 'content', 
@@ -110,7 +110,7 @@ const contentSlice = createSlice({
         });
 
 
-        //get best sale sale content
+        //get best sale content
         builder.addCase(fetchBestSellingContent.pending, (state)=>{
             state.isLoading = true;
         });
@@ -123,6 +123,28 @@ const contentSlice = createSlice({
             state.error = null;
         });
         builder.addCase(fetchBestSellingContent.rejected,(state, action)=>{
+            state.isLoading = false;
+            state.image_sliders = [];
+            state.video_sliders = [];
+            state.left_banner = null;
+            state.right_banner = null;
+            state.error = action.error.message;
+        });
+
+
+        //get featured content
+        builder.addCase(fetchFeaturedContent.pending, (state)=>{
+            state.isLoading = true;
+        });
+        builder.addCase(fetchFeaturedContent.fulfilled,(state, action)=>{
+            state.isLoading = false;
+            state.image_sliders = action.payload.data.page_content.image_sliders;
+            state.video_sliders = action.payload.data.page_content.video_sliders;
+            state.left_banner = action.payload.data.page_content.left_banner;
+            state.right_banner = action.payload.data.page_content.right_banner;
+            state.error = null;
+        });
+        builder.addCase(fetchFeaturedContent.rejected,(state, action)=>{
             state.isLoading = false;
             state.image_sliders = [];
             state.video_sliders = [];

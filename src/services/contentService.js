@@ -30,14 +30,7 @@ export const getBestSellingContent = async () => {
   return await axios.get(`${API_URL}/api/content/pages/best_selling`);
 };
 
-// Fetch featured categories from the API
-export const getFeaturedCategories = async (page_size=null, page=null) => {
-  let query = '';
-  if (page) {
-    query += `page=${page}&`; // Add page for pagination
-  }
-  if (page_size) {
-    query += `page_size=${page_size}&`; // Add limit
-  }
-  return await axios.get(`${API_URL}/api/products/categories/feature/?${query}`);
+// Fetch featured content from the API
+export const getFeaturedContent = async () => {
+  return await axios.get(`${API_URL}/api/content/pages/feature`);
 };
