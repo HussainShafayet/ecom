@@ -41,6 +41,17 @@ const HeroSection = () => {
     );
   };
 
+  const getLink = (item)=>{
+    switch (item.type) {
+        case 'product':
+            return `/products/detail/${item.link}`
+        case '/category':
+            return `category/${item.link}`
+        default:
+           return item.external_link;
+    }
+  }
+
   return (
     <>
     <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[40vh]">
@@ -60,18 +71,20 @@ const HeroSection = () => {
           >
             <FaChevronLeft size={50} className="text-blue-500" />
           </button>
-
-          {/* Video */}
-          <video
-            src={currentVideo?.media}
-            controls
-            autoPlay
-            muted
-            loop
-            preload='true'
-            className="w-full h-full object-cover rounded-sm"
-          />
-
+          <div className='relative h-full'>
+            <Link to={getLink(currentVideo)} target='_blank' className='absolute right-2 top-2 z-10 cursor-pointer text-blue-500 hover:underline'>{currentVideo?.caption?currentVideo?.caption :'Click'}</Link>
+                    
+            {/* Video */}
+            <video
+              src={currentVideo?.media}
+              controls
+              autoPlay
+              muted
+              loop
+              preload='true'
+              className="w-full h-full object-cover rounded-sm"
+            />
+          </div>
           {/* Right Arrow */}
           <button
             onClick={handleNext}

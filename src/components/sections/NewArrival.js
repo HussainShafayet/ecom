@@ -31,8 +31,8 @@ const NewArrival = ({forRoute}) => {
   const getLink = (item)=>{
     switch (item.type) {
         case 'product':
-            return `products/detail/${item.link}`
-        case 'category':
+            return `/products/detail/${item.link}`
+        case '/category':
             return `category/${item.link}`
         default:
            return item.external_link;
@@ -53,7 +53,7 @@ const NewArrival = ({forRoute}) => {
           {right_banner?.media_type === 'image' &&
             <>
               {/* Product Image */}
-              <Link to={`/products/detail/${right_banner?.link}`} className="block h-full">
+              <Link to={getLink(right_banner)} target='_blank' className="block h-full">
                 {/* Main Product Image */}
                 <img
                   src={right_banner?.media}
@@ -77,7 +77,8 @@ const NewArrival = ({forRoute}) => {
             </>
           }
           {right_banner?.media_type === 'video' && 
-            <>
+            <div className='relative h-full'>
+              <Link to={getLink(right_banner)} target='_blank' className='absolute right-2 top-2 z-10 cursor-pointer text-blue-500 hover:underline'>{right_banner.caption?right_banner.caption :'Click'}</Link>
               {/* Video */}
               <video
                 src={right_banner?.media}
@@ -88,7 +89,7 @@ const NewArrival = ({forRoute}) => {
                 preload='true'
                 className="w-full h-full object-cover rounded-sm"
               />
-            </>
+            </div>
           }
         </div>
       </div>
@@ -105,6 +106,7 @@ const NewArrival = ({forRoute}) => {
               <Link
                 to="/products/new-arrival"
                 className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
+                target='_blank'
               >
                 View All
               </Link>
@@ -133,8 +135,9 @@ const NewArrival = ({forRoute}) => {
             </span>
             {!forRoute && 
             <Link
-              to="/products/flash-sale"
+              to="/products/new-arrival"
               className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
+              target='_blank'
             >
               View All
             </Link>

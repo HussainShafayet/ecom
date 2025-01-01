@@ -32,9 +32,9 @@ const FlashSale = ({forRoute}) => {
     const getLink = (item)=>{
       switch (item.type) {
           case 'product':
-              return `products/detail/${item.link}`
+              return `/products/detail/${item.link}`
           case 'category':
-              return `category/${item.link}`
+              return `/category/${item.link}`
           default:
              return item.external_link;
       }
@@ -53,7 +53,7 @@ const FlashSale = ({forRoute}) => {
           {right_banner?.media_type === 'image' &&
             <>
               {/* Product Image */}
-              <Link to={getLink(right_banner)} className="block h-full">
+              <Link to={getLink(right_banner)} target='_blank' className="block h-full">
                 {/* Main Product Image */}
                 <img
                   src={right_banner?.media}
@@ -77,7 +77,8 @@ const FlashSale = ({forRoute}) => {
             </>
           }
           {right_banner?.media_type === 'video' && 
-            <>
+            <div className='relative h-full'>
+              <Link to={getLink(right_banner)} target='_blank' className='absolute right-2 top-2 z-10 text-blue-500 hover:underline text:2x'>{right_banner.caption?right_banner.caption :'Click'}</Link>
               {/* Video */}
               <video
                 src={right_banner?.media}
@@ -88,7 +89,7 @@ const FlashSale = ({forRoute}) => {
                 preload='true'
                 className="w-full h-full object-cover rounded-sm"
               />
-            </>
+            </div>
           }
         </div>
       </div>
@@ -103,6 +104,7 @@ const FlashSale = ({forRoute}) => {
           <Link
             to="/products/flash-sale"
             className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
+            target='_blank'
           >
             View All
           </Link>

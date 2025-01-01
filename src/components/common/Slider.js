@@ -16,9 +16,9 @@ const Slider = ({image_sliders}) => {
     const getLink = (slide)=>{
         switch (slide.type) {
             case 'product':
-                return `products/detail/${slide.link}`
+                return `/products/detail/${slide.link}`
             case 'category':
-                return `category/${slide.link}`
+                return `/category/${slide.link}`
             default:
                return slide.external_link;
         }
@@ -49,7 +49,7 @@ const Slider = ({image_sliders}) => {
             >
                 {image_sliders.map((slide) => (
                 <SwiperSlide key={slide.order}>
-                    <Link to={getLink(slide)}>
+                    <Link to={getLink(slide)} target='_blank'>
                     <div
                         className="relative bg-cover bg-center h-full flex items-center justify-center text-center text-white"
                         style={{ backgroundImage: `url(${slide.media})` }}
