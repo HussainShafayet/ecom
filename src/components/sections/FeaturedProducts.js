@@ -4,10 +4,13 @@ import {useDispatch, useSelector} from 'react-redux';
 import {fetchFeaturedProducts} from '../../redux/slice/productSlice';
 import {Link} from 'react-router-dom';
 import {fetchFeaturedContent} from '../../redux/slice/contentSlice';
+import blurImage from '../../assets/images/blur.jpg';
 
 const FeaturedProducts = ({forRoute}) => {
   const {isLoading, featured:products, error} = useSelector((state)=> state.product);
   const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
+
+  const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
 
 
   const dispatch = useDispatch();
@@ -28,6 +31,18 @@ const FeaturedProducts = ({forRoute}) => {
     return <div>{error}</div>;
   }
 
+
+  const getLink = (item)=>{
+    switch (item.type) {
+        case 'product':
+            return `products/detail/${item.link}`
+        case 'category':
+            return `category/${item.link}`
+        default:
+           return item.external_link;
+    }
+  }
+
   return (
     <div className="container mx-auto">
       {forRoute && 
@@ -38,12 +53,46 @@ const FeaturedProducts = ({forRoute}) => {
         </div>
   
         <div className="lg:w-2/5 flex flex-col space-y-4 h-full w-full border">
-          <div className="flex-grow h-3/5">
-            
-          </div>
-          
-          <div className="flex flex-grow space-x-4 h-2/5">
-          </div>
+          {right_banner?.media_type === 'image' &&
+            <>
+              {/* Product Image */}
+              <Link to={`/products/detail/${right_banner?.link}`} className="block h-full">
+                {/* Main Product Image */}
+                <img
+                  src={right_banner?.media}
+                  alt={right_banner?.caption}
+                  loading="lazy"
+                  className={`w-full h-full object-contain rounded-md transition-opacity duration-500 ${
+                    isImageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  onLoad={() => setIsImageLoaded(true)} // Set image loaded state
+                />
+
+                {/* Blurred Placeholder */}
+                {!isImageLoaded && (
+                  <img
+                    src={blurImage}
+                    alt="Loading"
+                    className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
+                  />
+                )}
+              </Link>
+            </>
+          }
+          {right_banner?.media_type === 'video' && 
+            <>
+              {/* Video */}
+              <video
+                src={right_banner?.media}
+                controls
+                autoPlay
+                muted
+                loop
+                preload='true'
+                className="w-full h-full object-cover rounded-sm"
+              />
+            </>
+          }
         </div>
       </div>
       }
