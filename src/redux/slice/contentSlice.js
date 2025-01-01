@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {getHomeContent, getNewArrivalContent} from "../../services/contentService";
+import {getFlashSaleContent, getHomeContent, getNewArrivalContent} from "../../services/contentService";
 
 const initialState ={
     isLoading: false,
@@ -22,11 +22,11 @@ export const fetchNewArrivalContent = createAsyncThunk("content/fetchNewArrivalC
     return {data: response.data.data, error: response.message};
 });
 
-//export const fetchNewArrivalCategories = createAsyncThunk("category/fetchNewArrivalCategories", async ({page_size=null,page=1,})=>{
-//    const response =  await getNewArrivalCategories(page_size, page);
-//    console.log('get new arrival categories res', response);
-//    return {data: response.data.data.results, error: response.message};
-//});
+export const fetchFlashSaleContent = createAsyncThunk("content/fetchFlashSaleContent", async ()=>{
+    const response =  await getFlashSaleContent();
+    console.log('get flash sale content res', response);
+    return {data: response.data.data, error: response.message};
+});
 
 //export const fetchBestSellingCategories = createAsyncThunk("category/fetchBestSellingCategories", async ({page_size=null,page=1,})=>{
 //    const response =  await getBestSellingCategories(page_size, page);
@@ -80,6 +80,27 @@ const contentSlice = createSlice({
             state.error = null;
         });
         builder.addCase(fetchNewArrivalContent.rejected,(state, action)=>{
+            state.isLoading = false;
+            state.image_sliders = [];
+            state.video_sliders = [];
+            state.left_banner = null;
+            state.right_banner = null;
+            state.error = action.error.message;
+        });
+
+        //get all flash sale content
+        builder.addCase(fetchFlashSaleContent.pending, (state)=>{
+            state.isLoading = true;
+        });
+        builder.addCase(fetchFlashSaleContent.fulfilled,(state, action)=>{
+            state.isLoading = false;
+            state.image_sliders = action.payload.data.page_content.image_sliders;
+            state.video_sliders = action.payload.data.page_content.video_sliders;
+            state.left_banner = action.payload.data.page_content.left_banner;
+            state.right_banner = action.payload.data.page_content.right_banner;
+            state.error = null;
+        });
+        builder.addCase(fetchFlashSaleContent.rejected,(state, action)=>{
             state.isLoading = false;
             state.image_sliders = [];
             state.video_sliders = [];

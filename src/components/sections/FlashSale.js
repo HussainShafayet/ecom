@@ -3,16 +3,19 @@ import {useDispatch, useSelector} from 'react-redux';
 import {fetchFlashSaleProducts} from '../../redux/slice/productSlice';
 import {Loader, ProductCard, Slider} from '../common';
 import {Link} from 'react-router-dom';
+import {fetchFlashSaleContent} from '../../redux/slice/contentSlice';
 
 const FlashSale = ({forRoute}) => {
-
     const {isLoading, flash_sale:products, error} = useSelector((state)=> state.product);
-
+    const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
 
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(fetchFlashSaleProducts({page_size: 12}));
+      if (forRoute) {
+        dispatch(fetchFlashSaleContent());
+      }
+      dispatch(fetchFlashSaleProducts({page_size: 12}));
     }, [dispatch]);
 
     if (isLoading) {
@@ -29,7 +32,7 @@ const FlashSale = ({forRoute}) => {
       <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[60vh]">
         {/*image slider*/}
         <div className="lg:w-3/5 flex h-full w-full">
-            <Slider />
+             <Slider image_sliders={image_sliders} />
         </div>
   
         <div className="lg:w-2/5 flex flex-col space-y-4 h-full w-full border">

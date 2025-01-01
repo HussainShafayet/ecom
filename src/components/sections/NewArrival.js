@@ -12,10 +12,10 @@ const NewArrival = ({forRoute}) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-   dispatch(fetchNewArrivalProducts({page_size:12}));
    if (forRoute) {
      dispatch(fetchNewArrivalContent());
    }
+   dispatch(fetchNewArrivalProducts({page_size:12}));
   }, [dispatch]);
 
   if (isLoading) {

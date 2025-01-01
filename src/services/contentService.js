@@ -19,16 +19,9 @@ export const getNewArrivalContent = async () => {
   return await axios.get(`${API_URL}/api/content/pages/newarrival/`);
 };
 
-// Fetch new arrival categories from the API
-export const getNewArrivalCategories = async (page_size=null, page=null) => {
-  let query = '';
-  if (page) {
-    query += `page=${page}&`; // Add page for pagination
-  }
-  if (page_size) {
-    query += `page_size=${page_size}&`; // Add limit
-  }
-  return await axios.get(`${API_URL}/api/products/categories/new-arrival/?${query}`);
+// Fetch flash sale content from the API
+export const getFlashSaleContent = async (page_size=null, page=null) => {
+  return await axios.get(`${API_URL}/api/content/pages/flashsale`);
 };
 
 
