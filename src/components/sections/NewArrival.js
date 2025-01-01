@@ -3,14 +3,19 @@ import {Loader, ProductCard, Slider} from '../common'; // Assuming you have a Pr
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts, fetchNewArrivalProducts} from '../../redux/slice/productSlice';
 import {Link} from 'react-router-dom';
+import {fetchNewArrivalContent} from '../../redux/slice/contentSlice';
 
 const NewArrival = ({forRoute}) => {
   const {isLoading, new_arrival:products, error} = useSelector((state)=> state.product);
+  const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
    dispatch(fetchNewArrivalProducts({page_size:12}));
+   if (forRoute) {
+     dispatch(fetchNewArrivalContent());
+   }
   }, [dispatch]);
 
   if (isLoading) {
@@ -28,7 +33,7 @@ const NewArrival = ({forRoute}) => {
       <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[60vh]">
         {/*image slider*/}
         <div className="lg:w-3/5 flex h-full w-full">
-            <Slider />
+            <Slider image_sliders={image_sliders} />
         </div>
   
         <div className="lg:w-2/5 flex flex-col space-y-4 h-full w-full border">
