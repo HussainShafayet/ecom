@@ -46,7 +46,7 @@ const HeroSection = () => {
     <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[40vh]">
       {/*image slider*/}
       <div className="lg:w-4/6 flex h-full w-full">
-          <Slider />
+          <Slider image_sliders={image_sliders} />
       </div>
 
       <div className="lg:w-2/6 flex flex-col space-y-4 h-full w-full">
