@@ -48,7 +48,7 @@ const HeroSection = () => {
         case '/category':
             return `category/${item.link}`
         default:
-           return item.external_link;
+           return item?.external_link;
     }
   }
 
@@ -72,7 +72,7 @@ const HeroSection = () => {
             <FaChevronLeft size={50} className="text-blue-500" />
           </button>
           <div className='relative h-full'>
-            <Link to={getLink(currentVideo)} target='_blank' className='absolute right-2 top-2 z-10 cursor-pointer text-blue-500 hover:underline'>{currentVideo?.caption?currentVideo?.caption :'Click'}</Link>
+            <Link to={currentVideo && getLink(currentVideo)} target='_blank' className='absolute right-2 top-2 z-10 cursor-pointer text-blue-500 hover:underline'>{currentVideo?.caption?currentVideo?.caption :'Click'}</Link>
                     
             {/* Video */}
             <video
