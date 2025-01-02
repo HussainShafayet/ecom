@@ -11,6 +11,9 @@ export {default as Breadcrum} from './product/Breadcrum';
 export {default as RatingAndReview} from './product/RatingAndReview';
 export {default as Slider} from './Slider';
 export {default as RichTextToHTML} from './RichTextToHTML';
+export {default as SelectFilter} from './product/SelectFilter';
+
+
 
 
 

@@ -1,14 +1,16 @@
 import React, {useEffect, useState} from "react";
-import {Accordion, Loader} from '../../common';
+import {Accordion, SelectFilter, Loader} from '../../common';
 import { FaTags, FaDollarSign, FaIndustry, FaStar, FaCheck, FaFilter, FaTshirt, FaPalette, FaChevronDown, FaChevronRight } from 'react-icons/fa';
 import {useDispatch, useSelector} from "react-redux";
 import {fetchShopContent} from "../../../redux/slice/contentSlice";
+import {useSearchParams} from "react-router-dom";
 
 
 // Sidebar Component
 const Sidebar = ({ onClose }) => {
-  const {isLoading,categories, error} = useSelector((state) => state.content);
+  const {isLoading,categories,brands,price_range, colors,sizes,tags, discounts, error} = useSelector((state) => state.content);
   const dispatch = useDispatch();
+   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     dispatch(fetchShopContent());
@@ -51,6 +53,75 @@ const Sidebar = ({ onClose }) => {
       </li>
     );
   };
+
+
+  const PriceRangeFilter = ({ onApply }) => {
+    const [minPrice, setMinPrice] = useState("");
+    const [maxPrice, setMaxPrice] = useState("");
+  
+    const handleApply = () => {
+      // Trigger callback with min and max values
+      if (onApply) {
+        onApply({ min_price: minPrice, max_price: maxPrice });
+      }
+      // Update the searchParams in the URL
+      if (minPrice) {
+        setSearchParams({
+          ...Object.fromEntries(searchParams),
+          min_price: minPrice,
+        });
+      }
+      if(maxPrice){
+        setSearchParams({
+        ...Object.fromEntries(searchParams),
+        max_price: maxPrice,
+      });
+      }
+      
+    };
+  
+    return (
+      <div className="flex items-center space-x-2">
+        {/* Min Price Input */}
+        <input
+          type="number"
+          placeholder="Min"
+          min={price_range?.min_range || ""}
+          value={minPrice}
+          onChange={(e) => setMinPrice(e.target.value)}
+          className="w-20 border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <span className="text-gray-500">-</span>
+        {/* Max Price Input */}
+        <input
+          type="number"
+          placeholder="Max"
+          min={price_range?.max_range || ""}
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+          className="w-20 border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        {/* Apply Button */}
+        <button
+          onClick={handleApply}
+          className="bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 00-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    );
+  };
   
   
   return (
@@ -80,78 +151,55 @@ const Sidebar = ({ onClose }) => {
             </ul>
           )}
         </Accordion>
-        
-        {/* Price Range Filter */}
-        <Accordion title="Price Range" icon={<FaDollarSign className="text-green-500" />}>
-          <input type="range" min="0" max="1000" className="w-full accent-green-500 cursor-pointer" />
-          <p className="text-gray-600 mt-2">Up to 1000</p>
-        </Accordion>
 
         {/* Brands with Checkboxes */}
         <Accordion title="Brands" icon={<FaIndustry className="text-yellow-500" />}>
-          <ul className="space-y-1">
-            {['Brand A', 'Brand B', 'Brand C'].map((brand) => (
-              <li key={brand} className="flex items-center">
-                <input type="checkbox" className="form-checkbox text-yellow-500 rounded-sm mr-2" />
-                <label className="text-gray-600">{brand}</label>
-              </li>
-            ))}
-          </ul>
+            <SelectFilter items={brands} type='brands' />
+        </Accordion>
+        
+
+        {/* Tags */}
+        <Accordion title="Tags" icon={<FaTags className="text-red-500" />}>
+          <SelectFilter items={tags} type='tags' />
         </Accordion>
 
-        {/* Ratings Filter */}
-        <Accordion title="Ratings" icon={<FaStar className="text-yellow-400" />}>
-          <ul className="space-y-1">
-            {[5, 4, 3, 2, 1].map((star) => (
-              <li key={star} className="flex items-center">
-                {[...Array(star)].map((_, i) => (
-                  <FaStar key={i} className="text-yellow-400" />
-                ))}
-                <a href="#" className="ml-2 text-gray-600 hover:text-yellow-500"> & Up</a>
-              </li>
-            ))}
-          </ul>
+        
+
+        {/* Price Range Filter */}
+        <Accordion title="Price Range" icon={<FaDollarSign className="text-green-500" />}>
+          <PriceRangeFilter />
         </Accordion>
+
+  
 
         {/* Color Filter */}
         <Accordion title="Color" icon={<FaPalette className="text-purple-500" />}>
           <div className="flex space-x-2">
-            {['bg-red-500', 'bg-blue-500', 'bg-yellow-500', 'bg-green-500', 'bg-gray-500'].map((color, index) => (
-              <div key={index} className={`${color} w-6 h-6 rounded-full cursor-pointer`} />
+            {colors.map((color, index) => (
+              <div key={color.hex_code} className={`w-6 h-6 rounded-full cursor-pointer`} style={{background: color.hex_code}} />
             ))}
           </div>
         </Accordion>
 
         {/* Size Filter */}
         <Accordion title="Size" icon={<FaTshirt className="text-blue-400" />}>
-          <ul className="flex space-x-2">
-            {['S', 'M', 'L', 'XL', 'XXL'].map((size) => (
-              <li key={size}>
-                <button className="px-2 py-1 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-100">{size}</button>
-              </li>
-            ))}
-          </ul>
+          <SelectFilter items={sizes} type='sizes' />
         </Accordion>
+        
 
-        {/* Availability Filter */}
-        <Accordion title="Availability" icon={<FaCheck className="text-green-500" />}>
-          <ul className="space-y-1">
-            <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-green-500 hover:bg-gray-100 rounded-md">In Stock</a></li>
-            <li><a href="#" className="block px-3 py-1 text-gray-600 hover:text-green-500 hover:bg-gray-100 rounded-md">Out of Stock</a></li>
-          </ul>
-        </Accordion>
-
-        {/* Discounts with Checkboxes */}
+        {/* Discount */}
         <Accordion title="Discounts" icon={<FaFilter className="text-red-500" />}>
-          <ul className="space-y-1">
-            {['10% or more', '20% or more', '50% or more'].map((discount) => (
-              <li key={discount} className="flex items-center">
+         <ul className="space-y-1">
+            {discounts.map((discount) => (
+              <li key={discount.discount_type} className="flex items-center">
                 <input type="checkbox" className="form-checkbox text-red-500 rounded-sm mr-2" />
-                <label className="text-gray-600">{discount}</label>
+                <label className="text-gray-600">{discount.value} {discount.discount_type == 'percentage'?'%':'৳'}</label>
               </li>
             ))}
           </ul>
         </Accordion>
+
+        
       </div>
     </div>
   );

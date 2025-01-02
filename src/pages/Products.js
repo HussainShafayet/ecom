@@ -41,14 +41,16 @@ const Products = ({scrollContainerRef}) => {
   }, [searchParams]);
 
   useEffect(() => {
-   
+    const brands = searchParams.get("brands");
+    const brandFilter = brands ? brands.split(",") : [];
+    
     if (category) {
       dispatch(fetchAllProducts({category: category, limit, sortBy, order, page, skip}))
     } else {
       dispatch(fetchAllProducts({limit:limit, sortBy, order, page, skip}));
     }
     
-  }, [dispatch,category, sortBy, order, page, limit, skip]);  // Fetch new products whenever the query parameter changes
+  }, [dispatch,category, sortBy, order, page, limit, skip, searchParams]);  // Fetch new products whenever the query parameter changes
   
   const fetchMoreProducts = () => {
     const nextPage = page + 1;
