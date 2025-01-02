@@ -1,10 +1,17 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {getBestSellingContent, getFeaturedContent, getFlashSaleContent, getHomeContent, getNewArrivalContent} from "../../services/contentService";
+import {getBestSellingContent, getFeaturedContent, getFlashSaleContent, getHomeContent, getNewArrivalContent, getShopContent} from "../../services/contentService";
 
 const initialState ={
     isLoading: false,
     image_sliders: [],
     video_sliders: [],
+    categories: [],
+    tags: [],
+    brands: [],
+    colors: [],
+    sizes: [],
+    price_range: {},
+    discounts: [],
     left_banner: null,
     right_banner: null,
     error: null,
@@ -37,6 +44,12 @@ export const fetchBestSellingContent = createAsyncThunk("content/fetchBestSellin
 export const fetchFeaturedContent = createAsyncThunk("content/fetchFeaturedContent", async ()=>{
     const response =  await getFeaturedContent();
     console.log('get featured content res', response);
+    return {data: response.data.data, error: response.message};
+});
+
+export const fetchShopContent = createAsyncThunk("content/fetchShopContent", async ()=>{
+    const response =  await getShopContent();
+    console.log('get shop content res', response);
     return {data: response.data.data, error: response.message};
 });
 
@@ -150,6 +163,34 @@ const contentSlice = createSlice({
             state.video_sliders = [];
             state.left_banner = null;
             state.right_banner = null;
+            state.error = action.error.message;
+        });
+
+
+        //get shop content
+        builder.addCase(fetchShopContent.pending, (state)=>{
+            state.isLoading = true;
+        });
+        builder.addCase(fetchShopContent.fulfilled,(state, action)=>{
+            state.isLoading = false;
+            state.categories =  action.payload.data.categories;
+            state.tags =  action.payload.data.tags;
+            state.brands =  action.payload.data.brands;
+            state.colors =  action.payload.data.colors;
+            state.sizes =  action.payload.data.sizes;
+            state.price_range =  action.payload.data.price_range;
+            state.discounts =  action.payload.data.discounts;
+            state.error = null;
+        });
+        builder.addCase(fetchShopContent.rejected,(state, action)=>{
+            state.isLoading = false;
+            state.categories = [];
+            state.tags = [];
+            state.brands = [];
+            state.colors = [];
+            state.sizes = [];
+            state.price_range = {};
+            state.discounts = [];
             state.error = action.error.message;
         });
 

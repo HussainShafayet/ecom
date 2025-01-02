@@ -34,3 +34,8 @@ export const getBestSellingContent = async () => {
 export const getFeaturedContent = async () => {
   return await axios.get(`${API_URL}/api/content/pages/feature`);
 };
+
+// Fetch featured content from the API
+export const getShopContent = async () => {
+  return await axios.get(`${API_URL}/api/content/shop`);
+};

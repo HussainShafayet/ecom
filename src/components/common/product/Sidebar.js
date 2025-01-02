@@ -2,16 +2,16 @@ import React, {useEffect} from "react";
 import {Accordion, Loader} from '../../common';
 import { FaTags, FaDollarSign, FaIndustry, FaStar, FaCheck, FaFilter, FaTshirt, FaPalette } from 'react-icons/fa';
 import {useDispatch, useSelector} from "react-redux";
-import {fetchAllCategories} from "../../../redux/slice/categorySlice";
+import {fetchShopContent} from "../../../redux/slice/contentSlice";
 
 
 // Sidebar Component
 const Sidebar = ({ onClose }) => {
-  const {isLoading, categories, error} = useSelector((state)=> state.category);
+  const {isLoading,categories, error} = useSelector((state) => state.content);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchAllCategories());
+    dispatch(fetchShopContent());
   }, [dispatch])
   
   
