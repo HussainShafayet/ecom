@@ -1,6 +1,6 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {Accordion, Loader} from '../../common';
-import { FaTags, FaDollarSign, FaIndustry, FaStar, FaCheck, FaFilter, FaTshirt, FaPalette } from 'react-icons/fa';
+import { FaTags, FaDollarSign, FaIndustry, FaStar, FaCheck, FaFilter, FaTshirt, FaPalette, FaChevronDown, FaChevronRight } from 'react-icons/fa';
 import {useDispatch, useSelector} from "react-redux";
 import {fetchShopContent} from "../../../redux/slice/contentSlice";
 
@@ -13,6 +13,44 @@ const Sidebar = ({ onClose }) => {
   useEffect(() => {
     dispatch(fetchShopContent());
   }, [dispatch])
+
+
+  const CategoryItem = ({ category }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const toggleExpand = () => setIsExpanded(!isExpanded);
+
+    return (
+      <li>
+        <div className="flex items-center justify-between px-3 py-1">
+          <a
+            href={`/products/?category=${category.slug}`}
+            className="text-gray-600 hover:text-blue-500 block w-full"
+          >
+            {category.name}
+          </a>
+          {category.children && category.children.length > 0 && (
+            <button
+              onClick={toggleExpand}
+              className="text-gray-500 hover:text-blue-500"
+              aria-label="Toggle Subcategories"
+            >
+              {isExpanded ? <FaChevronDown /> : <FaChevronRight />}
+            </button>
+          )}
+        </div>
+
+        {/* Render Children */}
+        {isExpanded && category.children.length > 0 && (
+          <ul className="pl-4 border-l border-gray-300 space-y-1">
+            {category.children.map((child) => (
+              <CategoryItem key={child.slug} category={child} />
+            ))}
+          </ul>
+        )}
+      </li>
+    );
+  };
   
   
   return (
@@ -28,14 +66,19 @@ const Sidebar = ({ onClose }) => {
       {/* Filters with Accordions */}
       <div className="space-y-4">
       
+        
+        {/*categories*/}
         <Accordion title="Categories" icon={<FaTags className="text-blue-500" />}>
-          {isLoading ? <Loader />:
+          {isLoading ? (
+            <Loader />
+          ) : (
             <ul className="space-y-1 max-h-44 overflow-y-auto">
-            {categories && categories.map((category)=>(
-              <li key={category.name}><a href={`/products/category/${category.slug}`} className="block px-3 py-1 text-gray-600 hover:text-blue-500 hover:bg-gray-100 rounded-md">{category.name}</a></li>
-            ))}
+              {categories &&
+                categories.map((category) => (
+                  <CategoryItem key={category.slug} category={category} />
+                ))}
             </ul>
-          }
+          )}
         </Accordion>
         
         {/* Price Range Filter */}
