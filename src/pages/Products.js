@@ -39,10 +39,22 @@ const Products = ({scrollContainerRef}) => {
   }, [searchParams]);
 
   useEffect(() => {
-    const brands = searchParams.get("brands");
-    const brandFilter = brands ? brands.split(",") : [];
-    
-    dispatch(fetchAllProducts({page_size:page_size, sortBy, order, page}));
+    const brandsParam = searchParams.get("brands");
+    const brands = brandsParam ? brandsParam.split(",") : [];
+
+    const tagsParam = searchParams.get("tags");
+    const tags = tagsParam ? tagsParam.split(",") : [];
+
+    const min_price = searchParams.get("min_price");
+    const max_price = searchParams.get("max_price");
+
+    const sizesParam = searchParams.get("sizes");
+    const sizes = sizesParam ? sizesParam.split(",") : [];
+
+    const colorsParam = searchParams.get("colors");
+    const colors = colorsParam ? colorsParam.split(",") : [];
+
+    dispatch(fetchAllProducts({page_size:page_size, sortBy, order, page, brands,tags, min_price, max_price, sizes, colors}));
     
     
   }, [dispatch,searchParams]);  // Fetch new products whenever the query parameter changes

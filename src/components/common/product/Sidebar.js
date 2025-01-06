@@ -174,11 +174,7 @@ const Sidebar = ({ onClose }) => {
 
         {/* Color Filter */}
         <Accordion title="Color" icon={<FaPalette className="text-purple-500" />}>
-          <div className="flex space-x-2">
-            {colors.map((color, index) => (
-              <div key={color.hex_code} className={`w-6 h-6 rounded-full cursor-pointer`} style={{background: color.hex_code}} />
-            ))}
-          </div>
+          <SelectFilter items={colors} type='colors' />
         </Accordion>
 
         {/* Size Filter */}
@@ -189,14 +185,15 @@ const Sidebar = ({ onClose }) => {
 
         {/* Discount */}
         <Accordion title="Discounts" icon={<FaFilter className="text-red-500" />}>
-         <ul className="space-y-1">
+         {/*<ul className="space-y-1">
             {discounts.map((discount) => (
               <li key={discount.discount_type} className="flex items-center">
                 <input type="checkbox" className="form-checkbox text-red-500 rounded-sm mr-2" />
                 <label className="text-gray-600">{discount.value} {discount.discount_type == 'percentage'?'%':'৳'}</label>
               </li>
             ))}
-          </ul>
+          </ul>*/}
+          <SelectFilter items={discounts} type='discounts' />
         </Accordion>
 
         
