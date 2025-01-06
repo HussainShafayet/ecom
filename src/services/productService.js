@@ -4,23 +4,20 @@ import axios from 'axios';
 const API_URL = 'http://192.168.0.103:8000'; // Replace with your API base URL
 
 // src/services/productService.js
-export const getAllProducts = async (limit = null, sortBy = null, order = null, page = null, skip=null) => {
+export const getAllProducts = async (page_size = null, sortBy = null, order = null, page = null) => {
   let query = '';
 
-  if (limit) {
-    query += `limit=${limit}&`; // Add limit
+  if (page) {
+    query += `page=${page}&`; // Add page for pagination
+  }
+  if (page_size) {
+    query += `page_size=${page_size}&`; // Add limit
   }
   if (sortBy) {
     query += `sortBy=${sortBy}&`; // Add sorting
   }
   if (order) {
     query += `order=${order}&`; // Add order (asc or desc)
-  }
-  if (page) {
-    query += `page=${page}&`; // Add page for pagination
-  }
-  if (skip) {
-    query += `skip=${skip}&`; // Add skip for pagination
   }
 
   return await axios.get(`${API_URL}/api/products?${query}`);

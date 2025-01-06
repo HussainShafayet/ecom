@@ -26,8 +26,7 @@ const Products = ({scrollContainerRef}) => {
 
   // Initialize page and limit from searchParams
   const [page, setPage] = useState(parseInt(searchParams.get('page') || 1));
-  const [limit, setLimit] = useState(parseInt(searchParams.get('limit') || 30)); // Default limit of 30
-  const [skip, setSkip] = useState(parseInt(searchParams.get('skip') || 0));
+  const [page_size, setPage_Size] = useState(parseInt(searchParams.get('page_size') || 20)); // Default limit of 30
 
   // Extract necessary parameters from searchParams
   const sortBy = searchParams.get('sortBy');
@@ -36,43 +35,39 @@ const Products = ({scrollContainerRef}) => {
   // First useEffect: Reset values if URL parameters are missing
   useEffect(() => {
     if (!searchParams.has('page')) setPage(1);
-    if (!searchParams.has('limit')) setLimit(30);
-    if (!searchParams.has('skip')) setSkip(0);
+    if (!searchParams.has('page_size')) setPage_Size(20);
   }, [searchParams]);
 
   useEffect(() => {
     const brands = searchParams.get("brands");
     const brandFilter = brands ? brands.split(",") : [];
     
-    if (category) {
-      dispatch(fetchAllProducts({category: category, limit, sortBy, order, page, skip}))
-    } else {
-      dispatch(fetchAllProducts({limit:limit, sortBy, order, page, skip}));
-    }
+    dispatch(fetchAllProducts({page_size:page_size, sortBy, order, page}));
     
-  }, [dispatch,category, sortBy, order, page, limit, skip, searchParams]);  // Fetch new products whenever the query parameter changes
+    
+  }, [dispatch,searchParams]);  // Fetch new products whenever the query parameter changes
   
   const fetchMoreProducts = () => {
     const nextPage = page + 1;
-    const nextSkip = skip + limit;
+    //const nextSkip = skip + limit;
     setPage(nextPage);
-    setSkip(nextSkip);
+    //setSkip(nextSkip);
     // Update searchParams to include the new page, keeping existing params
     setSearchParams({
       ...Object.fromEntries(searchParams),
       page: nextPage,
-      limit, // Ensure limit stays the same
-      skip: nextSkip,
+      page_size, // Ensure limit stays the same
+      //skip: nextSkip,
     });
   };
 
-  if (isLoading && page === 1) {
-    return <div className='container h-screen flex justify-center'><Loader message='Loading Products' /></div>
-  }
+  //if (isLoading && page === 1) {
+  //  return <div className='container h-screen flex justify-center'><Loader message='Loading Products' /></div>
+  //}
 
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
+  //if (error) {
+  //  return <div className="text-center text-red-500">{error}</div>;
+  //}
   const toggleSortType = () => {
     // Cycle through sort options on each button click
     const currentIndex = sortOptions.indexOf(sortType);
@@ -85,14 +80,14 @@ const Products = ({scrollContainerRef}) => {
   const handleSortChange = (e) => {
 
     const selectedSort = e.target.value;
-    const limit = searchParams.get('limit') || 30; // Use default limit if not in searchParams
+    const page_size = searchParams.get('paze_size') || 20; // Use default limit if not in searchParams
   
-    setLimit(limit);
+    setPage_Size(page_size);
     setPage(1); // Reset page to 1 for new sort
-    setSkip(0);
+    //setSkip(0);
   
     // Start with all existing search params
-      const updatedParams = { ...Object.fromEntries(searchParams), limit, page: 1, skip: 0 };
+      const updatedParams = { ...Object.fromEntries(searchParams), page_size, page: 1, };
     
   
     // Conditionally set 'order' if it differs from the default
@@ -115,14 +110,14 @@ const Products = ({scrollContainerRef}) => {
     const sortBy = searchParams.get('sortBy');
     const order = searchParams.get('order');
     
-    setLimit(itemShow);
+    setPage_Size(itemShow);
     setPage(1); // Reset page to 1 for the new limit
-    setSkip(0);
+    //setSkip(0);
     
     if (sortBy && order) {
-      setSearchParams({ ...Object.fromEntries(searchParams), limit: itemShow, sortBy:'price',order, page: 1, skip:0 })
+      setSearchParams({ ...Object.fromEntries(searchParams), page_size: itemShow, sortBy:'price',order, page: 1,})
     }else{
-      setSearchParams({ ...Object.fromEntries(searchParams), limit: itemShow, page: 1, skip:0 })
+      setSearchParams({ ...Object.fromEntries(searchParams), page_size: itemShow, page: 1 })
     }
 
   };

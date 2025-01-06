@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {Loader, ProductCard, Slider} from '../common'; // Assuming you have a ProductCard component
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchAllProducts, fetchNewArrivalProducts} from '../../redux/slice/productSlice';
+import {fetchNewArrivalProducts} from '../../redux/slice/productSlice';
 import {Link} from 'react-router-dom';
 import {fetchNewArrivalContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';

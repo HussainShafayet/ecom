@@ -11,7 +11,7 @@ const AllProducts = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-      dispatch(fetchAllProducts({limit:10}));
+      dispatch(fetchAllProducts({page_size:12}));
     }, [dispatch]);
 
 

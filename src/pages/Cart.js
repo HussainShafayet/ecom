@@ -16,7 +16,7 @@ const Cart = () => {
 
   useEffect(() => {
     if (cartItems.length > 0) {
-      dispatch(fetchAllProducts({limit:10}));
+      dispatch(fetchAllProducts({page_size:12}));
     }
     
    }, [dispatch]);
