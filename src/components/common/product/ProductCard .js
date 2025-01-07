@@ -19,9 +19,14 @@ const ProductCard = ({ product, cardForTrending }) => {
   };
 
   const handleBuyNow = () => {
-    const extProd = { ...product, quantity: 1 };
-    dispatch(addToCart(extProd));
-    navigate('/checkout');
+    if (product.has_variants) {
+      navigate(`/products/detail/${product.slug}`);
+    } else {
+      const extProd = { ...product, quantity: 1 };
+      dispatch(addToCart(extProd));
+      navigate(`/checkout`);
+    }
+    
   };
 
   const wishlist = useSelector(state => state.wishList.items);
@@ -42,7 +47,7 @@ const ProductCard = ({ product, cardForTrending }) => {
     <div className="border rounded-lg shadow-md bg-white hover:shadow-lg transition duration-200 relative p-3">
       
       {/* Out of Stock Overlay */}
-      {product.stock && product.stock < 0 && (
+      {!product.availability_status && (
         <div className="absolute inset-0 bg-black bg-opacity-50 text-white flex items-center justify-center text-lg font-bold z-10">
           Out of Stock
         </div>
@@ -155,12 +160,14 @@ const ProductCard = ({ product, cardForTrending }) => {
 
         {/* Button Group */}
         <div className="flex space-x-2 mt-2">
-          <button
-            onClick={handleAddToCart}
-            className="flex-grow bg-blue-500 text-white font-bold py-1 rounded hover:bg-blue-600 transition-colors text-xs"
-          >
-            Add to Cart
-          </button>
+          {!product.has_variants && 
+            <button
+              onClick={handleAddToCart}
+              className="flex-grow bg-blue-500 text-white font-bold py-1 rounded hover:bg-blue-600 transition-colors text-xs"
+            >
+              Add to Cart
+            </button>
+          }
           <button
             onClick={handleBuyNow}
             className="flex-grow bg-green-500 text-white font-bold py-1 rounded hover:bg-green-600 transition-colors text-xs"
