@@ -30,48 +30,79 @@ const SignUp = () => {
   const toggleConfirmPasswordVisibility = () =>
     setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
 
+  const validateField = (name, value) => {
+    let error = "";
+
+    switch (name) {
+      case "name":
+        if (!value.trim()) error = "Full name is required";
+        break;
+
+      case "phone":
+        if (!value.trim()) {
+          error = "Phone number is required";
+        } else if (!/^\+?(\d{10})$/.test(value)) {
+          error = "Enter a valid phone number";
+        }
+        break;
+
+      case "password":
+        if (value.length < 6) {
+          error = "Password must be at least 6 characters";
+        }
+        setPasswordStrength(value.length >= 6);
+        setPasswordMatch(value === formData.confirmPassword);
+        break;
+
+      case "confirmPassword":
+        if (value !== formData.password) {
+          error = "Passwords do not match";
+        }
+        setPasswordMatch(value === formData.password);
+        break;
+
+      default:
+        break;
+    }
+
+    return error;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Update the form data
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    if (name === "password") {
-      setPasswordStrength(value.length >= 6);
-      setPasswordMatch(value === formData.confirmPassword);
-    }
-    if (name === "confirmPassword") {
-      setPasswordMatch(value === formData.password);
-    }
+
+    // Validate the field and update the errors state
+    const error = validateField(name, value);
+    setErrors((prev) => ({
+      ...prev,
+      [name]: error,
+    }));
   };
 
   const validateForm = () => {
-    const errors = {};
+    const validationErrors = {};
 
-    if (!formData.name.trim()) {
-      errors.name = "Full name is required";
-    }
+    Object.keys(formData).forEach((field) => {
+      const error = validateField(field, formData[field]);
+      if (error) {
+        validationErrors[field] = error;
+      }
+    });
 
-    if (!formData.phone.trim()) {
-      errors.phone = "Phone number is required";
-    } else if (!/^\+?(\d{10})$/.test(formData.phone)) {
-      errors.phone = "Enter a valid phone number";
-    }
-
-    if (formData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
-    }
-
-    if (formData.confirmPassword !== formData.password) {
-      errors.confirmPassword = "Passwords do not match";
-    }
-
-    return errors;
+    return validationErrors;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const validationErrors = validateForm();
+
     if (Object.keys(validationErrors).length === 0) {
       console.log("Form data submitted:", formData);
       alert("Sign up successful!");
@@ -85,7 +116,7 @@ const SignUp = () => {
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-600 via-blue-500 to-indigo-600 p-6 relative overflow-hidden">
       {/* Background Animated Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 opacity-30 animate-pulse"></div>
-      
+
       {/* Decorative Circles */}
       <div className="absolute top-0 left-1/2 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl -translate-x-1/2"></div>
       <div className="absolute bottom-0 right-1/3 w-72 h-72 bg-pink-300 opacity-20 rounded-full blur-3xl"></div>
@@ -131,14 +162,13 @@ const SignUp = () => {
             </label>
             <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
               <FaPhone className="text-gray-400 m-3" title="Phone" />
-               {/* Country Code Selector */}
-            <select
-              id="country-code"
-              className="bg-gray-100 text-gray-700 font-medium px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
-              defaultValue="+880"
-            >
-              <option value="+880" selected>+880</option>
-            </select>
+              <select
+                id="country-code"
+                className="bg-gray-100 text-gray-700 font-medium px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
+                defaultValue="+880"
+              >
+                <option value="+880">+880</option>
+              </select>
               <input
                 type="number"
                 id="phone"
@@ -251,7 +281,7 @@ const SignUp = () => {
         {/* Divider */}
         <div className="flex items-center my-6">
           <hr className="w-full border-gray-300" />
-          <span className="px-4 w-full text-center text-gray-500 text-sm">or sign up with</span>
+          <span className="px-4 text-center text-gray-500 text-sm">or sign up with</span>
           <hr className="w-full border-gray-300" />
         </div>
 
