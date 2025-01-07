@@ -69,9 +69,39 @@ const SignUp = () => {
               id="name"
               placeholder="Enter your full name"
               className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
+              required
             />
           </div>
         </div>
+
+        {/* Phone Number */}
+        <div className="mb-4">
+          <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">Phone Number</label>
+          <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
+          
+          <FaPhone className="text-gray-400 m-3" title="Phone" />
+
+            {/* Country Code Selector */}
+            <select
+              id="country-code"
+              className="bg-gray-100 text-gray-700 font-medium px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
+              defaultValue="+880"
+            >
+              <option value="+880" selected>+880</option>
+            </select>
+            
+            {/* Phone Number Input */}
+            <input
+              type="number"
+              id="phone"
+              placeholder="Enter your phone number"
+              onInput={handlePhone}
+              className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
+              required
+            />
+          </div>
+        </div>
+
 
         {/* Email  */}
         <div className="mb-4">
@@ -89,22 +119,7 @@ const SignUp = () => {
           </div>
         </div>
 
-         {/* Phone Number */}
-         <div className="mb-4">
-          <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">Phone Number</label>
-          <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-            
-            <FaPhone className="text-gray-400 m-3" title="Phone" />
-            <input
-              type="number"
-              id="phone"
-              placeholder="Enter your phone number"
-              onInput={handlePhone}
-              className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
-              required
-            />
-          </div>
-        </div>
+         
 
         {/* Password */}
         <div className="mb-4">
