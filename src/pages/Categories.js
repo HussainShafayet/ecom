@@ -53,7 +53,7 @@ const Categories = () => {
                         {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
                     </span>
                     )}
-                    <Link to={`/products/category/${category.slug}`} key={category.id}>
+                    <Link to={`/products/?category=${category.slug}`} key={category.id}>
                     <div className="relative group cursor-pointer min-w-[150px]">
                         <img
                         src={category.image}
@@ -99,7 +99,7 @@ const Categories = () => {
                         {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
                     </span>
                     )}
-                    <Link to={`/products/category/${category.slug}`} key={category.id}>
+                    <Link to={`/products/?category=${category.slug}`} key={category.id}>
                     <div className="relative group cursor-pointer min-w-[150px]">
                         <img
                         src={category.image}
@@ -145,7 +145,7 @@ const Categories = () => {
                         {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
                     </span>
                     )}
-                    <Link to={`/products/category/${category.slug}`} key={category.id}>
+                    <Link to={`/products/?category=${category.slug}`} key={category.id}>
                     <div className="relative group cursor-pointer min-w-[150px]">
                         <img
                         src={category.image}
@@ -191,7 +191,7 @@ const Categories = () => {
                         {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
                     </span>
                     )}
-                    <Link to={`/products/category/${category.slug}`}>
+                    <Link to={`/products/?category=${category.slug}`} target='_blank'>
                     <div className="relative group cursor-pointer min-w-[150px]">
                         <img
                         src={category.image}

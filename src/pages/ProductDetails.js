@@ -723,7 +723,7 @@ useEffect(() => {
                     <ul className="text-sm text-gray-700 space-y-3 ml-3">
                       <li className="flex items-center">
                         <FaTag className="text-blue-500 mr-2" />
-                        <span className="font-semibold mr-1">Warranty:</span> {product.warranty_information}
+                        <span className="font-semibold mr-1">Warranty:</span> {product.warranty_information || 'N/A'}
                       </li>
                       <li className="flex items-center">
                         <FaBox className="text-green-500 mr-2" />
