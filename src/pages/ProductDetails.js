@@ -515,7 +515,7 @@ useEffect(() => {
 
           
             {/* Button Group */}
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+            <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
 
             {(selectedColor && selectedSize?.availability_status) || (selectedSize?.availability_status)? 
               <>
@@ -553,7 +553,10 @@ useEffect(() => {
                   Add to Cart
                 </button>
                 </>
-                : ''
+                : 
+                <div className='text-center'>
+                  <span className='font-bold text-red-500'>Out of Stock</span>
+                </div>
             }
               {/* Back to Products Link */}
               <Link
