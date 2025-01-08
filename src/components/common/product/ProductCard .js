@@ -47,11 +47,11 @@ const ProductCard = ({ product, cardForTrending }) => {
     <div className="border rounded-lg shadow-md bg-white hover:shadow-lg transition duration-200 relative p-3">
       
       {/* Out of Stock Overlay */}
-      {!product.availability_status && (
+      {/*{!product.availability_status && (
         <div className="absolute inset-0 bg-black bg-opacity-50 text-white flex items-center justify-center text-lg font-bold z-10">
           Out of Stock
         </div>
-      )}
+      )}*/}
       
       {/* Discount Badge */}
       {product.has_discount && (
@@ -159,22 +159,29 @@ const ProductCard = ({ product, cardForTrending }) => {
         </div>
 
         {/* Button Group */}
-        <div className="flex space-x-2 mt-2">
-          {!product.has_variants && 
+        {product.availability_status? 
+          <div className="flex space-x-2 mt-2">
+            {!product.has_variants && 
+              <button
+                onClick={handleAddToCart}
+                className="flex-grow bg-blue-500 text-white font-bold py-1 rounded hover:bg-blue-600 transition-colors text-xs"
+              >
+                Add to Cart
+              </button>
+            }
             <button
-              onClick={handleAddToCart}
-              className="flex-grow bg-blue-500 text-white font-bold py-1 rounded hover:bg-blue-600 transition-colors text-xs"
+              onClick={handleBuyNow}
+              className="flex-grow bg-green-500 text-white font-bold py-1 rounded hover:bg-green-600 transition-colors text-xs"
             >
-              Add to Cart
+              Buy Now
             </button>
-          }
-          <button
-            onClick={handleBuyNow}
-            className="flex-grow bg-green-500 text-white font-bold py-1 rounded hover:bg-green-600 transition-colors text-xs"
-          >
-            Buy Now
-          </button>
-        </div>
+          </div>
+          :
+          <div className='text-center'>
+            <span className='font-bold text-red-500'>Out of Stock</span>
+          </div>
+          
+        }
       </div>
     </div>
   );

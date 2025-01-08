@@ -516,6 +516,9 @@ useEffect(() => {
           
             {/* Button Group */}
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+
+            {(selectedColor && selectedSize?.availability_status) || (selectedSize?.availability_status)? 
+              <>
               {/* Buy Now Button */}
               <button
                 onClick={handleBuyNow}
@@ -531,7 +534,27 @@ useEffect(() => {
               >
                 Add to Cart
               </button>
+              </>
+              : (product.availability_status)?
+                <>
+                {/* Buy Now Button */}
+                <button
+                  onClick={handleBuyNow}
+                  className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  Buy Now
+                </button>
 
+                {/* Add to Cart Button */}
+                <button
+                  onClick={handleAddToCart}
+                  className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Add to Cart
+                </button>
+                </>
+                : ''
+            }
               {/* Back to Products Link */}
               <Link
                 to="/products"
