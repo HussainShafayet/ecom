@@ -1,7 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-//import axios from 'axios';
 
-import axios from 'axios';
 const initialState = {
     user: null,
     accessToken: null,
@@ -9,7 +7,23 @@ const initialState = {
     isAuthenticated: false,
     loading: false,
     error: null,
+    message: null,
   }
+
+// Async action for signup
+export const signUpUser = createAsyncThunk('auth/signUpUser', async (credentials, { rejectWithValue }) => {
+  try {
+     // Import axiosSetup only when needed to avoid circular dependency issues
+     const api = (await import('../../api/axiosSetup')).default;
+     const response = await api.post('api/accounts/register/', credentials);
+
+    console.log('signup response',response);
+    
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response.data);
+  }
+});
 
 // Async action for login
 export const signInUser = createAsyncThunk('auth/signInUser', async (credentials, { rejectWithValue }) => {
@@ -111,6 +125,25 @@ const authSlice = createSlice({
       })
       .addCase(getUser.fulfilled, (state, action) => {
         state.user = action.payload; // Update the access token
+      })
+
+      .addCase(signUpUser.pending, (state, action)=>{
+        state.loading = true;
+        state.error = null;
+        state.message = null;
+      })
+      .addCase(signUpUser.fulfilled, (state, action) =>{
+        state.loading = false;
+        console.log('fulfilled', action.payload);
+        state.error = null;
+        state.message = action.payload.message;
+        localStorage.setItem('user_id', JSON.stringify(action.payload.data.user_id));
+
+      })
+      .addCase(signUpUser.rejected, (state, action) =>{
+        state.loading = false;
+        state.message = null;
+        state.error = action.payload.errors;
       })
   },
 });

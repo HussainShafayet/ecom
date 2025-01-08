@@ -10,25 +10,24 @@ import {
   FaPhone,
   FaCheck,
 } from "react-icons/fa";
+import {useDispatch, useSelector} from "react-redux";
 import { Link } from "react-router-dom";
+import {signUpUser} from "../../redux/slice/authSlice";
+import {Loader} from '../../components/common';
 
 const SignUp = () => {
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+  const dispatch = useDispatch();
+  const { loading, error, message } = useSelector((state) => state.auth);
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
+    country_code: "+880",
     email: "",
-    password: "",
-    confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
-  const [passwordStrength, setPasswordStrength] = useState(false);
-  const [passwordMatch, setPasswordMatch] = useState(true);
 
-  const togglePasswordVisibility = () => setIsPasswordVisible(!isPasswordVisible);
-  const toggleConfirmPasswordVisibility = () =>
-    setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
+ 
 
   const validateField = (name, value) => {
     let error = "";
@@ -44,21 +43,6 @@ const SignUp = () => {
         } else if (!/^\+?(\d{10})$/.test(value)) {
           error = "Enter a valid phone number";
         }
-        break;
-
-      case "password":
-        if (value.length < 6) {
-          error = "Password must be at least 6 characters";
-        }
-        setPasswordStrength(value.length >= 6);
-        setPasswordMatch(value === formData.confirmPassword);
-        break;
-
-      case "confirmPassword":
-        if (value !== formData.password) {
-          error = "Passwords do not match";
-        }
-        setPasswordMatch(value === formData.password);
         break;
 
       default:
@@ -104,18 +88,54 @@ const SignUp = () => {
     const validationErrors = validateForm();
 
     if (Object.keys(validationErrors).length === 0) {
-      console.log("Form data submitted:", formData);
-      alert("Sign up successful!");
-      // Handle signup logic here (e.g., API call)
+      const regFormData = {
+        "phone_number": formData.country_code+formData.phone,
+        "email": formData.email,
+        "name":  formData.name,
+      }
+      dispatch(signUpUser(regFormData));
+      //console.log(loading, error);
+      //setTimeout(() => {
+        
+      //}, 3000);
+      
     } else {
       setErrors(validationErrors);
     }
   };
 
+
+  const ErrorDisplay = ({ errors }) => {
+    if (!errors || errors.length === 0) return null;
+  
+    return (
+      <div className="bg-red-50 border border-red-300 text-red-700 p-4 rounded-md mb-4">
+        <h3 className="font-semibold mb-2">Error</h3>
+        <ul className="list-disc list-inside space-y-1">
+          {errors.map((error, index) => (
+            <li key={index} className="text-sm">
+              {error}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+  const SuccessMessage = ({ message }) => {
+    if (!message) return null;
+  
+    return (
+      <div className="bg-green-50 border border-green-300 text-green-700 p-4 rounded-md mb-4">
+        <h3 className="font-semibold mb-2">Success</h3>
+        <p className="text-sm">{message}</p>
+      </div>
+    );
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-600 via-blue-500 to-indigo-600 p-6 relative overflow-hidden">
+    <div className="flex items-center justify-center min-h-screen  p-6 relative overflow-hidden">
       {/* Background Animated Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 opacity-30 animate-pulse"></div>
+      <div className="absolute inset-0 opacity-30 animate-pulse"></div>
 
       {/* Decorative Circles */}
       <div className="absolute top-0 left-1/2 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl -translate-x-1/2"></div>
@@ -133,6 +153,9 @@ const SignUp = () => {
             Already a member?
           </Link>
         </div>
+
+        <SuccessMessage message={message} />
+        <ErrorDisplay errors={error} />
 
         <form onSubmit={handleSubmit}>
           {/* Full Name */}
@@ -201,80 +224,16 @@ const SignUp = () => {
             </div>
           </div>
 
-          {/* Password */}
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-gray-700 font-medium mb-1">
-              Password
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-              <FaLock className="text-gray-400 m-3" title="Password" />
-              <input
-                type={isPasswordVisible ? "text" : "password"}
-                id="password"
-                name="password"
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
-              />
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="px-3 text-gray-500 hover:text-blue-600 transition focus:outline-none"
-                title={isPasswordVisible ? "Hide Password" : "Show Password"}
-              >
-                {isPasswordVisible ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-            )}
-            <p
-              className={`text-xs mt-2 ${
-                passwordStrength ? "text-green-600" : "text-gray-500"
-              }`}
-            >
-              {passwordStrength && <FaCheck className="inline mr-1" />}
-              Minimum 6 characters
-            </p>
-          </div>
-
-          {/* Confirm Password */}
-          <div className="mb-6">
-            <label htmlFor="confirmPassword" className="block text-gray-700 font-medium mb-1">
-              Confirm Password
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-              <FaLock className="text-gray-400 m-3" title="Confirm Password" />
-              <input
-                type={isConfirmPasswordVisible ? "text" : "password"}
-                id="confirmPassword"
-                name="confirmPassword"
-                placeholder="Confirm your password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
-              />
-              <button
-                type="button"
-                onClick={toggleConfirmPasswordVisibility}
-                className="px-3 text-gray-500 hover:text-blue-600 transition focus:outline-none"
-                title={isConfirmPasswordVisible ? "Hide Password" : "Show Password"}
-              >
-                {isConfirmPasswordVisible ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-            {!passwordMatch && (
-              <p className="text-red-500 text-xs mt-1">Passwords do not match</p>
-            )}
-          </div>
 
           {/* Sign Up Button */}
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105"
+            disabled={loading}
           >
-            Sign Up
+            {loading ? <Loader /> : 
+            'Sign Up'
+            }
           </button>
         </form>
 

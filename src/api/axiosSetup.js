@@ -4,7 +4,7 @@ import {logoutUser, refreshToken} from '../redux/slice/authSlice';
 import store from '../redux/store';
 
 const api = axios.create({
-  baseURL: 'https://dummyjson.com',
+  baseURL: 'http://192.168.0.103:8000',
   //withCredentials: true, // For secure cookies (e.g., refresh tokens)
 });
 
