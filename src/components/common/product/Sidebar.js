@@ -24,16 +24,24 @@ const Sidebar = ({ onClose }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const toggleExpand = () => setIsExpanded(!isExpanded);
-
+    
+    const handleCategorySearch = (item) => {
+      // Update the searchParams in the URL
+      setSearchParams({
+        ...Object.fromEntries(searchParams),
+      category: item.slug,
+      });
+    }
     return (
       <li>
         <div className="flex items-center justify-between px-3 py-1">
-          <a
-            href={`/products/?category=${category.slug}`}
-            className="text-gray-600 hover:text-blue-500 block w-full"
+          <span
+            //href={`/products/?category=${category.slug}`}
+            className="text-gray-600 hover:text-blue-500 block w-full cursor-pointer"
+            onClick={()=>handleCategorySearch(category)}
           >
             {category.name}
-          </a>
+          </span>
           {category.children && category.children.length > 0 && (
             <button
               onClick={toggleExpand}

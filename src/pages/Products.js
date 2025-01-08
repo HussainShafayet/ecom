@@ -11,7 +11,6 @@ const Products = ({scrollContainerRef}) => {
   //
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
-  const {category} = useParams();
   const { items: products, isLoading, error, hasMore, isSidebarOpen, sortType } = useSelector((state) => state.product);
   
   //get lastpath
@@ -39,6 +38,8 @@ const Products = ({scrollContainerRef}) => {
   }, [searchParams]);
 
   useEffect(() => {
+    const category = searchParams.get("category");
+
     const brandsParam = searchParams.get("brands");
     const brands = brandsParam ? brandsParam.split(",") : [];
 
@@ -57,7 +58,7 @@ const Products = ({scrollContainerRef}) => {
     const discount_type = searchParams.get("discount_type");
     const discount_value = searchParams.get("discount_value");
 
-    dispatch(fetchAllProducts({page_size:page_size, sortBy, order, page, brands,tags, min_price, max_price, sizes, colors, discount_type, discount_value}));
+    dispatch(fetchAllProducts({page_size:page_size, sortBy, order, page,category, brands,tags, min_price, max_price, sizes, colors, discount_type, discount_value}));
     
     
   }, [dispatch,searchParams]);  // Fetch new products whenever the query parameter changes
