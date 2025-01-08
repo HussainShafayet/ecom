@@ -10,7 +10,10 @@ import {useSearchParams} from "react-router-dom";
 const Sidebar = ({ onClose }) => {
   const {isLoading,categories,brands,price_range, colors,sizes,tags, discounts, error} = useSelector((state) => state.content);
   const dispatch = useDispatch();
-   const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedDiscount, setSelectedDiscount] = useState(
+    searchParams.get('discount_value') ? searchParams.get('discount_value') : null
+  );
 
   useEffect(() => {
     dispatch(fetchShopContent());
@@ -122,6 +125,17 @@ const Sidebar = ({ onClose }) => {
       </div>
     );
   };
+
+  const handleDiscountChange = (item) => {
+    setSelectedDiscount(item.value === selectedDiscount ? null : item.value);
+
+    // Update the searchParams in the URL
+    setSearchParams({
+      ...Object.fromEntries(searchParams),
+    discount_type: item.discount_type,
+    discount_value: item.value
+    });
+  }
   
   
   return (
@@ -185,15 +199,22 @@ const Sidebar = ({ onClose }) => {
 
         {/* Discount */}
         <Accordion title="Discounts" icon={<FaFilter className="text-red-500" />}>
-         {/*<ul className="space-y-1">
-            {discounts.map((discount) => (
-              <li key={discount.discount_type} className="flex items-center">
-                <input type="checkbox" className="form-checkbox text-red-500 rounded-sm mr-2" />
-                <label className="text-gray-600">{discount.value} {discount.discount_type == 'percentage'?'%':'৳'}</label>
+          <ul className="space-y-1">
+            {discounts.map((discount, index) => (
+              <li key={index} className="flex items-center">
+                <input
+                  type="radio"
+                  name="discount"
+                  checked={selectedDiscount == discount.value}
+                  onChange={() => handleDiscountChange(discount)}
+                  className="form-radio text-red-500 rounded-sm mr-2"
+                />
+                <label className="text-gray-600">
+                  {discount.value} {discount.discount_type === 'percentage' ? '%' : '৳'}
+                </label>
               </li>
             ))}
-          </ul>*/}
-          <SelectFilter items={discounts} type='discounts' />
+          </ul>
         </Accordion>
 
         

@@ -54,7 +54,10 @@ const Products = ({scrollContainerRef}) => {
     const colorsParam = searchParams.get("colors");
     const colors = colorsParam ? colorsParam.split(",") : [];
 
-    dispatch(fetchAllProducts({page_size:page_size, sortBy, order, page, brands,tags, min_price, max_price, sizes, colors}));
+    const discount_type = searchParams.get("discount_type");
+    const discount_value = searchParams.get("discount_value");
+
+    dispatch(fetchAllProducts({page_size:page_size, sortBy, order, page, brands,tags, min_price, max_price, sizes, colors, discount_type, discount_value}));
     
     
   }, [dispatch,searchParams]);  // Fetch new products whenever the query parameter changes

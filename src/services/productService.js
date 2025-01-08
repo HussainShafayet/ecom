@@ -4,7 +4,7 @@ import axios from 'axios';
 const API_URL = 'http://192.168.0.103:8000'; // Replace with your API base URL
 
 // src/services/productService.js
-export const getAllProducts = async (page_size = null, sortBy = null, order = null, page = null,brands=[], tags=[], min_price = 0,max_price = 0, sizes=[], colors=[]) => {
+export const getAllProducts = async (page_size = null, sortBy = null, order = null, page = null,brands=[], tags=[], min_price = 0,max_price = 0, sizes=[], colors=[], discount_type, discount_value) => {
   let query = '';
 
   if (page) {
@@ -20,22 +20,26 @@ export const getAllProducts = async (page_size = null, sortBy = null, order = nu
     query += `order=${order}&`; // Add order (asc or desc)
   }
   if (brands.length>0) {
-    query += `brands=${brands.toString()}&`; // Add order (asc or desc)
+    query += `brands=${brands.toString()}&`; // Add brands
   }
   if (tags.length>0) {
-    query += `tags=${tags.toString()}&`; // Add order (asc or desc)
+    query += `tags=${tags.toString()}&`; // Add tags
   }
   if (min_price > 0) {
-    query += `min_price=${min_price}&`; // Add order (asc or desc)
+    query += `min_price=${min_price}&`; // Add min_price
   }
   if (max_price > 0) {
-    query += `max_price=${max_price}&`; // Add order (asc or desc)
+    query += `max_price=${max_price}&`; // Add mas_price
   }
   if (sizes.length>0) {
-    query += `sizes=${sizes.toString()}&`; // Add order (asc or desc)
+    query += `sizes=${sizes.toString()}&`; // sizes
   }
   if (colors.length>0) {
-    query += `colors=${colors.toString()}&`; // Add order (asc or desc)
+    query += `colors=${colors.toString()}&`; // Add colors
+  }
+  if (discount_type && discount_value) {
+    query += `discount_type=${discount_type}&`; // Add discount
+    query += `discount_value=${discount_value}&`
   }
 
   return await axios.get(`${API_URL}/api/products?${query}`);
