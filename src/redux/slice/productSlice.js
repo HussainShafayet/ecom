@@ -238,6 +238,7 @@ const productSlice = createSlice({
                 state.mainImage =  product.colors[0].media_files[0];
                 state.selectedSize = product.colors[0].sizes[0];
             } else {
+                state.selectedColor = null;
                 state.mainImage = action.payload.media_files[0];
                 if (action.payload?.sizes?.length > 0) {
                     state.selectedSize = action.payload.sizes[0];
