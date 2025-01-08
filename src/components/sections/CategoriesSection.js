@@ -48,6 +48,7 @@ const CategoriesSection = () => {
         <Link
           to="/categories"
           className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
+          target='_blank'
         >
           View All
         </Link>

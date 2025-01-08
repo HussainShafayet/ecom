@@ -148,27 +148,5 @@ export const getProductById = async (slug) => {
     return await axios.get(`${API_URL}/api/products/detail/${slug}`);
 };
 
-// Fetch products by category (you can pass the category as a filter)
-export const getProductsByCategory = async (category=null, limit=null, sortBy = null, order = null, page = null, skip=null) => {
-  let query = '';
- 
-  if (limit) {
-    query += `limit=${limit}&`; // Add limit
-  }
-  if (sortBy) {
-    query += `sortBy=${sortBy}&`; // Add category filter
-  }
-  if (order) {
-    query += `order=${order}&`; // Add sort order, e.g., 'price_asc' or 'price_desc'
-  }
-  if (page) {
-    query += `page=${page}&`; // Add page for pagination
-  }
-  if (skip) {
-    query += `skip=${skip}&`; // Add skip for pagination
-  }
-  return await axios.get(`${API_URL}/products/category/${category}?${query}`);
-};
-
 //export default productService;
 

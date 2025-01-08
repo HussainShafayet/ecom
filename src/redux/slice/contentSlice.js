@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {getBestSellingContent, getFeaturedContent, getFlashSaleContent, getHomeContent, getNewArrivalContent, getShopContent} from "../../services/contentService";
+import {getBestSellingContent, getCategoriesContent, getFeaturedContent, getFlashSaleContent, getHomeContent, getNewArrivalContent, getShopContent} from "../../services/contentService";
 
 const initialState ={
     isLoading: false,
@@ -50,6 +50,12 @@ export const fetchFeaturedContent = createAsyncThunk("content/fetchFeaturedConte
 export const fetchShopContent = createAsyncThunk("content/fetchShopContent", async ()=>{
     const response =  await getShopContent();
     console.log('get shop content res', response);
+    return {data: response.data.data, error: response.message};
+});
+
+export const fetchCategoriesContent = createAsyncThunk("content/fetchCategoriesContent", async ()=>{
+    const response =  await getCategoriesContent();
+    console.log('get categories content res', response);
     return {data: response.data.data, error: response.message};
 });
 
@@ -191,6 +197,28 @@ const contentSlice = createSlice({
             state.sizes = [];
             state.price_range = {};
             state.discounts = [];
+            state.error = action.error.message;
+        });
+
+
+        //get categories  content
+        builder.addCase(fetchCategoriesContent.pending, (state)=>{
+            state.isLoading = true;
+        });
+        builder.addCase(fetchCategoriesContent.fulfilled,(state, action)=>{
+            state.isLoading = false;
+            state.image_sliders = action.payload.data.page_content.image_sliders;
+            state.video_sliders = action.payload.data.page_content.video_sliders;
+            state.left_banner = action.payload.data.page_content.left_banner;
+            state.right_banner = action.payload.data.page_content.right_banner;
+            state.error = null;
+        });
+        builder.addCase(fetchCategoriesContent.rejected,(state, action)=>{
+            state.isLoading = false;
+            state.image_sliders = [];
+            state.video_sliders = [];
+            state.left_banner = null;
+            state.right_banner = null;
             state.error = action.error.message;
         });
 

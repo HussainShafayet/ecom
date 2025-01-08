@@ -1,16 +1,21 @@
-import React, {useEffect, useRef} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {FaChevronLeft, FaChevronRight} from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {Loader} from '../components/common';
+import {Loader, Slider} from '../components/common';
 import {Link} from 'react-router-dom';
 import {fetchFlashSaleCategories, fetchNewArrivalCategories, fetchBestSellingCategories, fetchFeaturedCategories} from '../redux/slice/categorySlice';
+import {fetchCategoriesContent} from '../redux/slice/contentSlice';
+import blurImage from '../assets/images/blur.jpg';
 
 const Categories = () => {
     const { isLoading, flash_sale, new_arrival, best_selling,featured, error } = useSelector((state) => state.category);
+    const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
     const dispatch = useDispatch();
     const scrollRef = useRef(null);
+    const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
   
     useEffect(() => {
+      dispatch(fetchCategoriesContent());
       dispatch(fetchFlashSaleCategories({page:1, page_size:12}));
       dispatch(fetchNewArrivalCategories({page:1, page_size:12}));
       dispatch(fetchBestSellingCategories({page:1, page_size:12}));
@@ -24,10 +29,75 @@ const Categories = () => {
     if (error) {
       return <div className="text-center text-red-500">{error}</div>;
     }
+
+    const getLink = (item)=>{
+        switch (item.type) {
+            case 'product':
+                return `/products/detail/${item.link}`
+            case 'category':
+                return `/products/?category=${item.link}`
+            default:
+                return item.external_link;
+        }
+    }
   
     
   return (
     <div>
+        
+        <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[60vh]">
+            {/*image slider*/}
+            <div className="lg:w-3/5 flex h-full w-full">
+                <Slider image_sliders={image_sliders} />
+            </div>
+    
+            <div className="lg:w-2/5 flex flex-col space-y-4 h-full w-full border">
+            {right_banner?.media_type === 'image' &&
+                <>
+                {/* Product Image */}
+                <Link to={getLink(right_banner)} target='_blank' className="block h-full">
+                    {/* Main Product Image */}
+                    <img
+                    src={right_banner?.media}
+                    alt={right_banner?.caption}
+                    loading="lazy"
+                    className={`w-full h-full object-contain rounded-md transition-opacity duration-500 ${
+                        isImageLoaded ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    onLoad={() => setIsImageLoaded(true)} // Set image loaded state
+                    />
+
+                    {/* Blurred Placeholder */}
+                    {!isImageLoaded && (
+                    <img
+                        src={blurImage}
+                        alt="Loading"
+                        className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
+                    />
+                    )}
+                </Link>
+                </>
+            }
+            {right_banner?.media_type === 'video' && 
+                <div className='relative h-full'>
+                <Link to={getLink(right_banner)} target='_blank' className='absolute right-2 top-2 z-10 text-blue-500 hover:underline text:2x'>{right_banner.caption?right_banner.caption :'Click'}</Link>
+                {/* Video */}
+                <video
+                    src={right_banner?.media}
+                    controls
+                    autoPlay
+                    muted
+                    loop
+                    preload='true'
+                    className="w-full h-full object-cover rounded-sm"
+                />
+                </div>
+            }
+            </div>
+        </div>
+
+
+        {/*flash sale*/}
         <div className="container mx-auto my-8">
             <h2 className="text-3xl font-bold">Flash Sale Categories</h2>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -53,7 +123,7 @@ const Categories = () => {
                         {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
                     </span>
                     )}
-                    <Link to={`/products/?category=${category.slug}`} key={category.id}>
+                    <Link to={`/products/?category=${category.slug}`} key={category.id} target='_blank'>
                     <div className="relative group cursor-pointer min-w-[150px]">
                         <img
                         src={category.image}
@@ -99,7 +169,7 @@ const Categories = () => {
                         {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
                     </span>
                     )}
-                    <Link to={`/products/?category=${category.slug}`} key={category.id}>
+                    <Link to={`/products/?category=${category.slug}`} key={category.id} target='_blank'>
                     <div className="relative group cursor-pointer min-w-[150px]">
                         <img
                         src={category.image}
@@ -145,7 +215,7 @@ const Categories = () => {
                         {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
                     </span>
                     )}
-                    <Link to={`/products/?category=${category.slug}`} key={category.id}>
+                    <Link to={`/products/?category=${category.slug}`} key={category.id} target='_blank'>
                     <div className="relative group cursor-pointer min-w-[150px]">
                         <img
                         src={category.image}

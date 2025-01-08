@@ -45,8 +45,8 @@ const HeroSection = () => {
     switch (item.type) {
         case 'product':
             return `/products/detail/${item.link}`
-        case '/category':
-            return `category/${item.link}`
+        case 'category':
+            return `/products/?category=${item.link}`
         default:
            return item?.external_link;
     }

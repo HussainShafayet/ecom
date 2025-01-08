@@ -39,3 +39,8 @@ export const getFeaturedContent = async () => {
 export const getShopContent = async () => {
   return await axios.get(`${API_URL}/api/content/shop`);
 };
+
+// Fetch categories content from the API
+export const getCategoriesContent = async () => {
+  return await axios.get(`${API_URL}/api/content/pages/category`);
+};

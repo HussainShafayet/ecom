@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import axios from "axios";
-import {getAllProducts, getBestSellingProducts, getFeaturedProducts, getFlashSaleProducts, getNewArrivalProducts, getProductById, getProductsByCategory} from "../../services/productService";
+import {getAllProducts, getBestSellingProducts, getFeaturedProducts, getFlashSaleProducts, getNewArrivalProducts, getProductById} from "../../services/productService";
 const initialState = {
     isLoading: false,
     relatedProductsLoading: false,

@@ -34,7 +34,7 @@ const BestSelling = ({forRoute}) => {
         case 'product':
             return `/products/detail/${item.link}`
         case 'category':
-            return `/category/${item.link}`
+            return `/products/?category=${item.link}`
         default:
            return item.external_link;
     }

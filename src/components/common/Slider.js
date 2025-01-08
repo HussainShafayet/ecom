@@ -18,7 +18,7 @@ const Slider = ({image_sliders}) => {
             case 'product':
                 return `/products/detail/${slide.link}`
             case 'category':
-                return `/category/${slide.link}`
+                return `/products/?category=${slide.link}`
             default:
                return slide.external_link;
         }
