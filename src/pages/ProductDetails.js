@@ -535,7 +535,7 @@ useEffect(() => {
                 Add to Cart
               </button>
               </>
-              : (product.availability_status)?
+              : (!product.colors && !product.sizes && product.availability_status)?
                 <>
                 {/* Buy Now Button */}
                 <button
