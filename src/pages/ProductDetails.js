@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FaStar, FaChevronDown, FaShareAlt, FaTag, FaBox, FaWeightHanging, FaRulerCombined, FaCubes, FaTools, FaCopy, FaTwitter, FaWhatsapp, FaFacebookF, FaFacebook } from 'react-icons/fa';
 import { InputField, Loader, ProductCard, RatingAndReview, RichTextToHTML } from '../components/common/'; // Star and dropdown icons
 import {useDispatch, useSelector} from 'react-redux';
-import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts} from '../redux/slice/productSlice';
+import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts, setSelectedColor, setSelectedSize} from '../redux/slice/productSlice';
 //import {addToCart} from '../redux/slice/cartSlice';
 import {addToCart, addToCartAndRemoveFromWishlist} from '../redux/slice/cartSlice';
 import Zoom from 'react-medium-image-zoom'
@@ -11,9 +11,9 @@ import 'react-medium-image-zoom/dist/styles.css'
 
 const ProductDetails = () => {
   const { slug } = useParams();
-  const {isLoading, product, error, mainImage, items:products, quantity, relatedProductsLoading} = useSelector((state)=> state.product);
+  const {isLoading, product, error, mainImage, items:products, quantity, relatedProductsLoading, selectedColor, selectedSize} = useSelector((state)=> state.product);
 
-  const [selectedColor, setSelectedColor] = useState(null);
+  
   const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // Filter reviews by rating
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
   const [isRatingDropdownOpen, setIsRatingDropdownOpen] = useState(false);
@@ -153,9 +153,15 @@ useEffect(() => {
   };
 
   const handleSelectColor = (color) =>{
-    setSelectedColor(color);
+    dispatch(setSelectedColor(color))
     dispatch(setMainImage(color.media_files[0]));
+    dispatch(setSelectedSize(color.sizes[0]))
     
+    
+  }
+
+  const handleSelectSize = (variant) =>{
+    dispatch(setSelectedSize(variant));
   }
 
  
@@ -288,37 +294,123 @@ useEffect(() => {
             <h1 className="text-3xl font-bold mb-1">{product.name}</h1>
 
             {/* Product Price */}
-            {product.has_discount ? (
-              <div className="mb-1 flex flex-row space-x-1">
-                <p className=" text-gray-500 line-through">
-                  {product.base_price}
+            {selectedSize? 
+              <>
+              {product.has_discount ? (
+                <div className="mb-1 flex flex-row space-x-1">
+                  <p className=" text-gray-500 line-through">
+                    {selectedSize.base_price}
+                  </p>
+                  <p className="text-2x text-green-600 font-semibold">
+                  {selectedSize.discount_price} <span className="text-red-500">({product.discount_value}{product.discount_type == 'percentage'?'%':'৳'} OFF)</span>
+                  </p>
+                </div>
+              ) : (
+                <p className="text-2xl text-green-600 font-semibold mb-1">
+                  {selectedSize.base_price}
                 </p>
-                <p className="text-2x text-green-600 font-semibold">
-                {product.discount_price} <span className="text-red-500">({product.discount_value}{product.discount_type == 'percentage'?'%':'৳'} OFF)</span>
-                </p>
-              </div>
-            ) : (
-              <p className="text-2xl text-green-600 font-semibold mb-1">
-                {product.base_price}
-              </p>
-            )}
+              )}
+              </>
+            :
+              <>
+                {product.has_discount ? (
+                  <div className="mb-1 flex flex-row space-x-1">
+                    <p className=" text-gray-500 line-through">
+                      {product.base_price}
+                    </p>
+                    <p className="text-2x text-green-600 font-semibold">
+                    {product.discount_price} <span className="text-red-500">({product.discount_value}{product.discount_type == 'percentage'?'%':'৳'} OFF)</span>
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-2xl text-green-600 font-semibold mb-1">
+                    {product.base_price}
+                  </p>
+                )}
+              </>
+            
+            }
+           
 
           {/* Color Selector */}
-          <div className="flex items-center space-x-2 my-2">
-              <span className="font-semibold">Color:</span>
-              <div className="flex space-x-1">
-                {product.colors.map((color) => (
-                  <button
-                    key={color.name}
-                    onClick={() => handleSelectColor(color)}
-                    className={`w-6 h-6 rounded-full transition-colors border ${
-                      selectedColor === color ? 'border-blue-500' : 'border-gray-300'
-                    }`}
-                    style={{ backgroundColor: color.hex_code }}
-                  />
-                ))}
+          {product?.colors?.length > 0 && 
+
+            <>
+             <div className="mt-6 mb-3 flex items-center space-x-2">
+                <span className="font-semibold">Color:</span>
+                <div className="flex items-center gap-3">
+                  {product.colors.map((color, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSelectColor(color)}
+                      className={`w-8 h-8 rounded-full border shadow-md transform transition-transform duration-200 relative ${
+                        selectedColor.name === color.name
+                          ? 'ring-2 ring-blue-500 scale-110 border-blue-500'
+                          : 'border-gray-300 hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: color.hex_code }}
+                      title={color.name}
+                    >
+                      {/* Tooltip */}
+                      <span
+                        className={`absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs rounded-lg px-2 py-1 opacity-0 transition-opacity duration-200 ${
+                          selectedColor === color ? 'opacity-100' : 'group-hover:opacity-100'
+                        }`}
+                      >
+                        {color.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            </>
+          }
+
+          {/* size Selector */}
+          {(selectedColor?.sizes?.length > 0) ?  
+            <>
+              <div className="flex items-center space-x-2 my-2">
+                <span className="font-semibold">Size:</span>
+                <div className="flex gap-3">
+                  {selectedColor?.sizes.map((variant, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSelectSize(variant)}
+                      className={`px-2 py-1 text-sm font-medium rounded-lg border shadow-sm transition-transform duration-200 hover:scale-105 ${
+                        selectedSize.name === variant.name
+                          ? ' text-blue-500 border-blue-500'
+                          : ' text-gray-700 hover:bg-blue-100 border-gray-300'
+                      }`}
+                      title={`${variant.name}`}
+                    >
+                      {variant.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+            : (product?.sizes?.length > 0) ? 
+              <div className="flex items-center space-x-2 my-2">
+                <span className="font-semibold">Size:</span>
+                <div className="flex gap-3">
+                  {product?.sizes.map((variant, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSelectSize(variant)}
+                      className={`px-2 py-1 text-sm font-medium rounded-lg border shadow-sm transition-transform duration-200 hover:scale-105 ${
+                        selectedSize.name === variant.name
+                          ? ' text-blue-500 border-blue-500'
+                          : ' text-gray-700 hover:bg-blue-100 border-gray-300'
+                      }`}
+                      title={`${variant.name}`}
+                    >
+                      {variant.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            : ''
+          }
 
             {/* Quantity Selector */}
             <div className="flex items-center mb-1">

@@ -13,9 +13,12 @@ const initialState = {
     product: null,
     mainImage: null,
     quantity: 1,
+    minimum_quantity:1,
     hasMore: true,
     isSidebarOpen: false,
     sortType: '',
+    selectedColor: null,
+    selectedSize: null,
 }
 const API_URL = 'https://dummyjson.com/products';
 
@@ -84,7 +87,7 @@ const productSlice = createSlice({
             state.quantity +=  1;
         },
         decrementQuantity: (state, action) =>{
-            state.quantity =  Math.max(1, state.quantity - 1);
+            state.quantity =  Math.max(state.minimum_quantity, state.quantity - 1);
         },
         setIsSidebarOpen: (state, action)=>{
             state.isSidebarOpen = action.payload;
@@ -92,6 +95,12 @@ const productSlice = createSlice({
         setSortType: (state, action)=>{
             state.sortType = action.payload;
         }, 
+        setSelectedColor: (state, action)=>{
+            state.selectedColor = action.payload
+        },
+        setSelectedSize: (state, action)=>{
+            state.selectedSize = action.payload
+        },
     },
     extraReducers: (builder)=>{
 
@@ -222,11 +231,23 @@ const productSlice = createSlice({
         builder.addCase(fetchProductById.fulfilled,(state, action)=>{
             state.isLoading = false;
             state.product = action.payload;
-            state.mainImage = action.payload.media_files[0];
+            //state.mainImage = action.payload.media_files[0];
+            const product = action.payload;
+            if (product?.colors?.length > 0 ) {
+                state.selectedColor = product.colors[0];
+                state.mainImage =  product.colors[0].media_files[0];
+                state.selectedSize = product.colors[0].sizes[0];
+            } else {
+                state.mainImage = action.payload.media_files[0];
+                if (action.payload?.sizes?.length > 0) {
+                    state.selectedSize = action.payload.sizes[0];
+                }
+            }
             state.error = null
 
             //set quantity initial
-            state.quantity = 1;
+            state.minimum_quantity = action.payload?.minimum_order_quantity;
+            state.quantity = action.payload?.minimum_order_quantity;
         });
         builder.addCase(fetchProductById.rejected,(state, action)=>{
             state.isLoading = false;
@@ -236,5 +257,5 @@ const productSlice = createSlice({
     }
 });
 
-export const {setMainImage,incrementQuantity, decrementQuantity, setIsSidebarOpen, setSortType} = productSlice.actions;
+export const {setMainImage,incrementQuantity, decrementQuantity, setIsSidebarOpen, setSortType, setSelectedColor, setSelectedSize} = productSlice.actions;
 export default productSlice.reducer;
