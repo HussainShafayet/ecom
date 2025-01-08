@@ -661,7 +661,29 @@ useEffect(() => {
               <ul className="text-sm text-gray-700 space-y-3 ml-3">
                 <li className="flex items-center">
                   <FaTag className="text-blue-500 mr-2" />
-                  <span className="font-semibold mr-1">Brand:</span> {product.brand.name}
+                  <span className="font-semibold mr-1">Category:</span> 
+                  {product?.categories.map((category, index) =>(
+                    <Link key={index} to={`/products/?category=${category.slug}`}  className={`text-blue-500 hover:text-blue-600 underline transition-all mr-1`} target='_blank'>
+                      {category.name} 
+                    </Link>
+                  ))}
+                </li>
+                <li className="flex items-center">
+                  <FaTag className="text-blue-500 mr-2" />
+                  <span className="font-semibold mr-1">Brand:</span>
+                  <Link to={`/products/?brands=${product.brand.name}`}  className={`text-blue-500 hover:text-blue-600 underline transition-all mr-1`} target='_blank'>
+                    {product.brand.name} 
+                  </Link>
+                   
+                </li>
+                <li className="flex items-center">
+                  <FaTag className="text-blue-500 mr-2" />
+                  <span className="font-semibold mr-1">Tags:</span> 
+                  {product?.tags.map((tag, index) =>(
+                    <Link key={index} to={`/products/?tags=${tag.name}`}  className={`text-blue-500 hover:text-blue-600 underline transition-all mr-1`} target='_blank'>
+                      {tag.name} 
+                    </Link>
+                  ))}
                 </li>
                 <li className="flex items-center">
                   <FaBox className="text-green-500 mr-2" />
