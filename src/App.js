@@ -45,7 +45,7 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/wishlist" element={<WishList />} />
-            <Route path="/verify-otp" element={<VerifyOtp />} />
+            <Route path="/verify-otp/:user_id" element={<VerifyOtp />} />
 
 
             {/* Others Pages */}

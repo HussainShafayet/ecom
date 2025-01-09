@@ -9,11 +9,15 @@ const initialState = {
     error: null,
     message: null,
     signupLoading: false,
+    signinLoading: false,
     verifyOtpLoading: false,
     signupMessage: null,
+    signinMessage: null,
     signupError: null,
+    signinError: null,
     verifyOtpMessage: null,
     verifyOtpError: null,
+    user_id: null,
   }
 
 // Async action for signup
@@ -40,6 +44,21 @@ export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (credentials, 
 
     console.log('verifyotp response',response);
     
+    return response.data.data;
+  } catch (error) {
+    return rejectWithValue(error.response.data);
+  }
+});
+
+// Async action for resend otp
+export const resendOtp = createAsyncThunk('auth/resendOtp', async (credentials, { rejectWithValue }) => {
+  try {
+     // Import axiosSetup only when needed to avoid circular dependency issues
+     const api = (await import('../../api/axiosSetup')).default;
+     const response = await api.post('api/accounts/resend-otp/', credentials);
+
+    console.log('resend otp response',response);
+    
     return response.data;
   } catch (error) {
     return rejectWithValue(error.response.data);
@@ -51,7 +70,7 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('/auth/login', credentials);
+     const response = await api.post('api/accounts/login/', credentials);
 
     console.log('signin response',response);
     
@@ -129,18 +148,35 @@ const authSlice = createSlice({
       state.verifyOtpError = null;
       state.verifyOtpLoading = false;
     },
+    clearSigninState: (state) => {
+      state.signinLoading = null;
+      state.signinMessage = null;
+      state.signinError = false;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(signInUser.fulfilled, (state, action) => {
-        state.user = action.payload.username;
-        state.accessToken = action.payload.accessToken;
-        state.refreshToken = action.payload.refreshToken;
-        state.isAuthenticated = true;
-        localStorage.setItem('user', JSON.stringify(action.payload.username));
-        localStorage.setItem('accessToken', action.payload.accessToken);
-        localStorage.setItem('refreshToken', action.payload.refreshToken);
+      //sign in
+      .addCase(signInUser.pending, (state, action)=>{
+        state.signinLoading = true;
       })
+      .addCase(signInUser.fulfilled, (state, action) => {
+        //console.log(action.payload);
+        state.signinLoading = false;
+        state.signinMessage = action.payload.message;
+        state.signinError = null;
+        state.user_id = action.payload.data.user_id;
+        //temp
+        state.verifyOtpMessage = action.payload.message;
+        
+      })
+      .addCase(signInUser.rejected, (state, action)=>{
+        state.signinLoading = false;
+        state.signinError = action.payload.errors;
+      })
+
+
+
       .addCase(refreshToken.fulfilled, (state, action) => {
         state.accessToken = action.payload.accessToken; // Update the access token
         localStorage.setItem('accessToken', action.payload.accessToken);
@@ -150,7 +186,7 @@ const authSlice = createSlice({
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
-        localStorage.removeItem('user');
+        //localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
       })
@@ -166,8 +202,8 @@ const authSlice = createSlice({
         state.signupLoading = false;
         state.signupMessage = action.payload.message;
         state.signupError = null;
-        localStorage.setItem('user_id', JSON.stringify(action.payload.data.user_id));
-
+        state.user_id = action.payload.data.user_id;
+        
       })
       .addCase(signUpUser.rejected, (state, action) =>{
         state.signupLoading = false;
@@ -183,14 +219,38 @@ const authSlice = createSlice({
         state.verifyOtpLoading = false;
         state.verifyOtpMessage = action.payload.message;
         state.verifyOtpError = null;
+        
+        //state.user = action.payload.profile.username;
+        state.accessToken = action.payload.tokens.access;
+        state.refreshToken = action.payload.tokens.refresh;
+        state.isAuthenticated = true;
+        //localStorage.setItem('user', JSON.stringify(action.payload.profile.username));
+        localStorage.setItem('accessToken',  action.payload.tokens.access);
+        localStorage.setItem('refreshToken',  action.payload.tokens.refresh);
 
       })
       .addCase(verifyOtp.rejected, (state, action) =>{
         state.verifyOtpLoading = false;
         state.verifyOtpError = action.payload.errors;
       })
+
+
+
+       //resendOtp
+       .addCase(resendOtp.pending, (state, action)=>{
+        state.verifyOtpLoading = true;
+      })
+      .addCase(resendOtp.fulfilled, (state, action) =>{
+        state.verifyOtpLoading = false;
+        state.verifyOtpMessage = action.payload.message;
+        state.verifyOtpError = null;
+      })
+      .addCase(resendOtp.rejected, (state, action) =>{
+        state.verifyOtpLoading = false;
+        state.verifyOtpError = action.payload.errors;
+      })
   },
 });
 
-export const { loadUserFromStorage, clearSignupState, clearVerifyOtpState } = authSlice.actions;
+export const { loadUserFromStorage, clearSignupState, clearVerifyOtpState, clearSigninState } = authSlice.actions;
 export default authSlice.reducer;

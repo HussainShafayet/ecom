@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from "react";
 import {ErrorDisplay, Loader, SuccessMessage} from "../../components/common";
 import {useDispatch, useSelector} from "react-redux";
-import {clearSignupState, verifyOtp} from "../../redux/slice/authSlice";
+import {clearSignupState, clearVerifyOtpState, resendOtp, verifyOtp} from "../../redux/slice/authSlice";
+import {useNavigate, useParams} from "react-router-dom";
 
 const VerifyOtp = () => {
   const dispatch = useDispatch();
-  const { verifyOtpLoading, verifyOtpMessage, verifyOtpError } = useSelector((state) => state.auth);
-
-  const [formData, setFormData] = useState({ user_id: localStorage.getItem('user_id'), otp: "" });
+  const { verifyOtpLoading, verifyOtpMessage, verifyOtpError, signinMessage,isAuthenticated } = useSelector((state) => state.auth);
+  const { user_id } = useParams();
+  const navigate = useNavigate(); 
+  const [formData, setFormData] = useState({ user_id: user_id, otp: "", "cart": [],
+    "favorite": [] });
   const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        return () => {
-        dispatch(clearSignupState()); // Clear state when unmounting
-        };
-    }, [dispatch]);
+        if (isAuthenticated) {
+        //  navigate(from, { replace: true }); // Redirect to previous page if already authenticated
+        dispatch(clearVerifyOtpState());
+        navigate('/')
+        }
+      }, [verifyOtpMessage, isAuthenticated]);
 
   // Form validation
   const validateForm = () => {
@@ -23,6 +28,11 @@ const VerifyOtp = () => {
     if (!formData.otp) errors.otp = "OTP is required.";
     else if (!/^\d{6}$/.test(formData.otp)) errors.otp = "OTP must be a 6-digit number.";
     return errors;
+  };
+
+  // Handle input changes
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   // Handle form submission
@@ -41,10 +51,14 @@ const VerifyOtp = () => {
    
   };
 
-  // Handle input changes
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  //handle resend otp
+  const handleResendOtp = (e) =>{
+    e.preventDefault();
+    //console.log(formData.user_id);
+    dispatch(resendOtp({user_id:formData.user_id}));
+  }
+
+  
 
   return (
     <div className="max-w-sm mx-auto mt-12 p-6 border rounded shadow-md">
@@ -53,29 +67,11 @@ const VerifyOtp = () => {
       {/*Error message*/}
       <ErrorDisplay errors={verifyOtpError} />
       {/* Success Message */}
-      <SuccessMessage message={verifyOtpMessage} />
+      <SuccessMessage message={verifyOtpMessage||signinMessage} />
       
       <form onSubmit={handleSubmit}>
-        {/* User ID Field */}
-        <div className="mb-4">
-          <label htmlFor="user_id" className="block text-gray-700 font-medium mb-1">
-            User ID
-          </label>
-          <input
-            type="text"
-            id="user_id"
-            name="user_id"
-            value={formData.user_id}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded focus:outline-none ${
-              errors.user_id ? "border-red-500" : "border-gray-300"
-            }`}
-          />
-          {errors.user_id && <p className="text-red-500 text-sm">{errors.user_id}</p>}
-        </div>
-
         {/* OTP Field */}
-        <div className="mb-4">
+        <div className="">
           <label htmlFor="otp" className="block text-gray-700 font-medium mb-1">
             OTP
           </label>
@@ -91,6 +87,9 @@ const VerifyOtp = () => {
             }`}
           />
           {errors.otp && <p className="text-red-500 text-sm">{errors.otp}</p>}
+        </div>
+        <div className="text-end mb-4">
+            <span className="text-blue-500 hover:text-blue-600 underline transition-all cursor-pointer" onClick={handleResendOtp}>Resend OTP</span>
         </div>
 
         {/* Submit Button */}

@@ -1,40 +1,102 @@
 import React, { useEffect, useState } from 'react';
-import { FaFacebook, FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaPhoneAlt } from 'react-icons/fa';
-import {Loader} from '../../components/common';
+import { FaFacebook, FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaPhoneAlt, FaPhone } from 'react-icons/fa';
+import {ErrorDisplay, Loader} from '../../components/common';
 import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
-import {signInUser} from '../../redux/slice/authSlice';
+import {clearSigninState, signInUser} from '../../redux/slice/authSlice';
 
 const SignIn = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [inputType, setInputType] = useState('email');
+   const [errors, setErrors] = useState({});
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated } = useSelector((state) => state.auth);
-  const { loading, error } = useSelector((state) => state.auth);
-  const [credentials, setCredentials] = useState({ username: 'emilys', password: 'emilyspass', expiresInMins: 1 });
+  const {signinLoading, signinMessage, signinError,user_id } = useSelector((state) => state.auth);
+  const [formData, setFormData] = useState({ phone_number: '', country_code: '+880' });
 
-  const handleChange = (e) => setCredentials({ ...credentials, [e.target.name]: e.target.value });
+
 
   // Get the previous location from location.state
   const from = location.state?.from?.pathname || '/';
 
-  const handleLogin = () => {
-    dispatch(signInUser(credentials));
-    // Navigate back to the previous page or default to the home page
-    navigate(from, { replace: true });
-  };
+
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate(from, { replace: true }); // Redirect to previous page if already authenticated
+    if (signinMessage) {
+      // Redirect to the sign-in page after a successful signup
+      navigate(`/verify-otp/${user_id}`);
+      // Optionally clear the signup state
+      dispatch(clearSigninState());
     }
-  }, [isAuthenticated, from, navigate]);
+  }, [signinMessage]);
 
-  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    // Update the form data
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Validate the field and update the errors state
+    const error = validateField(name, value);
+    setErrors((prev) => ({
+      ...prev,
+      [name]: error,
+    }));
+  };
+
+  const validateField = (name, value) => {
+    let error = "";
+
+    switch (name) {
+      case "phone_number":
+        if (!value.trim()) {
+          error = "Phone number is required";
+        } else if (!/^\+?(\d{10})$/.test(value)) {
+          error = "Enter a valid phone number";
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    return error;
+  };
+  const validateForm = () => {
+    const validationErrors = {};
+
+    Object.keys(formData).forEach((field) => {
+      const error = validateField(field, formData[field]);
+      if (error) {
+        validationErrors[field] = error;
+      }
+    });
+
+    return validationErrors;
+  };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+  
+    const validationErrors = validateForm();
+
+    if (Object.keys(validationErrors).length === 0) {
+      const credential = {
+        phone_number: formData.country_code+formData.phone_number,
+        expiresInMins: 1,
+      }
+      
+      dispatch(signInUser(credential));
+      //navigate(from, { replace: true });
+      
+    } else {
+      setErrors(validationErrors);
+    }
+    
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-teal-400 to-blue-600 relative overflow-hidden p-4">
@@ -52,65 +114,44 @@ const SignIn = () => {
           {/* Logo or Title */}
           <h2 className="text-3xl font-bold text-center text-blue-800 mb-8">Sign In</h2>
 
-          {/* Email or Phone Input with Icon Toggle */}
-          <div className="mb-5">
-            <label htmlFor="emailOrPhone" className="block text-gray-700 font-medium mb-1">
-              Email or Phone
+          <ErrorDisplay errors={signinError} />
+         
+          {/* Phone Number */}
+          <div className="mb-4">
+            <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">
+              Phone Number
             </label>
             <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-              {inputType === 'email' ? (
-                <FaEnvelope className="text-gray-500 m-3" />
-              ) : (
-                <FaPhoneAlt className="text-gray-500 m-3" />
-              )}
-              <input
-                type={inputType}
-                name='username'
-                id="emailOrPhone"
-                placeholder={`Enter your ${inputType === 'email' ? 'email' : 'phone number'}`}
-                className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
-                onFocus={() => setInputType('email')}
-                onBlur={(e) => {
-                  if (e.target.value && !e.target.value.includes('@')) setInputType('tel');
-                }}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          {/* Password Input with Show/Hide Icon */}
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700 font-medium mb-1">
-              Password
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name='password'
-                id="password"
-                placeholder="Enter your password"
-                className="w-full px-4 py-2 border-none focus:outline-none rounded-l-md"
-                onChange={handleChange}
-              />
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="px-3 text-gray-500 hover:text-gray-600 focus:outline-none"
+              <FaPhone className="text-gray-400 m-3" title="Phone" />
+              <select
+                id="country-code"
+                className="bg-gray-100 text-gray-700 font-medium px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
+                defaultValue="+880"
               >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
+                <option value="+880">+880</option>
+              </select>
+              <input
+                type="number"
+                id="phone"
+                name="phone_number"
+                placeholder="Enter your phone number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
+              />
             </div>
+            {errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
           </div>
 
           {/* Login Button with Loading Animation */}
           <button
             onClick={handleLogin}
-            disabled={isLoading}
+            disabled={signinLoading}
             className={`w-full bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold py-3 rounded-lg shadow-lg transition-all transform duration-200 ${
-              isLoading ? 'cursor-wait' : 'hover:scale-105'
+              signinLoading ? 'cursor-wait' : 'hover:scale-105'
             }`}
           >
-            {isLoading ? (
+            {signinLoading ? (
               <Loader message="Signing In" />
             ) : (
               "Sign In"

@@ -18,7 +18,7 @@ import {ErrorDisplay, Loader, SuccessMessage} from '../../components/common';
 const SignUp = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const {signupLoading, signupMessage, signupError } = useSelector((state) => state.auth);
+  const {signupLoading, signupMessage, signupError, user_id } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -27,11 +27,11 @@ const SignUp = () => {
     email: "",
   });
   const [errors, setErrors] = useState({});
-  
+
   useEffect(() => {
     if (signupMessage) {
       // Redirect to the sign-in page after a successful signup
-      navigate('/signin');
+      navigate(`/verify-otp/${user_id}`);
       // Optionally clear the signup state
       dispatch(clearSignupState());
     }
@@ -211,7 +211,7 @@ const SignUp = () => {
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105"
             disabled={signupLoading}
           >
-            {signupLoading ? <Loader /> : 
+            {signupLoading ? <Loader message="Signing Up" /> : 
             'Sign Up'
             }
           </button>
