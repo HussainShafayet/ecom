@@ -12,6 +12,10 @@ export {default as RatingAndReview} from './product/RatingAndReview';
 export {default as Slider} from './Slider';
 export {default as RichTextToHTML} from './RichTextToHTML';
 export {default as SelectFilter} from './product/SelectFilter';
+export {default as ErrorDisplay} from './ErrorDisplay';
+export {default as SuccessMessage} from './SuccessMessage';
+
+
 
 
 

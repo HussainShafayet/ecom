@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { Layout } from './components/layout';
-import { Profile, SignIn, SignUp, WishList } from './pages/user';
+import { Profile, SignIn, SignUp, VerifyOtp, WishList } from './pages/user';
 import { Home, Products, ProductDetails, Cart, NotFound, Checkout, Categories } from './pages';
 import {useDispatch} from 'react-redux';
 import {loadUserFromStorage} from './redux/slice/authSlice';
@@ -45,6 +45,7 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/wishlist" element={<WishList />} />
+            <Route path="/verify-otp" element={<VerifyOtp />} />
 
 
             {/* Others Pages */}

@@ -1,0 +1,112 @@
+import React, { useEffect, useState } from "react";
+import {ErrorDisplay, Loader, SuccessMessage} from "../../components/common";
+import {useDispatch, useSelector} from "react-redux";
+import {clearSignupState, verifyOtp} from "../../redux/slice/authSlice";
+
+const VerifyOtp = () => {
+  const dispatch = useDispatch();
+  const { verifyOtpLoading, verifyOtpMessage, verifyOtpError } = useSelector((state) => state.auth);
+
+  const [formData, setFormData] = useState({ user_id: localStorage.getItem('user_id'), otp: "" });
+  const [errors, setErrors] = useState({});
+
+    useEffect(() => {
+        return () => {
+        dispatch(clearSignupState()); // Clear state when unmounting
+        };
+    }, [dispatch]);
+
+  // Form validation
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.user_id) errors.user_id = "User ID is required.";
+    if (!formData.otp) errors.otp = "OTP is required.";
+    else if (!/^\d{6}$/.test(formData.otp)) errors.otp = "OTP must be a 6-digit number.";
+    return errors;
+  };
+
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
+    // Simulate an API call
+    console.log("Form submitted:", formData);
+    dispatch(verifyOtp(formData));
+   
+  };
+
+  // Handle input changes
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  return (
+    <div className="max-w-sm mx-auto mt-12 p-6 border rounded shadow-md">
+      <h1 className="text-2xl font-bold mb-6 text-center">Verify OTP</h1>
+
+      {/*Error message*/}
+      <ErrorDisplay errors={verifyOtpError} />
+      {/* Success Message */}
+      <SuccessMessage message={verifyOtpMessage} />
+      
+      <form onSubmit={handleSubmit}>
+        {/* User ID Field */}
+        <div className="mb-4">
+          <label htmlFor="user_id" className="block text-gray-700 font-medium mb-1">
+            User ID
+          </label>
+          <input
+            type="text"
+            id="user_id"
+            name="user_id"
+            value={formData.user_id}
+            onChange={handleChange}
+            className={`w-full px-3 py-2 border rounded focus:outline-none ${
+              errors.user_id ? "border-red-500" : "border-gray-300"
+            }`}
+          />
+          {errors.user_id && <p className="text-red-500 text-sm">{errors.user_id}</p>}
+        </div>
+
+        {/* OTP Field */}
+        <div className="mb-4">
+          <label htmlFor="otp" className="block text-gray-700 font-medium mb-1">
+            OTP
+          </label>
+          <input
+            type="text"
+            id="otp"
+            name="otp"
+            value={formData.otp}
+            onChange={handleChange}
+            maxLength="6"
+            className={`w-full px-3 py-2 border rounded focus:outline-none ${
+              errors.otp ? "border-red-500" : "border-gray-300"
+            }`}
+          />
+          {errors.otp && <p className="text-red-500 text-sm">{errors.otp}</p>}
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 transition-colors"
+          disabled={verifyOtpLoading}
+        >
+            {verifyOtpLoading ? <Loader /> : 
+            'Verify OTP'
+            }
+          
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default VerifyOtp;

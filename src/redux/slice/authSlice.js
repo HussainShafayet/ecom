@@ -8,6 +8,12 @@ const initialState = {
     loading: false,
     error: null,
     message: null,
+    signupLoading: false,
+    verifyOtpLoading: false,
+    signupMessage: null,
+    signupError: null,
+    verifyOtpMessage: null,
+    verifyOtpError: null,
   }
 
 // Async action for signup
@@ -18,6 +24,21 @@ export const signUpUser = createAsyncThunk('auth/signUpUser', async (credentials
      const response = await api.post('api/accounts/register/', credentials);
 
     console.log('signup response',response);
+    
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response.data);
+  }
+});
+
+// Async action for verify-otp
+export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (credentials, { rejectWithValue }) => {
+  try {
+     // Import axiosSetup only when needed to avoid circular dependency issues
+     const api = (await import('../../api/axiosSetup')).default;
+     const response = await api.post('api/accounts/verify-otp/', credentials);
+
+    console.log('verifyotp response',response);
     
     return response.data;
   } catch (error) {
@@ -98,6 +119,16 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
       }
     },
+    clearSignupState: (state) => {
+      state.signupMessage = null;
+      state.signupError = null;
+      state.signupLoading = false;
+    },
+    clearVerifyOtpState: (state) => {
+      state.verifyOtpMessage = null;
+      state.verifyOtpError = null;
+      state.verifyOtpLoading = false;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -127,26 +158,39 @@ const authSlice = createSlice({
         state.user = action.payload; // Update the access token
       })
 
+      //signup
       .addCase(signUpUser.pending, (state, action)=>{
-        state.loading = true;
-        state.error = null;
-        state.message = null;
+        state.signupLoading = true;
       })
       .addCase(signUpUser.fulfilled, (state, action) =>{
-        state.loading = false;
-        console.log('fulfilled', action.payload);
-        state.error = null;
-        state.message = action.payload.message;
+        state.signupLoading = false;
+        state.signupMessage = action.payload.message;
+        state.signupError = null;
         localStorage.setItem('user_id', JSON.stringify(action.payload.data.user_id));
 
       })
       .addCase(signUpUser.rejected, (state, action) =>{
-        state.loading = false;
-        state.message = null;
-        state.error = action.payload.errors;
+        state.signupLoading = false;
+        state.signupError = action.payload.errors;
+      })
+
+      //verifyOtp
+
+      .addCase(verifyOtp.pending, (state, action)=>{
+        state.verifyOtpLoading = true;
+      })
+      .addCase(verifyOtp.fulfilled, (state, action) =>{
+        state.verifyOtpLoading = false;
+        state.verifyOtpMessage = action.payload.message;
+        state.verifyOtpError = null;
+
+      })
+      .addCase(verifyOtp.rejected, (state, action) =>{
+        state.verifyOtpLoading = false;
+        state.verifyOtpError = action.payload.errors;
       })
   },
 });
 
-export const { loadUserFromStorage } = authSlice.actions;
+export const { loadUserFromStorage, clearSignupState, clearVerifyOtpState } = authSlice.actions;
 export default authSlice.reducer;

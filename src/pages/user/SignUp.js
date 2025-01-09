@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaFacebook,
   FaGoogle,
@@ -11,13 +11,14 @@ import {
   FaCheck,
 } from "react-icons/fa";
 import {useDispatch, useSelector} from "react-redux";
-import { Link } from "react-router-dom";
-import {signUpUser} from "../../redux/slice/authSlice";
-import {Loader} from '../../components/common';
+import { Link, useNavigate } from "react-router-dom";
+import {clearSignupState, signUpUser} from "../../redux/slice/authSlice";
+import {ErrorDisplay, Loader, SuccessMessage} from '../../components/common';
 
 const SignUp = () => {
   const dispatch = useDispatch();
-  const { loading, error, message } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+  const {signupLoading, signupMessage, signupError } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -26,8 +27,15 @@ const SignUp = () => {
     email: "",
   });
   const [errors, setErrors] = useState({});
-
- 
+  
+  useEffect(() => {
+    if (signupMessage) {
+      // Redirect to the sign-in page after a successful signup
+      navigate('/signin');
+      // Optionally clear the signup state
+      dispatch(clearSignupState());
+    }
+  }, [signupMessage, dispatch, navigate]);
 
   const validateField = (name, value) => {
     let error = "";
@@ -96,40 +104,12 @@ const SignUp = () => {
       dispatch(signUpUser(regFormData));
       //console.log(loading, error);
       //setTimeout(() => {
-        
+      //  navigate(`/verify-otp`);
       //}, 3000);
       
     } else {
       setErrors(validationErrors);
     }
-  };
-
-
-  const ErrorDisplay = ({ errors }) => {
-    if (!errors || errors.length === 0) return null;
-  
-    return (
-      <div className="bg-red-50 border border-red-300 text-red-700 p-4 rounded-md mb-4">
-        <h3 className="font-semibold mb-2">Error</h3>
-        <ul className="list-disc list-inside space-y-1">
-          {errors.map((error, index) => (
-            <li key={index} className="text-sm">
-              {error}
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  };
-  const SuccessMessage = ({ message }) => {
-    if (!message) return null;
-  
-    return (
-      <div className="bg-green-50 border border-green-300 text-green-700 p-4 rounded-md mb-4">
-        <h3 className="font-semibold mb-2">Success</h3>
-        <p className="text-sm">{message}</p>
-      </div>
-    );
   };
 
   return (
@@ -154,8 +134,8 @@ const SignUp = () => {
           </Link>
         </div>
 
-        <SuccessMessage message={message} />
-        <ErrorDisplay errors={error} />
+        <SuccessMessage message={signupMessage} />
+        <ErrorDisplay errors={signupError} />
 
         <form onSubmit={handleSubmit}>
           {/* Full Name */}
@@ -229,9 +209,9 @@ const SignUp = () => {
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105"
-            disabled={loading}
+            disabled={signupLoading}
           >
-            {loading ? <Loader /> : 
+            {signupLoading ? <Loader /> : 
             'Sign Up'
             }
           </button>
