@@ -46,7 +46,7 @@ const VerifyOtp = () => {
 
     setErrors({});
     // Simulate an API call
-    console.log("Form submitted:", formData);
+    //console.log("Form submitted:", formData);
     dispatch(verifyOtp(formData));
    
   };
