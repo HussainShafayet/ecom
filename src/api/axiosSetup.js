@@ -113,7 +113,7 @@ api.interceptors.response.use(
           } catch (refreshError) {
             // If refreshing fails, log the user out and reject the request
             console.warn('Refresh token expired or invalid, logging out...');
-            store.dispatch(logoutUser());
+            store.dispatch(logoutUser({refresh: refreshToken}));
             isRefreshing = false;
             return Promise.reject(refreshError);
           }

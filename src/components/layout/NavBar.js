@@ -10,7 +10,7 @@ const Navbar = () => {
   const [authMenuOpen, setAuthMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   //const isAuthenticated = false; // Replace with actual authentication status
-  const {isAuthenticated} = useSelector((state)=>state.auth)
+  const {isAuthenticated, accessToken, refreshToken} = useSelector((state)=>state.auth)
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -21,7 +21,7 @@ const Navbar = () => {
 
 
   const handleLogout = () => {
-    dispatch(logoutUser());
+    dispatch(logoutUser({access: accessToken, refresh: refreshToken}));
     setProfileMenuOpen(false);
     navigate('/'); // Redirect to home page after logout, or choose another route
   };

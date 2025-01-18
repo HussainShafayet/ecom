@@ -122,11 +122,11 @@ export const checkAuth =  () => async (dispatch) => {
 };
 
 // Logout action
-export const logoutUser = createAsyncThunk('auth/logoutUser', async (_, { rejectWithValue }) => {
+export const logoutUser = createAsyncThunk('auth/logoutUser', async (credential, { rejectWithValue }) => {
   try {
     //await  axios.post('/api/auth/logout');
     const api = (await import('../../api/axiosSetup')).default;
-    const response = await api.post('/auth/logout');
+    const response = await api.post('/api/accounts/logout/', credential);
     console.log('logout response', response);
     
     return response.data;
