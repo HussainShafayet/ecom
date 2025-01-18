@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTrash, FaArrowRight } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {removeFromCart, updateQuantity, selectCartItems, selectTotalPrice, handleFetchCart} from '../redux/slice/cartSlice';
+import {removeFromCart, updateQuantity, selectCartItems, selectTotalPrice, handleFetchCart, handleRemovetoCart} from '../redux/slice/cartSlice';
 import {fetchAllProducts} from '../redux/slice/productSlice';
 import {Loader, ProductCard} from '../components/common';
 
@@ -27,6 +27,7 @@ const Cart = () => {
      return <div>{error}</div>;
    }
   const handleRemoveItem = (id) =>{
+    dispatch(handleRemovetoCart({product_id: id}));
     dispatch(removeFromCart(id));
   }
 

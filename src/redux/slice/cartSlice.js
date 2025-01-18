@@ -45,6 +45,19 @@ export const handleFetchCart = createAsyncThunk('cart/handleFetchCart', async (_
   }
 });
 
+// Async action for remove to cart
+export const handleRemovetoCart = createAsyncThunk('cart/handleRemovetoCart', async (formData, { rejectWithValue }) => {
+  try {
+     // Import axiosSetup only when needed to avoid circular dependency issues
+     const api = (await import('../../api/axiosSetup')).default;
+     const response = await api.put('api/accounts/cart/', formData);
+    console.log('remove to cart response',response);
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response.data);
+  }
+});
+
 
 
 const cartSlice = createSlice({
@@ -96,6 +109,20 @@ const cartSlice = createSlice({
       
     })
     .addCase(handleFetchCart.rejected, (state, action)=>{
+      state.isLoading = false;
+      state.error = action.payload.error;
+    })
+
+    //remove from cart 
+    .addCase(handleRemovetoCart.pending, (state)=>{
+      state.isLoading = true;
+    })
+    .addCase(handleRemovetoCart.fulfilled, (state, action)=>{
+      state.isLoading = false;
+      console.log(action);
+      
+    })
+    .addCase(handleRemovetoCart.rejected, (state, action)=>{
       state.isLoading = false;
       state.error = action.payload.error;
     })
