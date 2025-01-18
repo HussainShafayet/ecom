@@ -1,5 +1,5 @@
 // src/redux/slice/cartSlice.js
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { removeFromWishlist } from './wishlistSlice';
 
 // Load initial cart items from localStorage, or default to an empty array
@@ -14,8 +14,25 @@ const loadCartFromLocalStorage = () => {
 };
 
 const initialState = {
+  isLoading: false,
   cartItems: loadCartFromLocalStorage(),
+  error: null,
 };
+
+// Async action for add to cart
+export const handleAddtoCart = createAsyncThunk('cart/handleAddtoCart', async (formData, { rejectWithValue }) => {
+  try {
+     // Import axiosSetup only when needed to avoid circular dependency issues
+     const api = (await import('../../api/axiosSetup')).default;
+     const response = await api.post('api/accounts/cart/', formData);
+    console.log('add to cart response',response);
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response.data);
+  }
+});
+
+
 
 const cartSlice = createSlice({
   name: 'cart',
@@ -42,6 +59,20 @@ const cartSlice = createSlice({
       state.cartItems = [];
     },
   },
+  extraReducers: (builder) => {
+    builder
+    //add to cart 
+    .addCase(handleAddtoCart.pending, (state)=>{
+      state.isLoading = true;
+    })
+    .addCase(handleAddtoCart.fulfilled, (state, action)=>{
+      state.isLoading = false;
+    })
+    .addCase(handleAddtoCart.rejected, (state, action)=>{
+      state.isLoading = false;
+      state.error = action.payload.error;
+    })
+  }
 });
 
 // Action creators are generated for each case reducer function

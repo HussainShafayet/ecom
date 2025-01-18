@@ -4,7 +4,7 @@ import { Layout } from './components/layout';
 import { Profile, SignIn, SignUp, VerifyOtp, WishList } from './pages/user';
 import { Home, Products, ProductDetails, Cart, NotFound, Checkout, Categories } from './pages';
 import {useDispatch} from 'react-redux';
-import {checkAuth} from './redux/slice/authSlice';
+import {loadUserFromStorage} from './redux/slice/authSlice';
 import {useEffect, useRef} from 'react';
 import {ProtectedRoute, ScrollToTop} from './components/common';
 import {AboutUs, Contact, FAQPage, OrderTracking, PrivacyPolicy} from './pages/others';
@@ -15,7 +15,7 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(checkAuth());
+    dispatch(loadUserFromStorage());
   }, [dispatch]);
 
   

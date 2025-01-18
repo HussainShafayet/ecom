@@ -144,7 +144,7 @@ const authSlice = createSlice({
       const user = JSON.parse(localStorage.getItem('user'));
       const accessToken = localStorage.getItem('accessToken');
       const refreshToken = localStorage.getItem('refreshToken');
-      if (user && accessToken && refreshToken) {
+      if (accessToken && refreshToken) {
         state.user = user;
         state.accessToken = accessToken;
         state.refreshToken = refreshToken;
@@ -191,8 +191,11 @@ const authSlice = createSlice({
 
 
       .addCase(refreshToken.fulfilled, (state, action) => {
-        state.accessToken = action.payload.accessToken; // Update the access token
+        //console.log(action);
+        state.accessToken = action.payload.data.access; // Update the access token
         state.isAuthenticated = true;
+        localStorage.setItem('accessToken', action.payload.data.access);
+        localStorage.setItem('refreshToken', action.payload.data.refresh);
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
@@ -200,6 +203,8 @@ const authSlice = createSlice({
         state.refreshToken = null;
         state.isAuthenticated = false;
         Cookies.remove('refresh_token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
       })
       .addCase(getUser.fulfilled, (state, action) => {
         state.user = action.payload; // Update the access token
@@ -240,6 +245,9 @@ const authSlice = createSlice({
           secure: true, // Ensures cookies are sent only over HTTPS
           sameSite: 'Strict', // Prevents CSRF attacks
         });
+
+        localStorage.setItem('accessToken', action.payload.tokens.access);
+        localStorage.setItem('refreshToken', action.payload.tokens.refresh);
 
       })
       .addCase(verifyOtp.rejected, (state, action) =>{

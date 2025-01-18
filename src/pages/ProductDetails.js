@@ -5,13 +5,14 @@ import { InputField, Loader, ProductCard, RatingAndReview, RichTextToHTML } from
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts, setSelectedColor, setSelectedSize} from '../redux/slice/productSlice';
 //import {addToCart} from '../redux/slice/cartSlice';
-import {addToCart, addToCartAndRemoveFromWishlist} from '../redux/slice/cartSlice';
+import {addToCart, addToCartAndRemoveFromWishlist, handleAddtoCart} from '../redux/slice/cartSlice';
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 
 const ProductDetails = () => {
   const { slug } = useParams();
   const {isLoading, product, error, mainImage, items:products, quantity, relatedProductsLoading, selectedColor, selectedSize} = useSelector((state)=> state.product);
+  const {isAuthenticated} = useSelector((state)=> state.auth);
 
   
   const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // Filter reviews by rating
@@ -125,9 +126,18 @@ useEffect(() => {
   const handleAddToCart = () => {
     const extProd = {...product}
     extProd.quantity = quantity;
-    extProd.selectedColor = selectedColor;
+    extProd.variant = selectedSize || selectedColor;
     //dispatch(addToCart(extProd));
-    dispatch(addToCartAndRemoveFromWishlist(extProd))
+    if (isAuthenticated) {
+      const cartBody = {};
+      cartBody.product_id = product.id;
+      cartBody.quantity = quantity;
+      cartBody.variant_id = selectedSize.variant_id || selectedColor.variant_id;
+      dispatch(handleAddtoCart(cartBody));
+    }else{
+      dispatch(addToCartAndRemoveFromWishlist(extProd))
+    }
+    
   };
 
   const handleBuyNow = () => {
