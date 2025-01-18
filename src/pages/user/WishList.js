@@ -135,24 +135,30 @@
 //export default Wishlist;
 
 
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, {useEffect} from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { ProductCard } from '../../components/common';
 import {Link} from 'react-router-dom';
+import {fetchtoWishlist} from '../../redux/slice/wishlistSlice';
 
 const WishlistPage = () => {
-  const wishlistItems = useSelector(state => state.wishList.items);
+  //const wishlistItems = useSelector(state => state.wishList.items);
+  const {isLoading, items, error} = useSelector((state)=> state.wishList);
+  const dispatch = useDispatch();
 
+  useEffect(() => {
+    dispatch(fetchtoWishlist());
+   }, [dispatch]);
   return (
     <div className="container mx-auto my-6">
       <h2 className="text-2xl font-bold mb-4">Your Wishlist</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {wishlistItems.map(product => (
+        {items.map(product => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
       {/* No Items Message */}
-        {wishlistItems.length === 0 && (
+        {items.length === 0 && (
           <p className="text-center text-gray-600 mt-8">Your wishlist is currently empty. 
             <Link to="/products" className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"> Add WishList</Link>
           </p>

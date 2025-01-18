@@ -1,5 +1,5 @@
 // src/redux/slice/wishlistSlice.js
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 
 // Load initial Wish items from localStorage, or default to an empty array
@@ -15,8 +15,51 @@ const loadWishlistFromLocalStorage = () => {
 
 
 const initialState = {
+  isLoading: false,
   items: loadWishlistFromLocalStorage(),
+  error: null,
 };
+
+
+//add to wishlist
+export const handleAddtoWishlist = createAsyncThunk('cart/handleAddtoWishlist', async (formData, { rejectWithValue }) => {
+  try {
+     // Import axiosSetup only when needed to avoid circular dependency issues
+     const api = (await import('../../api/axiosSetup')).default;
+     const response = await api.post('api/accounts/favourite/', formData);
+    console.log('add to wishlist response',response);
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response.data);
+  }
+});
+
+//fetch to wishlist
+export const fetchtoWishlist = createAsyncThunk('cart/fetchtoWishlist', async (_, { rejectWithValue }) => {
+  try {
+     // Import axiosSetup only when needed to avoid circular dependency issues
+     const api = (await import('../../api/axiosSetup')).default;
+     const response = await api.get('api/accounts/favourite/');
+    console.log('fetch to wishlist response',response);
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response.data);
+  }
+});
+
+//remove to wishlist
+export const handleRemovetoWishlist = createAsyncThunk('cart/handleRemovetoWishlist', async (formData, { rejectWithValue }) => {
+  try {
+     // Import axiosSetup only when needed to avoid circular dependency issues
+     const api = (await import('../../api/axiosSetup')).default;
+     const response = await api.put('api/accounts/favourite/', formData);
+    console.log('remove to wishlist response',response);
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response.data);
+  }
+});
+
 
 const wishlistSlice = createSlice({
   name: 'wishList',
@@ -35,6 +78,48 @@ const wishlistSlice = createSlice({
       state.items = [];
     },
   },
+  extraReducers: (builder) => {
+      builder
+      //add to cart 
+      .addCase(handleAddtoWishlist.pending, (state)=>{
+        state.isLoading = true;
+      })
+      .addCase(handleAddtoWishlist.fulfilled, (state, action)=>{
+        state.isLoading = false;
+      })
+      .addCase(handleAddtoWishlist.rejected, (state, action)=>{
+        state.isLoading = false;
+        state.error = action.payload.error;
+      })
+  
+       //get cart 
+       .addCase(fetchtoWishlist.pending, (state)=>{
+        state.isLoading = true;
+      })
+      .addCase(fetchtoWishlist.fulfilled, (state, action)=>{
+        state.isLoading = false;
+        state.items = action.payload.data;
+        
+      })
+      .addCase(fetchtoWishlist.rejected, (state, action)=>{
+        state.isLoading = false;
+        state.error = action.payload.error;
+      })
+  
+      //remove from cart 
+      .addCase(handleRemovetoWishlist.pending, (state)=>{
+        state.isLoading = true;
+      })
+      .addCase(handleRemovetoWishlist.fulfilled, (state, action)=>{
+        state.isLoading = false;
+        console.log(action);
+        
+      })
+      .addCase(handleRemovetoWishlist.rejected, (state, action)=>{
+        state.isLoading = false;
+        state.error = action.payload.error;
+      })
+    }
 });
 
 export const { addToWishlist, removeFromWishlist, clearWishlist } = wishlistSlice.actions;

@@ -3,11 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToCart } from '../../../redux/slice/cartSlice';
 import { FaHeart, FaEye, FaShoppingCart, FaRegHeart } from 'react-icons/fa';
-import {addToWishlist, removeFromWishlist} from '../../../redux/slice/wishlistSlice';
+import {addToWishlist, handleAddtoWishlist, handleRemovetoWishlist, removeFromWishlist} from '../../../redux/slice/wishlistSlice';
 import {addToCartAndRemoveFromWishlist} from '../../../redux/slice/cartSlice';
 import blurImage from '../../../assets/images/blur.jpg';
 
 const ProductCard = ({ product, cardForTrending }) => {
+  const {isAuthenticated} = useSelector((state)=> state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
@@ -38,9 +39,26 @@ const ProductCard = ({ product, cardForTrending }) => {
     if (isInWishlist) {
       dispatch(removeFromWishlist(product.id));
     } else {
-      dispatch(addToWishlist(product));
+      dispatch(handleAddtoWishlist({product_id: product.id}));
+      //dispatch(addToWishlist(product));
     }
   };
+
+  const handleAddToWishlist = () =>{
+    if (isAuthenticated) {
+       dispatch(handleAddtoWishlist({product_id: product.id}));
+    } else {
+      dispatch(addToWishlist(product));
+    }
+   
+  }
+  const handleRemoveToWishlist = () =>{
+    if (isAuthenticated) {
+      dispatch(handleRemovetoWishlist({product_id: product.id}));
+    }
+    
+    dispatch(removeFromWishlist(product.id));
+  }
 
 
   return (
@@ -71,10 +89,14 @@ const ProductCard = ({ product, cardForTrending }) => {
 
       {/* Wishlist Icon */}
       <button
-          onClick={handleWishlistToggle}
+          //onClick={handleWishlistToggle}
           className="absolute top-2 right-2 text-gray-600 hover:text-red-500"
         >
-          {isInWishlist ? <FaHeart className="w-5 h-5" title='Remove from Wishlist' /> : <FaRegHeart className="w-5 h-5" title='Add to Wishlist' />}
+          {product.is_favourite ? 
+          
+          <FaHeart className="w-5 h-5" title='Remove from Wishlist' onClick={handleRemoveToWishlist} /> : 
+          
+          <FaRegHeart className="w-5 h-5" title='Add to Wishlist' onClick={handleAddToWishlist} />}
         </button>
 
       {/* Product Image */}
