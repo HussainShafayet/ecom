@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import Cookies from 'js-cookie';
 
 const initialState = {
     user: null,
@@ -99,7 +100,7 @@ export const getUser = createAsyncThunk('auth/getUser', async (_, { rejectWithVa
 export const refreshToken = createAsyncThunk('auth/refreshToken', async (credentials , { rejectWithValue }) => {
   try {
     const api = (await import('../../api/axiosSetup')).default;
-    const response = await api.post('/auth/refresh', credentials);
+    const response = await api.post('api/accounts/token/refresh/', credentials);
     console.log('refresh token response', response);
     
     return response.data;
@@ -107,6 +108,18 @@ export const refreshToken = createAsyncThunk('auth/refreshToken', async (credent
     return rejectWithValue(error.response.data);
   }
 });
+
+// Check Authentication Status
+export const checkAuth =  () => async (dispatch) => {
+  const refresh_token = Cookies.get('refresh_token');
+  if (refresh_token) {
+    try {
+      dispatch(refreshToken({expiresInMins:1,refresh: refresh_token}))
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+    }
+  }
+};
 
 // Logout action
 export const logoutUser = createAsyncThunk('auth/logoutUser', async (_, { rejectWithValue }) => {
@@ -179,16 +192,14 @@ const authSlice = createSlice({
 
       .addCase(refreshToken.fulfilled, (state, action) => {
         state.accessToken = action.payload.accessToken; // Update the access token
-        localStorage.setItem('accessToken', action.payload.accessToken);
+        state.isAuthenticated = true;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
-        //localStorage.removeItem('user');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        Cookies.remove('refresh_token');
       })
       .addCase(getUser.fulfilled, (state, action) => {
         state.user = action.payload; // Update the access token
@@ -224,9 +235,11 @@ const authSlice = createSlice({
         state.accessToken = action.payload.tokens.access;
         state.refreshToken = action.payload.tokens.refresh;
         state.isAuthenticated = true;
-        //localStorage.setItem('user', JSON.stringify(action.payload.profile.username));
-        localStorage.setItem('accessToken',  action.payload.tokens.access);
-        localStorage.setItem('refreshToken',  action.payload.tokens.refresh);
+        
+        Cookies.set('refresh_token', action.payload.tokens.refresh, {
+          secure: true, // Ensures cookies are sent only over HTTPS
+          sameSite: 'Strict', // Prevents CSRF attacks
+        });
 
       })
       .addCase(verifyOtp.rejected, (state, action) =>{

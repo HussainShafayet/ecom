@@ -2,6 +2,7 @@
 import axios from 'axios';
 import {logoutUser, refreshToken} from '../redux/slice/authSlice';
 import store from '../redux/store';
+import Cookies from 'js-cookie';
 
 const api = axios.create({
   baseURL: 'http://192.168.0.103:8000',
@@ -89,28 +90,33 @@ api.interceptors.response.use(
 
       if (!isRefreshing) {
         isRefreshing = true;
-        try {
-          console.log('Refreshing access token...'); // Log the refresh attempt
-          const result = await store.dispatch(refreshToken({
-            refreshToken: store.getState().auth.refreshToken,
-            expiresInMins: 1,
-          }));
-          const newAccessToken = result.payload.accessToken;
+        const refresh_token = Cookies.get('refresh_token');
+        if (refresh_token) {
+          try {
+            console.log('Refreshing access token...'); // Log the refresh attempt
+            const result = await store.dispatch(refreshToken({
+              refresh: refresh_token,
+              expiresInMins: 1,
+            }));
+            console.log('result', result);
+            
+            const newAccessToken = result.payload.accessToken;
 
-          // Update the Authorization header with the new token
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            // Update the Authorization header with the new token
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
-          // Notify all subscribers (queued requests) with the new token
-          onRefreshed(newAccessToken);
-          isRefreshing = false;
-          
-          return api(originalRequest); // Retry the original request with the new token
-        } catch (refreshError) {
-          // If refreshing fails, log the user out and reject the request
-          console.warn('Refresh token expired or invalid, logging out...');
-          store.dispatch(logoutUser());
-          isRefreshing = false;
-          return Promise.reject(refreshError);
+            // Notify all subscribers (queued requests) with the new token
+            onRefreshed(newAccessToken);
+            isRefreshing = false;
+            
+            return api(originalRequest); // Retry the original request with the new token
+          } catch (refreshError) {
+            // If refreshing fails, log the user out and reject the request
+            console.warn('Refresh token expired or invalid, logging out...');
+            store.dispatch(logoutUser());
+            isRefreshing = false;
+            return Promise.reject(refreshError);
+          }
         }
       } 
 
