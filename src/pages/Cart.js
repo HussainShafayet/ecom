@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTrash, FaArrowRight } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {removeFromCart, updateQuantity, selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
+import {removeFromCart, updateQuantity, selectCartItems, selectTotalPrice, handleFetchCart} from '../redux/slice/cartSlice';
 import {fetchAllProducts} from '../redux/slice/productSlice';
 import {Loader, ProductCard} from '../components/common';
 
@@ -15,6 +15,7 @@ const Cart = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    dispatch(handleFetchCart());
     if (cartItems.length > 0) {
       dispatch(fetchAllProducts({page_size:12}));
     }
@@ -58,35 +59,41 @@ const Cart = () => {
                   {/* Product Image */}
                   <div className="relative w-24 h-24 md:w-32 md:h-32 overflow-hidden rounded-lg">
                     <img
-                      src={item.images ? item.images[0] : 'fallback-image-url.jpg'}
-                      alt={item.title}
+                      src={item.image}
+                      alt={item.name}
                       className="w-full h-full object-cover"
                     />
-                    {item.discountPercentage && (
+                    {item.has_discount && (
                       <span className="absolute top-1 left-1 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                        {item.discountPercentage}% Off
+                      ({item.discount_value}{item.discount_type == 'percentage'?'%':'৳'} OFF)
                       </span>
                     )}
                   </div>
 
                   {/* Product Details */}
                   <div className="flex-1 text-sm">
-                    <h2 className="font-semibold mb-1">{item.title}</h2>
+                    <h2 className="font-semibold mb-1">{item.name}</h2>
                     <p className="text-gray-500 mb-1">
-                      <span>{item.category}</span> • <span>{item.brand}</span> • <span>{item.rating}</span>
+                      <span>{item.category}</span> • <span>{item.brand_name}</span> • <span>{item.avg_rating}</span>
                     </p>
                     <p className="text-gray-500 mb-2">
-                      {item.color && <span>Color: {item.color}</span>}
-                      {item.size && <span> • Size: {item.size}</span>}
+                      {item.color_name && <span>Color: {item.color_name}</span>}
+                      {item.size_name && <span> • Size: {item.size_name}</span>}
                     </p>
-                    <p className="text-green-500 font-bold mb-2">
-                      {item.price.toFixed(2)}{' '}
-                      {item.discountPercentage && (
-                        <span className="text-gray-400 line-through text-xs">
-                          {item.discountPercentage.toFixed(2)}
-                        </span>
-                      )}
-                    </p>
+                    {item.has_discount ? (
+                      <div className="flex flex-row space-x-1">
+                        <p className=" text-gray-500 line-through">
+                          {item.base_price}
+                        </p>
+                        <p className="text-2x text-green-600 font-semibold">
+                        {item.discount_price} <span className="text-red-500">({item.discount_value}{item.discount_type == 'percentage'?'%':'৳'} OFF)</span>
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-2x text-green-600 font-semibold">
+                        {item.base_price}
+                      </p>
+                    )}
 
                     {/* Quantity Selector */}
                     <div className="flex items-center">
@@ -176,7 +183,7 @@ const Cart = () => {
           <div className="fixed bottom-0 left-0 w-full bg-white p-4 lg:hidden shadow-lg">
             <div className="flex justify-between items-center">
               <div>
-                <p className="font-bold text-lg">Total: {totalPrice.toFixed(2)}</p>
+                <p className="font-bold text-lg">Total: {totalPrice}</p>
               </div>
               <Link
                 to="/checkout"

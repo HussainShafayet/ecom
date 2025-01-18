@@ -32,6 +32,19 @@ export const handleAddtoCart = createAsyncThunk('cart/handleAddtoCart', async (f
   }
 });
 
+// Async action for add to cart
+export const handleFetchCart = createAsyncThunk('cart/handleFetchCart', async (_, { rejectWithValue }) => {
+  try {
+     // Import axiosSetup only when needed to avoid circular dependency issues
+     const api = (await import('../../api/axiosSetup')).default;
+     const response = await api.get('api/accounts/cart/');
+    console.log('get cart response',response);
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response.data);
+  }
+});
+
 
 
 const cartSlice = createSlice({
@@ -72,6 +85,20 @@ const cartSlice = createSlice({
       state.isLoading = false;
       state.error = action.payload.error;
     })
+
+     //get cart 
+     .addCase(handleFetchCart.pending, (state)=>{
+      state.isLoading = true;
+    })
+    .addCase(handleFetchCart.fulfilled, (state, action)=>{
+      state.isLoading = false;
+      state.cartItems = action.payload.data;
+      
+    })
+    .addCase(handleFetchCart.rejected, (state, action)=>{
+      state.isLoading = false;
+      state.error = action.payload.error;
+    })
   }
 });
 
@@ -83,7 +110,7 @@ export const selectCartItems = (state) => state.cart.cartItems;
 export const selectCartCount = (state) =>
   state.cart.cartItems.reduce((total, item) => total + item.quantity, 0);
 export const selectTotalPrice = (state) =>
-  state.cart.cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  state.cart.cartItems.reduce((total, item) => total + (item.has_discount? item.discount_price : item.base_price) * item.quantity, 0);
 
 // Save cart to localStorage whenever cart items change
 export const saveCartToLocalStorage = (cartItems) => {
