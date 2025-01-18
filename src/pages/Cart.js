@@ -11,15 +11,14 @@ const Cart = () => {
   const totalPrice = useSelector(selectTotalPrice);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const {isLoading, items:products, error} = useSelector((state)=> state.product);
-
+  const {isAuthenticated} = useSelector((state)=> state.auth);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(handleFetchCart());
+    isAuthenticated && dispatch(handleFetchCart());
     if (cartItems.length > 0) {
       dispatch(fetchAllProducts({page_size:12}));
     }
-    
    }, [dispatch]);
  
  
