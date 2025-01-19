@@ -170,4 +170,45 @@ export const addToCartAndRemoveFromWishlist = (item) => (dispatch) => {
   dispatch(removeFromWishlist(item.id)); // Remove from wishlist after adding to cart
 };
 
+export const handleClonedProduct = (product, selectedSize, selectedColor, quantity)=>(dispatch)=>{
+  const dummyProduct = {}
+  dummyProduct['id'] = product.id;
+  dummyProduct['name'] = product.name;
+  dummyProduct['slug'] = product.slug;
+  dummyProduct['sku'] = product.sku;
+  dummyProduct['base_price'] = product.base_price;
+  dummyProduct['has_discount'] = product.has_discount;
+  dummyProduct['discount_price'] = product.discount_price;
+  dummyProduct['discount_type'] = product.discount_type;
+  dummyProduct['discount_value'] = product.discount_value;
+  dummyProduct['brand_name'] = product.brand.name;
+  dummyProduct['total_orders'] = product.total_orders;
+  dummyProduct['total_views'] = product.total_views;
+  dummyProduct['total_reviews'] = product.total_reviews;
+  dummyProduct['avg_rating'] = product.avg_rating;
+  let imgUrl = '';
+  selectedColor?.media_files.forEach(file => {
+    if (file.file_type == 'image') {
+      imgUrl = file.file_url;
+      return;
+    }
+  });
+  !selectedColor && product.media_files.forEach(file => {
+    if (file.file_type == 'image') {
+      imgUrl = file.file_url;
+      return;
+    }
+  });
+  dummyProduct['image'] = imgUrl;
+  dummyProduct['is_favourite'] = product.is_favourite;
+  dummyProduct['availability_status'] = product.availability_status;
+  dummyProduct['has_variants'] = product.colors.length > 0 ? true : false;
+  dummyProduct['quantity'] = quantity;
+  dummyProduct['color_name'] = selectedColor?.name;
+  dummyProduct['color_hex_code'] = selectedColor?.hex_code;
+  dummyProduct['size_name'] = selectedSize?.name;
+  dummyProduct['variant_id'] = selectedSize?.variant_id || selectedColor?.variant_id;
+  return dummyProduct;
+}
+
 export default cartSlice.reducer;

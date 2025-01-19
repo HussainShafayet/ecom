@@ -5,7 +5,7 @@ import { InputField, Loader, ProductCard, RatingAndReview, RichTextToHTML } from
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts, setSelectedColor, setSelectedSize} from '../redux/slice/productSlice';
 //import {addToCart} from '../redux/slice/cartSlice';
-import {addToCart, addToCartAndRemoveFromWishlist, handleAddtoCart} from '../redux/slice/cartSlice';
+import {addToCart, addToCartAndRemoveFromWishlist, handleAddtoCart, handleClonedProduct} from '../redux/slice/cartSlice';
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 
@@ -124,10 +124,8 @@ useEffect(() => {
   };
 
   const handleAddToCart = () => {
-    const extProd = {...product}
-    extProd.quantity = quantity;
-    extProd.variant = selectedSize || selectedColor;
-    //dispatch(addToCart(extProd));
+   
+    
     if (isAuthenticated) {
       const cartBody = {};
       cartBody.product_id = product.id;
@@ -135,14 +133,17 @@ useEffect(() => {
       cartBody.variant_id = selectedSize.variant_id || selectedColor.variant_id;
       dispatch(handleAddtoCart(cartBody));
     }else{
-      dispatch(addToCartAndRemoveFromWishlist(extProd))
+      const clonedProduct = dispatch(handleClonedProduct(product, selectedSize, selectedColor, quantity));
+      
+      dispatch(addToCart(clonedProduct));
     }
     
   };
 
   const handleBuyNow = () => {
-    const extProd = { ...product, quantity: 1 };
-    dispatch(addToCart(extProd));
+    const clonedProduct = dispatch(handleClonedProduct(product, selectedSize, selectedColor, quantity));
+      
+    dispatch(addToCart(clonedProduct));
     navigate('/checkout');
   };
 
