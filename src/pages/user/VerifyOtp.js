@@ -8,9 +8,26 @@ const VerifyOtp = () => {
   const dispatch = useDispatch();
   const { verifyOtpLoading, verifyOtpMessage, verifyOtpError, signinMessage,isAuthenticated } = useSelector((state) => state.auth);
   const { user_id } = useParams();
-  const navigate = useNavigate(); 
-  const [formData, setFormData] = useState({ user_id: user_id, otp: "", "cart": [],
-    "favorite": [] });
+  const navigate = useNavigate();
+
+   //set local cart items
+   const setLocalCart = () => {
+    const localCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    return localCartItems.map(item => ({
+        product_id: item.id,
+        quantity: item.quantity,
+        variant_id: item.variant_id,
+    }));
+  };
+   //set local favorite items
+   const setLocalFavorite = () => {
+    const localWishItems = JSON.parse(localStorage.getItem('wishList')) || [];
+    return localWishItems.map(item => ({
+        product_id: item.id,
+    }));
+  };  
+  const [formData, setFormData] = useState({ user_id: user_id, otp: "", "cart": setLocalCart(),
+    "favorite": setLocalFavorite() });
   const [errors, setErrors] = useState({});
 
     useEffect(() => {

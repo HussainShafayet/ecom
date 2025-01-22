@@ -246,6 +246,9 @@ const authSlice = createSlice({
           sameSite: 'Strict', // Prevents CSRF attacks
         });
 
+        localStorage.removeItem('cartItems');
+        localStorage.removeItem('wishList');
+
         localStorage.setItem('accessToken', action.payload.tokens.access);
         localStorage.setItem('refreshToken', action.payload.tokens.refresh);
 

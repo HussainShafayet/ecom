@@ -137,9 +137,11 @@ export const saveWishlistToLocalStorage = (wishlistItems) => {
   // Middleware to sync cart with localStorage
   export const wishlistMiddleware = (store) => (next) => (action) => {
     const result = next(action);
+    const state = store.getState().auth;
+    
     if (
         addToWishlist.match(action) ||
-        removeFromWishlist.match(action) ||
+        (!state.isAuthenticated && removeFromWishlist.match(action)) ||
         clearWishlist.match(action)
     ) {
       saveWishlistToLocalStorage(store.getState().wishList.items);
