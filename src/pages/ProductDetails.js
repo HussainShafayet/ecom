@@ -130,7 +130,7 @@ useEffect(() => {
       const cartBody = {};
       cartBody.product_id = product.id;
       cartBody.quantity = quantity;
-      cartBody.variant_id = selectedSize.variant_id || selectedColor.variant_id;
+      cartBody.variant_id = selectedSize?.variant_id || selectedColor?.variant_id;
       dispatch(handleAddtoCart(cartBody));
     }else{
       const clonedProduct = dispatch(handleClonedProduct(product, selectedSize, selectedColor, quantity));

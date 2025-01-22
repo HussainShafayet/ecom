@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTrash, FaArrowRight } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {removeFromCart, updateQuantity, selectCartItems, selectTotalPrice, handleFetchCart, handleRemovetoCart} from '../redux/slice/cartSlice';
+import {removeFromCart, updateQuantity, selectCartItems, selectTotalPrice, handleFetchCart, handleRemovetoCart, handleAddtoCart} from '../redux/slice/cartSlice';
 import {fetchAllProducts} from '../redux/slice/productSlice';
 import {Loader, ProductCard} from '../components/common';
+import debounce from 'lodash.debounce'; // Import lodash debounce
 
 const Cart = () => {
   const cartItems = useSelector(selectCartItems);
@@ -20,6 +21,19 @@ const Cart = () => {
       dispatch(fetchAllProducts({page_size:12}));
     }
    }, [dispatch]);
+
+   // Debounced API call
+   const debouncedUpdateQuantity = useCallback(
+    debounce((product, quantity) => {
+      const cartBody = {};
+      cartBody.product_id = product.id;
+      cartBody.quantity = quantity;
+      cartBody.variant_id = product.variant_id;
+      
+      dispatch(handleAddtoCart(cartBody));
+    }, 1000),
+    []
+  );
  
  
    if (error) {
@@ -30,9 +44,14 @@ const Cart = () => {
     dispatch(removeFromCart(id));
   }
 
-  const handleUpdateQuantity = (id, quantity)=>{
-    dispatch(updateQuantity({ id, quantity })) 
+  const handleUpdateQuantity = (id, quantity, item)=>{
+    dispatch(updateQuantity({ id, quantity }));
+    if (isAuthenticated) {
+      debouncedUpdateQuantity(item, quantity);
+    } 
   }
+
+   
 
   return (
     <div className="mx-auto">
@@ -98,7 +117,7 @@ const Cart = () => {
                     {/* Quantity Selector */}
                     <div className="flex items-center">
                       <button
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity -1)}
+                        onClick={() => handleUpdateQuantity(item.id, item.quantity -1, item)}
                         className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-l"
                         disabled={item.quantity === 1}
                       >
@@ -112,7 +131,7 @@ const Cart = () => {
                         min="1"
                       />
                       <button
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item)}
                         className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-r"
                       >
                         +
