@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
 
 const initialState = {
-    user: null,
     accessToken: null,
     refreshToken: null,
     isAuthenticated: false,
@@ -81,20 +80,6 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
   }
 });
 
-// Async action for getUser
-export const getUser = createAsyncThunk('auth/getUser', async (_, { rejectWithValue }) => {
-  try {
-     // Import axiosSetup only when needed to avoid circular dependency issues
-     const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.get('/auth/me');
-
-    console.log('get user response',response);
-    
-    return response.data; // { accessToken, refreshToken, user }
-  } catch (error) {
-    return rejectWithValue(error.response.data);
-  }
-});
 
 // Async action to refresh access token
 export const refreshToken = createAsyncThunk('auth/refreshToken', async (credentials , { rejectWithValue }) => {
@@ -141,11 +126,9 @@ const authSlice = createSlice({
   ,
   reducers: {
     loadUserFromStorage: (state) => {
-      const user = JSON.parse(localStorage.getItem('user'));
       const accessToken = localStorage.getItem('accessToken');
       const refreshToken = localStorage.getItem('refreshToken');
       if (accessToken && refreshToken) {
-        state.user = user;
         state.accessToken = accessToken;
         state.refreshToken = refreshToken;
         state.isAuthenticated = true;
@@ -198,16 +181,12 @@ const authSlice = createSlice({
         localStorage.setItem('refreshToken', action.payload.data.refresh);
       })
       .addCase(logoutUser.fulfilled, (state) => {
-        state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
         Cookies.remove('refresh_token');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-      })
-      .addCase(getUser.fulfilled, (state, action) => {
-        state.user = action.payload; // Update the access token
       })
 
       //signup

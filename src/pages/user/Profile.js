@@ -3,22 +3,35 @@ import { FaUserEdit, FaBoxOpen, FaMapMarkerAlt, FaCreditCard, FaLock, FaPlus, Fa
 import {useDispatch, useSelector} from 'react-redux';
 import {getUser} from '../../redux/slice/authSlice';
 import {useNavigate} from 'react-router-dom';
+import {handleGetProfile} from '../../redux/slice/profileSlice';
+import {Loader} from '../../components/common';
 
 const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const dispatch = useDispatch();
   const {isAuthenticated,user} = useSelector((state)=>state.auth);
+  const {isLoading, profile, error} = useSelector((state)=>state.profile);
+
   const navigate = useNavigate();
   
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/signin');
-    }
-  }, [isAuthenticated, navigate]);
+  //useEffect(() => {
+  //  if (!isAuthenticated) {
+  //    navigate('/signin');
+  //  }
+  //}, [isAuthenticated, navigate]);
   
   useEffect(()=>{
-    dispatch(getUser());
-  }, [dispatch])
+    dispatch(handleGetProfile());
+  }, [dispatch]);
+
+  if (isLoading) {
+    return <div className='container h-20 flex justify-center'><Loader message='Loading Profile' /></div>
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-4 md:p-8">
       <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
@@ -63,7 +76,7 @@ const Profile = () => {
               {/* Profile Image Section */}
               <div className="flex-shrink-0 relative w-32 h-32 mx-auto md:mx-0 rounded-full overflow-hidden bg-gray-200 shadow-md">
                 <img
-                  src="https://img.freepik.com/premium-photo/stylish-man-flat-vector-profile-picture-ai-generated_606187-310.jpg" // Placeholder for the profile image
+                  src={profile?.profile_picture || "https://img.freepik.com/premium-photo/stylish-man-flat-vector-profile-picture-ai-generated_606187-310.jpg"} // Placeholder for the profile image
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
@@ -75,11 +88,12 @@ const Profile = () => {
               {/* Personal Information Card */}
               <div className="flex-1 bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <h3 className="font-semibold text-lg mb-4">Personal Information</h3>
-                <p className="mb-2"><strong>Name:</strong> {user && user.username}</p>
-                <p className="mb-2"><strong>Email:</strong> john.doe@example.com</p>
-                <p className="mb-2"><strong>Phone:</strong> +1 234 567 890</p>
-                <p className="mb-2"><strong>Date of Birth:</strong> Jan 15, 1990</p>
-                <p className="mb-2"><strong>Gender:</strong> Male</p>
+                {profile?.name && <p className="mb-2"><strong>Name:</strong> {profile.name}</p>}
+                {profile?.username && <p className="mb-2"><strong>User Name:</strong> {profile?.username}</p>}
+                {profile?.email && <p className="mb-2"><strong>Email:</strong> {profile.email}</p>}
+                {profile?.phone_number &&<p className="mb-2"><strong>Phone:</strong> {profile.phone_number}</p>}
+                {profile?.date_of_birth &&<p className="mb-2"><strong>Date of Birth:</strong>{profile?.date_of_birth}</p>}
+                {profile?.gender && <p className="mb-2"><strong>Gender:</strong> {profile.gender}</p>}
                 <p className="mb-2"><strong>Address:</strong> 123 Main Street, New York, NY</p>
                 <button className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                   Edit Information
