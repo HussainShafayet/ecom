@@ -6,6 +6,9 @@ const initialState = {
     error: null,
     updateLoading:false,
     updateError: null,
+    adrressLoading: false,
+    address: [],
+    addressError: null,
 };
 
 //get profile
@@ -34,6 +37,45 @@ export const handleProfileUpdate = createAsyncThunk('profile/handleProfileUpdate
     }
 });
 
+// address get 
+export const handleGetAddress = createAsyncThunk('profile/handleGetAddress', async (_, { rejectWithValue }) => {
+    try {
+       // Import axiosSetup only when needed to avoid circular dependency issues
+       const api = (await import('../../api/axiosSetup')).default;
+       const response = await api.get('api/accounts/addresses/');
+      console.log('get address response',response);
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+});
+
+// address create 
+export const handleAddressCreate = createAsyncThunk('profile/handleAddressCreate', async (formData, { rejectWithValue }) => {
+    try {
+       // Import axiosSetup only when needed to avoid circular dependency issues
+       const api = (await import('../../api/axiosSetup')).default;
+       const response = await api.post('api/accounts/addresses/', formData);
+      console.log('create address response',response);
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+});
+
+// address update
+export const handleAddressUpdate = createAsyncThunk('profile/handleAddressUpdate', async (formData, { rejectWithValue }) => {
+    try {
+       // Import axiosSetup only when needed to avoid circular dependency issues
+       const api = (await import('../../api/axiosSetup')).default;
+       const response = await api.put('api/accounts/addresses/', formData);
+      console.log('update address response',response);
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+});
+
 const profileSlice = createSlice({
     name: 'profile',
     initialState,
@@ -53,7 +95,7 @@ const profileSlice = createSlice({
             state.error = action.payload.error
         })
 
-         //profile update
+        //profile update
          .addCase(handleProfileUpdate.pending, (state)=>{
             state.updateLoading = true;
         })
@@ -64,6 +106,47 @@ const profileSlice = createSlice({
         .addCase(handleProfileUpdate.rejected, (state, action)=>{
             state.updateLoading = false;
             state.updateError = action.payload.error
+        })
+
+
+
+        //get address
+         .addCase(handleGetAddress.pending, (state)=>{
+            state.adrressLoading = true;
+        })
+        .addCase(handleGetAddress.fulfilled, (state, action)=>{
+            state.adrressLoading = false;
+            state.address = action.payload;
+        })
+        .addCase(handleGetAddress.rejected, (state, action)=>{
+            state.adrressLoading = false;
+            state.addressError = action.payload.error
+        })
+
+        //address create
+         .addCase(handleAddressCreate.pending, (state)=>{
+            state.adrressLoading = true;
+        })
+        .addCase(handleAddressCreate.fulfilled, (state, action)=>{
+            state.adrressLoading = false;
+            state.address = action.payload;
+        })
+        .addCase(handleAddressCreate.rejected, (state, action)=>{
+            state.adrressLoading = false;
+            state.addressError = action.payload.error
+        })
+
+         //address update
+         .addCase(handleAddressUpdate.pending, (state)=>{
+            state.adrressLoading = true;
+        })
+        .addCase(handleAddressUpdate.fulfilled, (state, action)=>{
+            state.adrressLoading = false;
+            state.address = action.payload;
+        })
+        .addCase(handleAddressUpdate.rejected, (state, action)=>{
+            state.adrressLoading = false;
+            state.addressError = action.payload.error
         })
         
     }

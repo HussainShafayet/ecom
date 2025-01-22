@@ -122,139 +122,139 @@ const Profile = () => {
 
               {/* Personal Information Card */}
               <div className="flex-1 bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-      <h3 className="font-semibold text-lg mb-4">Personal Information</h3>
-      
-      {!isEditing ? (
-        <>
-          {profile?.name && <p className="mb-2"><strong>Name:</strong> {profile.name}</p>}
-          {profile?.username && <p className="mb-2"><strong>User Name:</strong> {profile?.username}</p>}
-          {profile?.email && <p className="mb-2"><strong>Email:</strong> {profile.email}</p>}
-          {profile?.phone_number && <p className="mb-2"><strong>Phone:</strong> {profile.phone_number}</p>}
-          {profile?.date_of_birth && <p className="mb-2"><strong>Date of Birth:</strong> {profile?.date_of_birth}</p>}
-          {profile?.gender && <p className="mb-2"><strong>Gender:</strong> {profile.gender}</p>}
+                <h3 className="font-semibold text-lg mb-4">Personal Information</h3>
+                
+                {!isEditing ? (
+                  <>
+                    {profile?.name && <p className="mb-2"><strong>Name:</strong> {profile.name}</p>}
+                    {profile?.username && <p className="mb-2"><strong>User Name:</strong> {profile?.username}</p>}
+                    {profile?.email && <p className="mb-2"><strong>Email:</strong> {profile.email}</p>}
+                    {profile?.phone_number && <p className="mb-2"><strong>Phone:</strong> {profile.phone_number}</p>}
+                    {profile?.date_of_birth && <p className="mb-2"><strong>Date of Birth:</strong> {profile?.date_of_birth}</p>}
+                    {profile?.gender && <p className="mb-2"><strong>Gender:</strong> {profile.gender}</p>}
 
-          <button
-            onClick={handleShowInfoEdit}
-            className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-          >
-            Edit Information
-          </button>
-        </>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Editable Name Field */}
-          <div>
-            <label htmlFor="name" className="block text-gray-700 font-medium mb-1">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+                    <button
+                      onClick={handleShowInfoEdit}
+                      className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                    >
+                      Edit Information
+                    </button>
+                  </>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Editable Name Field */}
+                    <div>
+                      <label htmlFor="name" className="block text-gray-700 font-medium mb-1">
+                        Name
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formData.name || ''}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                    </div>
 
-          {/* Editable Username Field */}
-          <div>
-            <label htmlFor="username" className="block text-gray-700 font-medium mb-1">
-              User Name
-            </label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+                    {/* Editable Username Field */}
+                    <div>
+                      <label htmlFor="username" className="block text-gray-700 font-medium mb-1">
+                        User Name
+                      </label>
+                      <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        value={formData.username || ''}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                    </div>
 
-          {/* Editable Email Field */}
-          <div>
-            <label htmlFor="email" className="block text-gray-700 font-medium mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+                    {/* Editable Email Field */}
+                    <div>
+                      <label htmlFor="email" className="block text-gray-700 font-medium mb-1">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email || ''}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                    </div>
 
-          {/* Editable Phone Number Field */}
-          {/*<div>
-            <label htmlFor="phone_number" className="block text-gray-700 font-medium mb-1">
-              Phone Number
-            </label>
-            <input
-              type="text"
-              id="phone_number"
-              name="phone_number"
-              value={formData.phone_number || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>*/}
+                    {/* Editable Phone Number Field */}
+                    {/*<div>
+                      <label htmlFor="phone_number" className="block text-gray-700 font-medium mb-1">
+                        Phone Number
+                      </label>
+                      <input
+                        type="text"
+                        id="phone_number"
+                        name="phone_number"
+                        value={formData.phone_number || ''}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                    </div>*/}
 
-          {/* Editable Date of Birth Field */}
-          <div>
-            <label htmlFor="date_of_birth" className="block text-gray-700 font-medium mb-1">
-              Date of Birth
-            </label>
-            <input
-              type="date"
-              id="date_of_birth"
-              name="date_of_birth"
-              value={formData.date_of_birth || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+                    {/* Editable Date of Birth Field */}
+                    <div>
+                      <label htmlFor="date_of_birth" className="block text-gray-700 font-medium mb-1">
+                        Date of Birth
+                      </label>
+                      <input
+                        type="date"
+                        id="date_of_birth"
+                        name="date_of_birth"
+                        value={formData.date_of_birth || ''}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                    </div>
 
-          {/* Editable Gender Field */}
-          <div>
-            <label htmlFor="gender" className="block text-gray-700 font-medium mb-1">
-              Gender
-            </label>
-            <select
-              id="gender"
-              name="gender"
-              value={formData.gender || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
+                    {/* Editable Gender Field */}
+                    <div>
+                      <label htmlFor="gender" className="block text-gray-700 font-medium mb-1">
+                        Gender
+                      </label>
+                      <select
+                        id="gender"
+                        name="gender"
+                        value={formData.gender || ''}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      >
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
 
-          {/* Save and Cancel Buttons */}
-          <div className="flex justify-end space-x-2">
-            <button
-              type="button"
-              onClick={() => setIsEditing(false)}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-            >
-              Save Changes
-            </button>
-          </div>
-        </form>
-      )}
-    </div>
+                    {/* Save and Cancel Buttons */}
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsEditing(false)}
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
             </div>
           )}
 
