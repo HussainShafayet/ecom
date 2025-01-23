@@ -10,7 +10,7 @@ import {
   setDistricts,
   setUpazilas,
 } from '../redux/slice/checkoutSlice';
-import {selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
+import {handleFetchCart, selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
 import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
 
 
@@ -29,6 +29,11 @@ const Checkout = () => {
   const { formData, errors, touched, districts, upazilas } = useSelector(
     (state) => state.checkout
   );
+  const {isAuthenticated} = useSelector((state)=> state.auth);
+
+  useEffect(() => {
+    isAuthenticated && dispatch(handleFetchCart());
+  }, [dispatch, isAuthenticated]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -348,10 +353,20 @@ const Checkout = () => {
           {cartItems.map((item) => (
             <div key={item.id} className="flex justify-between items-center mb-3">
               <div>
-                <h4 className="font-semibold">{item.title}</h4>
+                <h4 className="font-semibold">{item.name}</h4>
                 <p>Quantity: {item.quantity}</p>
               </div>
-              <p>{(item.price * item.quantity).toFixed(2)}</p>
+              {item.has_discount ? (
+                <>
+                  {item.discount_price * item.quantity}
+                </>
+            ) : (
+                <>
+                  {item.base_price * item.quantity}
+                </>
+                
+            )}
+
             </div>
           ))}
           </div>
