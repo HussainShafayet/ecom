@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { addToCart } from '../../../redux/slice/cartSlice';
+import { addToCart, handleAddtoCart, handleClonedProduct } from '../../../redux/slice/cartSlice';
 import { FaHeart, FaEye, FaShoppingCart, FaRegHeart } from 'react-icons/fa';
 import {addToWishlist, handleAddtoWishlist, handleRemovetoWishlist, removeFromWishlist} from '../../../redux/slice/wishlistSlice';
 import {addToCartAndRemoveFromWishlist} from '../../../redux/slice/cartSlice';
@@ -14,17 +14,34 @@ const ProductCard = ({ product, cardForTrending }) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
 
   const handleAddToCart = () => {
-    const extProd = { ...product, quantity: 1 };
-    //dispatch(addToCart(extProd));
-    dispatch(addToCartAndRemoveFromWishlist(extProd));
+     if (isAuthenticated) {
+      const cartBody = {};
+      cartBody.product_id = product.id;
+      cartBody.quantity = 1;
+      cartBody.variant_id = product.variant_id;
+      dispatch(handleAddtoCart(cartBody));
+    }else{
+      const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
+      
+      dispatch(addToCart(clonedProduct));
+    }
   };
 
   const handleBuyNow = () => {
     if (product.has_variants) {
       navigate(`/products/detail/${product.slug}`);
     } else {
-      const extProd = { ...product, quantity: 1 };
-      dispatch(addToCart(extProd));
+      if (isAuthenticated) {
+        const cartBody = {};
+        cartBody.product_id = product.id;
+        cartBody.quantity = 1;
+        cartBody.variant_id = product.variant_id;
+        dispatch(handleAddtoCart(cartBody));
+      }else{
+        const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
+        dispatch(addToCart(clonedProduct));
+      }
+
       navigate(`/checkout`);
     }
     

@@ -181,24 +181,25 @@ export const handleClonedProduct = (product, selectedSize, selectedColor, quanti
   dummyProduct['discount_price'] = product.discount_price;
   dummyProduct['discount_type'] = product.discount_type;
   dummyProduct['discount_value'] = product.discount_value;
-  dummyProduct['brand_name'] = product.brand.name;
+  dummyProduct['brand_name'] = product?.brand?.name || product.brand_name;
   dummyProduct['total_orders'] = product.total_orders;
   dummyProduct['total_views'] = product.total_views;
   dummyProduct['total_reviews'] = product.total_reviews;
   dummyProduct['avg_rating'] = product.avg_rating;
   let imgUrl = '';
-  selectedColor?.media_files.forEach(file => {
+  selectedColor && selectedColor?.media_files.forEach(file => {
     if (file.file_type == 'image') {
       imgUrl = file.file_url;
       return;
     }
   });
-  !selectedColor && product.media_files.forEach(file => {
+  !selectedColor && product.media_files && product?.media_files.forEach(file => {
     if (file.file_type == 'image') {
       imgUrl = file.file_url;
       return;
     }
   });
+  !selectedColor && product?.image && (imgUrl = product.image);  
   dummyProduct['image'] = imgUrl;
   dummyProduct['is_favourite'] = product.is_favourite;
   dummyProduct['availability_status'] = product.availability_status;

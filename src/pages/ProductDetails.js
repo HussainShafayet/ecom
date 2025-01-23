@@ -141,9 +141,18 @@ useEffect(() => {
   };
 
   const handleBuyNow = () => {
-    const clonedProduct = dispatch(handleClonedProduct(product, selectedSize, selectedColor, quantity));
+    if (isAuthenticated) {
+      const cartBody = {};
+      cartBody.product_id = product.id;
+      cartBody.quantity = quantity;
+      cartBody.variant_id = selectedSize?.variant_id || selectedColor?.variant_id;
+      dispatch(handleAddtoCart(cartBody));
+    }else{
+      const clonedProduct = dispatch(handleClonedProduct(product, selectedSize, selectedColor, quantity));
       
-    dispatch(addToCart(clonedProduct));
+      dispatch(addToCart(clonedProduct));
+    }
+    
     navigate('/checkout');
   };
 
