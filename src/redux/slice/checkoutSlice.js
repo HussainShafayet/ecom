@@ -1,7 +1,9 @@
 // src/redux/slice/checkoutSlice.js
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import axios from 'axios';
 
 const initialState = {
+  isLoading: false,
   formData: {
     name: '',
     email: '',
@@ -16,13 +18,33 @@ const initialState = {
     cardNumber: '',
     expiryDate: '',
     cvv: '',
-    paymentMethod: 'cod',
+    paymentMethod: 'cash',
   },
   errors: {},
   touched: {},
   districts: [],
   upazilas: [],
+  responseError: null,
 };
+
+// profile update
+export const handleOrder = createAsyncThunk('checkout/handleOrder', async (formData, {getState, rejectWithValue }) => {
+  try {
+     // Import axiosSetup only when needed to avoid circular dependency issues
+     const api = (await import('../../api/axiosSetup')).default;
+     const isAuthenticated = getState().auth.isAuthenticated;
+     let response = null;
+     if (isAuthenticated) {
+      response = await api.post('api/orders/', formData);
+     }else{
+      response = await axios.post('http://192.168.0.103:8000/api/orders/', formData);
+     }
+    console.log('order post response',response);
+    return response.data.data;
+  } catch (error) {
+    return rejectWithValue(error.response.data);
+  }
+});
 
 const checkoutSlice = createSlice({
   name: 'checkout',
@@ -49,6 +71,27 @@ const checkoutSlice = createSlice({
       state.touched = {};
     },
   },
+  extraReducers: (builder) =>{
+      builder
+      //get profile
+      .addCase(handleOrder.pending, (state)=>{
+          state.isLoading = true;
+      })
+      .addCase(handleOrder.fulfilled, (state, action)=>{
+          state.isLoading = false;
+          //state.profile = action.payload;
+          //console.log(action.payload);
+          
+      })
+      .addCase(handleOrder.rejected, (state, action)=>{
+          state.isLoading = false;
+          state.responseError = action.payload.errors;
+          
+      })
+
+     
+      
+  }
 });
 
 export const {

@@ -9,6 +9,7 @@ import {
   setErrors,
   setDistricts,
   setUpazilas,
+  handleOrder,
 } from '../redux/slice/checkoutSlice';
 import {handleFetchCart, selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
 import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
@@ -112,7 +113,7 @@ const Checkout = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    
     // Mark all fields as touched to show errors for untouched fields
     const allTouchedFields = Object.keys(formData).reduce((acc, field) => {
       acc[field] = true;
@@ -123,8 +124,35 @@ const Checkout = () => {
     const formErrors = validateForm();
 
     if (Object.keys(formErrors).length === 0) {
-      console.log('formData', formData)
-      alert('Order placed successfully!');
+      const checkoutBody ={
+        "name" : formData.name,
+        "phone_number" : formData.mobile,
+        "email" :  formData.email,
+        "shipping" : null,
+        "shipping_type" : formData.shippingLocationType,
+        "shipping_area": formData.dhakaArea,
+        "shipping_division": formData.division,
+        "shipping_district": formData.district,
+        "shipping_thana": formData.upazila,
+        "shipping_address": formData.address,
+        "payment_type": formData.paymentMethod,
+        "items" : [],
+        "sub_total_price": String(totalPrice),
+        "delivery_charge": String(shippingCost),
+        "total_price": String(grandTotal),
+      }
+      cartItems.map((cart)=>{
+        checkoutBody.items.push({
+            "product_id": cart.id,
+            "variant_id": cart.variant_id,
+            "quantity": cart.quantity,
+            "price": cart.has_discount? cart.discount_price : cart.base_price,
+        })
+      });
+
+      console.log(checkoutBody, 'body');
+      dispatch(handleOrder(checkoutBody))
+      //alert('Order placed successfully!');
     } else {
       dispatch(setErrors(formErrors));
     }
@@ -136,18 +164,21 @@ const Checkout = () => {
     if (!formData.email) formErrors.email = 'Email is required';
     if (!formData.mobile) formErrors.mobile = 'Mobile Number is required';
     if (!formData.shippingLocationType) formErrors.shippingLocationType = 'shippingLocationType is required';
+    if (formData.shippingLocationType == 'inside_dhaka') {
+       if (!formData.dhakaArea) formErrors.dhakaArea = 'dhakaArea is required';
+    } else if(formData.shippingLocationType === 'outside_dhaka') {
+      if (!formData.division) formErrors.division = 'Division is required';
+      if (!formData.district) formErrors.district = 'District is required';
+      if (!formData.upazila) formErrors.upazila = 'Upazila/thana is required';
+    }
     if (!formData.address) formErrors.address = 'Address is required';
-    if (!formData.dhakaArea) formErrors.dhakaArea = 'dhakaArea is required';
-    if (!formData.division) formErrors.division = 'Division is required';
-    if (!formData.district) formErrors.district = 'District is required';
-    if (!formData.upazila) formErrors.upazila = 'Upazila/thana is required';
     return formErrors;
   };
 
   const getLocationType = ()=>{
-    if (formData.shippingLocationType === 'dhaka') {
+    if (formData.shippingLocationType === 'inside_dhaka') {
       return 'md:grid-cols-2'
-    }else if(formData.shippingLocationType === 'outsideDhaka'){
+    }else if(formData.shippingLocationType === 'outside_dhaka'){
       return 'md:grid-cols-4 sm:grid-cols-2'
     } else {
       return 'grid-cols-1'
@@ -155,7 +186,7 @@ const Checkout = () => {
   }
 
   const totalPrice = useSelector(selectTotalPrice);
-  const shippingCost = formData.shippingLocationType ? ((formData.shippingLocationType === 'dhaka') ?  60 : 110) : 0;
+  const shippingCost = formData.shippingLocationType ? ((formData.shippingLocationType === 'inside_dhaka') ?  0 : 110) : 0;
   const grandTotal = totalPrice + shippingCost;
 
   return (
@@ -184,7 +215,7 @@ const Checkout = () => {
               </div>
               <div>
                 <input
-                  type="number"
+                  type="tel"
                   name="mobile"
                   placeholder="Mobile Number"
                   value={formData.mobile}
@@ -225,13 +256,13 @@ const Checkout = () => {
                   className="border border-gray-300 p-2 rounded-lg w-full"
                 >
                   <option value="">Select Shipping Area</option>
-                  <option value="dhaka">In Dhaka City</option>
-                  <option value="outsideDhaka">Out of Dhaka City</option>
+                  <option value="inside_dhaka">In Dhaka City</option>
+                  <option value="outside_dhaka">Out of Dhaka City</option>
                 </select>
                 {touched.shippingLocationType && errors.shippingLocationType && <p className="text-red-500 text-xs mt-1">{errors.shippingLocationType}</p>}
               </div>
 
-              {formData.shippingLocationType === 'dhaka' && (
+              {formData.shippingLocationType === 'inside_dhaka' && (
               <div className="grid grid-cols-1 gap-3">
                 <div className="w-full">
                   <select
@@ -252,7 +283,7 @@ const Checkout = () => {
             )}
              
            
-            {formData.shippingLocationType === 'outsideDhaka' && (
+            {formData.shippingLocationType === 'outside_dhaka' && (
               <>
                 <div>
                   <select
