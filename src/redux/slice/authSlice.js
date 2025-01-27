@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
+import {clearCart} from './cartSlice';
 
 const initialState = {
     accessToken: null,
@@ -107,13 +108,13 @@ export const checkAuth =  () => async (dispatch) => {
 };
 
 // Logout action
-export const logoutUser = createAsyncThunk('auth/logoutUser', async (credential, { rejectWithValue }) => {
+export const logoutUser = createAsyncThunk('auth/logoutUser', async (credential, { rejectWithValue, getState, dispatch }) => {
   try {
     //await  axios.post('/api/auth/logout');
     const api = (await import('../../api/axiosSetup')).default;
     const response = await api.post('/api/accounts/logout/', credential);
     console.log('logout response', response);
-    
+    dispatch(clearCart());
     return response.data;
   } catch (error) {
     return rejectWithValue(error.response.data);
