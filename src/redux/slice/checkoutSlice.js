@@ -1,7 +1,7 @@
 // src/redux/slice/checkoutSlice.js
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
-import {clearCart} from './cartSlice';
+import {clearCart, handleFetchCart} from './cartSlice';
 
 const initialState = {
   isLoading: false,
@@ -26,6 +26,8 @@ const initialState = {
   districts: [],
   upazilas: [],
   responseError: null,
+  isCheckoutFulfilled: false,
+  order_id: null,
 };
 
 // profile update
@@ -71,6 +73,11 @@ const checkoutSlice = createSlice({
       state.formData = initialState.formData;
       state.errors = {};
       state.touched = {};
+      state.districts = [];
+      state.upazilas = [];
+      state.responseError = null;
+      state.isCheckoutFulfilled = false;
+      state.order_id = null;
     },
   },
   extraReducers: (builder) =>{
@@ -81,7 +88,8 @@ const checkoutSlice = createSlice({
       })
       .addCase(handleCheckout.fulfilled, (state, action)=>{
           state.isLoading = false;
-          
+          state.isCheckoutFulfilled = true;
+          state.order_id = action.payload.order_id;
       })
       .addCase(handleCheckout.rejected, (state, action)=>{
           state.isLoading = false;
@@ -93,6 +101,11 @@ const checkoutSlice = createSlice({
       
   }
 });
+
+export const initializeCheckout = () => async (dispatch, getState) => {
+  const {isAuthenticated} = getState().auth;
+  isAuthenticated && await dispatch(handleFetchCart()).unwrap();
+}
 
 export const {
   updateFormData,

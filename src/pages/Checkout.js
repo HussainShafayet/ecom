@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaCreditCard, FaTruck, FaCheckCircle, FaMoneyBillWave, FaCheck } from 'react-icons/fa';
 
 import {
@@ -10,6 +10,8 @@ import {
   setDistricts,
   setUpazilas,
   handleCheckout,
+  resetForm,
+  initializeCheckout,
 } from '../redux/slice/checkoutSlice';
 import {handleFetchCart, selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
 import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
@@ -26,15 +28,25 @@ import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/
 const Checkout = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector(selectCartItems);
+  const {isLoading} = useSelector((state)=>state.cart);
+  const navigate = useNavigate();
 
-  const { formData, errors, touched, districts, upazilas } = useSelector(
+  const { formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id } = useSelector(
     (state) => state.checkout
   );
-  const {isAuthenticated} = useSelector((state)=> state.auth);
+  useEffect(() => {
+    if (cartItems.length === 0 && !isLoading) {
+      dispatch(initializeCheckout());
+    }
+    isCheckoutFulfilled && dispatch(resetForm());
+    isCheckoutFulfilled && navigate(`/order-confirmation/${order_id}`);
+  }, [isCheckoutFulfilled,dispatch]);
 
   useEffect(() => {
-    isAuthenticated && dispatch(handleFetchCart());
-  }, [dispatch, isAuthenticated]);
+    if (!isLoading && cartItems.length === 0) {
+      navigate('/cart'); // Redirect to cart page if no items
+    }
+  }, [cartItems, isLoading, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { Layout } from './components/layout';
 import { Profile, SignIn, SignUp, VerifyOtp, WishList } from './pages/user';
-import { Home, Products, ProductDetails, Cart, NotFound, Checkout, Categories } from './pages';
+import { Home, Products, ProductDetails, Cart, NotFound, Checkout, Categories, OrderConfirmation } from './pages';
 import {useDispatch} from 'react-redux';
 import {loadUserFromStorage} from './redux/slice/authSlice';
 import {useEffect, useRef} from 'react';
@@ -39,6 +39,8 @@ function App() {
             <Route path='/products/featured' element={<FeaturedProducts forRoute={true} />} />
             <Route path='/categories' element={<Categories forRoute={true} />} />
 
+            {/*order */}
+            <Route path='/order-confirmation/:orderId' element={<OrderConfirmation />} />
 
             {/* User Pages */}
             <Route path="/signin" element={<SignIn />} />
