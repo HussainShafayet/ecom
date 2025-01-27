@@ -9,7 +9,7 @@ import {
   setErrors,
   setDistricts,
   setUpazilas,
-  handleOrder,
+  handleCheckout,
 } from '../redux/slice/checkoutSlice';
 import {handleFetchCart, selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
 import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
@@ -137,9 +137,9 @@ const Checkout = () => {
         "shipping_address": formData.address,
         "payment_type": formData.paymentMethod,
         "items" : [],
-        "sub_total_price": String(totalPrice),
-        "delivery_charge": String(shippingCost),
-        "total_price": String(grandTotal),
+        "sub_total_price": totalPrice,
+        "delivery_charge": shippingCost,
+        "total_price": grandTotal,
       }
       cartItems.map((cart)=>{
         checkoutBody.items.push({
@@ -151,7 +151,7 @@ const Checkout = () => {
       });
 
       console.log(checkoutBody, 'body');
-      dispatch(handleOrder(checkoutBody))
+      dispatch(handleCheckout(checkoutBody))
       //alert('Order placed successfully!');
     } else {
       dispatch(setErrors(formErrors));

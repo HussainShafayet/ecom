@@ -1,6 +1,7 @@
 // src/redux/slice/checkoutSlice.js
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
+import {clearCart} from './cartSlice';
 
 const initialState = {
   isLoading: false,
@@ -28,7 +29,7 @@ const initialState = {
 };
 
 // profile update
-export const handleOrder = createAsyncThunk('checkout/handleOrder', async (formData, {getState, rejectWithValue }) => {
+export const handleCheckout = createAsyncThunk('checkout/handleCheckout', async (formData, {getState, rejectWithValue, dispatch }) => {
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
@@ -39,6 +40,7 @@ export const handleOrder = createAsyncThunk('checkout/handleOrder', async (formD
      }else{
       response = await axios.post('http://192.168.0.103:8000/api/orders/', formData);
      }
+     response.data.success && dispatch(clearCart());
     console.log('order post response',response);
     return response.data.data;
   } catch (error) {
@@ -74,16 +76,14 @@ const checkoutSlice = createSlice({
   extraReducers: (builder) =>{
       builder
       //get profile
-      .addCase(handleOrder.pending, (state)=>{
+      .addCase(handleCheckout.pending, (state)=>{
           state.isLoading = true;
       })
-      .addCase(handleOrder.fulfilled, (state, action)=>{
+      .addCase(handleCheckout.fulfilled, (state, action)=>{
           state.isLoading = false;
-          //state.profile = action.payload;
-          //console.log(action.payload);
           
       })
-      .addCase(handleOrder.rejected, (state, action)=>{
+      .addCase(handleCheckout.rejected, (state, action)=>{
           state.isLoading = false;
           state.responseError = action.payload.errors;
           
