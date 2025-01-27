@@ -15,6 +15,8 @@ import {
 } from '../redux/slice/checkoutSlice';
 import {handleFetchCart, selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
 import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
+import {handleGetAddress} from '../redux/slice/profileSlice';
+import {ShowAddress} from '../components/checkout';
 
 
  
@@ -37,10 +39,16 @@ const Checkout = () => {
   const { isAuthenticated } = useSelector(
     (state) => state.auth
   );
+
+  const { adrressLoading, addresses } = useSelector(
+    (state) => state.profile
+  );
   useEffect(() => {
     if (cartItems.length === 0 && !isLoading) {
       dispatch(initializeCheckout());
     }
+    isAuthenticated && cartItems.length > 0 && dispatch(handleGetAddress());
+    
     isCheckoutFulfilled && dispatch(resetForm());
     isCheckoutFulfilled && navigate(`/order-confirmation/${order_id}`);
   }, [isCheckoutFulfilled,dispatch]);
@@ -69,6 +77,15 @@ const Checkout = () => {
     if (!formData[name].trim()) {
       dispatch(setErrors({ ...errors, [name]: `${name} is required` }));
     }
+  };
+
+  const handleAddressSelection = (id) => {
+    //console.log('Selected Address ID:', id);
+    const addressItem = addresses.find((item) => item.id === id);
+
+    const {shipping_type, area, division , district, thana, address }  = addressItem;
+    
+    dispatch(updateFormData({ shippingLocationType:shipping_type, dhakaArea: area, division, district, upazila: thana, address: address }))
   };
 
   const handleLocationType= (e) =>{
@@ -266,6 +283,13 @@ const Checkout = () => {
 
           {/* Shipping Information */}
           <div className="p-2 bg-white shadow rounded-lg">
+
+          <div>
+            {!adrressLoading && 
+           
+            <ShowAddress addresses={addresses} onSelectAddress={handleAddressSelection} />}
+          </div>
+
             <h3 className="text-lg font-semibold flex items-center mb-1">
               <FaTruck className="mr-2 text-blue-500" /> Shipping Information
             </h3>

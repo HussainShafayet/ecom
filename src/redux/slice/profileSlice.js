@@ -7,7 +7,7 @@ const initialState = {
     updateLoading:false,
     updateError: null,
     adrressLoading: false,
-    address: [],
+    addresses: [],
     addressError: null,
 };
 
@@ -116,7 +116,7 @@ const profileSlice = createSlice({
         })
         .addCase(handleGetAddress.fulfilled, (state, action)=>{
             state.adrressLoading = false;
-            state.address = action.payload;
+            state.addresses = action.payload.data;
         })
         .addCase(handleGetAddress.rejected, (state, action)=>{
             state.adrressLoading = false;
@@ -129,7 +129,7 @@ const profileSlice = createSlice({
         })
         .addCase(handleAddressCreate.fulfilled, (state, action)=>{
             state.adrressLoading = false;
-            state.address = action.payload;
+            state.addresses = action.payload;
         })
         .addCase(handleAddressCreate.rejected, (state, action)=>{
             state.adrressLoading = false;
@@ -142,7 +142,7 @@ const profileSlice = createSlice({
         })
         .addCase(handleAddressUpdate.fulfilled, (state, action)=>{
             state.adrressLoading = false;
-            state.address = action.payload;
+            state.addresses = action.payload;
         })
         .addCase(handleAddressUpdate.rejected, (state, action)=>{
             state.adrressLoading = false;
