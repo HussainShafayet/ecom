@@ -190,7 +190,7 @@ const Checkout = () => {
     //if (!formData.email) formErrors.email = 'Email is required';
     if (!formData.phone_number) formErrors.phone_number = 'Phone Number is required';
 
-    if (!formData.title) formErrors.title = 'Shipping Title is required';
+    //if (!formData.title) formErrors.title = 'Shipping Title is required';
     if (!formData.shipping_type) formErrors.shipping_type = 'Shipping Type is required';
     if (formData.shipping_type == 'inside_dhaka') {
        if (!formData.shipping_area) formErrors.shipping_area = 'shipping_area is required';
@@ -291,10 +291,8 @@ const Checkout = () => {
                 value={formData.title}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                required
-                className={`border ${touched.title && errors.title ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                className={`border border-gray-300 p-2 rounded-lg w-full`}
               />
-              {touched.title && errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
             </div>
 
             <div className={`grid grid-cols-1 ${getLocationType()} gap-3 mb-3`}>
