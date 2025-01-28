@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaCreditCard, FaTruck, FaCheckCircle, FaMoneyBillWave, FaCheck } from 'react-icons/fa';
+import { FaCreditCard, FaTruck, FaCheckCircle, FaMoneyBillWave, FaCheck, FaTrash } from 'react-icons/fa';
 
 import {
   updateFormData,
@@ -14,10 +14,11 @@ import {
   initializeCheckout,
   setSelectedAddressId,
 } from '../redux/slice/checkoutSlice';
-import {handleFetchCart, selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
+import {handleAddtoCart, handleFetchCart, handleRemovetoCart, removeFromCart, selectCartItems, selectTotalPrice, updateQuantity} from '../redux/slice/cartSlice';
 import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
 import {handleGetAddress} from '../redux/slice/profileSlice';
 import {ShowAddress} from '../components/checkout';
+import debounce from 'lodash.debounce'; // Import lodash debounce
 
 
  
@@ -40,6 +41,7 @@ const Checkout = () => {
   const { isAuthenticated } = useSelector(
     (state) => state.auth
   );
+   const [confirmDelete, setConfirmDelete] = useState(null);
 
  
   useEffect(() => {
@@ -56,6 +58,19 @@ const Checkout = () => {
       //navigate('/cart'); // Redirect to cart page if no items
     }
   }, [cartItems, isLoading, navigate]);
+
+  // Debounced API call
+    const debouncedUpdateQuantity = useCallback(
+    debounce((product, quantity) => {
+      const cartBody = {};
+      cartBody.product_id = product.id;
+      cartBody.quantity = quantity;
+      cartBody.variant_id = product.variant_id;
+      
+      dispatch(handleAddtoCart(cartBody));
+    }, 1000),
+    []
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -216,6 +231,18 @@ const Checkout = () => {
   const totalPrice = useSelector(selectTotalPrice);
   const shippingCost = formData.shipping_type ? ((formData.shipping_type === 'inside_dhaka') ?  0 : 0) : 0;
   const grandTotal = totalPrice + shippingCost;
+
+  const handleUpdateQuantity = (id, quantity, item)=>{
+    dispatch(updateQuantity({ id, quantity }));
+    if (isAuthenticated) {
+      debouncedUpdateQuantity(item, quantity);
+    } 
+  }
+
+  const handleRemoveItem = (id) =>{
+    dispatch(handleRemovetoCart({product_id: id}));
+    dispatch(removeFromCart(id));
+  }
 
   return (
     <div className="container mx-auto px-1 lg:flex lg:space-x-3">
@@ -439,7 +466,7 @@ const Checkout = () => {
             {cartItems.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between gap-2 mb-4"
+                className="flex items-center justify-between gap-2 mb-2 relative border p-1"
               >
                 {/* Image */}
                 <img
@@ -458,7 +485,7 @@ const Checkout = () => {
                   </h4>
                   <div className="flex items-center gap-2 mt-1">
                     <button
-                      //onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => handleUpdateQuantity(item.id, item.quantity -1, item)}
                       disabled={item.quantity <= 1}
                       className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
                     >
@@ -466,10 +493,18 @@ const Checkout = () => {
                     </button>
                     <span className="text-sm">{item.quantity}</span>
                     <button
-                      //onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item)}
                       className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
                     >
                       +
+                    </button>
+
+                    {/* Remove Button */}
+                    <button
+                      className="bg-red-400 text-white p-[0.5rem] rounded-full hover:bg-red-600 transition-colors"
+                      onClick={() => setConfirmDelete(item.id)}
+                    >
+                      <FaTrash />
                     </button>
                   </div>
                 </div>
@@ -480,6 +515,34 @@ const Checkout = () => {
                     ? (item.discount_price * item.quantity).toFixed(2)
                     : (item.base_price * item.quantity).toFixed(2)}
                 </div>
+
+
+
+                {/* Confirm Delete Warning in Card */}
+                {confirmDelete === item.id && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
+                      <div className="text-center">
+                        <p className="text-gray-800 mb-2">Are you sure you want to remove this item?</p>
+                        <div className="flex justify-center gap-2">
+                          <button
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
+                            onClick={() => {
+                              handleRemoveItem(item.id);
+                              setConfirmDelete(null);
+                            }}
+                          >
+                            Yes
+                          </button>
+                          <button
+                            className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
+                            onClick={() => setConfirmDelete(null)}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
               </div>
             ))}
           </div>
@@ -499,9 +562,15 @@ const Checkout = () => {
               <span>Total</span>
               <span>{grandTotal.toFixed(2)}</span>
             </div>
-            <Link to="/cart" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
-              Edit Cart
-            </Link>
+            <div className="flex justify-between">
+              <Link to="/cart" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
+                Edit Cart
+              </Link>
+              <Link to="/products" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
+                Add more products
+              </Link>
+            </div>
+            
           </div>
         </div>
       </div>
