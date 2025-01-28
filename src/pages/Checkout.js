@@ -153,10 +153,10 @@ const Checkout = () => {
     const formErrors = validateForm();
 
     if (Object.keys(formErrors).length === 0) {
-      const {name,phone_number, email,shipping, shipping_type,shipping_area, division,district, upazila, address, payment_type } = formData;
+      const {name,phone_number, email,title, shipping_type,shipping_area, division,district, upazila, address, payment_type } = formData;
       const checkoutBody ={
         name, phone_number,email,shipping_type,shipping_area,
-        shipping: shipping || null,
+        shipping: null,
         "shipping_division": division,
         "shipping_district": district,
         "shipping_thana": upazila,
@@ -177,7 +177,7 @@ const Checkout = () => {
       });
 
       console.log(checkoutBody, 'body');
-      dispatch(handleCheckout(checkoutBody))
+      dispatch(handleCheckout(checkoutBody));
       //alert('Order placed successfully!');
     } else {
       dispatch(setErrors(formErrors));
@@ -189,7 +189,8 @@ const Checkout = () => {
     if (!formData.name) formErrors.name = 'Name is required';
     //if (!formData.email) formErrors.email = 'Email is required';
     if (!formData.phone_number) formErrors.phone_number = 'Phone Number is required';
-   
+
+    if (!formData.title) formErrors.title = 'Shipping Title is required';
     if (!formData.shipping_type) formErrors.shipping_type = 'Shipping Type is required';
     if (formData.shipping_type == 'inside_dhaka') {
        if (!formData.shipping_area) formErrors.shipping_area = 'shipping_area is required';
@@ -281,6 +282,20 @@ const Checkout = () => {
             <h3 className="text-lg font-semibold flex items-center mb-1">
               <FaTruck className="mr-2 text-blue-500" /> Shipping Information
             </h3>
+
+            <div className="w-full mb-3">
+              <input
+                type="text"
+                name="title"
+                placeholder="Home or office"
+                value={formData.title}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                required
+                className={`border ${touched.title && errors.title ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+              />
+              {touched.title && errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+            </div>
 
             <div className={`grid grid-cols-1 ${getLocationType()} gap-3 mb-3`}>
               <div>

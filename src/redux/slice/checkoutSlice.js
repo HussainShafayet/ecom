@@ -10,6 +10,7 @@ const initialState = {
     name: '',
     email: '',
     phone_number: '',
+    title: '',
     address: '',
     shipping_type: '',
     shipping_area: '',

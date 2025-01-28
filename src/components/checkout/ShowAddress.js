@@ -20,7 +20,7 @@ const ShowAddress = () => {
     
     const {shipping_type, area, division , district, thana, address }  = addressItem;
     
-    dispatch(updateFormData({ shipping_type, shipping_area: area, division, district, upazila: thana, address: address }));
+    dispatch(updateFormData({title: addressItem.title || '', shipping_type, shipping_area: area, division, district, upazila: thana, address: address }));
     
     if (shipping_type === 'outside_dhaka') {
       const divisionItem = divisionsData.find((item)=> item.name === division);
