@@ -435,28 +435,51 @@ const Checkout = () => {
       <div className="lg:w-1/3 mt-12 lg:mt-0">
         <h3 className="text-2xl font-bold mb-4">Order Summary</h3>
         <div className="bg-gray-100 rounded-lg shadow-md sticky top-20">
-          <div className='max-h-svh overflow-auto scrollbar-custom p-4'>
-          {cartItems.map((item) => (
-            <div key={item.id} className="flex justify-between items-center mb-3">
-              <div>
-                <h4 className="font-semibold">{item.name}</h4>
-                <p>Quantity: {item.quantity}</p>
-              </div>
-              {item.has_discount ? (
-                <>
-                  {item.discount_price * item.quantity}
-                </>
-            ) : (
-                <>
-                  {item.base_price * item.quantity}
-                </>
-                
-            )}
+          <div className="max-h-svh overflow-auto scrollbar-custom p-4">
+            {cartItems.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between gap-2 mb-4"
+              >
+                {/* Image */}
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-16 h-16 object-cover rounded-md flex-shrink-0"
+                />
 
-            </div>
-          ))}
+                {/* Name and Quantity */}
+                <div className="flex-grow">
+                  <h5 className=" text-sm">{item.name}</h5>
+                  <div className="flex items-center gap-2 mt-1">
+                    <button
+                      //onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                      className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
+                    >
+                      -
+                    </button>
+                    <span className="text-sm">{item.quantity}</span>
+                    <button
+                      //onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="text-sm font-semibold text-right flex-shrink-0">
+                  {item.has_discount
+                    ? (item.discount_price * item.quantity).toFixed(2)
+                    : (item.base_price * item.quantity).toFixed(2)}
+                </div>
+              </div>
+            ))}
           </div>
-          <div className='p-4'>
+
+          <div className="p-4">
             <hr className="my-3" />
             <div className="flex justify-between">
               <span>Subtotal</span>
@@ -477,6 +500,8 @@ const Checkout = () => {
           </div>
         </div>
       </div>
+
+
     </div>
   );
 };
