@@ -449,8 +449,13 @@ const Checkout = () => {
                 />
 
                 {/* Name and Quantity */}
-                <div className="flex-grow">
-                  <h5 className=" text-sm">{item.name}</h5>
+                <div className="flex-grow min-w-0">
+                  <h4
+                    className="font-semibold text-sm truncate"
+                    title={item.name} // Tooltip for full name
+                  >
+                    {item.name}
+                  </h4>
                   <div className="flex items-center gap-2 mt-1">
                     <button
                       //onClick={() => updateQuantity(item.id, item.quantity - 1)}
