@@ -158,7 +158,7 @@ const Checkout = () => {
     if (Object.keys(formErrors).length === 0) {
       const checkoutBody ={
         "name" : formData.name,
-        "phone_number" : formData.mobile,
+        "phone_number" : formData.phone_number,
         "email" :  formData.email,
         "shipping" : null,
         "shipping_type" : formData.shippingLocationType,
@@ -192,11 +192,9 @@ const Checkout = () => {
 
   const validateForm = () => {
     const formErrors = {};
-    if (!isAuthenticated) {
-      if (!formData.name) formErrors.name = 'Name is required';
-      if (!formData.email) formErrors.email = 'Email is required';
-      if (!formData.mobile) formErrors.mobile = 'Mobile Number is required';
-    }
+    if (!formData.name) formErrors.name = 'Name is required';
+    if (!formData.email) formErrors.email = 'Email is required';
+    if (!formData.phone_number) formErrors.phone_number = 'Phone Number is required';
    
     if (!formData.shippingLocationType) formErrors.shippingLocationType = 'shippingLocationType is required';
     if (formData.shippingLocationType == 'inside_dhaka') {
@@ -231,54 +229,51 @@ const Checkout = () => {
         
         <form onSubmit={handleSubmit} className="space-y-2">
 
-          {!isAuthenticated && 
-          <>
-            {/* Personal Information */}
-            <div className="p-2 bg-white shadow rounded-lg">
-              <h3 className="text-lg font-semibold flex items-center mb-1">
-                <FaCheckCircle className="mr-2 text-green-500" /> Personal Information
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div>
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Full Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`border ${touched.name && errors.name ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
-                  />
-                  {touched.name && errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-                </div>
-                <div>
-                  <input
-                    type="tel"
-                    name="mobile"
-                    placeholder="Mobile Number"
-                    value={formData.mobile}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`border ${touched.mobile && errors.mobile ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
-                  />
-                  {touched.mobile && errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
-                </div>
-                <div>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email Address"
-                    value={formData.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`border ${touched.email && errors.email ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
-                  />
-                  {touched.email && errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-                </div>
+          
+          {/* Personal Information */}
+          <div className="p-2 bg-white shadow rounded-lg">
+            <h3 className="text-lg font-semibold flex items-center mb-1">
+              <FaCheckCircle className="mr-2 text-green-500" /> Personal Information
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Full Name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`border ${touched.name && errors.name ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                />
+                {touched.name && errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+              </div>
+              <div>
+                <input
+                  type="tel"
+                  name="phone_number"
+                  placeholder="Phone Number"
+                  value={formData.phone_number}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`border ${touched.phone_number && errors.phone_number ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                />
+                {touched.phone_number && errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
+              </div>
+              <div>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email Address"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`border ${touched.email && errors.email ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                />
+                {touched.email && errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
             </div>
-          </>
-          }
+          </div>
           
 
           {/* Shipping Information */}

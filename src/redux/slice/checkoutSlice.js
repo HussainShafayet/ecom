@@ -2,13 +2,14 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import {clearCart, handleFetchCart} from './cartSlice';
+import {handleGetProfile} from './profileSlice';
 
 const initialState = {
   isLoading: false,
   formData: {
     name: '',
     email: '',
-    mobile: '',
+    phone_number: '',
     address: '',
     shippingLocationType: '',
     dhakaArea: '',
@@ -104,6 +105,19 @@ const checkoutSlice = createSlice({
 
 export const initializeCheckout = () => async (dispatch, getState) => {
   const {isAuthenticated} = getState().auth;
+  const profile = getState().profile.profile;
+
+  if (!profile) {
+    
+    const fetchedProfile = await dispatch(handleGetProfile()).unwrap();
+    const {name, phone_number, email} = fetchedProfile;
+    console.log(name, phone_number, email);
+    
+    dispatch(updateFormData({ name, phone_number, email}));
+  } else {
+    const {name, phone_number, email} = profile;
+    dispatch(updateFormData({ name, phone_number, email}));
+  }
   isAuthenticated && await dispatch(handleFetchCart()).unwrap();
 }
 
