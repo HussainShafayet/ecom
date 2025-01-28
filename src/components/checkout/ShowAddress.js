@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import {FaTruck} from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {setSelectedAddressId, updateFormData} from '../../redux/slice/checkoutSlice';
+import {setDistricts, setSelectedAddressId, setUpazilas, updateFormData} from '../../redux/slice/checkoutSlice';
+import {districtsData, divisionsData, upazilasData} from '../../data/location';
 
 const ShowAddress = () => {
   const dispatch = useDispatch();
@@ -19,7 +20,24 @@ const ShowAddress = () => {
     
     const {shipping_type, area, division , district, thana, address }  = addressItem;
     
-    dispatch(updateFormData({ shipping_type, shipping_area: area, division, district, upazila: thana, address: address }))
+    dispatch(updateFormData({ shipping_type, shipping_area: area, division, district, upazila: thana, address: address }));
+    
+    if (shipping_type === 'outside_dhaka') {
+      const divisionItem = divisionsData.find((item)=> item.name === division);
+        if (divisionItem) {
+          const divisionDist = districtsData.filter((item)=> item.division_id === divisionItem.id);
+          dispatch(setDistricts(divisionDist|| []));
+          const districtItem = divisionDist.find((item)=> item.name === district);
+          
+          if (districtItem) {
+            const upzillaDist = upazilasData.filter((item)=> item.district_id === districtItem.id);
+            dispatch(setUpazilas(upzillaDist|| []));
+          }
+        }
+
+      
+    }
+    
   };
 
   return (
