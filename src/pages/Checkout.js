@@ -12,6 +12,7 @@ import {
   handleCheckout,
   resetForm,
   initializeCheckout,
+  setSelectedAddressId,
 } from '../redux/slice/checkoutSlice';
 import {handleFetchCart, selectCartItems, selectTotalPrice} from '../redux/slice/cartSlice';
 import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
@@ -40,22 +41,19 @@ const Checkout = () => {
     (state) => state.auth
   );
 
-  const { adrressLoading, addresses } = useSelector(
-    (state) => state.profile
-  );
+ 
   useEffect(() => {
-    if (cartItems.length === 0 && !isLoading) {
-      dispatch(initializeCheckout());
-    }
-    isAuthenticated && cartItems.length > 0 && dispatch(handleGetAddress());
-    
+    //if (cartItems.length === 0 && !isLoading) {
+   dispatch(initializeCheckout());
+    //}
+    //isAuthenticated && dispatch(handleGetAddress());
     isCheckoutFulfilled && dispatch(resetForm());
     isCheckoutFulfilled && navigate(`/order-confirmation/${order_id}`);
   }, [isCheckoutFulfilled,dispatch]);
 
   useEffect(() => {
     if (!isLoading && cartItems.length === 0) {
-      navigate('/cart'); // Redirect to cart page if no items
+      //navigate('/cart'); // Redirect to cart page if no items
     }
   }, [cartItems, isLoading, navigate]);
 
@@ -67,6 +65,7 @@ const Checkout = () => {
     if (value.trim()) {
       dispatch(setErrors({ ...errors, [name]: '' }));
     }
+    isAuthenticated && name === 'address' && dispatch(setSelectedAddressId(null));
   };
 
   const handleBlur = (e) => {
@@ -79,34 +78,28 @@ const Checkout = () => {
     }
   };
 
-  const handleAddressSelection = (id) => {
-    //console.log('Selected Address ID:', id);
-    const addressItem = addresses.find((item) => item.id === id);
-
-    const {shipping_type, area, division , district, thana, address }  = addressItem;
-    
-    dispatch(updateFormData({ shippingLocationType:shipping_type, dhakaArea: area, division, district, upazila: thana, address: address }))
-  };
-
   const handleLocationType= (e) =>{
     const locationType = e.target.value;
     
-    locationType && dispatch(updateFormData({ shippingLocationType:locationType, dhakaArea: '', division: '', district: '', upazila: '', address: '' }));
+    locationType && dispatch(updateFormData({ shipping_type:locationType, shipping_area: '', division: '', district: '', upazila: '', address: '' }));
 
      // Validate field on change and clear error if valid
      if (locationType.trim()) {
-      dispatch(setErrors({ ...errors, ['shippingLocationType']: '' }));
+      dispatch(setErrors({ ...errors, ['shipping_type']: '' }));
     }
+
+    isAuthenticated && dispatch(setSelectedAddressId(null));
   }
   
   const handleDhakaArea = (e) => {
-    const dhakaArea = e.target.value;
-    dispatch(updateFormData({ dhakaArea:dhakaArea, division: '', district: '', upazila: '',}));
+    const shipping_area = e.target.value;
+    dispatch(updateFormData({ shipping_area, division: '', district: '', upazila: '',}));
 
      // Validate field on change and clear error if valid
-     if (dhakaArea.trim()) {
-      dispatch(setErrors({ ...errors, ['dhakaArea']: '' }));
+     if (shipping_area.trim()) {
+      dispatch(setErrors({ ...errors, ['shipping_area']: '' }));
     }
+    isAuthenticated && dispatch(setSelectedAddressId(null));
   }
 
   const handleDivisionChange = (e) => {
@@ -125,6 +118,8 @@ const Checkout = () => {
     if (division.trim()) {
       dispatch(setErrors({ ...errors, ['division']: '' }));
     }
+
+    isAuthenticated && dispatch(setSelectedAddressId(null));
   };
 
   const handleDistrictChange = (e) => {
@@ -141,6 +136,8 @@ const Checkout = () => {
      if (district.trim()) {
       dispatch(setErrors({ ...errors, ['district']: '' }));
     }
+
+    isAuthenticated && dispatch(setSelectedAddressId(null));
   };
 
   const handleSubmit = (e) => {
@@ -156,18 +153,15 @@ const Checkout = () => {
     const formErrors = validateForm();
 
     if (Object.keys(formErrors).length === 0) {
+      const {name,phone_number, email,shipping, shipping_type,shipping_area, division,district, upazila, address, payment_type } = formData;
       const checkoutBody ={
-        "name" : formData.name,
-        "phone_number" : formData.phone_number,
-        "email" :  formData.email,
-        "shipping" : null,
-        "shipping_type" : formData.shippingLocationType,
-        "shipping_area": formData.dhakaArea,
-        "shipping_division": formData.division,
-        "shipping_district": formData.district,
-        "shipping_thana": formData.upazila,
-        "shipping_address": formData.address,
-        "payment_type": formData.paymentMethod,
+        name, phone_number,email,shipping_type,shipping_area,
+        shipping: shipping || null,
+        "shipping_division": division,
+        "shipping_district": district,
+        "shipping_thana": upazila,
+        "shipping_address": address,
+        payment_type,
         "items" : [],
         "sub_total_price": totalPrice,
         "delivery_charge": shippingCost,
@@ -193,13 +187,13 @@ const Checkout = () => {
   const validateForm = () => {
     const formErrors = {};
     if (!formData.name) formErrors.name = 'Name is required';
-    if (!formData.email) formErrors.email = 'Email is required';
+    //if (!formData.email) formErrors.email = 'Email is required';
     if (!formData.phone_number) formErrors.phone_number = 'Phone Number is required';
    
-    if (!formData.shippingLocationType) formErrors.shippingLocationType = 'shippingLocationType is required';
-    if (formData.shippingLocationType == 'inside_dhaka') {
-       if (!formData.dhakaArea) formErrors.dhakaArea = 'dhakaArea is required';
-    } else if(formData.shippingLocationType === 'outside_dhaka') {
+    if (!formData.shipping_type) formErrors.shipping_type = 'Shipping Type is required';
+    if (formData.shipping_type == 'inside_dhaka') {
+       if (!formData.shipping_area) formErrors.shipping_area = 'shipping_area is required';
+    } else if(formData.shipping_type === 'outside_dhaka') {
       if (!formData.division) formErrors.division = 'Division is required';
       if (!formData.district) formErrors.district = 'District is required';
       if (!formData.upazila) formErrors.upazila = 'Upazila/thana is required';
@@ -209,9 +203,9 @@ const Checkout = () => {
   };
 
   const getLocationType = ()=>{
-    if (formData.shippingLocationType === 'inside_dhaka') {
+    if (formData.shipping_type === 'inside_dhaka') {
       return 'md:grid-cols-2'
-    }else if(formData.shippingLocationType === 'outside_dhaka'){
+    }else if(formData.shipping_type === 'outside_dhaka'){
       return 'md:grid-cols-4 sm:grid-cols-2'
     } else {
       return 'grid-cols-1'
@@ -219,7 +213,7 @@ const Checkout = () => {
   }
 
   const totalPrice = useSelector(selectTotalPrice);
-  const shippingCost = formData.shippingLocationType ? ((formData.shippingLocationType === 'inside_dhaka') ?  0 : 110) : 0;
+  const shippingCost = formData.shipping_type ? ((formData.shipping_type === 'inside_dhaka') ?  0 : 0) : 0;
   const grandTotal = totalPrice + shippingCost;
 
   return (
@@ -244,6 +238,7 @@ const Checkout = () => {
                   value={formData.name}
                   onChange={handleChange}
                   onBlur={handleBlur}
+                  required
                   className={`border ${touched.name && errors.name ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 />
                 {touched.name && errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
@@ -256,6 +251,7 @@ const Checkout = () => {
                   value={formData.phone_number}
                   onChange={handleChange}
                   onBlur={handleBlur}
+                  required
                   className={`border ${touched.phone_number && errors.phone_number ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 />
                 {touched.phone_number && errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
@@ -264,13 +260,12 @@ const Checkout = () => {
                 <input
                   type="email"
                   name="email"
-                  placeholder="Email Address"
+                  placeholder="Email Address (optional)"
                   value={formData.email}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`border ${touched.email && errors.email ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                  className={`border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 />
-                {touched.email && errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
             </div>
           </div>
@@ -280,9 +275,7 @@ const Checkout = () => {
           <div className="p-2 bg-white shadow rounded-lg">
 
           <div>
-            {!adrressLoading && 
-           
-            <ShowAddress addresses={addresses} onSelectAddress={handleAddressSelection} />}
+            {isAuthenticated && <ShowAddress /> }
           </div>
 
             <h3 className="text-lg font-semibold flex items-center mb-1">
@@ -292,41 +285,43 @@ const Checkout = () => {
             <div className={`grid grid-cols-1 ${getLocationType()} gap-3 mb-3`}>
               <div>
                 <select
-                  name="shippingLocationType"
-                  value={formData.shippingLocationType || ''}
+                  name="shipping_type"
+                  value={formData.shipping_type || ''}
                   onChange={handleLocationType}
                   onBlur={handleBlur}
+                  required
                   className="border border-gray-300 p-2 rounded-lg w-full"
                 >
                   <option value="">Select Shipping Area</option>
                   <option value="inside_dhaka">In Dhaka City</option>
                   <option value="outside_dhaka">Out of Dhaka City</option>
                 </select>
-                {touched.shippingLocationType && errors.shippingLocationType && <p className="text-red-500 text-xs mt-1">{errors.shippingLocationType}</p>}
+                {touched.shipping_type && errors.shipping_type && <p className="text-red-500 text-xs mt-1">{errors.shipping_type}</p>}
               </div>
 
-              {formData.shippingLocationType === 'inside_dhaka' && (
+              {formData.shipping_type === 'inside_dhaka' && (
               <div className="grid grid-cols-1 gap-3">
                 <div className="w-full">
                   <select
-                    name="dhakaArea"
-                    value={formData.dhakaArea || ''}
+                    name="shipping_area"
+                    value={formData.shipping_area || ''}
                     onChange={handleDhakaArea}
                     onBlur={handleBlur}
-                    className={`border ${touched.dhakaArea && errors.dhakaArea ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                    required
+                    className={`border ${touched.shipping_area && errors.shipping_area ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                   >
                     <option value="">Select Area in Dhaka City</option>
                     {dhakaCityData.map((area) => (
                       <option key={area.id} value={area.name}>{area.name}</option>
                     ))}
                   </select>
-                  {touched.dhakaArea && errors.dhakaArea && <p className="text-red-500 text-xs mt-1">{errors.dhakaArea}</p>}
+                  {touched.shipping_area && errors.shipping_area && <p className="text-red-500 text-xs mt-1">{errors.shipping_area}</p>}
                 </div>
               </div>
             )}
              
            
-            {formData.shippingLocationType === 'outside_dhaka' && (
+            {formData.shipping_type === 'outside_dhaka' && (
               <>
                 <div>
                   <select
@@ -334,6 +329,7 @@ const Checkout = () => {
                     value={formData.division || ''}
                     onChange={handleDivisionChange}
                     onBlur={handleBlur}
+                    required
                     className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                   >
                     <option value="">Select Division</option>
@@ -350,6 +346,7 @@ const Checkout = () => {
                     value={formData.district || ''}
                     onChange={handleDistrictChange}
                     onBlur={handleBlur}
+                    required
                     className={`border ${touched.district && errors.district ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                     disabled={!formData.division}
                   >
@@ -367,6 +364,7 @@ const Checkout = () => {
                     value={formData.upazila || ''}
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    required
                     className={`border ${touched.upazila && errors.upazila ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                     disabled={!formData.district}
                   >
@@ -389,6 +387,7 @@ const Checkout = () => {
                 value={formData.address}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                required
                 className={`border ${touched.address && errors.address ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
               />
               {touched.address && errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
@@ -404,11 +403,11 @@ const Checkout = () => {
 
             <div className="flex items-center space-x-2 mb-3">
               <div
-                className={`flex items-center p-2 rounded-lg transition-all ${formData.paymentMethod === 'cod' ? 'border-2 border-blue-500 bg-blue-50' : 'border border-gray-300'}`}
+                className={`flex items-center p-2 rounded-lg transition-all ${formData.payment_type === 'cod' ? 'border-2 border-blue-500 bg-blue-50' : 'border border-gray-300'}`}
               >
                 <FaMoneyBillWave className="text-green-500 mr-2" />
                 <span>Cash on Delivery</span>
-                {formData.paymentMethod === 'cod' && <FaCheck className="ml-auto text-blue-500" />}
+                {formData.payment_type === 'cod' && <FaCheck className="ml-auto text-blue-500" />}
               </div>
             </div>
           </div>

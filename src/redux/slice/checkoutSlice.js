@@ -2,7 +2,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import {clearCart, handleFetchCart} from './cartSlice';
-import {handleGetProfile} from './profileSlice';
+import {handleGetProfile, setAddress} from './profileSlice';
 
 const initialState = {
   isLoading: false,
@@ -11,8 +11,8 @@ const initialState = {
     email: '',
     phone_number: '',
     address: '',
-    shippingLocationType: '',
-    dhakaArea: '',
+    shipping_type: '',
+    shipping_area: '',
     country: 'Bangladesh',
     division: '',
     district: '',
@@ -20,7 +20,7 @@ const initialState = {
     cardNumber: '',
     expiryDate: '',
     cvv: '',
-    paymentMethod: 'cash',
+    payment_type: 'cash',
   },
   errors: {},
   touched: {},
@@ -29,6 +29,7 @@ const initialState = {
   responseError: null,
   isCheckoutFulfilled: false,
   order_id: null,
+  selectedAddressId: null,
 };
 
 // profile update
@@ -70,6 +71,9 @@ const checkoutSlice = createSlice({
     setUpazilas: (state, action) => {
       state.upazilas = action.payload;
     },
+    setSelectedAddressId: (state, action) => {
+      state.selectedAddressId = action.payload;
+    },
     resetForm: (state) => {
       state.formData = initialState.formData;
       state.errors = {};
@@ -79,6 +83,7 @@ const checkoutSlice = createSlice({
       state.responseError = null;
       state.isCheckoutFulfilled = false;
       state.order_id = null;
+      state.selectedAddressId = null;
     },
   },
   extraReducers: (builder) =>{
@@ -106,17 +111,16 @@ const checkoutSlice = createSlice({
 export const initializeCheckout = () => async (dispatch, getState) => {
   const {isAuthenticated} = getState().auth;
   const profile = getState().profile.profile;
-
-  if (!profile) {
-    
+  
+  if (!profile && isAuthenticated) {
     const fetchedProfile = await dispatch(handleGetProfile()).unwrap();
-    const {name, phone_number, email} = fetchedProfile;
-    console.log(name, phone_number, email);
-    
+    const {name, phone_number, email, addresses} = fetchedProfile;
     dispatch(updateFormData({ name, phone_number, email}));
-  } else {
-    const {name, phone_number, email} = profile;
+    dispatch(setAddress(addresses));
+  } else if(profile) {
+    const {name, phone_number, email,addresses} = profile;
     dispatch(updateFormData({ name, phone_number, email}));
+    dispatch(setAddress(addresses));
   }
   isAuthenticated && await dispatch(handleFetchCart()).unwrap();
 }
@@ -128,6 +132,7 @@ export const {
   setDistricts,
   setUpazilas,
   resetForm,
+  setSelectedAddressId
 } = checkoutSlice.actions;
 
 export default checkoutSlice.reducer;

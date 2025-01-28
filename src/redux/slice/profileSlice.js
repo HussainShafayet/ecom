@@ -79,7 +79,11 @@ export const handleAddressUpdate = createAsyncThunk('profile/handleAddressUpdate
 const profileSlice = createSlice({
     name: 'profile',
     initialState,
-    reducers: {},
+    reducers: {
+        setAddress: (state, action) => {
+            state.addresses = action.payload;
+        },
+    },
     extraReducers: (builder) =>{
         builder
         //get profile
@@ -151,5 +155,6 @@ const profileSlice = createSlice({
         
     }
 });
+export const {setAddress} = profileSlice.actions;
 
 export default profileSlice.reducer;

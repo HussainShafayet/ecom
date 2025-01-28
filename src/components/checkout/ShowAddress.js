@@ -1,12 +1,25 @@
 import React, { useState } from 'react';
 import {FaTruck} from 'react-icons/fa';
+import {useDispatch, useSelector} from 'react-redux';
+import {setSelectedAddressId, updateFormData} from '../../redux/slice/checkoutSlice';
 
-const ShowAddress = ({ addresses, onSelectAddress }) => {
-  const [selectedAddressId, setSelectedAddressId] = useState(null);
+const ShowAddress = () => {
+  const dispatch = useDispatch();
+  const { adrressLoading, addresses } = useSelector(
+    (state) => state.profile
+  );
+  const { selectedAddressId } = useSelector(
+    (state) => state.checkout
+  );
 
   const handleAddressSelection = (id) => {
-    setSelectedAddressId(id);
-    onSelectAddress(id); // Pass the selected address ID to the parent component
+    dispatch(setSelectedAddressId(id));
+
+    const addressItem = addresses.find((item) => item.id === id);
+    
+    const {shipping_type, area, division , district, thana, address }  = addressItem;
+    
+    dispatch(updateFormData({ shipping_type, shipping_area: area, division, district, upazila: thana, address: address }))
   };
 
   return (
@@ -15,7 +28,7 @@ const ShowAddress = ({ addresses, onSelectAddress }) => {
         <FaTruck className="mr-2 text-blue-500" /> Select a Shipping Address
       </h3>
 
-      {addresses.length > 0 ? (
+      {addresses?.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {addresses.map((address) => (
             <div
@@ -59,16 +72,8 @@ const ShowAddress = ({ addresses, onSelectAddress }) => {
           ))}
         </div>
       ) : (
-        <p className="text-gray-700">No addresses found. Please add one.</p>
+        <p className="text-gray-700 mb-2 text-center">No addresses found!</p>
       )}
-
-      {/* Add Address Button */}
-      <button
-        onClick={() => console.log('Redirect to Add Address')}
-        className="mt-6 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-      >
-        Add New Address
-      </button>
     </div>
   );
 };
