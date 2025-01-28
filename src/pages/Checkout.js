@@ -226,7 +226,7 @@ const Checkout = () => {
 
           
           {/* Personal Information */}
-          <div className="p-2 bg-white shadow rounded-lg">
+          <div className="p-2 bg-white rounded-lg">
             <h3 className="text-lg font-semibold flex items-center mb-1">
               <FaCheckCircle className="mr-2 text-green-500" /> Personal Information
             </h3>
@@ -273,7 +273,7 @@ const Checkout = () => {
           
 
           {/* Shipping Information */}
-          <div className="p-2 bg-white shadow rounded-lg">
+          <div className="p-2 bg-white rounded-lg">
 
           <div>
             {isAuthenticated && <ShowAddress /> }
@@ -409,7 +409,7 @@ const Checkout = () => {
 
 
           {/* Payment Method */}
-          <div className="p-2 bg-white shadow rounded-lg">
+          <div className="p-2 bg-white rounded-lg">
             <h3 className="text-lg font-semibold flex items-center mb-1">
               <FaCreditCard className="mr-2 text-yellow-500" />Payment Method
             </h3>
