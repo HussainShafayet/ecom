@@ -3,14 +3,15 @@ import { FaUserEdit, FaBoxOpen, FaMapMarkerAlt, FaCreditCard, FaLock, FaPlus, Fa
 import {useDispatch, useSelector} from 'react-redux';
 import {getUser} from '../../redux/slice/authSlice';
 import {useNavigate} from 'react-router-dom';
-import {handleGetProfile, handleProfileUpdate} from '../../redux/slice/profileSlice';
+import {handleGetAddress, handleGetProfile, handleProfileUpdate} from '../../redux/slice/profileSlice';
 import {Loader} from '../../components/common';
+import {AddressItem} from '../../components/profile';
 
 const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const dispatch = useDispatch();
   const {isAuthenticated,user} = useSelector((state)=>state.auth);
-  const {isLoading, profile, error} = useSelector((state)=>state.profile);
+  const {isLoading, profile, error, adrressLoading,addresses, addressError} = useSelector((state)=>state.profile);
 
   const navigate = useNavigate();
   
@@ -27,6 +28,7 @@ const Profile = () => {
   
   useEffect(()=>{
     dispatch(handleGetProfile());
+    dispatch(handleGetAddress());
   }, [dispatch]);
 
   const handleShowInfoEdit = ()=>{
@@ -82,7 +84,7 @@ const Profile = () => {
           {[
             { label: 'Account Overview', icon: <FaUserEdit />, id: 'overview' },
             { label: 'Order History', icon: <FaBoxOpen />, id: 'orders' },
-            { label: 'Address Book', icon: <FaMapMarkerAlt />, id: 'address' },
+            { label: 'Shipping Addresses', icon: <FaMapMarkerAlt />, id: 'address' },
             { label: 'Payment Methods', icon: <FaCreditCard />, id: 'payment' },
             { label: 'Security Settings', icon: <FaLock />, id: 'security' },
             { label: 'Wishlist', icon: <FaHeart />, id: 'wishlist' },
@@ -283,19 +285,11 @@ const Profile = () => {
 
           {selectedTab === 'address' && (
             <div>
-              <h2 className="text-xl font-semibold mb-4">Address Book</h2>
-              <div className="space-y-4">
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                  <p><strong>Home Address:</strong></p>
-                  <p>123 Main Street, Apt 4B, New York, NY, 10001</p>
-                  <p><strong>Type:</strong> Home</p>
-                  <button className="mt-3 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                    Edit Address
-                  </button>
-                </div>
-                <button className="flex items-center gap-2 mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                  <FaPlus /> Add New Address
-                </button>
+              <h2 className="text-xl font-semibold mb-4">Shipping Addresse</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {addresses.map((address) => (
+                  <AddressItem key={address.id} address={address} />
+                ))}
               </div>
             </div>
           )}
