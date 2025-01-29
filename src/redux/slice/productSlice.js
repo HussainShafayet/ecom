@@ -5,7 +5,9 @@ const initialState = {
     isLoading: false,
     relatedProductsLoading: false,
     items: [],
+    new_arrival_Loading: false,
     new_arrival: [],
+    new_arrival_error: null,
     best_selling: [],
     flash_sale: [],
     featured: [],
@@ -131,12 +133,11 @@ const productSlice = createSlice({
         //get NewArrival products
         builder.addCase(fetchNewArrivalProducts.pending, (state)=>{
             state.relatedProductsLoading = true;
-            state.isLoading = true;
+            state.new_arrival_Loading = true;
         });
         builder.addCase(fetchNewArrivalProducts.fulfilled,(state, action)=>{
-            
             state.relatedProductsLoading = false;
-            state.isLoading = false;
+            state.new_arrival_Loading = false;
             state.new_arrival = action.meta.arg.page > 1 
             ? [...state.new_arrival, ...action.payload.data] 
             : action.payload.data;
@@ -146,9 +147,9 @@ const productSlice = createSlice({
         });
         builder.addCase(fetchNewArrivalProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
-            state.isLoading = false;
+            state.new_arrival_Loading = false;
             //state.products = [];
-            state.error = action.error.message;
+            state.new_arrival_error = action.error.message;
         });
 
 

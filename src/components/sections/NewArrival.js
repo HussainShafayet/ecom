@@ -7,7 +7,7 @@ import {fetchNewArrivalContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 
 const NewArrival = ({forRoute}) => {
-  const {isLoading, new_arrival:products, error} = useSelector((state)=> state.product);
+  const {new_arrival_Loading, new_arrival:products, new_arrival_error} = useSelector((state)=> state.product);
   const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
 
@@ -20,12 +20,12 @@ const NewArrival = ({forRoute}) => {
    dispatch(fetchNewArrivalProducts({page_size:12}));
   }, [dispatch]);
 
-  if (isLoading) {
+  if (new_arrival_Loading) {
     return <div className='container h-20 flex justify-center'><Loader message='Loading New Arrival' /></div>
   }
 
-  if (error) {
-    return <div>{error}</div>;
+  if (new_arrival_error) {
+    return <div>{new_arrival_error}</div>;
   }
 
   const getLink = (item)=>{
@@ -102,7 +102,7 @@ const NewArrival = ({forRoute}) => {
           </span>
 
           
-          {!forRoute && !isLoading&&
+          {!forRoute && !new_arrival_Loading&&
               <Link
                 to="/products/new-arrival"
                 className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
