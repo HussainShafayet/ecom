@@ -7,7 +7,7 @@ import {fetchFeaturedContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 
 const FeaturedProducts = ({forRoute}) => {
-  const {isLoading, featured:products, error} = useSelector((state)=> state.product);
+  const {featured_Loading, featured:products, featured_error} = useSelector((state)=> state.product);
   const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
 
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
@@ -22,13 +22,13 @@ const FeaturedProducts = ({forRoute}) => {
    dispatch(fetchFeaturedProducts({page_size:12}));
   }, [dispatch]);
 
-  if (isLoading) {
+  if (featured_Loading) {
     return <div className='container h-20 flex justify-center'><Loader message='Loading Featured Products' /></div>
   }
 
 
-  if (error) {
-    return <div>{error}</div>;
+  if (featured_error) {
+    return <div>{featured_error}</div>;
   }
 
 
@@ -103,7 +103,7 @@ const FeaturedProducts = ({forRoute}) => {
           <span className="text-sm md:text-base text-gray-600">
             Discover the latest trends with our Featured Products.
           </span>
-          {!forRoute && !isLoading&&
+          {!forRoute && !featured_Loading&&
             <Link
               to="/products/featured"
               className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"

@@ -11,8 +11,12 @@ const initialState = {
     best_selling_Loading: false,
     best_selling: [],
     best_selling_error: null,
+    flash_sale_Loading: false,
+    flash_sale_error: null,
     flash_sale: [],
+    featured_Loading: false,
     featured: [],
+    featured_error: null,
     error: null,
     product: null,
     mainImage: null,
@@ -182,12 +186,12 @@ const productSlice = createSlice({
         //get flash sale products
         builder.addCase(fetchFlashSaleProducts.pending, (state)=>{
             state.relatedProductsLoading = true;
-            state.isLoading = true;
+            state.flash_sale_Loading = true;
         });
         builder.addCase(fetchFlashSaleProducts.fulfilled,(state, action)=>{
             
             state.relatedProductsLoading = false;
-            state.isLoading = false;
+            state.flash_sale_Loading = false;
             state.flash_sale = action.meta.arg.page > 1 
             ? [...state.flash_sale, ...action.payload.data] 
             : action.payload.data;
@@ -197,21 +201,21 @@ const productSlice = createSlice({
         });
         builder.addCase(fetchFlashSaleProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
-            state.isLoading = false;
+            state.flash_sale_Loading = false;
             //state.products = [];
-            state.error = action.error.message;
+            state.flash_sale_error = action.error.message;
         });
 
 
         //get fetured products
         builder.addCase(fetchFeaturedProducts.pending, (state)=>{
             state.relatedProductsLoading = true;
-            state.isLoading = true;
+            state.featured_Loading = true;
         });
         builder.addCase(fetchFeaturedProducts.fulfilled,(state, action)=>{
             
             state.relatedProductsLoading = false;
-            state.isLoading = false;
+            state.featured_Loading = false;
             state.featured = action.meta.arg.page > 1 
             ? [...state.featured, ...action.payload.data] 
             : action.payload.data;
@@ -221,9 +225,9 @@ const productSlice = createSlice({
         });
         builder.addCase(fetchFeaturedProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
-            state.isLoading = false;
+            state.featured_Loading = false;
             //state.products = [];
-            state.error = action.error.message;
+            state.featured_error = action.error.message;
         });
 
 

@@ -7,7 +7,7 @@ import {fetchFlashSaleContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 
 const FlashSale = ({forRoute}) => {
-    const {isLoading, flash_sale:products, error} = useSelector((state)=> state.product);
+    const {flash_sale_Loading, flash_sale:products, flash_sale_error} = useSelector((state)=> state.product);
     const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
 
     const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
@@ -21,12 +21,12 @@ const FlashSale = ({forRoute}) => {
       dispatch(fetchFlashSaleProducts({page_size: 12}));
     }, [dispatch]);
 
-    if (isLoading) {
+    if (flash_sale_Loading) {
       return <div className='container h-20 flex justify-center'><Loader message='Loading Trending' /></div>
     }
 
-    if (error) {
-        return <div>{error}</div>;
+    if (flash_sale_error) {
+        return <div>{flash_sale_error}</div>;
     }
 
     const getLink = (item)=>{
