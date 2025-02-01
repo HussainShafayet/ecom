@@ -8,7 +8,9 @@ const initialState = {
     new_arrival_Loading: false,
     new_arrival: [],
     new_arrival_error: null,
+    best_selling_Loading: false,
     best_selling: [],
+    best_selling_error: null,
     flash_sale: [],
     featured: [],
     error: null,
@@ -156,12 +158,12 @@ const productSlice = createSlice({
         //get bestSelling products
         builder.addCase(fetchBestSellingProducts.pending, (state)=>{
             state.relatedProductsLoading = true;
-            state.isLoading = true;
+            state.best_selling_Loading = true;
         });
         builder.addCase(fetchBestSellingProducts.fulfilled,(state, action)=>{
             
             state.relatedProductsLoading = false;
-            state.isLoading = false;
+            state.best_selling_Loading = false;
             state.best_selling = action.meta.arg.page > 1 
             ? [...state.best_selling, ...action.payload.data] 
             : action.payload.data;
@@ -171,9 +173,9 @@ const productSlice = createSlice({
         });
         builder.addCase(fetchBestSellingProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
-            state.isLoading = false;
+            state.best_selling_Loading = false;
             //state.products = [];
-            state.error = action.error.message;
+            state.best_selling_error = action.error.message;
         });
 
 

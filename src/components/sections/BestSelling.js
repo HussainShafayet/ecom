@@ -7,7 +7,7 @@ import {fetchBestSellingContent, fetchFeaturedContent} from '../../redux/slice/c
 import blurImage from '../../assets/images/blur.jpg';
 
 const BestSelling = ({forRoute}) => {
-  const {isLoading, best_selling:products, error} = useSelector((state)=> state.product);
+  const {best_selling_Loading, best_selling:products, best_selling_error} = useSelector((state)=> state.product);
    const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
 
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
@@ -21,12 +21,12 @@ const BestSelling = ({forRoute}) => {
    dispatch(fetchBestSellingProducts({page_size:12}));
   }, [dispatch]);
 
-  if (isLoading) {
+  if (best_selling_Loading) {
     return <div className='container h-20 flex justify-center'><Loader message='Loading Best Selling' /></div>
   }
 
-  if (error) {
-    return <div>{error}</div>;
+  if (best_selling_error) {
+    return <div>{best_selling_error}</div>;
   }
 
   const getLink = (item)=>{
@@ -101,7 +101,7 @@ const BestSelling = ({forRoute}) => {
           <span className="text-sm md:text-base text-gray-600">
             Discover the latest trends with our Best Selling Products.
           </span>
-          {!forRoute && !isLoading&&
+          {!forRoute && !best_selling_Loading&&
               <Link
                 to="/products/best-selling"
                 className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
