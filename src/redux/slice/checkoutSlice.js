@@ -33,7 +33,7 @@ const initialState = {
   selectedAddressId: null,
 };
 
-// profile update
+// checkout process
 export const handleCheckout = createAsyncThunk('checkout/handleCheckout', async (formData, {getState, rejectWithValue, dispatch }) => {
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
@@ -47,6 +47,19 @@ export const handleCheckout = createAsyncThunk('checkout/handleCheckout', async 
      }
      response.data.success && dispatch(clearCart());
     console.log('order post response',response);
+    return response.data.data;
+  } catch (error) {
+    return rejectWithValue(error.response.data);
+  }
+});
+
+// checkout content get 
+export const handleGetCheckoutContent = createAsyncThunk('profile/handleGetCheckoutContent', async (_, { rejectWithValue }) => {
+  try {
+     // Import axiosSetup only when needed to avoid circular dependency issues
+     const api = (await import('../../api/axiosSetup')).default;
+     const response = await api.get('api/content/checkout/');
+    console.log('get checkout content response',response);
     return response.data.data;
   } catch (error) {
     return rejectWithValue(error.response.data);
@@ -89,7 +102,7 @@ const checkoutSlice = createSlice({
   },
   extraReducers: (builder) =>{
       builder
-      //get profile
+      //checkout process
       .addCase(handleCheckout.pending, (state)=>{
           state.isLoading = true;
       })
@@ -104,6 +117,21 @@ const checkoutSlice = createSlice({
           
       })
 
+      //get checkout content
+      .addCase(handleGetCheckoutContent.pending, (state)=>{
+        state.isLoading = true;
+      })
+      .addCase(handleGetCheckoutContent.fulfilled, (state, action)=>{
+          state.isLoading = false;
+          console.log(action.payload);
+          
+      })
+      .addCase(handleGetCheckoutContent.rejected, (state, action)=>{
+          state.isLoading = false;
+          state.responseError = action.payload.errors;
+          
+      })
+
      
       
   }
@@ -111,18 +139,19 @@ const checkoutSlice = createSlice({
 
 export const initializeCheckout = () => async (dispatch, getState) => {
   const {isAuthenticated} = getState().auth;
-  const profile = getState().profile.profile;
+  //const profile = getState().profile.profile;
   
-  if (!profile && isAuthenticated) {
-    const fetchedProfile = await dispatch(handleGetProfile()).unwrap();
-    const {name, phone_number, email, addresses} = fetchedProfile;
-    dispatch(updateFormData({ name, phone_number, email}));
-    dispatch(setAddress(addresses));
-  } else if(profile) {
-    const {name, phone_number, email,addresses} = profile;
-    dispatch(updateFormData({ name, phone_number, email}));
-    dispatch(setAddress(addresses));
-  }
+  //if (!profile && isAuthenticated) {
+  //  const fetchedProfile = await dispatch(handleGetProfile()).unwrap();
+  //  const {name, phone_number, email, addresses} = fetchedProfile;
+  //  dispatch(updateFormData({ name, phone_number, email}));
+  //  dispatch(setAddress(addresses));
+  //} else if(profile) {
+  //  const {name, phone_number, email,addresses} = profile;
+  //  dispatch(updateFormData({ name, phone_number, email}));
+  //  dispatch(setAddress(addresses));
+  //}
+  dispatch(handleGetCheckoutContent());
   isAuthenticated && await dispatch(handleFetchCart()).unwrap();
 }
 
