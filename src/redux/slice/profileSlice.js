@@ -76,6 +76,18 @@ export const handleAddressUpdate = createAsyncThunk('profile/handleAddressUpdate
     }
 });
 
+export const handleAddressDelete = createAsyncThunk('profile/handleAddressDelete', async (id, { rejectWithValue }) => {
+    try {
+       // Import axiosSetup only when needed to avoid circular dependency issues
+       const api = (await import('../../api/axiosSetup')).default;
+       const response = await api.delete(`api/accounts/addresses/${id}/`);
+      console.log('address delete response', response);
+      return id //response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+});
+
 const profileSlice = createSlice({
     name: 'profile',
     initialState,
@@ -154,6 +166,24 @@ const profileSlice = createSlice({
             
         })
         .addCase(handleAddressUpdate.rejected, (state, action)=>{
+            state.adrressLoading = false;
+            state.addressError = action.payload.error;
+        })
+
+
+        //address delete
+        .addCase(handleAddressDelete.pending, (state)=>{
+            state.adrressLoading = true;
+        })
+        .addCase(handleAddressDelete.fulfilled, (state, action)=>{
+            state.adrressLoading = false;
+            
+            const delete_id = action.payload;
+
+            state.addresses = state.addresses.filter((item)=> item.id != delete_id);
+            
+        })
+        .addCase(handleAddressDelete.rejected, (state, action)=>{
             state.adrressLoading = false;
             state.addressError = action.payload.error;
         })

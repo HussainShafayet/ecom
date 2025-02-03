@@ -1,8 +1,8 @@
 import {useState} from "react";
-import {FaEdit} from "react-icons/fa";
+import {FaEdit, FaTrash} from "react-icons/fa";
 import {dhakaCityData, districtsData, divisionsData, upazilasData} from "../../data/location";
 import {useDispatch} from "react-redux";
-import {handleAddressCreate, handleAddressUpdate} from "../../redux/slice/profileSlice";
+import {handleAddressCreate, handleAddressDelete, handleAddressUpdate} from "../../redux/slice/profileSlice";
 
 const AddressItem = ({ address, onUpdate }) => {
     const dispatch = useDispatch();
@@ -13,6 +13,7 @@ const AddressItem = ({ address, onUpdate }) => {
    
     const [districts, setDistricts] = useState([]);
     const [upazillas, setUpazillas] = useState([]);
+    const [confirmDelete, setConfirmDelete] = useState(null);
 
     // Toggle edit mode
     const handleEditClick = () => {
@@ -139,6 +140,10 @@ const AddressItem = ({ address, onUpdate }) => {
     //  onUpdate(editedAddress); // Pass updated address to parent
       setIsEditing(false); // Exit edit mode
     };
+
+    const handleDelete = () => {
+      dispatch(handleAddressDelete(address.id));
+    };
   
     // Helper function to render a field with a fallback message if the data is missing
     const renderField = (label, value, fallback = "Not provided") => {
@@ -151,13 +156,21 @@ const AddressItem = ({ address, onUpdate }) => {
   
     return (
       <div className="bg-white shadow-md rounded-lg p-3 mb-4 max-w-md mx-auto relative">
-        {/* Edit Icon */}
-        <button
-          onClick={handleEditClick}
-          className="absolute top-2 right-2 text-gray-500 hover:text-blue-500"
-        >
-          <FaEdit className="w-5 h-5" />
-        </button>
+        {/* Edit and Delete Icons */}
+        <div className="absolute top-2 right-2 flex space-x-2">
+          <button
+              onClick={handleEditClick}
+              className="text-gray-500 hover:text-blue-500"
+          >
+              <FaEdit className="w-5 h-5" />
+          </button>
+          <button
+              onClick={()=>setConfirmDelete(address.id)}
+              className="text-gray-500 hover:text-red-500"
+          >
+              <FaTrash className="w-5 h-5" />
+          </button>
+        </div>
   
         {isEditing ? (
           // Edit Form
@@ -337,6 +350,34 @@ const AddressItem = ({ address, onUpdate }) => {
             
           </div>
         )}
+
+
+        {confirmDelete && (
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg">
+                  <h3 className="text-lg font-semibold">Confirm Delete</h3>
+                  <p className="text-gray-600">Are you sure you want to delete this address?</p>
+                  <div className="mt-4 flex justify-end space-x-2">
+                      <button
+                          onClick={() => setConfirmDelete(null)}
+                          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                      >
+                          Cancel
+                      </button>
+                      <button
+                          onClick={() => {
+                              handleDelete();
+                              setConfirmDelete(null);
+                            }}
+                          className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
+                      >
+                          Delete
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
+
       </div>
     );
   };
