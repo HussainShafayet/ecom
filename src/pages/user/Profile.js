@@ -174,13 +174,9 @@ const Profile = () => {
         <div className="flex flex-wrap justify-around md:justify-start bg-white border-b text-gray-700 overflow-x-auto">
           {[
             { label: 'Account Overview', icon: <FaUserEdit />, id: 'overview' },
-            { label: 'Order History', icon: <FaBoxOpen />, id: 'orders' },
             { label: 'Shipping Addresses', icon: <FaMapMarkerAlt />, id: 'address' },
-            { label: 'Payment Methods', icon: <FaCreditCard />, id: 'payment' },
             { label: 'Security Settings', icon: <FaLock />, id: 'security' },
             { label: 'Wishlist', icon: <FaHeart />, id: 'wishlist' },
-            { label: 'Notifications', icon: <FaBell />, id: 'notifications' },
-            { label: 'Recent Activity', icon: <FaHistory />, id: 'activity' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -351,28 +347,7 @@ const Profile = () => {
             </div>
           )}
 
-          {selectedTab === 'orders' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Order History</h2>
-              <div className="space-y-4">
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                  <p><strong>Order ID:</strong> #12345</p>
-                  <p><strong>Date:</strong> Oct 10, 2023</p>
-                  <p><strong>Total:</strong> $99.99</p>
-                  <p><strong>Status:</strong> Shipped</p>
-                  <p><strong>Items:</strong></p>
-                  <ul className="list-disc ml-5 text-gray-700">
-                    <li>Product 1 - $29.99</li>
-                    <li>Product 2 - $39.99</li>
-                    <li>Product 3 - $29.99</li>
-                  </ul>
-                  <button className="mt-3 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                    View Details
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+         
 
           {selectedTab === 'address' && (
            
@@ -547,24 +522,7 @@ const Profile = () => {
 
           )}
 
-          {selectedTab === 'payment' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Payment Methods</h2>
-              <div className="space-y-4">
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                  <p><strong>Visa</strong> ending in 1234</p>
-                  <p><strong>Expiry Date:</strong> 12/24</p>
-                  <p><strong>Billing Address:</strong> 123 Main Street, New York, NY</p>
-                  <button className="mt-3 w-full px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">
-                    Remove Card
-                  </button>
-                </div>
-                <button className="flex items-center gap-2 mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                  <FaPlus /> Add New Card
-                </button>
-              </div>
-            </div>
-          )}
+        
 
           {selectedTab === 'security' && (
             <div>
@@ -584,39 +542,6 @@ const Profile = () => {
             <div>
               <h2 className="text-xl font-semibold mb-4">My Wishlist</h2>
               <p className="text-gray-500">You haven’t added any items to your wishlist yet.</p>
-            </div>
-          )}
-
-          {selectedTab === 'notifications' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Notification Settings</h2>
-              <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 space-y-3">
-                <div>
-                  <label className="inline-flex items-center">
-                    <input type="checkbox" className="form-checkbox text-blue-600" />
-                    <span className="ml-2">Order Updates</span>
-                  </label>
-                </div>
-                <div>
-                  <label className="inline-flex items-center">
-                    <input type="checkbox" className="form-checkbox text-blue-600" />
-                    <span className="ml-2">Promotional Emails</span>
-                  </label>
-                </div>
-                <div>
-                  <label className="inline-flex items-center">
-                    <input type="checkbox" className="form-checkbox text-blue-600" />
-                    <span className="ml-2">SMS Notifications</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {selectedTab === 'activity' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-              <p className="text-gray-500">No recent activity to display.</p>
             </div>
           )}
         </div>
