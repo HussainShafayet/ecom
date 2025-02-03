@@ -145,7 +145,7 @@ const profileSlice = createSlice({
         })
         .addCase(handleAddressCreate.fulfilled, (state, action)=>{
             state.adrressLoading = false;
-            state.addresses = action.payload;
+            state.addresses.push(action.payload.data);
         })
         .addCase(handleAddressCreate.rejected, (state, action)=>{
             state.adrressLoading = false;

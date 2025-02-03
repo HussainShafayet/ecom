@@ -134,7 +134,7 @@ const AddressItem = ({ address, onUpdate }) => {
     // Handle form submission
     const handleSubmit = (e) => {
       e.preventDefault();
-      console.log(editedAddress);
+      //console.log(editedAddress);
      
       dispatch(handleAddressUpdate(editedAddress));
     //  onUpdate(editedAddress); // Pass updated address to parent
