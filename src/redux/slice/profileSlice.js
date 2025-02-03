@@ -9,6 +9,20 @@ const initialState = {
     adrressLoading: false,
     addresses: [],
     addressError: null,
+    isAddAddress: false,
+    addressFormData: {
+        "title": "",
+        "shipping_type": "",
+        "address": "",
+        "area": "",
+        "division": "",
+        "district": "",
+        "thana": ""
+    },
+    errors: {},
+    touched: {},
+    districts: [],
+    upazilas: [],
 };
 
 //get profile
@@ -95,6 +109,32 @@ const profileSlice = createSlice({
         setAddress: (state, action) => {
             state.addresses = action.payload;
         },
+        setIsAddAddress: (state, action) =>{
+            state.isAddAddress = action.payload;
+        },
+        updateAddressFormData: (state, action) => {
+            state.addressFormData = { ...state.addressFormData, ...action.payload };
+        },
+        updateTouched: (state, action) => {
+            state.touched = { ...state.touched, ...action.payload };
+            
+        },
+        setErrors: (state, action) => {
+            state.errors = action.payload;
+        },
+        setDistricts: (state, action) => {
+            state.districts = action.payload;
+        },
+        setUpazilas: (state, action) => {
+            state.upazilas = action.payload;
+        },
+        resetAddressForm: (state) => {
+            state.addressFormData = initialState.addressFormData;
+            state.errors = {};
+            state.touched = {};
+            state.districts = [];
+            state.upazilas = [];
+        }, 
     },
     extraReducers: (builder) =>{
         builder
@@ -190,6 +230,12 @@ const profileSlice = createSlice({
         
     }
 });
-export const {setAddress} = profileSlice.actions;
+export const {setAddress, setIsAddAddress, updateAddressFormData,
+updateTouched,
+setErrors,
+  setDistricts,
+  setUpazilas,
+  resetAddressForm,
+} = profileSlice.actions;
 
 export default profileSlice.reducer;

@@ -3,7 +3,7 @@ import { FaUserEdit, FaBoxOpen, FaMapMarkerAlt, FaCreditCard, FaLock, FaPlus, Fa
 import {useDispatch, useSelector} from 'react-redux';
 import {getUser} from '../../redux/slice/authSlice';
 import {useNavigate} from 'react-router-dom';
-import {handleAddressCreate, handleGetAddress, handleGetProfile, handleProfileUpdate} from '../../redux/slice/profileSlice';
+import {handleAddressCreate, handleGetAddress, handleGetProfile, handleProfileUpdate, resetAddressForm, setDistricts, setErrors, setIsAddAddress, setUpazilas, updateAddressFormData, updateTouched} from '../../redux/slice/profileSlice';
 import {Loader} from '../../components/common';
 import {AddressItem} from '../../components/profile';
 import {dhakaCityData, districtsData, divisionsData, upazilasData} from '../../data/location';
@@ -12,7 +12,7 @@ const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const dispatch = useDispatch();
   const {isAuthenticated,user} = useSelector((state)=>state.auth);
-  const {isLoading, profile, error, adrressLoading,addresses, addressError} = useSelector((state)=>state.profile);
+  const {isLoading, profile, error, adrressLoading,addresses, addressError, isAddAddress, addressFormData, touched, errors, districts,upazilas} = useSelector((state)=>state.profile);
 
   const navigate = useNavigate();
   
@@ -24,22 +24,6 @@ const Profile = () => {
 
   const [isEditing, setIsEditing] = useState(false); // State to toggle edit mode
   const [formData, setFormData] = useState({ ...profile }); // State to store form data
-
-  const [isAddAddress, setIsAddAddress] = useState(false);
-  const [addressFormData, setAddressFormData] = useState({
-    "title": "",
-    "shipping_type": "",
-    "address": "",
-    "area": "",
-    "division": "",
-    "district": "",
-    "thana": ""
-});
-  const [touched, updateTouched] = useState({});
-    const [errors, setErrors] = useState({});
-   
-    const [districts, setDistricts] = useState([]);
-    const [upazillas, setUpazillas] = useState([]);
 
  
   
@@ -79,22 +63,20 @@ const Profile = () => {
 
   //for address
    // Handle input changes
-      const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setAddressFormData((prev) => ({
-          ...prev,
-          [name]: value,
-        }));
-      };
-       const handleBlur = (e) => {
-          const { name } = e.target;
-          updateTouched({ [name]: true });
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      dispatch(updateAddressFormData({ [name]: value }));
+    };
+
+    const handleBlur = (e) => {
+      const { name } = e.target;
+      dispatch(updateTouched({ [name]: true }));
       
-          // Validate field on blur to show error if empty
-          if (!addressFormData[name]?.trim()) {
-            setErrors({ ...errors, [name]: `${name} is required` });
-          }
-        };
+      // Validate field on blur to show error if empty
+      if (!addressFormData[name]?.trim()) {
+        dispatch(setErrors({ ...errors, [name]: `${name} is required` }));
+      }
+    };
       const getLocationType = ()=>{
         if (addressFormData.shipping_type === 'inside_dhaka') {
           return 'md:grid-cols-2'
@@ -107,50 +89,33 @@ const Profile = () => {
       const handleLocationType= (e) =>{
           const locationType = e.target.value;
           
-          locationType && 
-          setAddressFormData((prevState) => ({
-              ...prevState,
-              ['shipping_type']: locationType,
-              ['area']: '',
-            }));
+          locationType &&
+          dispatch(updateAddressFormData({ shipping_type:locationType, area: '', division: '', district: '', thana: '', address: '' }));
           
            // Validate field on change and clear error if valid
            if (locationType?.trim()) {
-            setErrors({ ...errors, ['shipping_type']: '' });
+            dispatch(setErrors({ ...errors, ['shipping_type']: '' }));
           }
-      
-          //isAuthenticated && dispatch(setSelectedAddressId(null));
         }
         const handleDhakaArea = (e) => {
           const area = e.target.value;
-          setAddressFormData((prev) => ({
-              ...prev,
-              area: area,
-              division: '',
-              district: '',
-              thana: '',
-            }));
+          dispatch(updateAddressFormData({ area, division: '', district: '', thana: '',}));
           
           // Validate field on change and clear error if valid
           if (area.trim()) {
-          setErrors({ ...errors, ['area']: '' });
+            dispatch(setErrors({ ...errors, ['area']: '' }));
           }
-          //isAuthenticated && dispatch(setSelectedAddressId(null));
       }
       const handleDivisionChange = (e) => {
           const division = e.target.value;
           const divisionItem = divisionsData.find((item)=> item.name === division);
           if (divisionItem) {
-              setAddressFormData((prev) => ({
-                  ...prev,
-                  division: division,
-                  district: '',
-                  thana: '',
-                }));
-              const divisionDist = districtsData.filter((item)=> item.division_id === divisionItem.id);
-              
-              setDistricts(divisionDist|| []);
-              setUpazillas([]);
+            dispatch(updateAddressFormData({ division, district: '', thana: '' }));
+
+            const divisionDist = districtsData.filter((item)=> item.division_id === divisionItem.id);
+            
+            dispatch(setDistricts(divisionDist|| []));
+            dispatch(setUpazilas([]));
           }
           
   
@@ -164,28 +129,25 @@ const Profile = () => {
           const district = e.target.value;
           const districtItem = districts.find((item)=> item.name === district);
           if (districtItem) {
-              setAddressFormData((prev) => ({
-                  ...prev,
-                  district: district,
-                  thana: '',
-                }));
+            dispatch(updateAddressFormData({ district, thana: '' }));
       
             const upzillaDist = upazilasData.filter((item)=> item.district_id === districtItem.id);
             
-            setUpazillas(upzillaDist|| []);
+            dispatch(setUpazilas(upzillaDist|| []));
           }
            // Validate field on change and clear error if valid
            if (district.trim()) {
-            setErrors({ ...errors, ['district']: '' });
+            dispatch(setErrors({ ...errors, ['district']: '' }));
           }
         };
 
         
   const handleAddressSubmit = (e) =>{
     e.preventDefault();
-    //console.log(addressFormData, 'address');
+    console.log(addressFormData, 'address');
+    return
     dispatch(handleAddressCreate(addressFormData));
-    setIsAddAddress(false);
+    dispatch(setIsAddAddress(false));
   }
 
 
@@ -419,7 +381,7 @@ const Profile = () => {
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Shipping Address</h2>
                 {!isAddAddress &&
-                <FaPlusCircle className="w-6 h-6 hover:fill-green-500 cursor-pointer transition" title='Add Address' onClick={()=> setIsAddAddress(true)} />
+                <FaPlusCircle className="w-6 h-6 hover:fill-green-500 cursor-pointer transition" title='Add Address' onClick={()=> dispatch(setIsAddAddress(true))} />
                 }
                 </div>
               {isAddAddress && 
@@ -458,7 +420,7 @@ const Profile = () => {
                           <div className="grid grid-cols-1 gap-3">
                           <div className="w-full">
                               <select
-                              name="shipping_area"
+                              name="area"
                               value={addressFormData.area || ''}
                               onChange={handleDhakaArea}
                               onBlur={handleBlur}
@@ -522,7 +484,7 @@ const Profile = () => {
                               disabled={!addressFormData.district}
                               >
                               <option value="">Select Upazila/Thana</option>
-                              {upazillas.map((station) => (
+                              {upazilas.map((station) => (
                                   <option key={station.id} value={station.name}>{station.name}</option>
                               ))}
                               </select>
@@ -549,7 +511,11 @@ const Profile = () => {
                     <div className="flex justify-end space-x-2">
                       <button
                         type="button"
-                        onClick={()=> setIsAddAddress(false)}
+                        onClick={()=>{
+                          dispatch(setIsAddAddress(false))
+                          dispatch(resetAddressForm());
+                        } 
+                        }
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
                       >
                         Cancel
