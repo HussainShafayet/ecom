@@ -68,7 +68,7 @@ export const handleAddressUpdate = createAsyncThunk('profile/handleAddressUpdate
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
-       const response = await api.put('api/accounts/addresses/', formData);
+       const response = await api.put(`api/accounts/addresses/${formData.id}/`, formData);
       console.log('update address response',response);
       return response.data.data;
     } catch (error) {
@@ -146,11 +146,16 @@ const profileSlice = createSlice({
         })
         .addCase(handleAddressUpdate.fulfilled, (state, action)=>{
             state.adrressLoading = false;
-            state.addresses = action.payload;
+            const updateObj = action.payload.data;
+
+            state.addresses = state.addresses.map((item)=>{
+                return item.id === updateObj.id ? ({...item, ...updateObj}) : item
+            });
+            
         })
         .addCase(handleAddressUpdate.rejected, (state, action)=>{
             state.adrressLoading = false;
-            state.addressError = action.payload.error
+            state.addressError = action.payload.error;
         })
         
     }

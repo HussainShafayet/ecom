@@ -134,16 +134,8 @@ const AddressItem = ({ address, onUpdate }) => {
     const handleSubmit = (e) => {
       e.preventDefault();
       console.log(editedAddress);
-      const test = {
-        "title": "Home",
-        "shipping_type": "inside_dhaka",
-        "address": "baridhara",
-        "area": "Rampura",
-        "division": "",
-        "district": "",
-        "thana": ""
-    }
-      dispatch(handleAddressCreate(test));
+     
+      dispatch(handleAddressUpdate(editedAddress));
     //  onUpdate(editedAddress); // Pass updated address to parent
       setIsEditing(false); // Exit edit mode
     };
