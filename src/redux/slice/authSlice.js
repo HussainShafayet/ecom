@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
 import {clearCart} from './cartSlice';
+import axios from 'axios';
 
 const initialState = {
     accessToken: null,
@@ -110,15 +111,24 @@ export const checkAuth =  () => async (dispatch) => {
 // Logout action
 export const logoutUser = createAsyncThunk('auth/logoutUser', async (credential, { rejectWithValue, getState, dispatch }) => {
   try {
-    //await  axios.post('/api/auth/logout');
-    const api = (await import('../../api/axiosSetup')).default;
-    const response = await api.post('/api/accounts/logout/', credential);
+    const { accessToken } = getState().auth;
+    const refresh_token = Cookies.get('refresh_token');
+    const logout_body = {
+      access: accessToken,
+      refresh: refresh_token,
+    }
+    const response = await axios.post('http://192.168.0.103:8000/api/accounts/logout/',logout_body, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+        }
+    });
     console.log('logout response', response);
-    dispatch(clearCart());
     return response.data;
-  } catch (error) {
+} catch (error) {
+    console.error('Error submitting form:', error.response?.data || error.message);
     return rejectWithValue(error.response.data);
-  }
+}
 });
 
 const authSlice = createSlice({
@@ -182,6 +192,14 @@ const authSlice = createSlice({
         localStorage.setItem('refreshToken', action.payload.data.refresh);
       })
       .addCase(logoutUser.fulfilled, (state) => {
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.isAuthenticated = false;
+        Cookies.remove('refresh_token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+      })
+      .addCase(logoutUser.rejected, (state,action) => {
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
