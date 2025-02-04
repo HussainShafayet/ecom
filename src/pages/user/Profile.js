@@ -29,8 +29,15 @@ const Profile = () => {
   
   useEffect(()=>{
     dispatch(handleGetProfile());
-    dispatch(handleGetAddress());
   }, [dispatch]);
+
+  const handleTabChange = (tab)=>{
+    setSelectedTab(tab.id);
+    if (tab.id === 'address') {
+      dispatch(handleGetAddress());
+    }
+    
+  }
 
   const handleShowInfoEdit = ()=>{
     setIsEditing(true);
@@ -145,7 +152,6 @@ const Profile = () => {
   const handleAddressSubmit = (e) =>{
     e.preventDefault();
     console.log(addressFormData, 'address');
-    return
     dispatch(handleAddressCreate(addressFormData));
     dispatch(setIsAddAddress(false));
   }
@@ -180,7 +186,7 @@ const Profile = () => {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setSelectedTab(tab.id)}
+              onClick={() => handleTabChange(tab)}
               className={`flex-1 md:flex-none px-6 py-4 font-medium hover:text-blue-600 transition-colors ${
                 selectedTab === tab.id ? 'border-b-4 border-blue-600 text-blue-600 font-semibold' : 'border-b-2 border-transparent'
               }`}
@@ -505,7 +511,7 @@ const Profile = () => {
                   </form>
                 </div>
               }
-              {addresses.length > 0 ? (
+              {addresses?.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                   {addresses.map((address) => (
                     <AddressItem key={address.id} address={address} />

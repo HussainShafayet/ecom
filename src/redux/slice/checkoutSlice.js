@@ -32,7 +32,7 @@ const initialState = {
   order_id: null,
   selectedAddressId: null,
   delivery_charges: {},
-  shipping_address: [],
+  addresses: [],
   user_info: null,
 };
 
@@ -110,6 +110,9 @@ const checkoutSlice = createSlice({
       state.isCheckoutFulfilled = false;
       state.order_id = null;
       state.selectedAddressId = null;
+      state.delivery_charges = {};
+      state.addresses = [];
+      state.user_info = null;
     },
   },
   extraReducers: (builder) =>{
@@ -135,11 +138,13 @@ const checkoutSlice = createSlice({
       })
       .addCase(handleGetCheckoutContent.fulfilled, (state, action)=>{
           state.isLoading = false;
-          const { delivery_charges, shipping_address, user_info} = action.payload;
-          state.delivery_charges = delivery_charges;
-          state.shipping_address = shipping_address;
-          state.user_info = user_info;
           
+          const { delivery_charges, shipping_addresses, user_info} = action.payload;
+          
+          state.delivery_charges = delivery_charges;
+          state.addresses = shipping_addresses;
+          
+          state.user_info = user_info;
           state.formData.name = user_info?.name || '';
           state.formData.phone_number = user_info?.phone_number || '';
           state.formData.email = user_info?.email || '';
