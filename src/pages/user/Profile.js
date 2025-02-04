@@ -237,7 +237,7 @@ const Profile = () => {
                     </button>
                   </>
                 ) : (
-                  <form onSubmit={handleAddressSubmit} className="space-y-4">
+                  <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Editable Name Field */}
                     <div>
                       <label htmlFor="name" className="block text-gray-700 font-medium mb-1">

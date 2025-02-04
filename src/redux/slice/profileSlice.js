@@ -148,7 +148,7 @@ const profileSlice = createSlice({
         })
         .addCase(handleGetProfile.rejected, (state, action)=>{
             state.isLoading = false;
-            state.error = action.payload.error
+            state.error = action.payload?.error
         })
 
         //profile update
