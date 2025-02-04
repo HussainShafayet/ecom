@@ -6,6 +6,7 @@ import {useNavigate} from 'react-router-dom';
 import {handleAddressCreate, handleGetAddress, handleGetProfile, handleProfileUpdate, resetAddressForm, setDistricts, setErrors, setIsAddAddress, setUpazilas, updateAddressFormData, updateTouched} from '../../redux/slice/profileSlice';
 import {Loader} from '../../components/common';
 import {AddressItem} from '../../components/profile';
+import { WishList } from '../user';
 import {dhakaCityData, districtsData, divisionsData, upazilasData} from '../../data/location';
 
 const Profile = () => {
@@ -546,8 +547,9 @@ const Profile = () => {
 
           {selectedTab === 'wishlist' && (
             <div>
-              <h2 className="text-xl font-semibold mb-4">My Wishlist</h2>
-              <p className="text-gray-500">You haven’t added any items to your wishlist yet.</p>
+              {/*<h2 className="text-xl font-semibold mb-4">My Wishlist</h2>
+              <p className="text-gray-500">You haven’t added any items to your wishlist yet.</p>*/}
+              <WishList />
             </div>
           )}
         </div>

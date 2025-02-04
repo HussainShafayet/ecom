@@ -141,7 +141,7 @@ import { ProductCard } from '../../components/common';
 import {Link} from 'react-router-dom';
 import {fetchtoWishlist} from '../../redux/slice/wishlistSlice';
 
-const WishlistPage = () => {
+const WishList = () => {
   //const wishlistItems = useSelector(state => state.wishList.items);
   const {isLoading, items, error} = useSelector((state)=> state.wishList);
   const dispatch = useDispatch();
@@ -167,5 +167,5 @@ const WishlistPage = () => {
   );
 };
 
-export default WishlistPage;
+export default WishList;
 
