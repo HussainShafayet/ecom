@@ -31,6 +31,9 @@ const initialState = {
   isCheckoutFulfilled: false,
   order_id: null,
   selectedAddressId: null,
+  delivery_charges: {},
+  shipping_address: [],
+  user_info: null,
 };
 
 // checkout process
@@ -54,14 +57,23 @@ export const handleCheckout = createAsyncThunk('checkout/handleCheckout', async 
 });
 
 // checkout content get 
-export const handleGetCheckoutContent = createAsyncThunk('profile/handleGetCheckoutContent', async (_, { rejectWithValue }) => {
+export const handleGetCheckoutContent = createAsyncThunk('profile/handleGetCheckoutContent', async (_, { rejectWithValue,getState }) => {
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
-     const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.get('api/content/checkout/');
+    const {isAuthenticated} = getState().auth;
+    let response = {}
+    if (isAuthenticated) {
+      const api = (await import('../../api/axiosSetup')).default;
+      response = await api.get('api/content/checkout/');
+    } else {
+      response = await axios.get('http://192.168.0.103:8000/api/content/checkout/');
+    }
+     
     console.log('get checkout content response',response);
     return response.data.data;
   } catch (error) {
+    console.log(error);
+    
     return rejectWithValue(error.response.data);
   }
 });
@@ -123,7 +135,14 @@ const checkoutSlice = createSlice({
       })
       .addCase(handleGetCheckoutContent.fulfilled, (state, action)=>{
           state.isLoading = false;
-          console.log(action.payload);
+          const { delivery_charges, shipping_address, user_info} = action.payload;
+          state.delivery_charges = delivery_charges;
+          state.shipping_address = shipping_address;
+          state.user_info = user_info;
+          
+          state.formData.name = user_info?.name || '';
+          state.formData.phone_number = user_info?.phone_number || '';
+          state.formData.email = user_info?.email || '';
           
       })
       .addCase(handleGetCheckoutContent.rejected, (state, action)=>{
@@ -139,6 +158,7 @@ const checkoutSlice = createSlice({
 
 export const initializeCheckout = () => async (dispatch, getState) => {
   const {isAuthenticated} = getState().auth;
+  const {addresses} = getState().profile;
   //const profile = getState().profile.profile;
   
   //if (!profile && isAuthenticated) {

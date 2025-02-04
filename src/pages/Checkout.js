@@ -35,7 +35,7 @@ const Checkout = () => {
   const {isLoading} = useSelector((state)=>state.cart);
   const navigate = useNavigate();
 
-  const { formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id } = useSelector(
+  const { formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, delivery_charges } = useSelector(
     (state) => state.checkout
   );
   const { isAuthenticated } = useSelector(
@@ -229,7 +229,7 @@ const Checkout = () => {
   }
 
   const totalPrice = useSelector(selectTotalPrice);
-  const shippingCost = formData.shipping_type ? ((formData.shipping_type === 'inside_dhaka') ?  0 : 0) : 0;
+  const shippingCost = formData.shipping_type ? delivery_charges[formData.shipping_type] : 0;
   const grandTotal = totalPrice + shippingCost;
 
   const handleUpdateQuantity = (id, quantity, item)=>{
