@@ -5,7 +5,7 @@ import {Loader, ProductCard, Slider} from '../common';
 import {Link} from 'react-router-dom';
 import {fetchFlashSaleContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
-import {FlashSaleSkeleton} from '../common/skeleton';
+import {SectionSkeleton} from '../common/skeleton';
 
 const FlashSale = ({forRoute}) => {
     const {flash_sale_Loading, flash_sale:products, flash_sale_error} = useSelector((state)=> state.product);
@@ -43,7 +43,7 @@ const FlashSale = ({forRoute}) => {
 
   return (
     <>
-     {true? <FlashSaleSkeleton /> :
+     {flash_sale_Loading ? <SectionSkeleton forRoute={forRoute} /> :
       flash_sale_error ? (
       <div className="text-center text-red-500 font-semibold py-4">
         {flash_sale_error} - Please try again later.

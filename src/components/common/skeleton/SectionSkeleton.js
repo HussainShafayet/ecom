@@ -1,7 +1,7 @@
 import React from "react";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 
-const FlashSaleSkeleton = ({forRoute}) => {
+const Sectionkeleton = ({forRoute}) => {
   return (
     <div className="container mx-auto animate-pulse">
     {forRoute &&
@@ -24,7 +24,9 @@ const FlashSaleSkeleton = ({forRoute}) => {
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
           <div className="h-4 bg-gray-200 w-64 rounded"></div>
-          <div className="h-4 bg-gray-200 w-20 rounded hidden md:block"></div>
+          {!forRoute && 
+            <div className="h-4 bg-gray-200 w-20 rounded hidden md:block"></div>
+          }
         </div>
 
         {/* Product Grid Skeleton */}
@@ -44,7 +46,9 @@ const FlashSaleSkeleton = ({forRoute}) => {
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
           <div className="h-4 bg-gray-200 w-64 rounded"></div>
-          <div className="h-4 bg-gray-200 w-20 rounded hidden md:block"></div>
+          {!forRoute && 
+            <div className="h-4 bg-gray-200 w-20 rounded hidden md:block"></div>
+          }
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -61,4 +65,4 @@ const FlashSaleSkeleton = ({forRoute}) => {
   );
 };
 
-export default FlashSaleSkeleton;
+export default Sectionkeleton;

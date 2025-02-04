@@ -47,7 +47,7 @@ const HeroSection = () => {
 
   return (
     <>
-    {true? <HeroSectionSkeleton /> :
+    {isLoading ? <HeroSectionSkeleton /> :
       error ? (
       <div className="text-center text-red-500 font-semibold py-4">
         {error} - Please try again later.

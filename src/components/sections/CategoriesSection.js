@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { fetchAllCategories } from '../../redux/slice/categorySlice';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import {Loader} from '../common';
+import CategorySectionSkeleton from '../common/skeleton/CategorySectionSkeleton';
 
 const CategoriesSection = () => {
   const { isLoading, categories, error } = useSelector((state) => state.category);
@@ -14,13 +15,13 @@ const CategoriesSection = () => {
     dispatch(fetchAllCategories({page:1, page_size:12}));
   }, [dispatch]);
 
-  if (isLoading) {
-    return <div className='container h-20 flex justify-center'><Loader message='Loading Categories' /></div>
-  }
+  //if (isLoading) {
+  //  return <div className='container h-20 flex justify-center'><Loader message='Loading Categories' /></div>
+  //}
 
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
+  //if (error) {
+  //  return <div className="text-center text-red-500">{error}</div>;
+  //}
 
   const scrollLeft = () => {
     scrollRef.current.scrollBy({
@@ -39,6 +40,13 @@ const CategoriesSection = () => {
   };
 
   return (
+    <>
+    {isLoading ? <CategorySectionSkeleton /> :
+      error ? (
+      <div className="text-center text-red-500 font-semibold py-4">
+        {error} - Please try again later.
+      </div>
+    ) :
     <div className="container mx-auto my-8">
       <h2 className="text-3xl font-bold">Shop by Category</h2>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -101,6 +109,8 @@ const CategoriesSection = () => {
         </button>
       </div>
     </div>
+    }
+    </>
   );
 };
 
