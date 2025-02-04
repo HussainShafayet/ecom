@@ -245,8 +245,124 @@ const Checkout = () => {
   }
 
   return (
-    <div className="container mx-auto px-1 lg:flex lg:space-x-3">
-      <div className="lg:w-2/3">
+    <div className="mx-auto px-1 lg:flex lg:space-x-3 mb-3">
+     {/* Right Section: Order Summary */}
+     <div className="lg:lg:w-7/12 mt-12 lg:mt-0">
+        <h3 className="text-2xl font-bold mb-4">Order Summary</h3>
+        <div className="bg-gray-100 rounded-lg shadow-md sticky top-20">
+          <div className="max-h-svh overflow-auto scrollbar-custom p-4">
+            {cartItems.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between gap-2 mb-2 relative border p-1"
+              >
+                {/* Image */}
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-16 h-16 object-cover rounded-md flex-shrink-0"
+                />
+
+                {/* Name and Quantity */}
+                <div className="flex-grow min-w-0">
+                  <h4
+                    className="font-semibold text-sm truncate"
+                    title={item.name} // Tooltip for full name
+                  >
+                    {item.name}
+                  </h4>
+                  <div className="flex items-center gap-2 mt-1">
+                    <button
+                      onClick={() => handleUpdateQuantity(item.id, item.quantity -1, item)}
+                      disabled={item.quantity <= 1}
+                      className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
+                    >
+                      -
+                    </button>
+                    <span className="text-sm">{item.quantity}</span>
+                    <button
+                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item)}
+                      className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
+                    >
+                      +
+                    </button>
+
+                    {/* Remove Button */}
+                    <button
+                      className="bg-red-400 text-white p-[0.5rem] rounded-full hover:bg-red-600 transition-colors"
+                      onClick={() => setConfirmDelete(item.id)}
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="text-sm font-semibold text-right flex-shrink-0">
+                  {item.has_discount
+                    ? (item.discount_price * item.quantity).toFixed(2)
+                    : (item.base_price * item.quantity).toFixed(2)}
+                </div>
+
+
+
+                {/* Confirm Delete Warning in Card */}
+                {confirmDelete === item.id && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
+                      <div className="text-center">
+                        <p className="text-gray-800 mb-2">Are you sure you want to remove this item?</p>
+                        <div className="flex justify-center gap-2">
+                          <button
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
+                            onClick={() => {
+                              handleRemoveItem(item.id);
+                              setConfirmDelete(null);
+                            }}
+                          >
+                            Yes
+                          </button>
+                          <button
+                            className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
+                            onClick={() => setConfirmDelete(null)}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+              </div>
+            ))}
+          </div>
+
+          <div className="p-4">
+            <hr className="my-3" />
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{totalPrice.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Shipping</span>
+              <span>{shippingCost.toFixed(2)}</span>
+            </div>
+            <hr className="my-3" />
+            <div className="flex justify-between font-bold text-lg">
+              <span>Total</span>
+              <span>{grandTotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <Link to="/cart" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
+                Edit Cart
+              </Link>
+              <Link to="/products" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
+                Add more products
+              </Link>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+      <div className="lg:w-5/12">
         <h2 className="text-2xl font-bold mb-1">Checkout</h2>
         
         <form onSubmit={handleSubmit} className="space-y-2">
@@ -458,122 +574,7 @@ const Checkout = () => {
         </form>
       </div>
 
-      {/* Right Section: Order Summary */}
-      <div className="lg:w-1/3 mt-12 lg:mt-0">
-        <h3 className="text-2xl font-bold mb-4">Order Summary</h3>
-        <div className="bg-gray-100 rounded-lg shadow-md sticky top-20">
-          <div className="max-h-svh overflow-auto scrollbar-custom p-4">
-            {cartItems.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between gap-2 mb-2 relative border p-1"
-              >
-                {/* Image */}
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-16 h-16 object-cover rounded-md flex-shrink-0"
-                />
-
-                {/* Name and Quantity */}
-                <div className="flex-grow min-w-0">
-                  <h4
-                    className="font-semibold text-sm truncate"
-                    title={item.name} // Tooltip for full name
-                  >
-                    {item.name}
-                  </h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    <button
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity -1, item)}
-                      disabled={item.quantity <= 1}
-                      className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
-                    >
-                      -
-                    </button>
-                    <span className="text-sm">{item.quantity}</span>
-                    <button
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item)}
-                      className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
-                    >
-                      +
-                    </button>
-
-                    {/* Remove Button */}
-                    <button
-                      className="bg-red-400 text-white p-[0.5rem] rounded-full hover:bg-red-600 transition-colors"
-                      onClick={() => setConfirmDelete(item.id)}
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Price */}
-                <div className="text-sm font-semibold text-right flex-shrink-0">
-                  {item.has_discount
-                    ? (item.discount_price * item.quantity).toFixed(2)
-                    : (item.base_price * item.quantity).toFixed(2)}
-                </div>
-
-
-
-                {/* Confirm Delete Warning in Card */}
-                {confirmDelete === item.id && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
-                      <div className="text-center">
-                        <p className="text-gray-800 mb-2">Are you sure you want to remove this item?</p>
-                        <div className="flex justify-center gap-2">
-                          <button
-                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
-                            onClick={() => {
-                              handleRemoveItem(item.id);
-                              setConfirmDelete(null);
-                            }}
-                          >
-                            Yes
-                          </button>
-                          <button
-                            className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
-                            onClick={() => setConfirmDelete(null)}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-              </div>
-            ))}
-          </div>
-
-          <div className="p-4">
-            <hr className="my-3" />
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>{totalPrice.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Shipping</span>
-              <span>{shippingCost.toFixed(2)}</span>
-            </div>
-            <hr className="my-3" />
-            <div className="flex justify-between font-bold text-lg">
-              <span>Total</span>
-              <span>{grandTotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <Link to="/cart" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
-                Edit Cart
-              </Link>
-              <Link to="/products" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
-                Add more products
-              </Link>
-            </div>
-            
-          </div>
-        </div>
-      </div>
+     
 
 
     </div>
