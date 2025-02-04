@@ -84,14 +84,23 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
 
 
 // Async action to refresh access token
-export const refreshToken = createAsyncThunk('auth/refreshToken', async (credentials , { rejectWithValue }) => {
+export const refreshToken = createAsyncThunk('auth/refreshToken', async (credentials , { rejectWithValue, getState }) => {
   try {
-    const api = (await import('../../api/axiosSetup')).default;
-    const response = await api.post('api/accounts/token/refresh/', credentials);
-    console.log('refresh token response', response);
     
+    //const api = (await import('../../api/axiosSetup')).default;
+    //const response = await api.post('api/accounts/token/refresh/', credentials);
+    const { accessToken } = getState().auth;
+    const response = await axios.post('http://192.168.0.103:8000/api/accounts/token/refresh/',credentials, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    console.log('refresh token response', response);
     return response.data;
   } catch (error) {
+    console.log('refresh error', error);
+    
     return rejectWithValue(error.response.data);
   }
 });
@@ -191,6 +200,7 @@ const authSlice = createSlice({
         localStorage.setItem('accessToken', action.payload.data.access);
         localStorage.setItem('refreshToken', action.payload.data.refresh);
       })
+      
       .addCase(logoutUser.fulfilled, (state) => {
         state.accessToken = null;
         state.refreshToken = null;

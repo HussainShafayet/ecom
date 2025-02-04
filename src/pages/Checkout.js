@@ -80,7 +80,7 @@ const Checkout = () => {
     if (value.trim()) {
       dispatch(setErrors({ ...errors, [name]: '' }));
     }
-    isAuthenticated && name === 'address' && dispatch(setSelectedAddressId(null));
+    isAuthenticated && name === 'title' || 'address' && dispatch(setSelectedAddressId(null));
   };
 
   const handleBlur = (e) => {
