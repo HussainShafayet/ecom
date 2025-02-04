@@ -100,8 +100,7 @@ export const refreshToken = createAsyncThunk('auth/refreshToken', async (credent
     return response.data;
   } catch (error) {
     console.log('refresh error', error);
-    
-    return rejectWithValue(error.response.data);
+    throw error.response.data;
   }
 });
 
@@ -200,7 +199,7 @@ const authSlice = createSlice({
         localStorage.setItem('accessToken', action.payload.data.access);
         localStorage.setItem('refreshToken', action.payload.data.refresh);
       })
-      
+
       .addCase(logoutUser.fulfilled, (state) => {
         state.accessToken = null;
         state.refreshToken = null;
