@@ -5,6 +5,7 @@ import {fetchHomeContent} from '../../redux/slice/contentSlice';
 import {useDispatch, useSelector} from 'react-redux';
 import {Link} from 'react-router-dom';
 import blurImage from '../../assets/images/blur.jpg';
+import {HeroSectionSkeleton} from '../common/skeleton';
 
 const HeroSection = () => {
   
@@ -19,14 +20,6 @@ const HeroSection = () => {
     dispatch(fetchHomeContent());
     
    }, [dispatch]);
- 
-   if (isLoading) {
-     return <div className='container h-20 flex justify-center'><Loader message='Loading' /></div>
-   }
- 
-   if (error) {
-     return <div>{error}</div>;
-   }
 
 
   const handleNext = () => {
@@ -54,6 +47,7 @@ const HeroSection = () => {
 
   return (
     <>
+    {isLoading? <HeroSectionSkeleton /> :
     <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[40vh]">
       {/*image slider*/}
       <div className="lg:w-4/6 flex h-full w-full">
@@ -148,7 +142,7 @@ const HeroSection = () => {
         </div>
       </div>
     </div>
-
+    }
 
     </>
    
