@@ -353,7 +353,7 @@ const AddressItem = ({ address, onUpdate }) => {
 
 
         {confirmDelete && (
-          <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-10">
               <div className="bg-white p-6 rounded-lg shadow-lg">
                   <h3 className="text-lg font-semibold">Confirm Delete</h3>
                   <p className="text-gray-600">Are you sure you want to delete this address?</p>
