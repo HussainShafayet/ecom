@@ -48,6 +48,12 @@ const HeroSection = () => {
   return (
     <>
     {isLoading? <HeroSectionSkeleton /> :
+      error ? (
+      <div className="text-center text-red-500 font-semibold py-4">
+        {error} - Please try again later.
+      </div>
+    ) :
+
     <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[40vh]">
       {/*image slider*/}
       <div className="lg:w-4/6 flex h-full w-full">
