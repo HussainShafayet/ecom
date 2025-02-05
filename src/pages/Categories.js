@@ -6,10 +6,11 @@ import {Link} from 'react-router-dom';
 import {fetchFlashSaleCategories, fetchNewArrivalCategories, fetchBestSellingCategories, fetchFeaturedCategories} from '../redux/slice/categorySlice';
 import {fetchCategoriesContent} from '../redux/slice/contentSlice';
 import blurImage from '../assets/images/blur.jpg';
+import {HeroSectionSkeleton, SectionSkeleton} from '../components/common/skeleton';
 
 const Categories = () => {
-    const { isLoading, flash_sale, new_arrival, best_selling,featured, error } = useSelector((state) => state.category);
-    const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
+    const { flash_sale_loading,new_arrival_loading,best_selling_loading,featured_loading,flash_sale, new_arrival, best_selling,featured, flash_sale_error,new_arrival_error,best_selling_error,featured_error } = useSelector((state) => state.category);
+    const {isLoading, image_sliders, video_sliders, left_banner, right_banner, error} = useSelector((state)=> state.content);
     const dispatch = useDispatch();
     const scrollRef = useRef(null);
     const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
@@ -22,13 +23,13 @@ const Categories = () => {
       dispatch(fetchFeaturedCategories({page:1, page_size:12}));
     }, [dispatch]);
   
-    if (isLoading) {
-      return <div className='container h-20 flex justify-center'><Loader message='Loading Categories' /></div>
-    }
+    //if (isLoading) {
+    //  return <div className='container h-20 flex justify-center'><Loader message='Loading Categories' /></div>
+    //}
   
-    if (error) {
-      return <div className="text-center text-red-500">{error}</div>;
-    }
+    //if (error) {
+    //  return <div className="text-center text-red-500">{error}</div>;
+    //}
 
     const getLink = (item)=>{
         switch (item.type) {
@@ -44,6 +45,13 @@ const Categories = () => {
     
   return (
     <div>
+
+        {isLoading ? <HeroSectionSkeleton /> :
+        error ? (
+        <div className="text-center text-red-500 font-semibold py-4">
+            {error} - Please try again later.
+        </div>
+        ) :
         
         <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[60vh]">
             {/*image slider*/}
@@ -95,55 +103,68 @@ const Categories = () => {
             }
             </div>
         </div>
-
+        }
 
         {/*flash sale*/}
-        <div className="container mx-auto my-8">
-            <h2 className="text-3xl font-bold">Flash Sale Categories</h2>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
-            <span className="text-sm md:text-base text-gray-600">
-                Discover the latest trends with Categories.
-            </span>
-            </div>
-            <div className="relative">
-           
-    
-            {/* Categories Container */}
+         {flash_sale_loading ? <SectionSkeleton /> :
+              flash_sale_error ? (
+              <div className="text-center text-red-500 font-semibold py-4">
+                {flash_sale_error} - Please try again later.
+              </div>
+            ) :
+            <div className="container mx-auto my-8">
+                <h2 className="text-3xl font-bold">Flash Sale Categories</h2>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
+                <span className="text-sm md:text-base text-gray-600">
+                    Discover the latest trends with Categories.
+                </span>
+                </div>
+                <div className="relative">
             
-            {flash_sale.length === 0  ? <div className='text-center'>
-                <span>Not found</span>
-            </div>:
+        
+                {/* Categories Container */}
+                
+                {flash_sale.length === 0  ? <div className='text-center'>
+                    <span>Not found</span>
+                </div>:
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                {flash_sale.map((category) => (
-                    <>
-                    {/* Discount Badge */}
-                    {category.has_discount && (
-                    <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                        {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
-                    </span>
-                    )}
-                    <Link to={`/products/?category=${category.slug}`} key={category.id} target='_blank'>
-                    <div className="relative group cursor-pointer min-w-[150px]">
-                        <img
-                        src={category.image}
-                        alt={category.name}
-                        className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-lg font-semibold">{category.name}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                    {flash_sale.map((category) => (
+                        <>
+                        {/* Discount Badge */}
+                        {category.has_discount && (
+                        <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
+                            {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
+                        </span>
+                        )}
+                        <Link to={`/products/?category=${category.slug}`} key={category.id} target='_blank'>
+                        <div className="relative group cursor-pointer min-w-[150px]">
+                            <img
+                            src={category.image}
+                            alt={category.name}
+                            className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-lg font-semibold">{category.name}</span>
+                            </div>
                         </div>
-                    </div>
-                    </Link>
-                    </>
-                ))}
+                        </Link>
+                        </>
+                    ))}
+                </div>
+                }
+            
+                </div>
             </div>
-            }
-          
-            </div>
-        </div>
+         }
 
         {/*New Arrival*/}
+         {new_arrival_loading ? <HeroSectionSkeleton /> :
+              new_arrival_error ? (
+              <div className="text-center text-red-500 font-semibold py-4">
+                {new_arrival_error} - Please try again later.
+              </div>
+            ) :
         <div className="container mx-auto my-8">
             <h2 className="text-3xl font-bold">New Arrival Categories</h2>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -188,8 +209,15 @@ const Categories = () => {
           
             </div>
         </div>
+         }
 
         {/*Best Selling*/}
+         {best_selling_loading ? <HeroSectionSkeleton /> :
+              best_selling_error ? (
+              <div className="text-center text-red-500 font-semibold py-4">
+                {best_selling_error} - Please try again later.
+              </div>
+            ) :
         <div className="container mx-auto my-8">
             <h2 className="text-3xl font-bold">Best Selling Categories</h2>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -234,52 +262,60 @@ const Categories = () => {
           
             </div>
         </div>
+         }
 
         {/*Featrued*/}
-        <div className="container mx-auto my-8">
-            <h2 className="text-3xl font-bold">Best Featured Categories</h2>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
-            <span className="text-sm md:text-base text-gray-600">
-                Discover the latest trends with Categories.
-            </span>
-            </div>
-            <div className="relative">
-           
-    
-            {/* Categories Container */}
+         {featured_loading ? <SectionSkeleton /> :
+              featured_error ? (
+              <div className="text-center text-red-500 font-semibold py-4">
+                {featured_error} - Please try again later.
+              </div>
+            ) :
+            <div className="container mx-auto my-8">
+                <h2 className="text-3xl font-bold">Best Featured Categories</h2>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
+                <span className="text-sm md:text-base text-gray-600">
+                    Discover the latest trends with Categories.
+                </span>
+                </div>
+                <div className="relative">
             
-            {featured.length === 0  ? <div className='text-center'>
-                <span>Not found</span>
-            </div>:
+        
+                {/* Categories Container */}
+                
+                {featured.length === 0  ? <div className='text-center'>
+                    <span>Not found</span>
+                </div>:
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                {featured.map((category) => (
-                    <div key={category.id}>
-                    {/* Discount Badge */}
-                    {category.has_discount && (
-                    <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                        {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
-                    </span>
-                    )}
-                    <Link to={`/products/?category=${category.slug}`} target='_blank'>
-                    <div className="relative group cursor-pointer min-w-[150px]">
-                        <img
-                        src={category.image}
-                        alt={category.name}
-                        className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-lg font-semibold">{category.name}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                    {featured.map((category) => (
+                        <div key={category.id}>
+                        {/* Discount Badge */}
+                        {category.has_discount && (
+                        <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
+                            {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
+                        </span>
+                        )}
+                        <Link to={`/products/?category=${category.slug}`} target='_blank'>
+                        <div className="relative group cursor-pointer min-w-[150px]">
+                            <img
+                            src={category.image}
+                            alt={category.name}
+                            className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-lg font-semibold">{category.name}</span>
+                            </div>
                         </div>
-                    </div>
-                    </Link>
-                    </div>
-                ))}
+                        </Link>
+                        </div>
+                    ))}
+                </div>
+                }
+            
+                </div>
             </div>
-            }
-          
-            </div>
-        </div>
+         }
     </div>
   )
 }

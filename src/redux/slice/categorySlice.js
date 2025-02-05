@@ -4,11 +4,19 @@ import {getAllCategories, getBestSellingCategories, getFeaturedCategories, getFl
 const initialState ={
     isLoading: false,
     categories: [],
-    flash_sale: [],
-    new_arrival: [],
-    best_selling:[],
-    featured: [],
     error: null,
+    flash_sale_loading: false,
+    flash_sale: [],
+    flash_sale_error: null,
+    new_arrival_loading: false,
+    new_arrival: [],
+    new_arrival_error: null,
+    best_selling_loading: false,
+    best_selling:[],
+    best_selling_error: null,
+    featured_loading: false,
+    featured: [],
+    featured_error: null,
 }
 
 export const fetchAllCategories = createAsyncThunk("category/fetchAllCategories", async ({page_size=null,page=1,})=>{
@@ -63,65 +71,61 @@ const categorySlice = createSlice({
 
          //get flash_sale categories
          builder.addCase(fetchFlashSaleCategories.pending, (state)=>{
-            state.isLoading = true;
+            state.flash_sale_loading = true;
         });
         builder.addCase(fetchFlashSaleCategories.fulfilled,(state, action)=>{
-            state.isLoading = false;
+            state.flash_sale_loading = false;
             state.flash_sale = action.payload.data;
-            state.error = null
         });
         builder.addCase(fetchFlashSaleCategories.rejected,(state, action)=>{
-            state.isLoading = false;
+            state.flash_sale_loading = false;
             state.flash_sale = [];
-            state.error = action.error.message;
+            state.flash_sale_error = action.error.message;
         });
 
 
          //get new arrival categories
          builder.addCase(fetchNewArrivalCategories.pending, (state)=>{
-            state.isLoading = true;
+            state.new_arrival_loading = true;
         });
         builder.addCase(fetchNewArrivalCategories.fulfilled,(state, action)=>{
-            state.isLoading = false;
+            state.new_arrival_loading = false;
             state.new_arrival = action.payload.data;
-            state.error = null
         });
         builder.addCase(fetchNewArrivalCategories.rejected,(state, action)=>{
-            state.isLoading = false;
+            state.new_arrival_loading = false;
             state.new_arrival = [];
-            state.error = action.error.message;
+            state.new_arrival_error = action.error.message;
         });
 
 
          //get best selling categories
          builder.addCase(fetchBestSellingCategories.pending, (state)=>{
-            state.isLoading = true;
+            state.best_selling_loading = true;
         });
         builder.addCase(fetchBestSellingCategories.fulfilled,(state, action)=>{
-            state.isLoading = false;
+            state.best_selling_loading = false;
             state.best_selling = action.payload.data;
-            state.error = null
         });
         builder.addCase(fetchBestSellingCategories.rejected,(state, action)=>{
-            state.isLoading = false;
+            state.best_selling_loading = false;
             state.best_selling = [];
-            state.error = action.error.message;
+            state.best_selling_error = action.error.message;
         });
 
 
-         //get best selling categories
+         //get featured categories
          builder.addCase(fetchFeaturedCategories.pending, (state)=>{
-            state.isLoading = true;
+            state.featured_loading = true;
         });
         builder.addCase(fetchFeaturedCategories.fulfilled,(state, action)=>{
-            state.isLoading = false;
+            state.featured_loading = false;
             state.featured = action.payload.data;
-            state.error = null
         });
         builder.addCase(fetchFeaturedCategories.rejected,(state, action)=>{
-            state.isLoading = false;
+            state.featured_loading = false;
             state.featured = [];
-            state.error = action.error.message;
+            state.featured_error = action.error.message;
         });
     }
 });
