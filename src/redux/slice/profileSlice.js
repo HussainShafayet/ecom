@@ -34,6 +34,8 @@ export const handleGetProfile = createAsyncThunk('profile/handleGetProfile', asy
       console.log('get profile response',response);
       return response.data.data;
     } catch (error) {
+        console.log('get profile error: ', error);
+        
       return rejectWithValue(error.response.data);
     }
 });
