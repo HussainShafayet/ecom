@@ -138,17 +138,22 @@
 import React, {useEffect} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ProductCard } from '../../components/common';
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import {fetchtoWishlist} from '../../redux/slice/wishlistSlice';
 
 const WishList = () => {
   //const wishlistItems = useSelector(state => state.wishList.items);
   const {isLoading, items, error} = useSelector((state)=> state.wishList);
   const dispatch = useDispatch();
+  const {isAuthenticated} = useSelector((state)=>state.auth);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(fetchtoWishlist());
-   }, [dispatch]);
+    !isAuthenticated && navigate('/signin')
+    isAuthenticated && dispatch(fetchtoWishlist());
+   }, [dispatch, navigate, isAuthenticated]);
+   
   return (
     <div className="container mx-auto my-6">
       <h2 className="text-2xl font-bold mb-4">Your Wishlist</h2>
