@@ -43,7 +43,7 @@ api.interceptors.response.use(
           // Retry the original request with the new token
           return api(originalRequest);
         }else{
-          throw 'Not Found Refresh Token'
+          throw 'Session is Expired'
         }
       } catch (refreshError) {
         // If refreshing fails, log the user out and return error

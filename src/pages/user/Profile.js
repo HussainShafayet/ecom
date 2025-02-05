@@ -8,6 +8,7 @@ import {Loader} from '../../components/common';
 import {AddressItem} from '../../components/profile';
 import { WishList } from '../user';
 import {dhakaCityData, districtsData, divisionsData, upazilasData} from '../../data/location';
+import {ProfileSkeleton} from '../../components/common/skeleton';
 
 const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
@@ -17,11 +18,6 @@ const Profile = () => {
 
   const navigate = useNavigate();
   
-  //useEffect(() => {
-  //  if (!isAuthenticated) {
-  //    navigate('/signin');
-  //  }
-  //}, [isAuthenticated, navigate]);
 
   const [isEditing, setIsEditing] = useState(false); // State to toggle edit mode
   const [formData, setFormData] = useState({ ...profile }); // State to store form data
@@ -29,8 +25,11 @@ const Profile = () => {
  
   
   useEffect(()=>{
-    dispatch(handleGetProfile());
-  }, [dispatch]);
+    if (!isAuthenticated) {
+      navigate('/signin');
+    }
+    isAuthenticated && dispatch(handleGetProfile());
+  }, [dispatch, isAuthenticated, navigate]);
 
   const handleTabChange = (tab)=>{
     setSelectedTab(tab.id);
@@ -159,385 +158,394 @@ const Profile = () => {
 
 
 
-  if (isLoading) {
-    return <div className='container h-screen flex justify-center'><Loader message='Loading Profile' /></div>
-  }
+  //if (isLoading) {
+  //  return <div className='container h-screen flex justify-center'><Loader message='Loading Profile' /></div>
+  //}
 
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
+  //if (error) {
+  //  return <div className="text-center text-red-500">{error}</div>;
+  //}
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-4 md:p-8">
-      <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-        
-        {/* Header Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
-          <h1 className="text-4xl font-bold mb-2">My Profile</h1>
-          <p className="text-sm opacity-80">Manage your personal information, orders, and account settings.</p>
-        </div>
+    <>
+    {isLoading ? <ProfileSkeleton /> :
+      error ? (
+      <div className="text-center text-red-500 font-semibold py-4">
+        {error} - Please try again later.
+      </div>
+    ) :
+      <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-4 md:p-8">
+        <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+          
+          {/* Header Section */}
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
+            <h1 className="text-4xl font-bold mb-2">My Profile</h1>
+            <p className="text-sm opacity-80">Manage your personal information, orders, and account settings.</p>
+          </div>
 
-        {/* Tabs for Profile Sections */}
-        <div className="flex flex-wrap justify-around md:justify-start bg-white border-b text-gray-700 overflow-x-auto">
-          {[
-            { label: 'Account Overview', icon: <FaUserEdit />, id: 'overview' },
-            { label: 'Shipping Addresses', icon: <FaMapMarkerAlt />, id: 'address' },
-            { label: 'Wishlist', icon: <FaHeart />, id: 'wishlist' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab)}
-              className={`flex-1 md:flex-none px-6 py-4 font-medium hover:text-blue-600 transition-colors ${
-                selectedTab === tab.id ? 'border-b-4 border-blue-600 text-blue-600 font-semibold' : 'border-b-2 border-transparent'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                {tab.icon}
-                <span className="hidden sm:inline">{tab.label}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Content Section */}
-        <div className="p-6">
-        {selectedTab === 'overview' && (
-            <div className="rounded-lg bg-gray-100 p-6 shadow-md flex flex-col md:flex-row gap-6">
-              {/* Profile Image Section */}
-              <div className="flex-shrink-0 relative w-32 h-32 mx-auto md:mx-0 rounded-full overflow-hidden bg-gray-200 shadow-md">
-                <img
-                  src={profile?.profile_picture || "https://img.freepik.com/premium-photo/stylish-man-flat-vector-profile-picture-ai-generated_606187-310.jpg"} // Placeholder for the profile image
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-                <button className="absolute bottom-0 right-12 p-1 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
-                  <FaCamera />
-                </button>
-              </div>
-
-              {/* Personal Information Card */}
-              <div className="flex-1 bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h3 className="font-semibold text-lg mb-4">Personal Information</h3>
-                
-                {!isEditing ? (
-                  <>
-                    {profile?.name && <p className="mb-2"><strong>Name:</strong> {profile.name}</p>}
-                    {profile?.username && <p className="mb-2"><strong>User Name:</strong> {profile?.username}</p>}
-                    {profile?.email && <p className="mb-2"><strong>Email:</strong> {profile.email}</p>}
-                    {profile?.phone_number && <p className="mb-2"><strong>Phone:</strong> {profile.phone_number}</p>}
-                    {profile?.date_of_birth && <p className="mb-2"><strong>Date of Birth:</strong> {profile?.date_of_birth}</p>}
-                    {profile?.gender && <p className="mb-2"><strong>Gender:</strong> {profile.gender}</p>}
-
-                    <button
-                      onClick={handleShowInfoEdit}
-                      className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                    >
-                      Edit Information
-                    </button>
-                  </>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Editable Name Field */}
-                    <div>
-                      <label htmlFor="name" className="block text-gray-700 font-medium mb-1">
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name || ''}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      />
-                    </div>
-
-                    {/* Editable Username Field */}
-                    <div>
-                      <label htmlFor="username" className="block text-gray-700 font-medium mb-1">
-                        User Name
-                      </label>
-                      <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        value={formData.username || ''}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      />
-                    </div>
-
-                    {/* Editable Email Field */}
-                    <div>
-                      <label htmlFor="email" className="block text-gray-700 font-medium mb-1">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email || ''}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      />
-                    </div>
-
-                    {/* Editable Phone Number Field */}
-                    {/*<div>
-                      <label htmlFor="phone_number" className="block text-gray-700 font-medium mb-1">
-                        Phone Number
-                      </label>
-                      <input
-                        type="text"
-                        id="phone_number"
-                        name="phone_number"
-                        value={formData.phone_number || ''}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      />
-                    </div>*/}
-
-                    {/* Editable Date of Birth Field */}
-                    <div>
-                      <label htmlFor="date_of_birth" className="block text-gray-700 font-medium mb-1">
-                        Date of Birth
-                      </label>
-                      <input
-                        type="date"
-                        id="date_of_birth"
-                        name="date_of_birth"
-                        value={formData.date_of_birth || ''}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      />
-                    </div>
-
-                    {/* Editable Gender Field */}
-                    <div>
-                      <label htmlFor="gender" className="block text-gray-700 font-medium mb-1">
-                        Gender
-                      </label>
-                      <select
-                        id="gender"
-                        name="gender"
-                        value={formData.gender || ''}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      >
-                        <option value="">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-
-                    {/* Save and Cancel Buttons */}
-                    <div className="flex justify-end space-x-2">
-                      <button
-                        type="button"
-                        onClick={() => setIsEditing(false)}
-                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                      >
-                        Save Changes
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
-            </div>
-          )}
-
-         
-
-          {selectedTab === 'address' && (
-           
-            <div>
-              
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Shipping Address</h2>
-                {!isAddAddress &&
-                <FaPlusCircle className="w-6 h-6 hover:fill-green-500 cursor-pointer transition" title='Add Address' onClick={()=> dispatch(setIsAddAddress(true))} />
-                }
+          {/* Tabs for Profile Sections */}
+          <div className="flex flex-wrap justify-around md:justify-start bg-white border-b text-gray-700 overflow-x-auto">
+            {[
+              { label: 'Account Overview', icon: <FaUserEdit />, id: 'overview' },
+              { label: 'Shipping Addresses', icon: <FaMapMarkerAlt />, id: 'address' },
+              { label: 'Wishlist', icon: <FaHeart />, id: 'wishlist' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab)}
+                className={`flex-1 md:flex-none px-6 py-4 font-medium hover:text-blue-600 transition-colors ${
+                  selectedTab === tab.id ? 'border-b-4 border-blue-600 text-blue-600 font-semibold' : 'border-b-2 border-transparent'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  {tab.icon}
+                  <span className="hidden sm:inline">{tab.label}</span>
                 </div>
-              {isAddAddress && 
-                <div className='mb-4'>
-                  {/*Edit Form*/}
-                  <form onSubmit={handleAddressSubmit} className="space-y-2">
-                    <div className='w-full'>
-                      <input
-                        type="text"
-                        name="title"
-                        value={addressFormData.title || ''}
-                        onChange={handleInputChange}
-                        //onBlur={handleBlur}
-                        placeholder='Home or Office'
-                        className={`border  border-gray-300 p-2 rounded-lg w-full`}
-                      />
-                    </div>
+              </button>
+            ))}
+          </div>
 
-                    <div className={`grid grid-cols-1 ${getLocationType()} gap-3 mb-3`}>
+          {/* Content Section */}
+          <div className="p-6">
+          {selectedTab === 'overview' && (
+              <div className="rounded-lg bg-gray-100 p-6 shadow-md flex flex-col md:flex-row gap-6">
+                {/* Profile Image Section */}
+                <div className="flex-shrink-0 relative w-32 h-32 mx-auto md:mx-0 rounded-full overflow-hidden bg-gray-200 shadow-md">
+                  <img
+                    src={profile?.profile_picture || "https://img.freepik.com/premium-photo/stylish-man-flat-vector-profile-picture-ai-generated_606187-310.jpg"} // Placeholder for the profile image
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                  <button className="absolute bottom-0 right-12 p-1 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+                    <FaCamera />
+                  </button>
+                </div>
+
+                {/* Personal Information Card */}
+                <div className="flex-1 bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                  <h3 className="font-semibold text-lg mb-4">Personal Information</h3>
+                  
+                  {!isEditing ? (
+                    <>
+                      {profile?.name && <p className="mb-2"><strong>Name:</strong> {profile.name}</p>}
+                      {profile?.username && <p className="mb-2"><strong>User Name:</strong> {profile?.username}</p>}
+                      {profile?.email && <p className="mb-2"><strong>Email:</strong> {profile.email}</p>}
+                      {profile?.phone_number && <p className="mb-2"><strong>Phone:</strong> {profile.phone_number}</p>}
+                      {profile?.date_of_birth && <p className="mb-2"><strong>Date of Birth:</strong> {profile?.date_of_birth}</p>}
+                      {profile?.gender && <p className="mb-2"><strong>Gender:</strong> {profile.gender}</p>}
+
+                      <button
+                        onClick={handleShowInfoEdit}
+                        className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                      >
+                        Edit Information
+                      </button>
+                    </>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      {/* Editable Name Field */}
                       <div>
-                      <select
-                          name="shipping_type"
-                          value={addressFormData.shipping_type || ''}
-                          onChange={handleLocationType}
+                        <label htmlFor="name" className="block text-gray-700 font-medium mb-1">
+                          Name
+                        </label>
+                        <input
+                          type="text"
+                          id="name"
+                          name="name"
+                          value={formData.name || ''}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                      </div>
+
+                      {/* Editable Username Field */}
+                      <div>
+                        <label htmlFor="username" className="block text-gray-700 font-medium mb-1">
+                          User Name
+                        </label>
+                        <input
+                          type="text"
+                          id="username"
+                          name="username"
+                          value={formData.username || ''}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                      </div>
+
+                      {/* Editable Email Field */}
+                      <div>
+                        <label htmlFor="email" className="block text-gray-700 font-medium mb-1">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          id="email"
+                          name="email"
+                          value={formData.email || ''}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                      </div>
+
+                      {/* Editable Phone Number Field */}
+                      {/*<div>
+                        <label htmlFor="phone_number" className="block text-gray-700 font-medium mb-1">
+                          Phone Number
+                        </label>
+                        <input
+                          type="text"
+                          id="phone_number"
+                          name="phone_number"
+                          value={formData.phone_number || ''}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                      </div>*/}
+
+                      {/* Editable Date of Birth Field */}
+                      <div>
+                        <label htmlFor="date_of_birth" className="block text-gray-700 font-medium mb-1">
+                          Date of Birth
+                        </label>
+                        <input
+                          type="date"
+                          id="date_of_birth"
+                          name="date_of_birth"
+                          value={formData.date_of_birth || ''}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                      </div>
+
+                      {/* Editable Gender Field */}
+                      <div>
+                        <label htmlFor="gender" className="block text-gray-700 font-medium mb-1">
+                          Gender
+                        </label>
+                        <select
+                          id="gender"
+                          name="gender"
+                          value={formData.gender || ''}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        >
+                          <option value="">Select Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+
+                      {/* Save and Cancel Buttons */}
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsEditing(false)}
+                          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                        >
+                          Save Changes
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              </div>
+            )}
+
+          
+
+            {selectedTab === 'address' && (
+            
+              <div>
+                
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">Shipping Address</h2>
+                  {!isAddAddress &&
+                  <FaPlusCircle className="w-6 h-6 hover:fill-green-500 cursor-pointer transition" title='Add Address' onClick={()=> dispatch(setIsAddAddress(true))} />
+                  }
+                  </div>
+                {isAddAddress && 
+                  <div className='mb-4'>
+                    {/*Edit Form*/}
+                    <form onSubmit={handleAddressSubmit} className="space-y-2">
+                      <div className='w-full'>
+                        <input
+                          type="text"
+                          name="title"
+                          value={addressFormData.title || ''}
+                          onChange={handleInputChange}
+                          //onBlur={handleBlur}
+                          placeholder='Home or Office'
+                          className={`border  border-gray-300 p-2 rounded-lg w-full`}
+                        />
+                      </div>
+
+                      <div className={`grid grid-cols-1 ${getLocationType()} gap-3 mb-3`}>
+                        <div>
+                        <select
+                            name="shipping_type"
+                            value={addressFormData.shipping_type || ''}
+                            onChange={handleLocationType}
+                            onBlur={handleBlur}
+                            required
+                            className="border border-gray-300 p-2 rounded-lg w-full"
+                        >
+                            <option value="">Select Shipping Area</option>
+                            <option value="inside_dhaka">In Dhaka City</option>
+                            <option value="outside_dhaka">Out of Dhaka City</option>
+                        </select>
+                        {touched.shipping_type && errors.shipping_type && <p className="text-red-500 text-xs mt-1">{errors.shipping_type}</p>}
+                        </div>
+                        {addressFormData.shipping_type === 'inside_dhaka' && (
+                            <div className="grid grid-cols-1 gap-3">
+                            <div className="w-full">
+                                <select
+                                name="area"
+                                value={addressFormData.area || ''}
+                                onChange={handleDhakaArea}
+                                onBlur={handleBlur}
+                                required
+                                className={`border ${touched.area && errors.area ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                                >
+                                <option value="">Select Area in</option>
+                                {dhakaCityData.map((area) => (
+                                    <option key={area.id} value={area.name}>{area.name}</option>
+                                ))}
+                                </select>
+                                {touched.area && errors.area && <p className="text-red-500 text-xs mt-1">{errors.area}</p>}
+                            </div>
+                            </div>
+                        )}
+                          {addressFormData.shipping_type === 'outside_dhaka' && (
+                            <>
+                            <div>
+                                <select
+                                name="division"
+                                value={addressFormData.division || ''}
+                                onChange={handleDivisionChange}
+                                onBlur={handleBlur}
+                                required
+                                className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                                >
+                                <option value="">Select Division</option>
+                                {divisionsData.map((division) => (
+                                    <option key={division.id} value={division.name}>{division.name}</option>
+                                ))}
+                                </select>
+                                {touched.division && errors.division && <p className="text-red-500 text-xs mt-1">{errors.division}</p>}
+                            </div>
+            
+                            <div>
+                                <select
+                                name="district"
+                                value={addressFormData.district || ''}
+                                onChange={handleDistrictChange}
+                                onBlur={handleBlur}
+                                required
+                                className={`border ${touched.district && errors.district ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                                disabled={!addressFormData.division}
+                                >
+                                <option value="">Select District</option>
+                                {districts.map((district) => (
+                                    <option key={district.id} value={district.name}>{district.name}</option>
+                                ))}
+                                </select>
+                                {touched.district && errors.district && <p className="text-red-500 text-xs mt-1">{errors.district}</p>}
+                            </div>
+            
+                            <div>
+                                <select
+                                name="thana"
+                                value={addressFormData.thana || ''}
+                                onChange={handleInputChange}
+                                onBlur={handleBlur}
+                                required
+                                className={`border ${touched.thana && errors.thana ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                                disabled={!addressFormData.district}
+                                >
+                                <option value="">Select Upazila/Thana</option>
+                                {upazilas.map((station) => (
+                                    <option key={station.id} value={station.name}>{station.name}</option>
+                                ))}
+                                </select>
+                                {touched.thana && errors.thana && <p className="text-red-500 text-xs mt-1">{errors.thana}</p>}
+                            </div>
+                            </>
+                        )}
+                      </div>
+
+                      <div className="w-full">
+                        <input
+                          type="text"
+                          name="address"
+                          placeholder="Delivery Address"
+                          value={addressFormData.address}
+                          onChange={handleInputChange}
                           onBlur={handleBlur}
                           required
-                          className="border border-gray-300 p-2 rounded-lg w-full"
-                      >
-                          <option value="">Select Shipping Area</option>
-                          <option value="inside_dhaka">In Dhaka City</option>
-                          <option value="outside_dhaka">Out of Dhaka City</option>
-                      </select>
-                      {touched.shipping_type && errors.shipping_type && <p className="text-red-500 text-xs mt-1">{errors.shipping_type}</p>}
+                          className={`border ${touched.address && errors.address ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                        />
+                        {touched.address && errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
                       </div>
-                      {addressFormData.shipping_type === 'inside_dhaka' && (
-                          <div className="grid grid-cols-1 gap-3">
-                          <div className="w-full">
-                              <select
-                              name="area"
-                              value={addressFormData.area || ''}
-                              onChange={handleDhakaArea}
-                              onBlur={handleBlur}
-                              required
-                              className={`border ${touched.area && errors.area ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                              >
-                              <option value="">Select Area in</option>
-                              {dhakaCityData.map((area) => (
-                                  <option key={area.id} value={area.name}>{area.name}</option>
-                              ))}
-                              </select>
-                              {touched.area && errors.area && <p className="text-red-500 text-xs mt-1">{errors.area}</p>}
-                          </div>
-                          </div>
-                      )}
-                        {addressFormData.shipping_type === 'outside_dhaka' && (
-                          <>
-                          <div>
-                              <select
-                              name="division"
-                              value={addressFormData.division || ''}
-                              onChange={handleDivisionChange}
-                              onBlur={handleBlur}
-                              required
-                              className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                              >
-                              <option value="">Select Division</option>
-                              {divisionsData.map((division) => (
-                                  <option key={division.id} value={division.name}>{division.name}</option>
-                              ))}
-                              </select>
-                              {touched.division && errors.division && <p className="text-red-500 text-xs mt-1">{errors.division}</p>}
-                          </div>
-          
-                          <div>
-                              <select
-                              name="district"
-                              value={addressFormData.district || ''}
-                              onChange={handleDistrictChange}
-                              onBlur={handleBlur}
-                              required
-                              className={`border ${touched.district && errors.district ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                              disabled={!addressFormData.division}
-                              >
-                              <option value="">Select District</option>
-                              {districts.map((district) => (
-                                  <option key={district.id} value={district.name}>{district.name}</option>
-                              ))}
-                              </select>
-                              {touched.district && errors.district && <p className="text-red-500 text-xs mt-1">{errors.district}</p>}
-                          </div>
-          
-                          <div>
-                              <select
-                              name="thana"
-                              value={addressFormData.thana || ''}
-                              onChange={handleInputChange}
-                              onBlur={handleBlur}
-                              required
-                              className={`border ${touched.thana && errors.thana ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                              disabled={!addressFormData.district}
-                              >
-                              <option value="">Select Upazila/Thana</option>
-                              {upazilas.map((station) => (
-                                  <option key={station.id} value={station.name}>{station.name}</option>
-                              ))}
-                              </select>
-                              {touched.thana && errors.thana && <p className="text-red-500 text-xs mt-1">{errors.thana}</p>}
-                          </div>
-                          </>
-                      )}
-                    </div>
+                      
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          type="button"
+                          onClick={()=>{
+                            dispatch(setIsAddAddress(false))
+                            dispatch(resetAddressForm());
+                          } 
+                          }
+                          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                }
+                {addresses?.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                    {addresses.map((address) => (
+                      <AddressItem key={address.id} address={address} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center bg-gray-100 p-6 rounded-md mb-4">
+                    <p className="text-gray-600 mb-4">No shipping addresses found. Please add one.</p>
+                  </div>
+                )}
 
-                    <div className="w-full">
-                      <input
-                        type="text"
-                        name="address"
-                        placeholder="Delivery Address"
-                        value={addressFormData.address}
-                        onChange={handleInputChange}
-                        onBlur={handleBlur}
-                        required
-                        className={`border ${touched.address && errors.address ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                      />
-                      {touched.address && errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
-                    </div>
-                    
-                    <div className="flex justify-end space-x-2">
-                      <button
-                        type="button"
-                        onClick={()=>{
-                          dispatch(setIsAddAddress(false))
-                          dispatch(resetAddressForm());
-                        } 
-                        }
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              }
-              {addresses?.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                  {addresses.map((address) => (
-                    <AddressItem key={address.id} address={address} />
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center bg-gray-100 p-6 rounded-md mb-4">
-                  <p className="text-gray-600 mb-4">No shipping addresses found. Please add one.</p>
-                </div>
-              )}
+                
+              </div>
 
-              
-            </div>
+            )}
 
-          )}
-
-          {selectedTab === 'wishlist' && (
-            <div>
-              {/*<h2 className="text-xl font-semibold mb-4">My Wishlist</h2>
-              <p className="text-gray-500">You haven’t added any items to your wishlist yet.</p>*/}
-              <WishList />
-            </div>
-          )}
+            {selectedTab === 'wishlist' && (
+              <div>
+                {/*<h2 className="text-xl font-semibold mb-4">My Wishlist</h2>
+                <p className="text-gray-500">You haven’t added any items to your wishlist yet.</p>*/}
+                <WishList />
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    }
+    </>
   );
 };
 
