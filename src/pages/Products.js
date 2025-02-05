@@ -6,6 +6,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts, setIsSidebarOpen, setSortType} from '../redux/slice/productSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {FaArrowDown, FaArrowUp} from 'react-icons/fa';
+import {ProductsPageSkeleton} from '../components/common/skeleton';
 
 const Products = ({scrollContainerRef}) => {
   //
@@ -172,6 +173,15 @@ const Products = ({scrollContainerRef}) => {
       
 
         <div className='lg:col-span-4'>
+        
+        
+        {isLoading ? <ProductsPageSkeleton /> :
+          error ? (
+          <div className="text-center text-red-500 font-semibold py-4">
+            {error} - Please try again later.
+          </div>
+        ) :
+        <>
           {/* Sort and Show Items Options Above Product List */}
           <div className="flex justify-between items-center mb-4">
             {/* Mobile Toggle Button for Sidebar */}
@@ -182,7 +192,8 @@ const Products = ({scrollContainerRef}) => {
               Show Filters
             </button>
 
-            <div> <h1 className="hidden md:block text-2xl font-bold capitalize">{lastPathSegment.replace(/-/g, ' ')}</h1>
+            <div> 
+              <h1 className="hidden md:block text-2xl font-bold capitalize">{lastPathSegment.replace(/-/g, ' ')}</h1>
             </div>
 
             <div className='flex flex-nowrap space-x-2'>
@@ -254,8 +265,9 @@ const Products = ({scrollContainerRef}) => {
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-            </InfiniteScroll>
-          
+          </InfiniteScroll>
+          </>
+          }
         </div>
       </div>
   </div>

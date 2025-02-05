@@ -4,6 +4,7 @@ import { FaTags, FaDollarSign, FaIndustry, FaStar, FaCheck, FaFilter, FaTshirt, 
 import {useDispatch, useSelector} from "react-redux";
 import {fetchShopContent} from "../../../redux/slice/contentSlice";
 import {useSearchParams} from "react-router-dom";
+import {SidebarSkeleton} from "../skeleton";
 
 
 // Sidebar Component
@@ -147,6 +148,13 @@ const Sidebar = ({ onClose }) => {
   
   
   return (
+    <>
+     {isLoading ? <SidebarSkeleton /> :
+      error ? (
+      <div className="text-center text-red-500 font-semibold py-4">
+        {error} - Please try again later.
+      </div>
+    ) :
     <div className="bg-gray-100 p-4 rounded-lg space-y-4 max-h-svh overflow-y-auto lg:sticky top-[100px]">
       {/* Close Icon for Mobile */}
       <div className="flex justify-between items-center lg:hidden mb-4">
@@ -228,6 +236,8 @@ const Sidebar = ({ onClose }) => {
         
       </div>
     </div>
+     }
+    </>
   );
 };
 
