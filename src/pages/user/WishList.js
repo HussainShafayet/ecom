@@ -140,6 +140,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ProductCard } from '../../components/common';
 import {Link, useNavigate} from 'react-router-dom';
 import {fetchtoWishlist} from '../../redux/slice/wishlistSlice';
+import {ProductCardSkeleton} from '../../components/common/skeleton';
 
 const WishList = () => {
   //const wishlistItems = useSelector(state => state.wishList.items);
@@ -155,20 +156,43 @@ const WishList = () => {
    }, [dispatch, navigate, isAuthenticated]);
    
   return (
-    <div className="container mx-auto my-6">
-      <h2 className="text-2xl font-bold mb-4">Your Wishlist</h2>
+    <>
+    {isLoading ?
+      <div className="container mx-auto my-6 animate-pulse">
+      {/* Wishlist Heading Skeleton */}
+      <div className="h-8 w-48 bg-gray-300 rounded mb-4"></div>
+
+      {/* Wishlist Grid Skeleton */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {items.map(product => (
-          <ProductCard key={product.id} product={product} />
+        {[...Array(8)].map((_, index) => (
+          <ProductCardSkeleton key={index} />
         ))}
       </div>
-      {/* No Items Message */}
-        {items.length === 0 && (
-          <p className="text-center text-gray-600 mt-8">Your wishlist is currently empty. 
-            <Link to="/products" className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"> Add WishList</Link>
-          </p>
-        )}
+
     </div>
+    
+     :
+      error ? (
+      <div className="text-center text-red-500 font-semibold py-4">
+        {error} - Please try again later.
+      </div>
+    ) :
+      <div className="container mx-auto my-6">
+        <h2 className="text-2xl font-bold mb-4">Your Wishlist</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {items.map(product => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+        {/* No Items Message */}
+          {items.length === 0 && (
+            <p className="text-center text-gray-600 mt-8">Your wishlist is currently empty. 
+              <Link to="/products" className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"> Add WishList</Link>
+            </p>
+          )}
+      </div>
+    }
+    </>
   );
 };
 

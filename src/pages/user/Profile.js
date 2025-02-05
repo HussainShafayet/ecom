@@ -51,7 +51,7 @@ const Profile = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle form submission
+  // Handle form submissiontrue
   const handleSubmit = (e) => {
     e.preventDefault();
     // Create a new FormData instance
@@ -364,7 +364,24 @@ const Profile = () => {
             {selectedTab === 'address' && (
             
               <div>
-                
+              {adrressLoading ? 
+                <div className="mt-6">
+                  <div className="h-8 w-48 bg-gray-300 rounded mb-4"></div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[...Array(3)].map((_, index) => (
+                      <div key={index} className="h-32 bg-gray-300 rounded"></div>
+                    ))}
+                  </div>
+                </div>
+              
+               :
+                addressError ? (
+                <div className="text-center text-red-500 font-semibold py-4">
+                  {addressError} - Please try again later.
+                </div>
+              ) :
+                <>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Shipping Address</h2>
                   {!isAddAddress &&
@@ -528,8 +545,8 @@ const Profile = () => {
                     <p className="text-gray-600 mb-4">No shipping addresses found. Please add one.</p>
                   </div>
                 )}
-
-                
+                </>
+                }
               </div>
 
             )}
