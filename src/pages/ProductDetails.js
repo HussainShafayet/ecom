@@ -8,6 +8,7 @@ import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fet
 import {addToCart, addToCartAndRemoveFromWishlist, handleAddtoCart, handleClonedProduct} from '../redux/slice/cartSlice';
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
+import {ProductDetailsSkeleton} from '../components/common/skeleton';
 
 const ProductDetails = () => {
   const { slug } = useParams();
@@ -64,13 +65,13 @@ useEffect(() => {
 }, []);
 
 
-  if (isLoading) {
-    return <div><Loader message='Loading product details' /></div>;
-  }
+  //if (isLoading) {
+  //  return <div><Loader message='Loading product details' /></div>;
+  //}
 
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
+  //if (error) {
+  //  return <div className="text-center text-red-500">{error}</div>;
+  //}
 
   //if (!isLoading && !product) {
   //  return <div className="text-center text-gray-600">
@@ -249,6 +250,13 @@ useEffect(() => {
   
 
   return (
+    <>
+     {isLoading ? <ProductDetailsSkeleton /> :
+      error ? (
+      <div className="text-center text-red-500 font-semibold py-4">
+        {error} - Please try again later.
+      </div>
+    ) :
     <div className="container mx-auto  my-6">
       {product &&
       <>
@@ -795,6 +803,8 @@ useEffect(() => {
       }
       
     </div>
+     }
+    </>
   );
 };
 
