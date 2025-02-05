@@ -11,7 +11,7 @@ const SignIn = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const {signinLoading, signinMessage, signinError,user_id } = useSelector((state) => state.auth);
+  const {signinLoading, signinMessage, signinError,user_id, isAuthenticated } = useSelector((state) => state.auth);
   const [formData, setFormData] = useState({ phone_number: '', country_code: '+880' });
 
 
@@ -22,13 +22,15 @@ const SignIn = () => {
 
 
   useEffect(() => {
+    isAuthenticated && navigate('/');
+
     if (signinMessage) {
       // Redirect to the sign-in page after a successful signup
       navigate(`/verify-otp/${user_id}`);
       // Optionally clear the signup state
       dispatch(clearSigninState());
     }
-  }, [signinMessage]);
+  }, [signinMessage, isAuthenticated]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

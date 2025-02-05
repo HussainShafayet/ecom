@@ -18,7 +18,7 @@ import {ErrorDisplay, Loader, SuccessMessage} from '../../components/common';
 const SignUp = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const {signupLoading, signupMessage, signupError, user_id } = useSelector((state) => state.auth);
+  const {signupLoading, signupMessage, signupError, user_id, isAuthenticated } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -29,13 +29,16 @@ const SignUp = () => {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
+    isAuthenticated && navigate('/');
+
     if (signupMessage) {
       // Redirect to the sign-in page after a successful signup
       navigate(`/verify-otp/${user_id}`);
       // Optionally clear the signup state
       dispatch(clearSignupState());
     }
-  }, [signupMessage, dispatch, navigate]);
+   
+  }, [signupMessage, dispatch, navigate, isAuthenticated]);
 
   const validateField = (name, value) => {
     let error = "";
