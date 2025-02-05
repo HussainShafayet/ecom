@@ -43,7 +43,9 @@ export const fetchtoWishlist = createAsyncThunk('cart/fetchtoWishlist', async (_
     console.log('fetch to wishlist response',response);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response.data);
+    console.log('fetch wish list error: ', error);
+    
+    return rejectWithValue(error.response?.data || error.message);
   }
 });
 
@@ -92,7 +94,7 @@ const wishlistSlice = createSlice({
         state.error = action.payload.error;
       })
   
-       //get cart 
+       //get wishlist 
        .addCase(fetchtoWishlist.pending, (state)=>{
         state.isLoading = true;
       })
@@ -103,7 +105,9 @@ const wishlistSlice = createSlice({
       })
       .addCase(fetchtoWishlist.rejected, (state, action)=>{
         state.isLoading = false;
-        state.error = action.payload.error;
+        console.log('dukse', action.payload);
+        
+        state.error = action.payload?.error || action.payload;
       })
   
       //remove from cart 

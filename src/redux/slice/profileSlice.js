@@ -36,7 +36,7 @@ export const handleGetProfile = createAsyncThunk('profile/handleGetProfile', asy
     } catch (error) {
         console.log('get profile error: ', error);
         
-      return rejectWithValue(error.response?.data || error);
+      return rejectWithValue(error.response?.data || error.message || error);
     }
 });
 
@@ -150,7 +150,7 @@ const profileSlice = createSlice({
         })
         .addCase(handleGetProfile.rejected, (state, action)=>{
             state.isLoading = false;
-            state.error = action.payload?.error || action.payload
+            state.error = action.payload?.error || action.payload;
         })
 
         //profile update
