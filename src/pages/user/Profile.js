@@ -182,7 +182,6 @@ const Profile = () => {
           {[
             { label: 'Account Overview', icon: <FaUserEdit />, id: 'overview' },
             { label: 'Shipping Addresses', icon: <FaMapMarkerAlt />, id: 'address' },
-            { label: 'Security Settings', icon: <FaLock />, id: 'security' },
             { label: 'Wishlist', icon: <FaHeart />, id: 'wishlist' },
           ].map((tab) => (
             <button
@@ -527,22 +526,6 @@ const Profile = () => {
               
             </div>
 
-          )}
-
-        
-
-          {selectedTab === 'security' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Security Settings</h2>
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <p><strong>Password:</strong> ••••••••</p>
-                <button className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                  Change Password
-                </button>
-                <p className="mt-6"><strong>Two-Factor Authentication:</strong> Enabled</p>
-                <p><strong>Last Login:</strong> Oct 13, 2023, 2:30 PM</p>
-              </div>
-            </div>
           )}
 
           {selectedTab === 'wishlist' && (
