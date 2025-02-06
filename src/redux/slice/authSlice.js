@@ -263,8 +263,8 @@ const authSlice = createSlice({
           sameSite: 'Strict', // Prevents CSRF attacks
         });
 
-        localStorage.removeItem('cartItems');
-        localStorage.removeItem('wishList');
+        //localStorage.removeItem('cartItems');
+        //localStorage.removeItem('wishList');
 
       })
       .addCase(verifyOtp.rejected, (state, action) =>{

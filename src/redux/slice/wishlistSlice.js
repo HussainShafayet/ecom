@@ -3,20 +3,20 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 
 // Load initial Wish items from localStorage, or default to an empty array
-const loadWishlistFromLocalStorage = () => {
-    try {
-      const serializedWish = localStorage.getItem('wishList');
-      return serializedWish ? JSON.parse(serializedWish) : [];
-    } catch (e) {
-      console.warn("Could not load wishlist items from localStorage:", e);
-      return [];
-    }
-  };
+//const loadWishlistFromLocalStorage = () => {
+//    try {
+//      const serializedWish = localStorage.getItem('wishList');
+//      return serializedWish ? JSON.parse(serializedWish) : [];
+//    } catch (e) {
+//      console.warn("Could not load wishlist items from localStorage:", e);
+//      return [];
+//    }
+//  };
 
 
 const initialState = {
   isLoading: false,
-  items: loadWishlistFromLocalStorage(),
+  items: [],
   error: null,
 };
 
@@ -107,6 +107,7 @@ const wishlistSlice = createSlice({
       })
       .addCase(fetchtoWishlist.rejected, (state, action)=>{
         state.isLoading = false;
+        state.error = false;
         
         state.error = action.payload?.error || action.payload;
       })
@@ -117,7 +118,7 @@ const wishlistSlice = createSlice({
       })
       .addCase(handleRemovetoWishlist.fulfilled, (state, action)=>{
         state.isLoading = false;
-        console.log(action);
+        state.error = false;
         
       })
       .addCase(handleRemovetoWishlist.rejected, (state, action)=>{
@@ -130,27 +131,27 @@ const wishlistSlice = createSlice({
 export const { addToWishlist, removeFromWishlist, clearWishlist } = wishlistSlice.actions;
 
 // Save cart to localStorage whenever cart items change
-export const saveWishlistToLocalStorage = (wishlistItems) => {
-    try {
-      const serializedWish = JSON.stringify(wishlistItems);
-      localStorage.setItem('wishList', serializedWish);
-    } catch (e) {
-      console.warn("Could not save wishList items to localStorage:", e);
-    }
-  };
+//export const saveWishlistToLocalStorage = (wishlistItems) => {
+//    try {
+//      const serializedWish = JSON.stringify(wishlistItems);
+//      localStorage.setItem('wishList', serializedWish);
+//    } catch (e) {
+//      console.warn("Could not save wishList items to localStorage:", e);
+//    }
+//  };
   
   // Middleware to sync cart with localStorage
-  export const wishlistMiddleware = (store) => (next) => (action) => {
-    const result = next(action);
-    const state = store.getState().auth;
+  //export const wishlistMiddleware = (store) => (next) => (action) => {
+  //  const result = next(action);
+  //  const state = store.getState().auth;
     
-    if (
-        addToWishlist.match(action) ||
-        (!state.isAuthenticated && removeFromWishlist.match(action)) ||
-        clearWishlist.match(action)
-    ) {
-      saveWishlistToLocalStorage(store.getState().wishList.items);
-    }
-    return result;
-  };
+  //  if (
+  //      addToWishlist.match(action) ||
+  //      (!state.isAuthenticated && removeFromWishlist.match(action)) ||
+  //      clearWishlist.match(action)
+  //  ) {
+  //    saveWishlistToLocalStorage(store.getState().wishList.items);
+  //  }
+  //  return result;
+  //};
 export default wishlistSlice.reducer;

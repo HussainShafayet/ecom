@@ -2,17 +2,20 @@ import React, { useEffect, useState } from "react";
 import {ErrorDisplay, Loader, SuccessMessage} from "../../components/common";
 import {useDispatch, useSelector} from "react-redux";
 import {clearSignupState, clearVerifyOtpState, resendOtp, verifyOtp} from "../../redux/slice/authSlice";
-import {useNavigate, useParams} from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 
 const VerifyOtp = () => {
   const dispatch = useDispatch();
   const { verifyOtpLoading, verifyOtpMessage, verifyOtpError, signinMessage,isAuthenticated } = useSelector((state) => state.auth);
+  const { cartItems} = useSelector((state) => state.cart);
+  const { items } = useSelector((state) => state.wishList);
   const { user_id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation().state?.from || '/';
 
    //set local cart items
    const setLocalCart = () => {
-    const localCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    const localCartItems = cartItems || [];
     return localCartItems.map(item => ({
         product_id: item.id,
         quantity: item.quantity,
@@ -21,7 +24,7 @@ const VerifyOtp = () => {
   };
    //set local favorite items
    const setLocalFavorite = () => {
-    const localWishItems = JSON.parse(localStorage.getItem('wishList')) || [];
+    const localWishItems = items || [];
     return localWishItems.map(item => ({
         product_id: item.id,
     }));
@@ -31,10 +34,11 @@ const VerifyOtp = () => {
   const [errors, setErrors] = useState({});
 
     useEffect(() => {
+        //isAuthenticated && navigate(location, { replace: true })
         if (isAuthenticated) {
-        //  navigate(from, { replace: true }); // Redirect to previous page if already authenticated
-        dispatch(clearVerifyOtpState());
-        navigate('/')
+          //navigate(from, { replace: true }); // Redirect to previous page if already authenticated
+          dispatch(clearVerifyOtpState());
+          navigate(location, { replace: true });
         }
       }, [verifyOtpMessage, isAuthenticated]);
 

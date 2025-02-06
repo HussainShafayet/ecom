@@ -3,19 +3,19 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { removeFromWishlist } from './wishlistSlice';
 
 // Load initial cart items from localStorage, or default to an empty array
-const loadCartFromLocalStorage = () => {
-  try {
-    const serializedCart = localStorage.getItem('cartItems');
-    return serializedCart ? JSON.parse(serializedCart) : [];
-  } catch (e) {
-    console.warn("Could not load cart items from localStorage:", e);
-    return [];
-  }
-};
+//const loadCartFromLocalStorage = () => {
+//  try {
+//    const serializedCart = localStorage.getItem('cartItems');
+//    return serializedCart ? JSON.parse(serializedCart) : [];
+//  } catch (e) {
+//    console.warn("Could not load cart items from localStorage:", e);
+//    return [];
+//  }
+//};
 
 const initialState = {
   cartLoading: false,
-  cartItems: loadCartFromLocalStorage(),
+  cartItems: [],
   cartError: null,
 };
 
@@ -154,25 +154,25 @@ export const saveCartToLocalStorage = (cartItems) => {
 };
 
 // Middleware to sync cart with localStorage
-export const cartMiddleware = (store) => (next) => (action) => {
-  const result = next(action);
-  if (
-    addToCart.match(action) ||
-    removeFromCart.match(action) ||
-    updateQuantity.match(action) ||
-    clearCart.match(action)
-  ) {
-    saveCartToLocalStorage(store.getState().cart.cartItems);
-  }
-  return result;
-};
+//export const cartMiddleware = (store) => (next) => (action) => {
+//  const result = next(action);
+//  if (
+//    addToCart.match(action) ||
+//    removeFromCart.match(action) ||
+//    updateQuantity.match(action) ||
+//    clearCart.match(action)
+//  ) {
+//    saveCartToLocalStorage(store.getState().cart.cartItems);
+//  }
+//  return result;
+//};
 
 
 // Thunk to handle adding to cart and removing from wishlist
-export const addToCartAndRemoveFromWishlist = (item) => (dispatch) => {
-  dispatch(addToCart(item));
-  dispatch(removeFromWishlist(item.id)); // Remove from wishlist after adding to cart
-};
+//export const addToCartAndRemoveFromWishlist = (item) => (dispatch) => {
+//  dispatch(addToCart(item));
+//  dispatch(removeFromWishlist(item.id)); // Remove from wishlist after adding to cart
+//};
 
 export const handleClonedProduct = (product, selectedSize, selectedColor, quantity)=>(dispatch)=>{
   const dummyProduct = {}

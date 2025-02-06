@@ -48,8 +48,8 @@ const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: false,  // Required for redux-persist
     })
-    .concat(cartMiddleware)
-    .concat(wishlistMiddleware),
+    //.concat(cartMiddleware)
+    //.concat(wishlistMiddleware),
 });
 
 // Persistor
