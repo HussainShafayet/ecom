@@ -145,8 +145,9 @@ const authSlice = createSlice({
   ,
   reducers: {
     loadUserFromStorage: (state) => {
-      const accessToken = localStorage.getItem('accessToken');
-      const refreshToken = localStorage.getItem('refreshToken');
+      const accessToken = Cookies.get('access_token');
+      const refreshToken = Cookies.get('refresh_token');
+
       if (accessToken && refreshToken) {
         state.accessToken = accessToken;
         state.refreshToken = refreshToken;
@@ -196,25 +197,29 @@ const authSlice = createSlice({
         //console.log(action);
         state.accessToken = action.payload.data.access; // Update the access token
         state.isAuthenticated = true;
-        localStorage.setItem('accessToken', action.payload.data.access);
-        localStorage.setItem('refreshToken', action.payload.data.refresh);
+        Cookies.set('access_token', action.payload.data.access, {
+          secure: true, // Ensures cookies are sent only over HTTPS
+          sameSite: 'Strict', // Prevents CSRF attacks
+        });
+        Cookies.set('refresh_token', action.payload.data.refresh, {
+          secure: true, // Ensures cookies are sent only over HTTPS
+          sameSite: 'Strict', // Prevents CSRF attacks
+        });
       })
 
       .addCase(logoutUser.fulfilled, (state) => {
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
+        Cookies.remove('access_token');
         Cookies.remove('refresh_token');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
       })
       .addCase(logoutUser.rejected, (state,action) => {
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
+        Cookies.remove('access_token');
         Cookies.remove('refresh_token');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
       })
 
       //signup
@@ -252,12 +257,13 @@ const authSlice = createSlice({
           secure: true, // Ensures cookies are sent only over HTTPS
           sameSite: 'Strict', // Prevents CSRF attacks
         });
+        Cookies.set('access_token', action.payload.tokens.access, {
+          secure: true, // Ensures cookies are sent only over HTTPS
+          sameSite: 'Strict', // Prevents CSRF attacks
+        });
 
         localStorage.removeItem('cartItems');
         localStorage.removeItem('wishList');
-
-        localStorage.setItem('accessToken', action.payload.tokens.access);
-        localStorage.setItem('refreshToken', action.payload.tokens.refresh);
 
       })
       .addCase(verifyOtp.rejected, (state, action) =>{
