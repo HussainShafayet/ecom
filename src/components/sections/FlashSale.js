@@ -102,36 +102,11 @@ const FlashSale = ({forRoute}) => {
           </div>
         </div>
         }
-        <div className='my-5'>
-          <h2 className="text-3xl font-bold">Flash Sale</h2>
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
-            <span className="text-sm md:text-base text-gray-600">
-              Discover the latest trends with our Flash Sale Products.
-            </span>
-            {!forRoute && 
-            <Link
-              to="/products/flash-sale"
-              className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
-              target='_blank'
-            >
-              View All
-            </Link>
-            }
-          </div>
-          {products.length === 0  ? <div className='text-center'>
-            <span>Not found</span>
-          </div>:
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-          }
-        </div>
-        {forRoute && 
+       
+         
+          {products.length != 0 &&
           <div className='my-5'>
-            <h2 className="text-3xl font-bold">Recomendent Products</h2>
+            <h2 className="text-3xl font-bold">Flash Sale</h2>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
               <span className="text-sm md:text-base text-gray-600">
                 Discover the latest trends with our Flash Sale Products.
@@ -140,22 +115,48 @@ const FlashSale = ({forRoute}) => {
               <Link
                 to="/products/flash-sale"
                 className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
+                target='_blank'
               >
                 View All
               </Link>
               }
             </div>
-            {products.length === 0  ? <div className='text-center'>
-              <span>Not found</span>
-            </div>:
-
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
-            }
           </div>
+          }
+        
+        {forRoute && 
+          <>
+          {products.length != 0  &&
+            <div className='my-5'>
+              <h2 className="text-3xl font-bold">Recomendent Products</h2>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
+                <span className="text-sm md:text-base text-gray-600">
+                  Discover the latest trends with our Flash Sale Products.
+                </span>
+                {!forRoute && 
+                <Link
+                  to="/products/flash-sale"
+                  className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
+                >
+                  View All
+                </Link>
+                }
+              </div>
+              
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </div>
+          }
+          </>
         }
       </div>
      }

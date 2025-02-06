@@ -105,6 +105,8 @@ const FeaturedProducts = ({forRoute}) => {
           </div>
         </div>
         }
+
+        {products.length != 0  &&
         <div className='my-5'>
           <h2 className="text-3xl font-bold">Featured Products</h2>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -121,18 +123,16 @@ const FeaturedProducts = ({forRoute}) => {
               </Link>
             }
           </div>
-          {products.length === 0  ? <div className='text-center'>
-            <span>Not found</span>
-          </div>:
-
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-          }
         </div>
+        }
 
+        {products.length != 0  &&
+        <>
         {forRoute && 
           <div className='my-5'>
             <h2 className="text-3xl font-bold">Recomendent Products</h2>
@@ -160,6 +160,8 @@ const FeaturedProducts = ({forRoute}) => {
             </div>
             }
           </div>
+        } 
+        </>
         }
       </div>
     }

@@ -40,7 +40,7 @@ api.interceptors.response.use(
             const result = await store.dispatch(refreshToken({expiresInMins:1,refresh: refresh_token}));
             console.log('new access result', result);
             
-            const newAccessToken = result.payload.accessToken;
+            const newAccessToken = result.payload.data.access;
 
             // Update the Authorization header with the new token
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
