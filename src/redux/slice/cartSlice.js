@@ -14,9 +14,9 @@ const loadCartFromLocalStorage = () => {
 };
 
 const initialState = {
-  isLoading: false,
+  cartLoading: false,
   cartItems: loadCartFromLocalStorage(),
-  error: null,
+  cartError: null,
 };
 
 // Async action for add to cart
@@ -32,7 +32,7 @@ export const handleAddtoCart = createAsyncThunk('cart/handleAddtoCart', async (f
   }
 });
 
-// Async action for add to cart
+// Async action for get to cart
 export const handleFetchCart = createAsyncThunk('cart/handleFetchCart', async (_, { rejectWithValue }) => {
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
@@ -43,7 +43,7 @@ export const handleFetchCart = createAsyncThunk('cart/handleFetchCart', async (_
   } catch (error) {
     console.log('fetch error cart:', error);
     
-    return rejectWithValue(error?.response?.data || error.message || 'Something went wrong!');
+    return rejectWithValue(error?.response?.data || error.message);
   }
 });
 
@@ -91,42 +91,42 @@ const cartSlice = createSlice({
     builder
     //add to cart 
     .addCase(handleAddtoCart.pending, (state)=>{
-      state.isLoading = true;
+      state.cartLoading = true;
     })
     .addCase(handleAddtoCart.fulfilled, (state, action)=>{
-      state.isLoading = false;
+      state.cartLoading = false;
     })
     .addCase(handleAddtoCart.rejected, (state, action)=>{
-      state.isLoading = false;
-      state.error = action.payload.error;
+      state.cartLoading = false;
+      state.cartError = action.payload.error;
     })
 
      //get cart 
      .addCase(handleFetchCart.pending, (state)=>{
-      state.isLoading = true;
+      state.cartLoading = true;
     })
     .addCase(handleFetchCart.fulfilled, (state, action)=>{
-      state.isLoading = false;
+      state.cartLoading = false;
       state.cartItems = action.payload.data;
       
     })
     .addCase(handleFetchCart.rejected, (state, action)=>{
-      state.isLoading = false;
-      state.error = action.payload.error;
+      state.cartLoading = false;
+      state.cartError = action.payload.error || action.payload;
     })
 
     //remove from cart 
     .addCase(handleRemovetoCart.pending, (state)=>{
-      state.isLoading = true;
+      state.cartLoading = true;
     })
     .addCase(handleRemovetoCart.fulfilled, (state, action)=>{
-      state.isLoading = false;
+      state.cartLoading = false;
       console.log(action);
       
     })
     .addCase(handleRemovetoCart.rejected, (state, action)=>{
-      state.isLoading = false;
-      state.error = action.payload.error;
+      state.cartLoading = false;
+      state.cartError = action.payload.error;
     })
   }
 });

@@ -32,7 +32,7 @@ import debounce from 'lodash.debounce'; // Import lodash debounce
 const Checkout = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector(selectCartItems);
-  const {isLoading} = useSelector((state)=>state.cart);
+  const {cartLoading} = useSelector((state)=>state.cart);
   const navigate = useNavigate();
 
   const { formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, delivery_charges } = useSelector(
@@ -54,10 +54,10 @@ const Checkout = () => {
   }, [isCheckoutFulfilled,dispatch]);
 
   useEffect(() => {
-    if (!isLoading && cartItems.length === 0) {
+    if (!cartLoading && cartItems.length === 0) {
       //navigate('/cart'); // Redirect to cart page if no items
     }
-  }, [cartItems, isLoading, navigate]);
+  }, [cartItems, cartLoading, navigate]);
 
   // Debounced API call
     const debouncedUpdateQuantity = useCallback(

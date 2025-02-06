@@ -5,6 +5,8 @@ export {default as ProductDetailsSkeleton} from './ProductDetailsSkeleton';
 export {default as ProductsPageSkeleton} from './ProductsPageSkeleton';
 export {default as SidebarSkeleton} from './SidebarSkeleton';
 export {default as ProfileSkeleton} from './ProfileSkeleton';
+export {default as CartSkeleton} from './CartSkeleton';
+
 
 
 
