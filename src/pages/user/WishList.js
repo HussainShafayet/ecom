@@ -151,7 +151,7 @@ const WishList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    !isAuthenticated && navigate('/signin')
+    //!isAuthenticated && navigate('/signin')
     isAuthenticated && dispatch(fetchtoWishlist());
    }, [dispatch, navigate, isAuthenticated]);
    

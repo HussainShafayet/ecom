@@ -1,27 +1,51 @@
-import {configureStore} from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage"; // Local storage for persistence
+
+// Import reducers
 import productReducer from "./slice/productSlice";
 import categoryReducer from "./slice/categorySlice";
-import authSlice from "./slice/authSlice";
-import checkoutReducer from './slice/checkoutSlice'
-import cartReducer, {cartMiddleware} from './slice/cartSlice';
-import wishListReducer,{wishlistMiddleware} from './slice/wishlistSlice';
-import contentReducer from './slice/contentSlice'
-import profileReducer from './slice/profileSlice'
+import authReducer from "./slice/authSlice";  // Authentication slice
+import checkoutReducer from './slice/checkoutSlice';
+import cartReducer, { cartMiddleware } from './slice/cartSlice';
+import wishListReducer, { wishlistMiddleware } from './slice/wishlistSlice';
+import contentReducer from './slice/contentSlice';
+import profileReducer from './slice/profileSlice';
 
-const store = configureStore({
-    reducer: {
-        product: productReducer,
-        category: categoryReducer,
-        auth: authSlice,
-        checkout: checkoutReducer,
-        cart: cartReducer,
-        wishList: wishListReducer,
-        content: contentReducer,
-        profile: profileReducer,
-    },
-    middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(cartMiddleware)
-        .concat(wishlistMiddleware)
+// Persist Config for Selected Reducers
+const persistConfig = {
+  key: "root",
+  storage,
+  whitelist: ["auth", "cart", "wishList"], // Only persist these slices
+};
+
+// Combine Reducers
+const rootReducer = combineReducers({
+  product: productReducer,      // Not persisted
+  category: categoryReducer,    // Not persisted
+  auth: authReducer,            // Persisted
+  checkout: checkoutReducer,    // Not persisted
+  cart: cartReducer,            // Persisted
+  wishList: wishListReducer,    // Persisted
+  content: contentReducer,      // Not persisted
+  profile: profileReducer       // Not persisted
 });
+
+// Apply Persist Reducer
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+// Create Store
+const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,  // Required for redux-persist
+    })
+    .concat(cartMiddleware)
+    .concat(wishlistMiddleware),
+});
+
+// Persistor
+export const persistor = persistStore(store);
 
 export default store;

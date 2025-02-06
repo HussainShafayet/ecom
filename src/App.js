@@ -46,7 +46,10 @@ function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/wishlist" element={<WishList />} />
+            {/* Protect Wishlist Route */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/wishlist" element={<WishList />} />
+            </Route>
             <Route path="/verify-otp/:user_id" element={<VerifyOtp />} />
 
 

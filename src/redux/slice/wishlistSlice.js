@@ -82,12 +82,13 @@ const wishlistSlice = createSlice({
   },
   extraReducers: (builder) => {
       builder
-      //add to cart 
+      //add to wishlist 
       .addCase(handleAddtoWishlist.pending, (state)=>{
         state.isLoading = true;
       })
       .addCase(handleAddtoWishlist.fulfilled, (state, action)=>{
         state.isLoading = false;
+        state.error = false;
       })
       .addCase(handleAddtoWishlist.rejected, (state, action)=>{
         state.isLoading = false;
@@ -100,6 +101,7 @@ const wishlistSlice = createSlice({
       })
       .addCase(fetchtoWishlist.fulfilled, (state, action)=>{
         state.isLoading = false;
+        state.error = false;
         state.items = action.payload.data;
         
       })
