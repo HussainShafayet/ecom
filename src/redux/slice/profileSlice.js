@@ -62,7 +62,9 @@ export const handleGetAddress = createAsyncThunk('profile/handleGetAddress', asy
       console.log('get address response',response);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+        console.log('get address error: ', error);
+        
+      return rejectWithValue(error?.response?.data || error.message);
     }
 });
 
@@ -150,7 +152,8 @@ const profileSlice = createSlice({
         })
         .addCase(handleGetProfile.rejected, (state, action)=>{
             state.isLoading = false;
-            state.error = action.payload?.error || action.payload;
+            
+            state.error = action.payload.error || action.payload;
         })
 
         //profile update
@@ -179,7 +182,7 @@ const profileSlice = createSlice({
         })
         .addCase(handleGetAddress.rejected, (state, action)=>{
             state.adrressLoading = false;
-            state.addressError = action.payload.error
+            state.addressError = action.payload.error || action.payload;
         })
 
         //address create

@@ -105,7 +105,6 @@ const wishlistSlice = createSlice({
       })
       .addCase(fetchtoWishlist.rejected, (state, action)=>{
         state.isLoading = false;
-        console.log('dukse', action.payload);
         
         state.error = action.payload?.error || action.payload;
       })

@@ -41,7 +41,9 @@ export const handleFetchCart = createAsyncThunk('cart/handleFetchCart', async (_
     console.log('get cart response',response);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response.data);
+    console.log('fetch error cart:', error);
+    
+    return rejectWithValue(error?.response?.data || error.message || 'Something went wrong!');
   }
 });
 
@@ -54,7 +56,7 @@ export const handleRemovetoCart = createAsyncThunk('cart/handleRemovetoCart', as
     console.log('remove to cart response',response);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response.data);
+    return rejectWithValue(error?.response?.data || error.message || 'Something went wrong!');
   }
 });
 

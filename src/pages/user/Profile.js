@@ -26,7 +26,7 @@ const Profile = () => {
   
   useEffect(()=>{
     if (!isAuthenticated) {
-      navigate('/signin');
+      //navigate('/signin');
     }
     isAuthenticated && dispatch(handleGetProfile());
   }, [dispatch, isAuthenticated, navigate]);

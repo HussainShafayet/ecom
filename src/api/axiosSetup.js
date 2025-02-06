@@ -22,38 +22,44 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response, // Return response if no errors
   async (error) => {
-    const originalRequest = error.config;
+    if (!error.response) {
+      // Network error (no response from server)
+      console.log("Network error: Check your internet connection.");
+    } else {
 
-    // Check if error is due to an expired access token
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true; // Prevents infinite loop
+      const originalRequest = error.config;
 
-      try {
-        console.log('Refreshing access token...'); // Log the refresh attempt
-        const refresh_token = Cookies.get('refresh_token');
-        if (refresh_token) {
-          const result = await store.dispatch(refreshToken({expiresInMins:1,refresh: refresh_token}));
-          console.log('new access result', result);
-          
-          const newAccessToken = result.payload.accessToken;
+      // Check if error is due to an expired access token
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true; // Prevents infinite loop
 
-          // Update the Authorization header with the new token
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        try {
+          console.log('Refreshing access token...'); // Log the refresh attempt
+          const refresh_token = Cookies.get('refresh_token');
+          if (refresh_token) {
+            const result = await store.dispatch(refreshToken({expiresInMins:1,refresh: refresh_token}));
+            console.log('new access result', result);
+            
+            const newAccessToken = result.payload.accessToken;
 
-          // Retry the original request with the new token
-          return api(originalRequest);
-        }else{
-          throw 'Session is Expired'
+            // Update the Authorization header with the new token
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+            // Retry the original request with the new token
+            return api(originalRequest);
+          }else{
+            throw 'Session is Expired'
+          }
+        } catch (refreshError) {
+          // If refreshing fails, log the user out and return error
+          console.log('Refresh token expired or invalid, logging out...');
+          store.dispatch(logoutUser());
+          return Promise.reject(refreshError);
         }
-      } catch (refreshError) {
-        // If refreshing fails, log the user out and return error
-        console.log('Refresh token expired or invalid, logging out...');
-        store.dispatch(logoutUser());
-        return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
+  
   }
 );
 
