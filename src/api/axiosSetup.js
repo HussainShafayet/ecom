@@ -1,8 +1,9 @@
 // src/api/axiosSetup.js
 import axios from 'axios';
-import {logoutUser, refreshToken} from '../redux/slice/authSlice';
+import {refreshToken} from '../redux/slice/authSlice';
 import store from '../redux/store';
 import Cookies from 'js-cookie';
+import {Logout} from '../redux/slice/authActions';
 
 const api = axios.create({
   baseURL: 'http://192.168.0.103:8000',
@@ -53,7 +54,7 @@ api.interceptors.response.use(
         } catch (refreshError) {
           // If refreshing fails, log the user out and return error
           console.log('Refresh token expired or invalid, logging out...');
-          store.dispatch(logoutUser());
+          store.dispatch(Logout());
           return Promise.reject(refreshError);
         }
       }

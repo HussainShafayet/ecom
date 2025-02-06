@@ -1,6 +1,6 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
-import storage from "redux-persist/lib/storage"; // Local storage for persistence
+import storage from "redux-persist/lib/storage"; // Local storage
 
 // Import reducers
 import productReducer from "./slice/productSlice";
@@ -12,21 +12,28 @@ import wishListReducer, { wishlistMiddleware } from './slice/wishlistSlice';
 import contentReducer from './slice/contentSlice';
 import profileReducer from './slice/profileSlice';
 
-// Persist Config for Selected Reducers
+// ✅ Persist Only `isAuthenticated` (Not Full auth Slice)
+const authPersistConfig = {
+  key: "auth",
+  storage,
+  whitelist: ["isAuthenticated"], // ✅ Only persist isAuthenticated
+};
+
+// ✅ Persist Other Slices as Normal
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "cart", "wishList"], // Only persist these slices
+  whitelist: ["cart", "wishList"], // ✅ Persist cart and wishlist as before
 };
 
-// Combine Reducers
+// Combine reducers with auth having its own persist reducer
 const rootReducer = combineReducers({
   product: productReducer,      // Not persisted
   category: categoryReducer,    // Not persisted
-  auth: authReducer,            // Persisted
+  auth: persistReducer(authPersistConfig, authReducer), // ✅ Only persist isAuthenticated
   checkout: checkoutReducer,    // Not persisted
-  cart: cartReducer,            // Persisted
-  wishList: wishListReducer,    // Persisted
+  cart: cartReducer,            // ✅ Persisted
+  wishList: wishListReducer,    // ✅ Persisted
   content: contentReducer,      // Not persisted
   profile: profileReducer       // Not persisted
 });

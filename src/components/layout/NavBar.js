@@ -4,6 +4,7 @@ import { FaShoppingCart, FaUser, FaBars, FaTimes, FaSearch, FaHeart, FaSignInAlt
 import {useDispatch, useSelector} from 'react-redux';
 import {logoutUser} from '../../redux/slice/authSlice';
 import { selectCartCount } from '../../redux/slice/cartSlice';
+import {Logout} from '../../redux/slice/authActions';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,7 +22,7 @@ const Navbar = () => {
 
 
   const handleLogout = () => {
-    dispatch(logoutUser({access: accessToken, refresh: refreshToken}));
+    dispatch(Logout({access: accessToken, refresh: refreshToken}));
     setProfileMenuOpen(false);
     navigate('/'); // Redirect to home page after logout, or choose another route
   };
