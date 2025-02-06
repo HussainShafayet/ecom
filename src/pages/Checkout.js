@@ -55,7 +55,7 @@ const Checkout = () => {
 
   useEffect(() => {
     if (!cartLoading && cartItems.length === 0) {
-      //navigate('/cart'); // Redirect to cart page if no items
+      navigate('/products'); // Redirect to cart page if no items
     }
   }, [cartItems, cartLoading, navigate]);
 
