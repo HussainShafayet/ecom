@@ -45,7 +45,7 @@ export const fetchtoWishlist = createAsyncThunk('cart/fetchtoWishlist', async (_
   } catch (error) {
     console.log('fetch wish list error: ', error);
     
-    return rejectWithValue(error.response?.data || error.message);
+    return rejectWithValue(error?.response?.data || error.message);
   }
 });
 

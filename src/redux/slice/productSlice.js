@@ -120,6 +120,7 @@ const productSlice = createSlice({
         builder.addCase(fetchAllProducts.fulfilled,(state, action)=>{
             state.relatedProductsLoading = false;
             state.isLoading = false;
+            state.error = null;
             state.items = action.meta.arg.page > 1 
             ? [...state.items, ...action.payload.data] 
             : action.payload.data;
@@ -144,6 +145,7 @@ const productSlice = createSlice({
         builder.addCase(fetchNewArrivalProducts.fulfilled,(state, action)=>{
             state.relatedProductsLoading = false;
             state.new_arrival_Loading = false;
+            state.new_arrival_error = null;
             state.new_arrival = action.meta.arg.page > 1 
             ? [...state.new_arrival, ...action.payload.data] 
             : action.payload.data;
@@ -168,6 +170,7 @@ const productSlice = createSlice({
             
             state.relatedProductsLoading = false;
             state.best_selling_Loading = false;
+            state.best_selling_error = null;
             state.best_selling = action.meta.arg.page > 1 
             ? [...state.best_selling, ...action.payload.data] 
             : action.payload.data;
@@ -192,6 +195,7 @@ const productSlice = createSlice({
             
             state.relatedProductsLoading = false;
             state.flash_sale_Loading = false;
+            state.flash_sale_error = null;
             state.flash_sale = action.meta.arg.page > 1 
             ? [...state.flash_sale, ...action.payload.data] 
             : action.payload.data;
@@ -216,6 +220,7 @@ const productSlice = createSlice({
             
             state.relatedProductsLoading = false;
             state.featured_Loading = false;
+            state.featured_error = null;
             state.featured = action.meta.arg.page > 1 
             ? [...state.featured, ...action.payload.data] 
             : action.payload.data;
@@ -237,6 +242,7 @@ const productSlice = createSlice({
         });
         builder.addCase(fetchProductById.fulfilled,(state, action)=>{
             state.isLoading = false;
+            state.error = null;
             state.product = action.payload;
             //state.mainImage = action.payload.media_files[0];
             const product = action.payload;
@@ -251,7 +257,6 @@ const productSlice = createSlice({
                     state.selectedSize = action.payload.sizes[0];
                 }
             }
-            state.error = null
 
             //set quantity initial
             state.minimum_quantity = action.payload?.minimum_order_quantity;

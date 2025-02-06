@@ -70,11 +70,11 @@ const contentSlice = createSlice({
         });
         builder.addCase(fetchHomeContent.fulfilled,(state, action)=>{
             state.isLoading = false;
+            state.error = null;
             state.image_sliders = action.payload.data.page_content.image_sliders;
             state.video_sliders = action.payload.data.page_content.video_sliders;
             state.left_banner = action.payload.data.page_content.left_banner;
             state.right_banner = action.payload.data.page_content.right_banner;
-            state.error = null;
         });
         builder.addCase(fetchHomeContent.rejected,(state, action)=>{
             state.isLoading = false;
@@ -92,11 +92,12 @@ const contentSlice = createSlice({
         });
         builder.addCase(fetchNewArrivalContent.fulfilled,(state, action)=>{
             state.isLoading = false;
+            state.error = null;
             state.image_sliders = action.payload.data.page_content.image_sliders;
             state.video_sliders = action.payload.data.page_content.video_sliders;
             state.left_banner = action.payload.data.page_content.left_banner;
             state.right_banner = action.payload.data.page_content.right_banner;
-            state.error = null;
+            
         });
         builder.addCase(fetchNewArrivalContent.rejected,(state, action)=>{
             state.isLoading = false;
@@ -113,11 +114,12 @@ const contentSlice = createSlice({
         });
         builder.addCase(fetchFlashSaleContent.fulfilled,(state, action)=>{
             state.isLoading = false;
+            state.error = null;
             state.image_sliders = action.payload.data.page_content.image_sliders;
             state.video_sliders = action.payload.data.page_content.video_sliders;
             state.left_banner = action.payload.data.page_content.left_banner;
             state.right_banner = action.payload.data.page_content.right_banner;
-            state.error = null;
+            
         });
         builder.addCase(fetchFlashSaleContent.rejected,(state, action)=>{
             state.isLoading = false;
@@ -135,11 +137,12 @@ const contentSlice = createSlice({
         });
         builder.addCase(fetchBestSellingContent.fulfilled,(state, action)=>{
             state.isLoading = false;
+            state.error = null;
             state.image_sliders = action.payload.data.page_content.image_sliders;
             state.video_sliders = action.payload.data.page_content.video_sliders;
             state.left_banner = action.payload.data.page_content.left_banner;
             state.right_banner = action.payload.data.page_content.right_banner;
-            state.error = null;
+            
         });
         builder.addCase(fetchBestSellingContent.rejected,(state, action)=>{
             state.isLoading = false;
@@ -157,11 +160,12 @@ const contentSlice = createSlice({
         });
         builder.addCase(fetchFeaturedContent.fulfilled,(state, action)=>{
             state.isLoading = false;
+            state.error = null;
             state.image_sliders = action.payload.data.page_content.image_sliders;
             state.video_sliders = action.payload.data.page_content.video_sliders;
             state.left_banner = action.payload.data.page_content.left_banner;
             state.right_banner = action.payload.data.page_content.right_banner;
-            state.error = null;
+            
         });
         builder.addCase(fetchFeaturedContent.rejected,(state, action)=>{
             state.isLoading = false;
@@ -179,6 +183,7 @@ const contentSlice = createSlice({
         });
         builder.addCase(fetchShopContent.fulfilled,(state, action)=>{
             state.isLoading = false;
+            state.error = null;
             state.categories =  action.payload.data.categories;
             state.tags =  action.payload.data.tags;
             state.brands =  action.payload.data.brands;
@@ -186,7 +191,7 @@ const contentSlice = createSlice({
             state.sizes =  action.payload.data.sizes;
             state.price_range =  action.payload.data.price_range;
             state.discounts =  action.payload.data.discounts;
-            state.error = null;
+            
         });
         builder.addCase(fetchShopContent.rejected,(state, action)=>{
             state.isLoading = false;
@@ -207,11 +212,12 @@ const contentSlice = createSlice({
         });
         builder.addCase(fetchCategoriesContent.fulfilled,(state, action)=>{
             state.isLoading = false;
+            state.error = null;
             state.image_sliders = action.payload.data.page_content.image_sliders;
             state.video_sliders = action.payload.data.page_content.video_sliders;
             state.left_banner = action.payload.data.page_content.left_banner;
             state.right_banner = action.payload.data.page_content.right_banner;
-            state.error = null;
+            
         });
         builder.addCase(fetchCategoriesContent.rejected,(state, action)=>{
             state.isLoading = false;
