@@ -5,7 +5,7 @@ import {Breadcrum, Loader, ProductCard, Sidebar} from '../components/common';  /
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts, setIsSidebarOpen, setSortType} from '../redux/slice/productSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import {FaArrowDown, FaArrowUp} from 'react-icons/fa';
+import {FaArrowDown, FaArrowUp, FaFilter, FaFlag} from 'react-icons/fa';
 import {ProductsPageSkeleton} from '../components/common/skeleton';
 
 const Products = ({scrollContainerRef}) => {
@@ -166,20 +166,21 @@ const Products = ({scrollContainerRef}) => {
         ) :
         <>
           {/* Sort and Show Items Options Above Product List */}
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-wrap justify-between items-center mb-4">
             {/* Mobile Toggle Button for Sidebar */}
-            <button
+            {/*<button
                 onClick={() => handleSidebarOpen(true)}
                 className="block lg:hidden bg-blue-500 text-white py-1 px-2 rounded-lg z-10 relative"
               >
               Show Filters
-            </button>
+            </button>*/}
+            <FaFilter className="block lg:hidden ml-2  z-10 relative" onClick={() => handleSidebarOpen(true)}/>
 
             <div> 
               <h1 className="hidden md:block text-2xl font-bold capitalize">{lastPathSegment.replace(/-/g, ' ')}</h1>
             </div>
 
-            <div className='flex flex-nowrap space-x-2'>
+            <div className='flex space-x-2'>
               {/* Show Items Dropdown */}
               <div className="flex items-center">
                 <span className="hidden sm:block text-gray-600 font-medium mr-2">Show</span>
@@ -195,7 +196,7 @@ const Products = ({scrollContainerRef}) => {
                 </select>
               </div>
               {/* Sort Type Toggle for Mobile and Default Dropdown for Desktop */}
-              <div className="sm:hidden">
+              {/*<div className="sm:hidden">
                 <button
                   onClick={toggleSortType}
                   className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
@@ -212,11 +213,11 @@ const Products = ({scrollContainerRef}) => {
                   </div>
                   }
                 </button>
-              </div>
+              </div>*/}
 
               {/* Sort by Amount Dropdown */}
-              <div className="hidden sm:flex items-center">
-                <span className="text-gray-600 font-medium mr-2 text-nowrap">Sort by:</span>
+              <div className="sm:flex items-center">
+                <span className="hidden sm:block text-gray-600 font-medium mr-2 text-nowrap">Sort by:</span>
                 <select
                   value={ordering}
                   onChange={handleSortChange}
