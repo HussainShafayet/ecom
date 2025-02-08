@@ -31,8 +31,9 @@ const initialState = {
 const API_URL = 'https://dummyjson.com/products';
 
 //get all products
-export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", async ({page_size=null,sortBy=null, order=null, page=1,category = null, brands=[], tags=[], min_price=0, max_price=0, sizes=[], colors=[],discount_type, discount_value})=>{
-    let response = await getAllProducts(page_size, sortBy, order, page, category, brands,tags, min_price, max_price, sizes, colors,discount_type, discount_value);
+export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", async ({page_size=null,ordering=null, page=1,category = null, brands=[], tags=[], min_price=0, max_price=0, sizes=[], colors=[],discount_type, discount_value})=>{
+
+    let response = await getAllProducts(page_size, ordering, page, category, brands,tags, min_price, max_price, sizes, colors,discount_type, discount_value);
     console.log('get all product res', response);
     
     return {data: response.data.data.results, error: response.message};

@@ -22,20 +22,18 @@ const Products = ({scrollContainerRef}) => {
   const lastPathSegment = pathParts[pathParts.length - 1] || 'Products'; //end last path
 
 
-  const sortOptions = ['', 'asc', 'desc']; // Define sort option
+  const sortOptions = ['', 'price', '-price', 'discount_price', '-discount_price', 'rating', '-rating']; // Define sort option
 
   // Initialize page and limit from searchParams
   const [page, setPage] = useState(parseInt(searchParams.get('page') || 1));
-  const [page_size, setPage_Size] = useState(parseInt(searchParams.get('page_size') || 20)); // Default limit of 30
+  const [page_size, setPage_Size] = useState(parseInt(searchParams.get('page_size') || 30)); // Default limit of 30
+  const [ordering, setOrdering] = useState(searchParams.get('ordering') || '');
 
-  // Extract necessary parameters from searchParams
-  const sortBy = searchParams.get('sortBy');
-  const order = searchParams.get('order');
   
   // First useEffect: Reset values if URL parameters are missing
   useEffect(() => {
     if (!searchParams.has('page')) setPage(1);
-    if (!searchParams.has('page_size')) setPage_Size(20);
+    if (!searchParams.has('page_size')) setPage_Size(30);
   }, [searchParams]);
 
   useEffect(() => {
@@ -59,7 +57,7 @@ const Products = ({scrollContainerRef}) => {
     const discount_type = searchParams.get("discount_type");
     const discount_value = searchParams.get("discount_value");
 
-    dispatch(fetchAllProducts({page_size:page_size, sortBy, order, page,category, brands,tags, min_price, max_price, sizes, colors, discount_type, discount_value}));
+    dispatch(fetchAllProducts({page_size, ordering, page,category, brands,tags, min_price, max_price, sizes, colors, discount_type, discount_value}));
     
     
   }, [dispatch,searchParams]);  // Fetch new products whenever the query parameter changes
@@ -78,13 +76,7 @@ const Products = ({scrollContainerRef}) => {
     });
   };
 
-  //if (isLoading && page === 1) {
-  //  return <div className='container h-screen flex justify-center'><Loader message='Loading Products' /></div>
-  //}
-
-  //if (error) {
-  //  return <div className="text-center text-red-500">{error}</div>;
-  //}
+ 
   const toggleSortType = () => {
     // Cycle through sort options on each button click
     const currentIndex = sortOptions.indexOf(sortType);
@@ -97,24 +89,20 @@ const Products = ({scrollContainerRef}) => {
   const handleSortChange = (e) => {
 
     const selectedSort = e.target.value;
-    const page_size = searchParams.get('paze_size') || 20; // Use default limit if not in searchParams
-  
-    setPage_Size(page_size);
-    setPage(1); // Reset page to 1 for new sort
-    //setSkip(0);
+    setOrdering(selectedSort);
   
     // Start with all existing search params
-      const updatedParams = { ...Object.fromEntries(searchParams), page_size, page: 1, };
+      const updatedParams = { ...Object.fromEntries(searchParams)};
     
   
     // Conditionally set 'order' if it differs from the default
     if (selectedSort !== '') {
-      updatedParams.sortBy = 'price';
-      updatedParams.order = selectedSort;
+      //updatedParams.sortBy = 'price';
+      updatedParams.ordering = selectedSort;
     } else {
       
-      delete updatedParams.sortBy;
-      delete updatedParams.order;
+      //delete updatedParams.sortBy;
+      delete updatedParams.ordering;
     }
     
     // Update search params in the URL
@@ -124,18 +112,13 @@ const Products = ({scrollContainerRef}) => {
   
   const handleItemsToShowChange = (e) => {
     const itemShow = parseInt(e.target.value);
+    
     const sortBy = searchParams.get('sortBy');
     const order = searchParams.get('order');
     
     setPage_Size(itemShow);
     setPage(1); // Reset page to 1 for the new limit
-    //setSkip(0);
-    
-    if (sortBy && order) {
-      setSearchParams({ ...Object.fromEntries(searchParams), page_size: itemShow, sortBy:'price',order, page: 1,})
-    }else{
       setSearchParams({ ...Object.fromEntries(searchParams), page_size: itemShow, page: 1 })
-    }
 
   };
 
@@ -201,7 +184,7 @@ const Products = ({scrollContainerRef}) => {
               <div className="flex items-center">
                 <span className="hidden sm:block text-gray-600 font-medium mr-2">Show</span>
                 <select
-                  value={searchParams.get('limit') || 30}
+                  value={page_size}
                   onChange={handleItemsToShowChange}
                   className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
                 >
@@ -235,13 +218,17 @@ const Products = ({scrollContainerRef}) => {
               <div className="hidden sm:flex items-center">
                 <span className="text-gray-600 font-medium mr-2 text-nowrap">Sort by:</span>
                 <select
-                  value={searchParams.get('order') || ''}
+                  value={ordering}
                   onChange={handleSortChange}
                   className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
                 >
                   <option value="">Default</option>
-                  <option value="asc">Price: Low to High</option>
-                  <option value="desc">Price: High to Low</option>
+                  <option value="price">Price: Low to High</option>
+                  <option value="-price">Price: High to Low</option>
+                  <option value="discount_price">Discount Price: Low to High</option>
+                  <option value="-discount_price">Discount Price: High to Low</option>
+                  <option value="rating">Rating: Low to High</option>
+                  <option value="-rating">Rating: High to Low</option>
                 </select>
               </div>
 

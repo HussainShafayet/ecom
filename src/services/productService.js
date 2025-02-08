@@ -4,7 +4,7 @@ import axios from 'axios';
 const API_URL = 'http://192.168.0.103:8000'; // Replace with your API base URL
 
 // src/services/productService.js
-export const getAllProducts = async (page_size = null, sortBy = null, order = null, page = null, category= null,brands=[], tags=[], min_price = 0,max_price = 0, sizes=[], colors=[], discount_type, discount_value) => {
+export const getAllProducts = async (page_size = null, ordering = null, page = null, category= null,brands=[], tags=[], min_price = 0,max_price = 0, sizes=[], colors=[], discount_type, discount_value) => {
   let query = '';
 
   if (page) {
@@ -13,14 +13,11 @@ export const getAllProducts = async (page_size = null, sortBy = null, order = nu
   if (page_size) {
     query += `page_size=${page_size}&`; // Add limit
   }
-  if (sortBy) {
-    query += `sortBy=${sortBy}&`; // Add sorting
-  }
-  if (order) {
-    query += `order=${order}&`; // Add order (asc or desc)
+  if (ordering) {
+    query += `ordering=${ordering}&`; // Add order 
   }
   if (category) {
-    query += `category=${category}&`; // Add order (asc or desc)
+    query += `category=${category}&`; // Add order category
   }
   if (brands.length>0) {
     query += `brands=${brands.toString()}&`; // Add brands
