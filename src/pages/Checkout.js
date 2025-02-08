@@ -42,6 +42,7 @@ const Checkout = () => {
     (state) => state.auth
   );
    const [confirmDelete, setConfirmDelete] = useState(null);
+   const [originalQuantities, setOriginalQuantities] = useState({}); // Store original quantities
 
  
   useEffect(() => {
@@ -60,14 +61,21 @@ const Checkout = () => {
   }, [cartItems, cartLoading, navigate]);
 
   // Debounced API call
-    const debouncedUpdateQuantity = useCallback(
-    debounce((product, quantity) => {
+  const debouncedUpdateQuantity = useCallback(
+    
+    debounce((product, difference) => {
+      if (difference !== 0) {
       const cartBody = {};
       cartBody.product_id = product.id;
-      cartBody.quantity = quantity;
+      cartBody.quantity = difference;
       cartBody.variant_id = product.variant_id;
       
       dispatch(handleAddtoCart(cartBody));
+      setOriginalQuantities((prev) => ({
+        ...prev,
+        [product.id]: null,
+      }));
+      }
     }, 1000),
     []
   );
@@ -233,12 +241,27 @@ const Checkout = () => {
   const shippingCost = formData.shipping_type ? delivery_charges[formData.shipping_type] : 0;
   const grandTotal = totalPrice + shippingCost;
 
-  const handleUpdateQuantity = (id, quantity, item)=>{
-    dispatch(updateQuantity({ id, quantity }));
-    if (isAuthenticated) {
-      debouncedUpdateQuantity(item, quantity);
-    } 
-  }
+ const handleUpdateQuantity = (id, newQuantity, item) => {
+     let prevQuantity = 0;
+     if (originalQuantities[id]) {
+       prevQuantity = originalQuantities[id];
+     } else {
+        setOriginalQuantities((prev) => ({
+         ...prev,
+         [id]: item.quantity,
+       }));
+       prevQuantity = item.quantity;
+     }
+     const difference = newQuantity - prevQuantity; // Calculate actual difference
+     
+     // Update UI immediately
+     dispatch(updateQuantity({ id, quantity: newQuantity }));
+ 
+     // Only send API request if the quantity actually changed
+     if (isAuthenticated && difference !== 0) {
+         debouncedUpdateQuantity(item, difference); // API gets the actual difference
+     }
+ };
 
   const handleRemoveItem = (id) =>{
     dispatch(handleRemovetoCart({product_id: id}));
@@ -280,7 +303,16 @@ const Checkout = () => {
                     >
                       -
                     </button>
-                    <span className="text-sm">{item.quantity}</span>
+                    <input
+                        type="number"
+                        value={item.quantity}
+                        onChange={(e) => {
+                          const newValue = parseInt(e.target.value, 10) || 1; // Ensure it's a number
+                          handleUpdateQuantity(item.id, newValue, item);
+                        }}
+                        className="w-10 text-center border-l border-r"
+                        min="1"
+                      />
                     <button
                       onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item)}
                       className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"

@@ -17,6 +17,7 @@ const Cart = () => {
   const {isLoading, items:products, error} = useSelector((state)=> state.product);
   const {isAuthenticated} = useSelector((state)=> state.auth);
   const dispatch = useDispatch();
+  const [originalQuantities, setOriginalQuantities] = useState({}); // Store original quantities
 
   useEffect(() => {
     isAuthenticated && dispatch(handleFetchCart());
@@ -27,13 +28,21 @@ const Cart = () => {
 
    // Debounced API call
    const debouncedUpdateQuantity = useCallback(
-    debounce((product, quantity) => {
+    
+    debounce((product, difference) => {
+      if (difference !== 0) {
       const cartBody = {};
       cartBody.product_id = product.id;
-      cartBody.quantity = quantity;
+      cartBody.quantity = difference;
       cartBody.variant_id = product.variant_id;
       
       dispatch(handleAddtoCart(cartBody));
+      setOriginalQuantities((prev) => ({
+        ...prev,
+        [product.id]: null,
+      }));
+      
+      }
     }, 1000),
     []
   );
@@ -47,12 +56,27 @@ const Cart = () => {
     dispatch(removeFromCart(id));
   }
 
-  const handleUpdateQuantity = (id, quantity, item)=>{
-    dispatch(updateQuantity({ id, quantity }));
-    if (isAuthenticated) {
-      debouncedUpdateQuantity(item, quantity);
-    } 
-  }
+  const handleUpdateQuantity = (id, newQuantity, item) => {
+    let prevQuantity = 0;
+    if (originalQuantities[id]) {
+      prevQuantity = originalQuantities[id];
+    } else {
+       setOriginalQuantities((prev) => ({
+        ...prev,
+        [id]: item.quantity,
+      }));
+      prevQuantity = item.quantity;
+    }
+    const difference = newQuantity - prevQuantity; // Calculate actual difference
+    
+    // Update UI immediately
+    dispatch(updateQuantity({ id, quantity: newQuantity }));
+
+    // Only send API request if the quantity actually changed
+    if (isAuthenticated && difference !== 0) {
+        debouncedUpdateQuantity(item, difference); // API gets the actual difference
+    }
+};
 
    
 
@@ -138,7 +162,10 @@ const Cart = () => {
                           <input
                             type="number"
                             value={item.quantity}
-                            onChange={(e) => handleUpdateQuantity(item.id, e.target.value)}
+                            onChange={(e) => {
+                              const newValue = parseInt(e.target.value, 10) || 1; // Ensure it's a number
+                              handleUpdateQuantity(item.id, newValue, item);
+                            }}
                             className="w-10 text-center border-l border-r"
                             min="1"
                           />
