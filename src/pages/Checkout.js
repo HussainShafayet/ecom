@@ -284,7 +284,7 @@ const Checkout = () => {
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-16 h-16 object-cover rounded-md flex-shrink-0"
+                  className="w-20 h-20 object-contain rounded-md flex-shrink-0"
                 />
 
                 {/* Name and Quantity */}

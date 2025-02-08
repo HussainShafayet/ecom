@@ -116,7 +116,7 @@ const Cart = () => {
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
                         />
                         {item.has_discount && (
                           <span className="absolute top-1 left-1 bg-red-500 text-white text-xs px-2 py-1 rounded">
