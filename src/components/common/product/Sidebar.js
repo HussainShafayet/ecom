@@ -68,8 +68,8 @@ const Sidebar = ({ onClose }) => {
 
 
   const PriceRangeFilter = ({ onApply }) => {
-    const [minPrice, setMinPrice] = useState("");
-    const [maxPrice, setMaxPrice] = useState("");
+    const [minPrice, setMinPrice] = useState(searchParams.get('min_price') || '');
+    const [maxPrice, setMaxPrice] = useState(searchParams.get('max_price') || '');
   
     const handleApply = () => {
       // Trigger callback with min and max values
