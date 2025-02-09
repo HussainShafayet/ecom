@@ -1,7 +1,6 @@
 import axios from 'axios';
+import publicApi from '../api/publicApi';
 
-// Base API URL (you can adjust this based on your actual API endpoint)
-const baseUrl = process.env.REACT_APP_BASE_URL; // Replace with your API base URL
 
 // src/services/productService.js
 export const getAllProducts = async (page_size = null, ordering = null, page = null, category= null,brands=[], tags=[], min_price = 0,max_price = 0, sizes=[], colors=[], discount_type, discount_value, search="") => {
@@ -45,7 +44,7 @@ export const getAllProducts = async (page_size = null, ordering = null, page = n
     query += `search=${search}&`; // Add search
   }
 
-  return await axios.get(`${baseUrl}/api/products?${query}`);
+  return await publicApi.get(`/products?${query}`);
 };
 
 // new arrival products
@@ -68,7 +67,7 @@ export const getNewArrivalProducts = async (page, page_size) => {
     query += `page_size=${page_size}&`; // Add skip for pagination
   }
   
-  return await axios.get(`${baseUrl}/api/products/new-arrivals?${query}`);
+  return await publicApi.get(`/products/new-arrivals?${query}`);
 };
 
 // best-selling products
@@ -91,7 +90,7 @@ export const getBestSellingProducts = async (page , page_size) => {
     query += `page_size=${page_size}&`; // Add skip for pagination
   }
 
-  return await axios.get(`${baseUrl}/api/products/best-selling?${query}`);
+  return await publicApi.get(`/products/best-selling?${query}`);
 };
 
 
@@ -115,7 +114,7 @@ export const getFlashSaleProducts = async (page, page_size) => {
     query += `page_size=${page_size}&`; // Add skip for pagination
   }
 
-  return await axios.get(`${baseUrl}/api/products/flash-sale?${query}`);
+  return await publicApi.get(`/products/flash-sale?${query}`);
 };
 
 
@@ -139,13 +138,13 @@ export const getFeaturedProducts = async (page, page_size) => {
     query += `page_size=${page_size}&`; // Add skip for pagination
   }
 
-  return await axios.get(`${baseUrl}/api/products/featured?${query}`);
+  return await publicApi.get(`/products/featured?${query}`);
 };
 
 
 // Fetch a single product by its slug
 export const getProductById = async (slug) => {
-    return await axios.get(`${baseUrl}/api/products/detail/${slug}`);
+    return await publicApi.get(`/products/detail/${slug}`);
 };
 
 //export default productService;

@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const baseUrl = process.env.REACT_APP_BASE_URL; // Replace with your API URL
+import publicApi from '../api/publicApi';
 
 // Fetch all categories from the API
 export const getHomeContent = async () => {
@@ -11,36 +10,36 @@ export const getHomeContent = async () => {
 //  if (page_size) {
 //    query += `page_size=${page_size}&`; // Add limit
 //  }
-  return await axios.get(`${baseUrl}/api/content/pages/home`);
+  return await publicApi.get(`/content/pages/home`);
 };
 
 // Fetch new_arrival content from the API
 export const getNewArrivalContent = async () => {
-  return await axios.get(`${baseUrl}/api/content/pages/newarrival/`);
+  return await publicApi.get(`/content/pages/newarrival/`);
 };
 
 // Fetch flash sale content from the API
 export const getFlashSaleContent = async () => {
-  return await axios.get(`${baseUrl}/api/content/pages/flashsale`);
+  return await publicApi.get(`/content/pages/flashsale`);
 };
 
 
 // Fetch best sale content from the API
 export const getBestSellingContent = async () => {
-  return await axios.get(`${baseUrl}/api/content/pages/best_selling`);
+  return await publicApi.get(`/content/pages/best_selling`);
 };
 
 // Fetch featured content from the API
 export const getFeaturedContent = async () => {
-  return await axios.get(`${baseUrl}/api/content/pages/feature`);
+  return await publicApi.get(`/content/pages/feature`);
 };
 
 // Fetch featured content from the API
 export const getShopContent = async () => {
-  return await axios.get(`${baseUrl}/api/content/shop`);
+  return await publicApi.get(`/content/shop`);
 };
 
 // Fetch categories content from the API
 export const getCategoriesContent = async () => {
-  return await axios.get(`${baseUrl}/api/content/pages/category`);
+  return await publicApi.get(`/content/pages/category`);
 };

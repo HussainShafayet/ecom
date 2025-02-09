@@ -1,6 +1,7 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import axios from "axios";
 import {getAllProducts, getBestSellingProducts, getFeaturedProducts, getFlashSaleProducts, getNewArrivalProducts, getProductById} from "../../services/productService";
+import publicApi from "../../api/publicApi";
 const initialState = {
     isLoading: false,
     relatedProductsLoading: false,
@@ -95,10 +96,9 @@ export const fetchProductById = createAsyncThunk("product/getProductById", async
         if (isAuthenticated) {
             // Import axiosSetup only when needed to avoid circular dependency issues
             const api = (await import('../../api/axiosSetup')).default;
-            response = await api.get(`/api/products/search-suggestions/?q=${searchValue}`);
+            response = await api.get(`/products/search-suggestions/?q=${searchValue}`);
         } else {
-            const baseUrl = process.env.REACT_APP_BASE_URL;
-            response = await axios.get(`${baseUrl}/api/products/search-suggestions/?q=${searchValue}`);
+            response = await publicApi.get(`/products/search-suggestions/?q=${searchValue}`);
         }
        
   

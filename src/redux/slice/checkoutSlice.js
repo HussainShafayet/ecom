@@ -3,6 +3,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import {clearCart, handleFetchCart} from './cartSlice';
 import {handleGetProfile, setAddress} from './profileSlice';
+import publicApi from '../../api/publicApi';
 
 const initialState = {
   isLoading: false,
@@ -46,8 +47,7 @@ export const handleCheckout = createAsyncThunk('checkout/handleCheckout', async 
      if (isAuthenticated) {
       response = await api.post('api/orders/', formData);
      }else{
-      const baseUrl = process.env.REACT_APP_BASE_URL;
-      response = await axios.post(`${baseUrl}/api/orders/`, formData);
+      response = await publicApi.post(`/orders/`, formData);
      }
      response.data.success && dispatch(clearCart());
     console.log('order post response',response);
@@ -67,8 +67,7 @@ export const handleGetCheckoutContent = createAsyncThunk('profile/handleGetCheck
       const api = (await import('../../api/axiosSetup')).default;
       response = await api.get('api/content/checkout/');
     } else {
-      const baseUrl = process.env.REACT_APP_BASE_URL;
-      response = await axios.get(`${baseUrl}/api/content/checkout/`);
+      response = await publicApi.get(`/content/checkout/`);
     }
      
     console.log('get checkout content response',response);

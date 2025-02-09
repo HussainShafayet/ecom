@@ -28,7 +28,7 @@ export const signUpUser = createAsyncThunk('auth/signUpUser', async (credentials
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('api/accounts/register/', credentials);
+     const response = await api.post('/accounts/register/', credentials);
 
     console.log('signup response',response);
     
@@ -43,7 +43,7 @@ export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (credentials, 
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('api/accounts/verify-otp/', credentials);
+     const response = await api.post('/accounts/verify-otp/', credentials);
 
     console.log('verifyotp response',response);
     
@@ -58,7 +58,7 @@ export const resendOtp = createAsyncThunk('auth/resendOtp', async (credentials, 
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('api/accounts/resend-otp/', credentials);
+     const response = await api.post('/accounts/resend-otp/', credentials);
 
     console.log('resend otp response',response);
     
@@ -73,7 +73,7 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('api/accounts/login/', credentials);
+     const response = await api.post('/accounts/login/', credentials);
 
     console.log('signin response',response);
     

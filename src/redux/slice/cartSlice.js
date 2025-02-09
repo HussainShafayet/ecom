@@ -24,7 +24,7 @@ export const handleAddtoCart = createAsyncThunk('cart/handleAddtoCart', async (f
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('api/accounts/cart/', formData);
+     const response = await api.post('/accounts/cart/', formData);
     console.log('add to cart response',response);
     return response.data;
   } catch (error) {
@@ -37,7 +37,7 @@ export const handleFetchCart = createAsyncThunk('cart/handleFetchCart', async (_
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.get('api/accounts/cart/');
+     const response = await api.get('/accounts/cart/');
     console.log('get cart response',response);
     return response.data;
   } catch (error) {
@@ -52,7 +52,7 @@ export const handleRemovetoCart = createAsyncThunk('cart/handleRemovetoCart', as
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.put('api/accounts/cart/', formData);
+     const response = await api.put('/accounts/cart/', formData);
     console.log('remove to cart response',response);
     return response.data;
   } catch (error) {
