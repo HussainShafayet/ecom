@@ -47,11 +47,10 @@ const AboutUs = () => {
       </section>
 
       {/* Meet the Team Section */}
-      <section className="text-center space-y-4">
+      {/*<section className="text-center space-y-4">
         <h2 className="text-3xl font-bold text-gray-800">Meet the Team</h2>
         <p className="text-gray-600 max-w-2xl mx-auto">Our team of passionate individuals is dedicated to bringing you an exceptional shopping experience.</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          {/* Team Member Card */}
           {["Alice Johnson", "John Doe", "Jane Smith"].map((name, index) => (
             <div key={index} className="bg-white shadow-lg rounded-lg p-6 text-center transform hover:scale-105 transition-transform">
               <img src="https://via.placeholder.com/150" alt="Team Member" className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-purple-600" />
@@ -60,7 +59,7 @@ const AboutUs = () => {
             </div>
           ))}
         </div>
-      </section>
+      </section>*/}
 
       {/* Testimonials Section in Grid */}
       <section className="text-center space-y-4">

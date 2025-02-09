@@ -82,9 +82,11 @@
 
 import React from 'react';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaEnvelope, FaApple, FaGooglePlay } from 'react-icons/fa';
+import {useSelector} from 'react-redux';
 import {Link} from 'react-router-dom';
 
 const Footer = () => {
+  const {isAuthenticated} = useSelector((state)=> state.auth);
   return (
     <footer className="bg-gray-900 text-gray-300 pt-12 pb-8">
       <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
@@ -121,7 +123,7 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Customer Service</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-gray-100 transition">Support Center</a></li>
+              <li><Link to="/contact" className="hover:text-gray-100 transition">Support Center</Link></li>
               <li><Link to="/faq" className="hover:text-gray-100 transition">FAQ</Link></li>
             </ul>
           </div>
@@ -130,8 +132,12 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">My Account</h3>
             <ul className="space-y-2">
+              {isAuthenticated? 
+                <li><Link to="/profile" className="hover:text-gray-100 transition">Profile</Link></li>
+              :
               <li><Link to="/signin" className="hover:text-gray-100 transition">Sign In</Link></li>
-              <li><Link to="/order-tracking" className="hover:text-gray-100 transition">Order Tracking</Link></li>
+              }
+              {/*<li><Link to="/order-tracking" className="hover:text-gray-100 transition">Order Tracking</Link></li>*/}
               <li><Link to="/wishlist" className="hover:text-gray-100 transition">Wishlist</Link></li>
               <li><Link to="/cart" className="hover:text-gray-100 transition">Shopping Cart</Link></li>
             </ul>
