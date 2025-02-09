@@ -6,7 +6,7 @@ import Cookies from 'js-cookie';
 import {Logout} from '../redux/slice/authActions';
 
 const api = axios.create({
-  baseURL: 'http://192.168.0.103:8000',
+  baseURL: process.env.REACT_APP_BASE_URL,
   //withCredentials: true, // For secure cookies (e.g., refresh tokens)
 });
 

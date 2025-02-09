@@ -46,7 +46,8 @@ export const handleCheckout = createAsyncThunk('checkout/handleCheckout', async 
      if (isAuthenticated) {
       response = await api.post('api/orders/', formData);
      }else{
-      response = await axios.post('http://192.168.0.103:8000/api/orders/', formData);
+      const baseUrl = process.env.REACT_APP_BASE_URL;
+      response = await axios.post(`${baseUrl}/api/orders/`, formData);
      }
      response.data.success && dispatch(clearCart());
     console.log('order post response',response);
@@ -66,7 +67,8 @@ export const handleGetCheckoutContent = createAsyncThunk('profile/handleGetCheck
       const api = (await import('../../api/axiosSetup')).default;
       response = await api.get('api/content/checkout/');
     } else {
-      response = await axios.get('http://192.168.0.103:8000/api/content/checkout/');
+      const baseUrl = process.env.REACT_APP_BASE_URL;
+      response = await axios.get(`${baseUrl}/api/content/checkout/`);
     }
      
     console.log('get checkout content response',response);
