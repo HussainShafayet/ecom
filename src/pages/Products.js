@@ -56,8 +56,9 @@ const Products = ({scrollContainerRef}) => {
 
     const discount_type = searchParams.get("discount_type");
     const discount_value = searchParams.get("discount_value");
+    const search = searchParams.get('search');
 
-    dispatch(fetchAllProducts({page_size, ordering, page,category, brands,tags, min_price, max_price, sizes, colors, discount_type, discount_value}));
+    dispatch(fetchAllProducts({page_size, ordering, page,category, brands,tags, min_price, max_price, sizes, colors, discount_type, discount_value,search}));
     
     
   }, [dispatch,searchParams]);  // Fetch new products whenever the query parameter changes

@@ -1,5 +1,8 @@
 import {debounce} from "lodash";
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {searchSuggestions, suggestionsInputTime} from "../../redux/slice/productSlice";
+import {Link} from "react-router-dom";
 
 const items = [
     "Apple iPhone 13",
@@ -24,6 +27,9 @@ const SearchDropdown = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const dropdownRef = useRef(null);
+  const dispatch = useDispatch();
+
+  const {suggestionsLoading, suggestions, suggestionsError} = useSelector((state)=> state.product);
 
   useEffect(() => {
     //if (query.length > 0) {
@@ -53,14 +59,9 @@ const SearchDropdown = () => {
   // Debounced API call
      const debouncedAfterInput = useCallback(
       
-      debounce(() => {
+      debounce((searchValue) => {
        console.log('input', query);
-        const results = items.filter((item) =>
-          item.toLowerCase().includes(query.toLowerCase())
-        );
-        console.log(results);
-        
-        setFilteredItems(results);
+       dispatch(searchSuggestions(searchValue));
       }, 1000),
       []
     );
@@ -68,7 +69,8 @@ const SearchDropdown = () => {
   const handleInput = (e) => {
     const value = e.target.value;
     setQuery(value);
-    value ? setIsDropdownOpen(true): setIsDropdownOpen(false);;
+    value ? setIsDropdownOpen(true): setIsDropdownOpen(false);
+    dispatch(suggestionsInputTime());
     value && debouncedAfterInput(value);
   }
 
@@ -80,11 +82,11 @@ const SearchDropdown = () => {
 
   const handleKeyDown = (e) => {
     if (e.key === "ArrowDown") {
-      setSelectedIndex((prev) => Math.min(prev + 1, filteredItems.length - 1));
+      setSelectedIndex((prev) => Math.min(prev + 1, suggestions.length - 1));
     } else if (e.key === "ArrowUp") {
       setSelectedIndex((prev) => Math.max(prev - 1, 0));
     } else if (e.key === "Enter" && selectedIndex >= 0) {
-      handleSelectItem(filteredItems[selectedIndex]);
+      handleSelectItem(suggestions[selectedIndex]);
     }
   };
 
@@ -99,9 +101,23 @@ const SearchDropdown = () => {
         onKeyDown={handleKeyDown}
       />
       {isDropdownOpen && (
-        <ul className="absolute left-0 w-full mt-1 bg-white border border-gray-300 shadow-lg rounded-md max-h-48 overflow-y-auto">
-          {filteredItems.length > 0 ? (
-            filteredItems.map((item, index) => (
+        <ul className="absolute left-0 w-full mt-1 bg-white border border-gray-300 shadow-lg rounded-md max-h-[80vh] overflow-y-auto">
+        {suggestionsLoading?
+        <div className="animate-pulse p-3">
+            {Array.from({ length: 10 }).map((_, index) => (
+            <li
+                key={index}
+                className="px-4 py-3 border mb-1"
+            >
+            </li>
+            ))}
+        </div>
+        
+        :
+        <>
+          {suggestions.length > 0 ? (
+            suggestions.map((item, index) => (
+            <Link to={`/products?search=${item}`}>
               <li
                 key={item}
                 className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
@@ -111,10 +127,13 @@ const SearchDropdown = () => {
               >
                 {item}
               </li>
+              </Link>
             ))
           ) : (
             <li className="px-4 py-2 text-gray-500">No results found</li>
           )}
+          </>
+        }
         </ul>
       )}
     </div>

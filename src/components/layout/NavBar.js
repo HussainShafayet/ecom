@@ -59,7 +59,7 @@ const Navbar = () => {
         </div>*/}
 
         {/* Search Bar */}
-        <div className="hidden md:flex items-center">
+        <div className="hidden md:flex items-center border">
           {/*<input
             type="text"
             placeholder="Search products..."

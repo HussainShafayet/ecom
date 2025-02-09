@@ -27,13 +27,16 @@ const initialState = {
     sortType: '',
     selectedColor: null,
     selectedSize: null,
+    suggestionsLoading: false,
+    suggestions: [],
+    suggestionsError: null,
 }
 const API_URL = 'https://dummyjson.com/products';
 
 //get all products
-export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", async ({page_size=null,ordering=null, page=1,category = null, brands=[], tags=[], min_price=0, max_price=0, sizes=[], colors=[],discount_type, discount_value})=>{
+export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", async ({page_size=null,ordering=null, page=1,category = null, brands=[], tags=[], min_price=0, max_price=0, sizes=[], colors=[],discount_type, discount_value, search=""})=>{
 
-    let response = await getAllProducts(page_size, ordering, page, category, brands,tags, min_price, max_price, sizes, colors,discount_type, discount_value);
+    let response = await getAllProducts(page_size, ordering, page, category, brands,tags, min_price, max_price, sizes, colors,discount_type, discount_value,search);
     console.log('get all product res', response);
     
     return {data: response.data.data.results, error: response.message};
@@ -73,7 +76,7 @@ export const fetchFeaturedProducts = createAsyncThunk("product/fetchFeaturedProd
 });
 
 // Fetch a single product by its slug
-export const fetchProductById = createAsyncThunk("post/getProductById", async (slug) => {
+export const fetchProductById = createAsyncThunk("product/getProductById", async (slug) => {
     try {
       const response = await getProductById(slug);
       console.log('get product res', response);
@@ -81,6 +84,28 @@ export const fetchProductById = createAsyncThunk("post/getProductById", async (s
     } catch (error) {
       console.error(`Error fetching product with ID ${slug}:`, error);
       throw error;  // Let the caller handle the error
+    }
+  });
+
+  //search suggestions
+  export const searchSuggestions = createAsyncThunk('product/searchSuggestions', async (searchValue, { rejectWithValue , getState}) => {
+    try {
+        const {isAuthenticated} = getState().auth;
+        let response;
+        if (isAuthenticated) {
+            // Import axiosSetup only when needed to avoid circular dependency issues
+            const api = (await import('../../api/axiosSetup')).default;
+            response = await api.get(`/api/products/search-suggestions/?q=${searchValue}`);
+        } else {
+            response = await axios.get(`/api/products/search-suggestions/?q=${searchValue}`);
+        }
+       
+  
+      console.log('suggestions response',response);
+      
+      return response?.data?.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
     }
   });
 
@@ -109,6 +134,9 @@ const productSlice = createSlice({
         },
         setSelectedSize: (state, action)=>{
             state.selectedSize = action.payload
+        },
+        suggestionsInputTime: (state) =>{
+            state.suggestionsLoading = true;
         },
     },
     extraReducers: (builder)=>{
@@ -268,8 +296,24 @@ const productSlice = createSlice({
             state.product = null;
             state.error = action.payload.message;
         });
+
+        //get search suggestions
+        builder.addCase(searchSuggestions.pending, (state)=>{
+            state.suggestionsLoading = true;
+        });
+        builder.addCase(searchSuggestions.fulfilled,(state, action)=>{
+            state.suggestionsLoading = false;
+            state.suggestionsError = null;
+            state.suggestions = action.payload;
+            
+        });
+        builder.addCase(searchSuggestions.rejected,(state, action)=>{
+            state.suggestionsLoading = false;
+            state.suggestions = [];
+            state.suggestionsError = action.payload.message;
+        });
     }
 });
 
-export const {setMainImage,incrementQuantity, decrementQuantity, setIsSidebarOpen, setSortType, setSelectedColor, setSelectedSize} = productSlice.actions;
+export const {setMainImage,incrementQuantity, decrementQuantity, setIsSidebarOpen, setSortType, setSelectedColor, setSelectedSize, suggestionsInputTime} = productSlice.actions;
 export default productSlice.reducer;
