@@ -52,22 +52,10 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Navigation Links */}
-        {/*<div className="hidden md:flex space-x-6">
-          <Link to="/" className="text-gray-700 hover:text-blue-500 transition">Home</Link>
-          <Link to="/products" className="text-gray-700 hover:text-blue-500 transition">Shop</Link>
-        </div>*/}
+       
 
         {/* Search Bar */}
-        <div className="hidden md:flex items-center border">
-          {/*<input
-            type="text"
-            placeholder="Search products..."
-            className="border border-gray-300 rounded-full py-2 px-4 focus:outline-none focus:border-blue-500 transition"
-          />
-          <button className="ml-2 text-gray-500 hover:text-blue-500">
-            <FaSearch />
-          </button>*/}
+        <div className="hidden md:flex items-center">
           <SearchDropdown />
         </div>
 

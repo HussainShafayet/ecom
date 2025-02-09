@@ -2,7 +2,7 @@ import {debounce} from "lodash";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {searchSuggestions, suggestionsInputTime} from "../../redux/slice/productSlice";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 const items = [
     "Apple iPhone 13",
@@ -28,20 +28,10 @@ const SearchDropdown = () => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const dropdownRef = useRef(null);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const {suggestionsLoading, suggestions, suggestionsError} = useSelector((state)=> state.product);
 
-  useEffect(() => {
-    //if (query.length > 0) {
-    //  const results = items.filter((item) =>
-    //    item.toLowerCase().includes(query.toLowerCase())
-    //  );
-    //  setFilteredItems(results);
-    //  setIsDropdownOpen(true);
-    //} else {
-    //  setIsDropdownOpen(false);
-    //}
-  }, [query, items]);
 
   // Handle outside click
   useEffect(() => {
@@ -75,9 +65,8 @@ const SearchDropdown = () => {
   }
 
   const handleSelectItem = (item) => {
-    
+    setQuery(item);
     setIsDropdownOpen(false);
-    //onSelect(item);
   };
 
   const handleKeyDown = (e) => {
@@ -87,6 +76,7 @@ const SearchDropdown = () => {
       setSelectedIndex((prev) => Math.max(prev - 1, 0));
     } else if (e.key === "Enter" && selectedIndex >= 0) {
       handleSelectItem(suggestions[selectedIndex]);
+      navigate(`/products?search=${suggestions[selectedIndex]}`);
     }
   };
 
@@ -95,10 +85,11 @@ const SearchDropdown = () => {
       <input
         type="text"
         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="Search items..."
+        placeholder="Search products..."
         value={query}
         onChange={handleInput}
         onKeyDown={handleKeyDown}
+        onFocus={()=>setIsDropdownOpen(true)}
       />
       {isDropdownOpen && (
         <ul className="absolute left-0 w-full mt-1 bg-white border border-gray-300 shadow-lg rounded-md max-h-[80vh] overflow-y-auto">
