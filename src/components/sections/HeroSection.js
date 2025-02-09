@@ -54,15 +54,14 @@ const HeroSection = () => {
       </div>
     ) :
 
-    <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[40vh]">
+    <div className="flex flex-col lg:flex-row gap-4 min-h-[40vh]">
       {/*image slider*/}
-      <div className="lg:w-4/6 flex h-full w-full">
+      <div className="lg:w-4/6 w-full flex">
           <Slider image_sliders={image_sliders} />
       </div>
 
-      <div className="lg:w-2/6 flex flex-col space-y-4 h-full w-full">
-        <div className="flex-grow h-3/5">
-        <div className="relative h-full w-full">
+      <div className="lg:w-2/6 flex flex-col gap-4 h-full w-full">
+        <div className="flex-grow h-3/5 relative w-full">
 
           {/* Left Arrow */}
           <button
@@ -93,11 +92,9 @@ const HeroSection = () => {
             <FaChevronRight size={50} className="text-blue-500" />
           </button>
         </div>
-         
-        </div>
         
-        <div className="flex flex-grow space-x-4 h-2/5">
-          <div className="flex-grow border p-4">
+        <div className="flex flex-grow gap-4 h-2/5">
+          <div className="flex-grow border p-4 relative bg-white rounded-md">
             {/* Product Image */}
             <Link to={`/products/detail/${left_banner?.link}`} className="block h-full">
               {/* Main Product Image */}
@@ -121,7 +118,7 @@ const HeroSection = () => {
               )}
             </Link>
           </div>
-          <div className="flex-grow p-4 border">
+          <div className="flex-grow border p-4 relative bg-white rounded-md">
             {/* Product Image */}
             <Link to={`/products/detail/${right_banner?.link}`} className="block h-full">
               {/* Main Product Image */}

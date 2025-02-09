@@ -25,7 +25,7 @@ const Slider = ({image_sliders}) => {
     }
   return (
     <>
-        <div className="relative h-full w-full">
+        <div className="relative min-h-[40vh] w-full">
             <div className="absolute top-0 left-0 w-full h-1 bg-gray-300">
                 <div
                 className="bg-blue-500 h-full"
