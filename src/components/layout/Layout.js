@@ -9,7 +9,7 @@ const Layout = ({ children, scrollContainerRef}) => {
     <div ref={scrollContainerRef} className="flex flex-col h-screen overflow-y-auto scrollbar-custom">
       <NavBar />
       <div className="flex-grow">
-        <main className="container pt-4 w-full mx-auto min-h-screen">
+        <main className="container pt-4 w-full mx-auto min-h-screen p-2">
           {children}
         </main>
       </div>
