@@ -5,6 +5,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {logoutUser} from '../../redux/slice/authSlice';
 import { selectCartCount } from '../../redux/slice/cartSlice';
 import {Logout} from '../../redux/slice/authActions';
+import SearchDropdown from '../common/SearchDropdown';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,21 +53,22 @@ const Navbar = () => {
         </div>
 
         {/* Navigation Links */}
-        <div className="hidden md:flex space-x-6">
+        {/*<div className="hidden md:flex space-x-6">
           <Link to="/" className="text-gray-700 hover:text-blue-500 transition">Home</Link>
           <Link to="/products" className="text-gray-700 hover:text-blue-500 transition">Shop</Link>
-        </div>
+        </div>*/}
 
         {/* Search Bar */}
         <div className="hidden md:flex items-center">
-          <input
+          {/*<input
             type="text"
             placeholder="Search products..."
             className="border border-gray-300 rounded-full py-2 px-4 focus:outline-none focus:border-blue-500 transition"
           />
           <button className="ml-2 text-gray-500 hover:text-blue-500">
             <FaSearch />
-          </button>
+          </button>*/}
+          <SearchDropdown />
         </div>
 
         {/* User Actions and Cart */}

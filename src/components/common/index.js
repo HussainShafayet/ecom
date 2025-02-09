@@ -14,6 +14,8 @@ export {default as RichTextToHTML} from './RichTextToHTML';
 export {default as SelectFilter} from './product/SelectFilter';
 export {default as ErrorDisplay} from './ErrorDisplay';
 export {default as SuccessMessage} from './SuccessMessage';
+export {default as SearchDropdown} from './SearchDropdown';
+
 
 
 
