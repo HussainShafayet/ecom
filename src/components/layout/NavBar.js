@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaShoppingCart, FaUser, FaBars, FaTimes, FaSearch, FaHeart, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
@@ -17,6 +17,27 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const cartCount = useSelector(selectCartCount);
+  const authRef = useRef(null);
+  const profileRef = useRef(null);
+
+  // Close menu if clicked outside
+  useEffect(() => {
+      const handleClickOutside = (event) => {
+      if (authRef.current && !authRef.current.contains(event.target)) {
+          setAuthMenuOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+          setProfileMenuOpen(false);
+      }
+      };
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      };
+      }, []);
+
+
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleAuthMenu = () => setAuthMenuOpen(!authMenuOpen);
   const toggleProfileMenu = () => setProfileMenuOpen(!profileMenuOpen);
@@ -78,7 +99,7 @@ const Navbar = () => {
           {!isAuthenticated ? (
             <>
               {/* Authentication Dropdown for Unauthenticated Users */}
-              <div className="relative">
+              <div className="relative" ref={authRef}>
                 <button
                   onClick={toggleAuthMenu}
                   className="flex items-center text-gray-700 hover:text-blue-500 font-medium focus:outline-none"
@@ -115,7 +136,7 @@ const Navbar = () => {
               </Link>
 
               {/* Profile Dropdown for Authenticated Users */}
-              <div className="relative">
+              <div className="relative" ref={profileRef}>
                 <button
                   onClick={toggleProfileMenu}
                   className="text-gray-700 hover:text-blue-500 focus:outline-none"
@@ -140,7 +161,7 @@ const Navbar = () => {
                     </Link>
                     <div className="border-t border-gray-200"></div>
                     <button
-                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition"
+                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition w-full"
                       onClick={handleLogout}
                     >
                       <FaSignInAlt className="mr-2 text-red-500" /> Logout
