@@ -25,42 +25,43 @@ const Slider = ({image_sliders}) => {
     }
   return (
     <>
-        <div className="relative min-h-[40vh] w-full">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gray-300">
-                <div
+    <div className="relative h-full w-full border rounded-sm">
+        {/*<div className="absolute top-0 left-0 w-full h-1 bg-gray-300">
+            <div
                 className="bg-blue-500 h-full"
                 style={{ width: `${(currentSlide / totalSlides) * 100}%`, transition: 'width 3s' }}
-                ></div>
-            </div>
+            ></div>
+        </div>*/}
 
-            <Swiper
-                modules={[Navigation, Pagination, Autoplay, EffectFade, Parallax]}  // Correct module imports
-                spaceBetween={30}
-                slidesPerView={1}
-                navigation
-                pagination={{ clickable: true }}
-                autoplay={{ delay: 3000 }}
-                effect="fade"
-                fadeEffect={{ crossFade: true }}
-                loop
-                parallax
-                className='h-full'
-                onSlideChange={(swiper) => setCurrentSlide(swiper.realIndex + 1)}  // Update current slide number
-            >
-                {image_sliders.map((slide) => (
+        <Swiper
+            modules={[Navigation, Pagination, Autoplay, EffectFade, Parallax]}
+            spaceBetween={30}
+            slidesPerView={1}
+            navigation
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 3000 }}
+            effect="fade"
+            fadeEffect={{ crossFade: true }}
+            loop
+            parallax
+            className="h-full"
+            onSlideChange={(swiper) => setCurrentSlide(swiper.realIndex + 1)}
+        >
+            {image_sliders.map((slide) => (
                 <SwiperSlide key={slide.order}>
-                    <Link to={getLink(slide)} target='_blank'>
-                    <div
-                        className="relative bg-cover bg-center h-full flex items-center justify-center text-center text-white"
-                        style={{ backgroundImage: `url(${slide.media})` }}
-                        data-swiper-parallax="-100"
-                    >
-                    </div>
+                    <Link to={getLink(slide)} target="_blank">
+                        <div className="relative flex items-center justify-center text-center text-white h-full">
+                            <img
+                                src={slide.media}
+                                alt="Slide"
+                                className="w-full h-full object-contain" // Use object-cover if needed
+                            />
+                        </div>
                     </Link>
                 </SwiperSlide>
-                ))}
-            </Swiper>
-        </div>
+            ))}
+        </Swiper>
+    </div>
     </>
   )
 }

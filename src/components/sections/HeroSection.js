@@ -54,95 +54,99 @@ const HeroSection = () => {
       </div>
     ) :
 
-    <div className="flex flex-col lg:flex-row gap-4 min-h-[40vh]">
+    <div className="flex flex-col lg:flex-row gap-4 min-h-[30vh] lg:max-h-[40vh]">
       {/*image slider*/}
       <div className="lg:w-4/6 w-full flex">
           <Slider image_sliders={image_sliders} />
       </div>
 
-      <div className="lg:w-2/6 flex flex-col gap-4 h-full w-full">
-        <div className="flex-grow h-3/5 relative w-full">
+      
+      <div className="lg:w-2/6 gap-4 w-full  flex flex-col">
 
-          {/* Left Arrow */}
-          <button
-            onClick={handlePrevious}
-            className="absolute left-0-0 top-1/2 transform -translate-y-1/2 text-blue-500 p-1 rounded-full hover:scale-110 transition-transform z-10"
-          >
-            <FaChevronLeft size={50} className="text-blue-500" />
-          </button>
-          <div className='relative h-full'>
-            <Link to={currentVideo && getLink(currentVideo)} target='_blank' className='absolute right-2 top-2 z-10 cursor-pointer text-blue-500 hover:underline'>{currentVideo?.caption?currentVideo?.caption :'Click'}</Link>
-                    
-            {/* Video */}
-            <video
-              src={currentVideo?.media}
-              controls
-              autoPlay
-              muted
-              loop
-              preload='true'
-              className="w-full h-full object-cover rounded-sm"
-            />
-          </div>
-          {/* Right Arrow */}
-          <button
-            onClick={handleNext}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 text-blue-500 p-1 rounded-full hover:scale-110 transition-transform z-10"
-          >
-            <FaChevronRight size={50} className="text-blue-500" />
-          </button>
-        </div>
         
-        <div className="flex flex-grow gap-4 h-2/5">
-          <div className="flex-grow border p-4 relative bg-white rounded-md">
-            {/* Product Image */}
-            <Link to={`/products/detail/${left_banner?.link}`} className="block h-full">
-              {/* Main Product Image */}
-              <img
-                src={left_banner?.media}
-                alt={left_banner?.caption}
-                loading="lazy"
-                className={`w-full h-full object-contain rounded-md transition-opacity duration-500 ${
-                  isImageLoaded ? 'opacity-100' : 'opacity-0'
-                }`}
-                onLoad={() => setIsImageLoaded(true)} // Set image loaded state
+          <div className="relative w-full border h-3/5">
+              {/* Left Arrow */}
+            <button
+              onClick={handlePrevious}
+              className="absolute left-0-0 top-1/2 transform -translate-y-1/2 text-blue-500 p-1 rounded-full hover:scale-110 transition-transform z-10"
+            >
+              <FaChevronLeft size={50} className="text-blue-500" />
+            </button>
+            <div className='relative h-full'>
+              <Link to={currentVideo && getLink(currentVideo)} target='_blank' className='absolute right-2 top-2 z-10 cursor-pointer text-blue-500 hover:underline'>{currentVideo?.caption?currentVideo?.caption :'Click'}</Link>
+                      
+              {/* Video */}
+              <video
+                src={currentVideo?.media}
+                controls
+                autoPlay
+                muted
+                loop
+                preload='true'
+                className="w-full h-full object-cover rounded-sm"
               />
-
-              {/* Blurred Placeholder */}
-              {!isImageLoaded && (
-                <img
-                  src={blurImage}
-                  alt="Loading"
-                  className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
-                />
-              )}
-            </Link>
+            </div>
+            {/* Right Arrow */}
+            <button
+              onClick={handleNext}
+              className="absolute right-0 top-1/2 transform -translate-y-1/2 text-blue-500 p-1 rounded-full hover:scale-110 transition-transform z-10"
+            >
+              <FaChevronRight size={50} className="text-blue-500" />
+            </button>
           </div>
-          <div className="flex-grow border p-4 relative bg-white rounded-md">
-            {/* Product Image */}
-            <Link to={`/products/detail/${right_banner?.link}`} className="block h-full">
-              {/* Main Product Image */}
-              <img
-                src={right_banner?.media}
-                alt={right_banner?.caption}
-                loading="lazy"
-                className={`w-full h-full object-contain rounded-md transition-opacity duration-500 ${
-                  isImageLoaded ? 'opacity-100' : 'opacity-0'
-                }`}
-                onLoad={() => setIsImageLoaded(true)} // Set image loaded state
-              />
 
-              {/* Blurred Placeholder */}
-              {!isImageLoaded && (
+          
+          <div className="flex flex-grow gap-4 h-1/5">
+            <div className="flex-grow border p-2 relative bg-white rounded-md">
+              {/* Product Image */}
+              <Link to={`/products/detail/${left_banner?.link}`} className="block h-full">
+                {/* Main Product Image */}
                 <img
-                  src={blurImage}
-                  alt="Loading"
-                  className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
+                  src={left_banner?.media}
+                  alt={left_banner?.caption}
+                  loading="lazy"
+                  className={`w-full h-full object-contain rounded-md transition-opacity duration-500 ${
+                    isImageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  onLoad={() => setIsImageLoaded(true)} // Set image loaded state
                 />
-              )}
-            </Link>
+
+                {/* Blurred Placeholder */}
+                {!isImageLoaded && (
+                  <img
+                    src={blurImage}
+                    alt="Loading"
+                    className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
+                  />
+                )}
+              </Link>
+            </div>
+            <div className="flex-grow border p-2 relative bg-white rounded-md">
+              {/* Product Image */}
+              <Link to={`/products/detail/${right_banner?.link}`} className="block h-full">
+                {/* Main Product Image */}
+                <img
+                  src={right_banner?.media}
+                  alt={right_banner?.caption}
+                  loading="lazy"
+                  className={`w-full h-full object-contain rounded-md transition-opacity duration-500 ${
+                    isImageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  onLoad={() => setIsImageLoaded(true)} // Set image loaded state
+                />
+
+                {/* Blurred Placeholder */}
+                {!isImageLoaded && (
+                  <img
+                    src={blurImage}
+                    alt="Loading"
+                    className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
+                  />
+                )}
+              </Link>
+            </div>
           </div>
-        </div>
+
       </div>
     </div>
     }
