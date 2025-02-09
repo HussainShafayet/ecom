@@ -47,22 +47,28 @@ const SearchDropdown = () => {
   }, []);
 
   // Debounced API call
-     const debouncedAfterInput = useCallback(
-      
-      debounce((searchValue) => {
-       console.log('input', query);
-       dispatch(searchSuggestions(searchValue));
-      }, 1000),
-      []
-    );
+  const debouncedAfterInput = useCallback(
+    debounce((searchValue) => {
+      dispatch(searchSuggestions(searchValue));
+    }, 1000),
+    [dispatch] // Add dispatch as a dependency
+  );
 
   const handleInput = (e) => {
     const value = e.target.value;
+  
     setQuery(value);
-    value ? setIsDropdownOpen(true): setIsDropdownOpen(false);
-    dispatch(suggestionsInputTime());
-    value && debouncedAfterInput(value);
-  }
+  
+    if (value) {
+      setIsDropdownOpen(true);
+      dispatch(suggestionsInputTime());
+      debouncedAfterInput(value);
+    } else {
+      setIsDropdownOpen(false);
+      navigate(`/products`);
+      debouncedAfterInput.cancel(); // Cancel debounce when input is cleared
+    }
+  };
 
   const handleSelectItem = (item) => {
     setQuery(item);
@@ -108,9 +114,8 @@ const SearchDropdown = () => {
         <>
           {suggestions.length > 0 ? (
             suggestions.map((item, index) => (
-            <Link to={`/products?search=${item}`}>
+            <Link to={`/products?search=${item}`} key={item}>
               <li
-                key={item}
                 className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
                   selectedIndex === index ? "bg-blue-200" : ""
                 }`}

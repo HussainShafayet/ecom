@@ -97,7 +97,7 @@ export const fetchProductById = createAsyncThunk("product/getProductById", async
             const api = (await import('../../api/axiosSetup')).default;
             response = await api.get(`/api/products/search-suggestions/?q=${searchValue}`);
         } else {
-            response = await axios.get(`/api/products/search-suggestions/?q=${searchValue}`);
+            response = await axios.get(`http://192.168.0.103:8000/api/products/search-suggestions/?q=${searchValue}`);
         }
        
   
