@@ -15,6 +15,8 @@ export {default as SelectFilter} from './product/SelectFilter';
 export {default as ErrorDisplay} from './ErrorDisplay';
 export {default as SuccessMessage} from './SuccessMessage';
 export {default as SearchDropdown} from './SearchDropdown';
+export {default as BottomNav} from './BottomNav';
+
 
 
 

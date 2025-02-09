@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { NavBar, Footer } from '../layout';
 import BackToTop from '../common/BackToTop';
+import {BottomNav} from '../common';
 
 const Layout = ({ children, scrollContainerRef}) => {
 
@@ -12,6 +13,7 @@ const Layout = ({ children, scrollContainerRef}) => {
           {children}
         </main>
       </div>
+      <BottomNav />
       <Footer className="shadow-lg" />
       
       {/* Pass the scrollable container ref to BackToTop */}

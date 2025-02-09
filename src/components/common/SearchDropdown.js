@@ -81,7 +81,7 @@ const SearchDropdown = () => {
   };
 
   return (
-    <div className="relative w-full max-w-md mx-auto" ref={dropdownRef}>
+    <div className="relative w-full" ref={dropdownRef}>
       <input
         type="text"
         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"

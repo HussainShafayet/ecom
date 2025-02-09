@@ -35,7 +35,7 @@ const Navbar = () => {
         <Link to="/deals">Flash Sale! Up to 50% Off Selected Items</Link>
       </div>
 
-      <div className="container mx-auto px-4 py-2 flex justify-between items-center">
+      <div className="container mx-auto px-4 py-2 flex justify-between items-center gap-2">
         {/* Logo Section */}
         <div className="flex items-center space-x-3 md:space-x-4">
           <Link to='/'>
@@ -47,7 +47,7 @@ const Navbar = () => {
           </Link>
           
           <Link to='/' className="flex flex-col items-start md:items-center">
-            <span className="text-lg md:text-2xl font-bold tracking-wide">GoCart</span>
+            <span className="text-lg md:text-2xl font-bold tracking-wide hidden sm:block">GoCart</span>
             <p className="text-xs font-light hidden sm:block md:-mt-1">Happy To Shopping</p>
           </Link>
         </div>
@@ -55,12 +55,14 @@ const Navbar = () => {
        
 
         {/* Search Bar */}
-        <div className="hidden md:flex items-center">
+        <div className="flex items-center flex-1 max-w-3xl">
           <SearchDropdown />
         </div>
 
+
         {/* User Actions and Cart */}
-        <div className="flex items-center space-x-4">
+        <div className="hidden md:flex items-center space-x-4">
+
           {/* Always Displayed Cart Icon */}
           <div className="relative">
             <Link to="/cart" className="text-gray-700 hover:text-blue-500">
@@ -148,13 +150,6 @@ const Navbar = () => {
               </div>
             </>
           )}
-        </div>
-
-        {/* Hamburger Icon for Mobile */}
-        <div className="md:hidden">
-          <button onClick={toggleMenu} className="text-gray-700 hover:text-blue-500">
-            {menuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-          </button>
         </div>
       </div>
 
