@@ -503,7 +503,7 @@ useEffect(() => {
                 <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-300 shadow-md rounded-lg p-4 z-20">
                   <div className="flex items-center mb-2">
                   <div className="flex">
-                    {Array(Math.ceil(product.rating))
+                    {Array(Math.ceil(product.avg_rating))
                       .fill(0)
                       .map((_, i) => (
                         <svg
@@ -516,7 +516,7 @@ useEffect(() => {
                         </svg>
                       ))}
                   </div>
-                    <span className="font-bold text-lg">{product.rating.toFixed(1)} out of 5</span>
+                    <span className="font-bold text-lg">{product.avg_rating} out of 5</span>
                   </div>
                   {Object.keys(ratingBreakdown).reverse().map(star => (
                     <div
