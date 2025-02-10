@@ -187,9 +187,9 @@ const Checkout = () => {
         "shipping_address": address,
         payment_type,
         "items" : [],
-        "sub_total_price": totalPrice,
+        "sub_total_price": totalPrice.toFixed(2),
         "delivery_charge": shippingCost,
-        "total_price": grandTotal,
+        "total_price": grandTotal.toFixed(2),
       }
       cartItems.map((cart)=>{
         checkoutBody.items.push({
@@ -238,7 +238,9 @@ const Checkout = () => {
   }
 
   const totalPrice = useSelector(selectTotalPrice);
-  const shippingCost = formData.shipping_type ? delivery_charges[formData.shipping_type] : 0;
+  
+  const shippingCost = formData.shipping_type && delivery_charges[formData.shipping_type] ? delivery_charges[formData.shipping_type] : 0;
+  
   const grandTotal = totalPrice + shippingCost;
 
  const handleUpdateQuantity = (id, newQuantity, item) => {
@@ -275,9 +277,9 @@ const Checkout = () => {
         <h3 className="text-2xl font-bold mb-4">Order Summary</h3>
         <div className="bg-gray-100 rounded-lg shadow-md sticky top-20">
           <div className="max-h-svh overflow-auto scrollbar-custom p-4">
-            {cartItems.map((item) => (
+            {cartItems.map((item, index) => (
               <div
-                key={item.id}
+                key={index}
                 className="flex items-center justify-between gap-2 mb-2 relative border p-1"
               >
                 {/* Image */}

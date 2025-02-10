@@ -106,9 +106,9 @@ const Cart = () => {
                 <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
 
                 <div className="flex flex-col gap-3">
-                  {cartItems.map((item) => (
+                  {cartItems.map((item, index) => (
                     <div
-                      key={item.id}
+                      key={index}
                       className="border rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 bg-white flex flex-col md:flex-row items-center gap-3 relative"
                     >
                       {/* Product Image */}

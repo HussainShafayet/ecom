@@ -32,7 +32,6 @@ const initialState = {
     suggestions: [],
     suggestionsError: null,
 }
-const API_URL = 'https://dummyjson.com/products';
 
 //get all products
 export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", async ({page_size=null,ordering=null, page=1,category = null, brands=[], tags=[], min_price=0, max_price=0, sizes=[], colors=[],discount_type, discount_value, search=""})=>{
