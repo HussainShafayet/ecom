@@ -67,21 +67,36 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action) => {
-      const existingItem = state.cartItems.find((item) => item.id === action.payload.id);
+      const { id, variant_id, quantity } = action.payload;
+
+      const existingItem = state.cartItems.find((item) => 
+          item.id === id && 
+          (item.variant_id ? item.variant_id === variant_id : !variant_id) // Handle both cases
+      );
+
       if (existingItem) {
-        existingItem.quantity += action.payload.quantity;
+        existingItem.quantity += quantity;
       } else {
         state.cartItems.push(action.payload);
       }
     },
     removeFromCart: (state, action) => {
-      state.cartItems = state.cartItems.filter((item) => item.id !== action.payload);
+      const { id, variant_id } = action.payload;
+
+      state.cartItems = state.cartItems.filter((item) =>
+          item.id !== id || (item.variant_id ? item.variant_id !== variant_id : variant_id !== undefined)
+      );
     },
     updateQuantity: (state, action) => {
-      const item = state.cartItems.find((item) => item.id === action.payload.id);
-      if (item) {
-        item.quantity = action.payload.quantity;
-      }
+      const { id, variant_id, quantity } = action.payload;
+
+      const item = state.cartItems.find((item) => 
+          item.id === id && 
+          (item.variant_id ? item.variant_id === variant_id : !variant_id)
+      );
+  
+     
+      item && (item.quantity = quantity);
     },
     clearCart: (state) => {
       state.cartItems = [];
@@ -123,7 +138,7 @@ const cartSlice = createSlice({
     })
     .addCase(handleRemovetoCart.fulfilled, (state, action)=>{
       state.cartLoading = false;
-      console.log(action);
+      //console.log(action);
       
     })
     .addCase(handleRemovetoCart.rejected, (state, action)=>{
@@ -191,18 +206,24 @@ export const handleClonedProduct = (product, selectedSize, selectedColor, quanti
   dummyProduct['total_reviews'] = product.total_reviews;
   dummyProduct['avg_rating'] = product.avg_rating;
   let imgUrl = '';
-  selectedColor && selectedColor?.media_files.forEach(file => {
-    if (file.file_type == 'image') {
-      imgUrl = file.file_url;
-      return;
+  
+  if(selectedColor && selectedColor?.media_files){ 
+    for (const file of selectedColor.media_files) {
+      if (file.file_type === 'image') {
+          imgUrl = file.file_url;
+          break;  // Exits the loop when condition is met
+      }
     }
-  });
-  !selectedColor && product.media_files && product?.media_files.forEach(file => {
-    if (file.file_type == 'image') {
-      imgUrl = file.file_url;
-      return;
+  }
+
+  if(!selectedColor && product.media_files){ 
+    for (const file of product.media_files) {
+      if (file.file_type === 'image') {
+          imgUrl = file.file_url;
+          break;  // Exits the loop when condition is met
+      }
     }
-  });
+  }
   !selectedColor && product?.image && (imgUrl = product.image);  
   dummyProduct['image'] = imgUrl;
   dummyProduct['is_favourite'] = product.is_favourite;

@@ -41,7 +41,7 @@ const Checkout = () => {
   const { isAuthenticated } = useSelector(
     (state) => state.auth
   );
-   const [confirmDelete, setConfirmDelete] = useState(null);
+   const [confirmDelete, setConfirmDelete] = useState({});
    const [originalQuantities, setOriginalQuantities] = useState({}); // Store original quantities
 
  
@@ -257,7 +257,7 @@ const Checkout = () => {
      const difference = newQuantity - prevQuantity; // Calculate actual difference
      
      // Update UI immediately
-     dispatch(updateQuantity({ id, quantity: newQuantity }));
+     dispatch(updateQuantity({ id, quantity: newQuantity, variant_id: item.variant_id }));
  
      // Only send API request if the quantity actually changed
      if (isAuthenticated && difference !== 0) {
@@ -265,9 +265,9 @@ const Checkout = () => {
      }
  };
 
-  const handleRemoveItem = (id) =>{
-    dispatch(handleRemovetoCart({product_id: id}));
-    dispatch(removeFromCart(id));
+  const handleRemoveItem = (item) =>{
+    dispatch(handleRemovetoCart({product_id: item.id}));
+    dispatch(removeFromCart(item));
   }
 
   return (
@@ -325,7 +325,7 @@ const Checkout = () => {
                     {/* Remove Button */}
                     <button
                       className="bg-red-400 text-white p-[0.5rem] rounded-full hover:bg-red-600 transition-colors"
-                      onClick={() => setConfirmDelete(item.id)}
+                      onClick={() => setConfirmDelete({ id: item.id, variant_id: item.variant_id })}
                     >
                       <FaTrash />
                     </button>
@@ -342,7 +342,7 @@ const Checkout = () => {
 
 
                 {/* Confirm Delete Warning in Card */}
-                {confirmDelete === item.id && (
+                {confirmDelete?.id === item.id && confirmDelete?.variant_id === item.variant_id && (
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
                       <div className="text-center">
                         <p className="text-gray-800 mb-2">Are you sure you want to remove this item?</p>
@@ -350,15 +350,15 @@ const Checkout = () => {
                           <button
                             className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
                             onClick={() => {
-                              handleRemoveItem(item.id);
-                              setConfirmDelete(null);
+                              handleRemoveItem(item);
+                              setConfirmDelete({});
                             }}
                           >
                             Yes
                           </button>
                           <button
                             className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
-                            onClick={() => setConfirmDelete(null)}
+                            onClick={() => setConfirmDelete({})}
                           >
                             Cancel
                           </button>
