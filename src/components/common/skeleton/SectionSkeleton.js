@@ -7,12 +7,12 @@ const Sectionkeleton = ({forRoute}) => {
     {forRoute &&
       <>
         {/* Hero Section Skeleton */}
-        <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[60vh]">
+        <div className="flex flex-col lg:flex-row gap-4 min-h-[30vh] lg:max-h-[40vh]">
           {/* Image Slider Skeleton */}
-          <div className="lg:w-3/5 h-full w-full bg-gray-200 rounded-md"></div>
+          <div className="lg:w-4/6 w-full flex bg-gray-200 rounded-md"></div>
 
           {/* Right Banner Skeleton */}
-          <div className="lg:w-2/5 flex flex-col space-y-4 h-full w-full border p-4">
+          <div className="lg:w-2/6 gap-4 w-full  flex flex-col border p-4">
             <div className="h-full bg-gray-200 rounded-md"></div>
           </div>
         </div>

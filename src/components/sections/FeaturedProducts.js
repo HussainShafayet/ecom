@@ -54,13 +54,13 @@ const FeaturedProducts = ({forRoute}) => {
     ) :
       <div className="container mx-auto">
         {forRoute && 
-        <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[60vh]">
+        <div className="flex flex-col lg:flex-row gap-4 min-h-[30vh] lg:max-h-[40vh]">
           {/*image slider*/}
-          <div className="lg:w-3/5 flex h-full w-full">
+          <div className="lg:w-4/6 w-full flex">
               <Slider image_sliders={image_sliders} />
           </div>
     
-          <div className="lg:w-2/5 flex flex-col space-y-4 h-full w-full border">
+          <div className="lg:w-2/6 gap-4 w-full  flex flex-col">
             {right_banner?.media_type === 'image' &&
               <>
                 {/* Product Image */}

@@ -1,11 +1,11 @@
 
 const HeroSectionSkeleton = () => {
   return (
-    <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[40vh] animate-pulse">
+    <div className="flex flex-col lg:flex-row gap-4 min-h-[30vh] lg:max-h-[40vh] animate-pulse">
       {/* Image Slider Placeholder */}
-      <div className="lg:w-4/6 flex h-full w-full bg-gray-300 rounded-md"></div>
+      <div className="lg:w-4/6 w-full flex bg-gray-300 rounded-md"></div>
 
-      <div className="lg:w-2/6 flex flex-col space-y-4 h-full w-full">
+      <div className="lg:w-2/6 gap-4 w-full  flex flex-col">
         {/* Video Slide Placeholder */}
         <div className="flex-grow h-3/5 bg-gray-300 rounded-md"></div>
 
