@@ -56,7 +56,11 @@ const Checkout = () => {
   useEffect(() => {
     if (isCheckoutFulfilled) {
       order_id && navigate(`/order-confirmation/${order_id}`);
-      dispatch(clearCart());
+      setTimeout(() => {
+        dispatch(clearCart());
+        dispatch(resetForm());
+      }, 500);
+      
     }
   }, [isCheckoutFulfilled, dispatch, navigate, order_id]);
 
