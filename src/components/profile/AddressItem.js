@@ -1,11 +1,13 @@
 import {useState} from "react";
 import {FaEdit, FaTrash} from "react-icons/fa";
 import {dhakaCityData, districtsData, divisionsData, upazilasData} from "../../data/location";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {handleAddressCreate, handleAddressDelete, handleAddressUpdate} from "../../redux/slice/profileSlice";
+import {Loader} from "../common";
 
 const AddressItem = ({ address, onUpdate }) => {
     const dispatch = useDispatch();
+    const {adrressLoading, adrressError} = useSelector((state)=> state.profile);
     const [isEditing, setIsEditing] = useState(false);
     const [editedAddress, setEditedAddress] = useState(address);
     const [touched, updateTouched] = useState({});
@@ -327,11 +329,17 @@ const AddressItem = ({ address, onUpdate }) => {
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
-              >
-                Save
+              <button type="submit" className={`px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors transform duration-200 cursor-pointer ${
+                    adrressLoading ? 'cursor-wait' : 'hover:scale-105'
+                  }`}
+                  disabled={adrressLoading}
+                
+                >
+                {adrressLoading ? (
+                    <Loader message="Progreccing" />
+                  ) : (
+                    "Save"
+                  )}
               </button>
             </div>
           </form>
