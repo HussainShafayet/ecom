@@ -45,21 +45,27 @@ const Checkout = () => {
    const [originalQuantities, setOriginalQuantities] = useState({}); // Store original quantities
 
  
+  // Step 1: Initialize checkout on page load if not fulfilled
   useEffect(() => {
-    //if (cartItems.length === 0 && !isLoading) {
-   dispatch(initializeCheckout());
-    //}
-    //isAuthenticated && dispatch(handleGetAddress());
-    isCheckoutFulfilled && dispatch(resetForm());
-    isCheckoutFulfilled && dispatch(clearCart());
-    isCheckoutFulfilled && navigate(`/order-confirmation/${order_id}`);
-  }, [isCheckoutFulfilled,dispatch]);
+    !isCheckoutFulfilled && dispatch(initializeCheckout());
+    
+  }, [isCheckoutFulfilled, dispatch]);
 
+  // Step 2: Handle checkout success (redirect + clear cart + reset form)
   useEffect(() => {
-    if (!cartLoading && cartItems.length === 0) {
-      navigate('/products'); // Redirect to cart page if no items
+    if (isCheckoutFulfilled) {
+      order_id && navigate(`/order-confirmation/${order_id}`);
+      dispatch(clearCart());
+      dispatch(resetForm());
     }
-  }, [cartItems, cartLoading, navigate]);
+  }, [isCheckoutFulfilled, dispatch, navigate, order_id]);
+
+  // Step 3: If cart is empty after loading, redirect to products page
+  useEffect(() => {
+    if (!cartLoading && cartItems.length === 0 && !isCheckoutFulfilled) {
+      navigate('/products');
+    }
+  }, [cartItems, cartLoading, isCheckoutFulfilled, navigate]);
 
   // Debounced API call
   const debouncedUpdateQuantity = useCallback(
