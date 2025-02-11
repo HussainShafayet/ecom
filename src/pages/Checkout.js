@@ -20,6 +20,7 @@ import {handleGetAddress} from '../redux/slice/profileSlice';
 import {ShowAddress} from '../components/checkout';
 import debounce from 'lodash.debounce'; // Import lodash debounce
 import {CheckoutSkeleton} from '../components/common/skeleton';
+import {Loader} from '../components/common';
 
 
  
@@ -35,7 +36,7 @@ const Checkout = () => {
   const {cartLoading, cartItems, cartError} = useSelector((state)=>state.cart);
   const navigate = useNavigate();
 
-  const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, delivery_charges, responseError } = useSelector(
+  const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, delivery_charges, responseError, checkoutContentLoading, checkoutContentError} = useSelector(
     (state) => state.checkout
   );
   const { isAuthenticated } = useSelector(
@@ -56,7 +57,6 @@ const Checkout = () => {
     if (isCheckoutFulfilled) {
       order_id && navigate(`/order-confirmation/${order_id}`);
       dispatch(clearCart());
-      dispatch(resetForm());
     }
   }, [isCheckoutFulfilled, dispatch, navigate, order_id]);
 
@@ -307,12 +307,12 @@ const Checkout = () => {
 
   return (
     <>
-    {isLoading ? 
+    {checkoutContentLoading ? 
       <CheckoutSkeleton />
      :
-      responseError ? (
+      checkoutContentError ? (
       <div className="text-center text-red-500 font-semibold py-4">
-        {responseError} - Please try again later.
+        {checkoutContentError} - Please try again later.
       </div>
     ) :
     <div className="mx-auto px-1 lg:flex lg:space-x-3 mb-3">
@@ -658,8 +658,17 @@ const Checkout = () => {
             </div>
           </div>
 
-          <button type="submit" className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors w-full">
-            Place Order
+          <button type="submit" className={`bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors w-full transform duration-200 cursor-pointer ${
+              isLoading ? 'cursor-wait' : 'hover:scale-105'
+            }`}
+            disabled={isLoading}
+          
+          >
+           {isLoading ? (
+              <Loader message="Place Order Progreccing" />
+            ) : (
+              "Place Order"
+            )}
           </button>
         </form>
       </div>

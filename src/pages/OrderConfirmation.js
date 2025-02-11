@@ -1,11 +1,17 @@
 import React, {useEffect} from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FaCheckCircle } from 'react-icons/fa';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {resetForm} from '../redux/slice/checkoutSlice';
 
 const OrderConfirmation = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(resetForm());
+  }, [dispatch])
 
   return (
     <div className="container mx-auto my-12 p-6 max-w-3xl bg-gray-50 rounded-lg shadow-md">

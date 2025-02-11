@@ -35,6 +35,8 @@ const initialState = {
   delivery_charges: {},
   addresses: [],
   user_info: null,
+  checkoutContentLoading: false,
+  checkoutContentError: null,
 };
 
 // checkout process
@@ -108,8 +110,8 @@ const checkoutSlice = createSlice({
       state.districts = [];
       state.upazilas = [];
       state.responseError = null;
-      //state.isCheckoutFulfilled = false;
-      //state.order_id = null;
+      state.isCheckoutFulfilled = false;
+      state.order_id = null;
       state.selectedAddressId = null;
       state.delivery_charges = {};
       state.addresses = [];
@@ -135,11 +137,11 @@ const checkoutSlice = createSlice({
 
       //get checkout content
       .addCase(handleGetCheckoutContent.pending, (state)=>{
-        state.isLoading = true;
+        state.checkoutContentLoading = true;
       })
       .addCase(handleGetCheckoutContent.fulfilled, (state, action)=>{
-          state.isLoading = false;
-          
+          state.checkoutContentLoading = false;
+          state.checkoutContentError = null;
           const { delivery_charges, shipping_addresses, user_info} = action.payload;
           
           state.delivery_charges = delivery_charges;
@@ -152,8 +154,8 @@ const checkoutSlice = createSlice({
           
       })
       .addCase(handleGetCheckoutContent.rejected, (state, action)=>{
-          state.isLoading = false;
-          state.responseError = action.payload?.errors || 'Something went wrong';
+          state.checkoutContentLoading = false;
+          state.checkoutContentError = action.payload?.errors || 'Something went wrong';
           
       })
 
