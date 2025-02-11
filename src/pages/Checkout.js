@@ -32,8 +32,7 @@ import {CheckoutSkeleton} from '../components/common/skeleton';
 
 const Checkout = () => {
   const dispatch = useDispatch();
-  const cartItems = useSelector(selectCartItems);
-  const {cartLoading} = useSelector((state)=>state.cart);
+  const {cartLoading, cartItems, cartError} = useSelector((state)=>state.cart);
   const navigate = useNavigate();
 
   const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, delivery_charges, responseError } = useSelector(
@@ -279,6 +278,33 @@ const Checkout = () => {
     dispatch(removeFromCart(item));
   }
 
+  const OrderSummarySkeleton = () => {
+    return (
+      <div className="bg-gray-100 rounded-lg shadow-md p-4">
+        {/* Cart Items Skeleton */}
+        {[...Array(3)].map((_, index) => (
+          <div key={index} className="flex items-center justify-between gap-2 mb-2 border p-2 rounded-md bg-gray-200">
+            <div className="w-20 h-20 bg-gray-300 rounded-md"></div>
+            <div className="flex-grow min-w-0">
+              <div className="h-4 bg-gray-300 rounded w-32 mb-2"></div>
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 bg-gray-300 rounded"></div>
+                <div className="h-8 w-12 bg-gray-300 rounded"></div>
+                <div className="h-8 w-8 bg-gray-300 rounded"></div>
+                <div className="h-8 w-8 bg-gray-300 rounded"></div>
+              </div>
+            </div>
+            <div className="h-4 bg-gray-300 rounded w-16"></div>
+          </div>
+        ))}
+        {/* Price Summary Skeleton */}
+        <div className="h-4 bg-gray-300 rounded w-full my-3"></div>
+        <div className="h-4 bg-gray-300 rounded w-full my-3"></div>
+        <div className="h-6 bg-gray-400 rounded w-full my-3"></div>
+      </div>
+    )
+  }
+
   return (
     <>
     {isLoading ? 
@@ -293,128 +319,137 @@ const Checkout = () => {
      {/* Right Section: Order Summary */}
      <div className="lg:lg:w-7/12 mt-12 lg:mt-0">
         <h3 className="text-2xl font-bold mb-4">Order Summary</h3>
-        <div className="bg-gray-100 rounded-lg shadow-md sticky top-20">
-          <div className="max-h-svh overflow-auto scrollbar-custom p-4">
-            {cartItems.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between gap-2 mb-2 relative border p-1"
-              >
-                {/* Image */}
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-20 h-20 object-contain rounded-md flex-shrink-0"
-                />
+        {cartLoading ? 
+          <OrderSummarySkeleton />
+          :
+            cartError ? (
+            <div className="text-center text-red-500 font-semibold py-4">
+              {cartError} - Please try again later.
+            </div>
+          ) :
+          <div className="bg-gray-100 rounded-lg shadow-md sticky top-20">
+            <div className="max-h-svh overflow-auto scrollbar-custom p-4">
+              {cartItems.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between gap-2 mb-2 relative border p-1"
+                >
+                  {/* Image */}
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-20 h-20 object-contain rounded-md flex-shrink-0"
+                  />
 
-                {/* Name and Quantity */}
-                <div className="flex-grow min-w-0">
-                  <h4
-                    className="font-semibold text-sm truncate"
-                    title={item.name} // Tooltip for full name
-                  >
-                    {item.name}
-                  </h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    <button
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity -1, item)}
-                      disabled={item.quantity <= 1}
-                      className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
+                  {/* Name and Quantity */}
+                  <div className="flex-grow min-w-0">
+                    <h4
+                      className="font-semibold text-sm truncate"
+                      title={item.name} // Tooltip for full name
                     >
-                      -
-                    </button>
-                    <input
-                        type="number"
-                        value={item.quantity}
-                        onChange={(e) => {
-                          const newValue = parseInt(e.target.value, 10) || 1; // Ensure it's a number
-                          handleUpdateQuantity(item.id, newValue, item);
-                        }}
-                        className="w-10 text-center border-l border-r"
-                        min="1"
-                      />
-                    <button
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item)}
-                      className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
-                    >
-                      +
-                    </button>
+                      {item.name}
+                    </h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <button
+                        onClick={() => handleUpdateQuantity(item.id, item.quantity -1, item)}
+                        disabled={item.quantity <= 1}
+                        className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
+                      >
+                        -
+                      </button>
+                      <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => {
+                            const newValue = parseInt(e.target.value, 10) || 1; // Ensure it's a number
+                            handleUpdateQuantity(item.id, newValue, item);
+                          }}
+                          className="w-10 text-center border-l border-r"
+                          min="1"
+                        />
+                      <button
+                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item)}
+                        className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
+                      >
+                        +
+                      </button>
 
-                    {/* Remove Button */}
-                    <button
-                      className="bg-red-400 text-white p-[0.5rem] rounded-full hover:bg-red-600 transition-colors"
-                      onClick={() => setConfirmDelete({ id: item.id, variant_id: item.variant_id })}
-                    >
-                      <FaTrash />
-                    </button>
+                      {/* Remove Button */}
+                      <button
+                        className="bg-red-400 text-white p-[0.5rem] rounded-full hover:bg-red-600 transition-colors"
+                        onClick={() => setConfirmDelete({ id: item.id, variant_id: item.variant_id })}
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {/* Price */}
-                <div className="text-sm font-semibold text-right flex-shrink-0">
-                  {item.has_discount
-                    ? (item.discount_price * item.quantity).toFixed(2)
-                    : (item.base_price * item.quantity).toFixed(2)}
-                </div>
-
+                  {/* Price */}
+                  <div className="text-sm font-semibold text-right flex-shrink-0">
+                    {item.has_discount
+                      ? (item.discount_price * item.quantity).toFixed(2)
+                      : (item.base_price * item.quantity).toFixed(2)}
+                  </div>
 
 
-                {/* Confirm Delete Warning in Card */}
-                {confirmDelete?.id === item.id && confirmDelete?.variant_id === item.variant_id && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
-                      <div className="text-center">
-                        <p className="text-gray-800 mb-2">Are you sure you want to remove this item?</p>
-                        <div className="flex justify-center gap-2">
-                          <button
-                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
-                            onClick={() => {
-                              handleRemoveItem(item);
-                              setConfirmDelete({});
-                            }}
-                          >
-                            Yes
-                          </button>
-                          <button
-                            className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
-                            onClick={() => setConfirmDelete({})}
-                          >
-                            Cancel
-                          </button>
+
+                  {/* Confirm Delete Warning in Card */}
+                  {confirmDelete?.id === item.id && confirmDelete?.variant_id === item.variant_id && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
+                        <div className="text-center">
+                          <p className="text-gray-800 mb-2">Are you sure you want to remove this item?</p>
+                          <div className="flex justify-center gap-2">
+                            <button
+                              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
+                              onClick={() => {
+                                handleRemoveItem(item);
+                                setConfirmDelete({});
+                              }}
+                            >
+                              Yes
+                            </button>
+                            <button
+                              className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
+                              onClick={() => setConfirmDelete({})}
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-              </div>
-            ))}
-          </div>
+                    )}
+                </div>
+              ))}
+            </div>
 
-          <div className="p-4">
-            <hr className="my-3" />
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>{totalPrice.toFixed(2)}</span>
+            <div className="p-4">
+              <hr className="my-3" />
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>{totalPrice.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Shipping</span>
+                <span>{shippingCost.toFixed(2)}</span>
+              </div>
+              {errors.delivery_charge && <p className="text-red-500 text-xs mt-1">{errors.delivery_charge}</p>}
+              <hr className="my-3" />
+              <div className="flex justify-between font-bold text-lg">
+                <span>Total</span>
+                <span>{grandTotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <Link to="/cart" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
+                  Edit Cart
+                </Link>
+                <Link to="/products" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
+                  Add more products
+                </Link>
+              </div>
+              
             </div>
-            <div className="flex justify-between">
-              <span>Shipping</span>
-              <span>{shippingCost.toFixed(2)}</span>
-            </div>
-            {errors.delivery_charge && <p className="text-red-500 text-xs mt-1">{errors.delivery_charge}</p>}
-            <hr className="my-3" />
-            <div className="flex justify-between font-bold text-lg">
-              <span>Total</span>
-              <span>{grandTotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <Link to="/cart" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
-                Edit Cart
-              </Link>
-              <Link to="/products" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
-                Add more products
-              </Link>
-            </div>
-            
           </div>
-        </div>
+          }
       </div>
       {/*form section*/}
       <div className="lg:w-5/12">

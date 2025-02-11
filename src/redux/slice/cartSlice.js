@@ -39,11 +39,11 @@ export const handleFetchCart = createAsyncThunk('cart/handleFetchCart', async (_
      const api = (await import('../../api/axiosSetup')).default;
      const response = await api.get('/accounts/cart/');
     console.log('get cart response',response);
-    return response.data;
+    return response?.data;
   } catch (error) {
     console.log('fetch error cart:', error);
     
-    return rejectWithValue(error?.response?.data || error.message);
+    return rejectWithValue(error?.response?.data || error?.message);
   }
 });
 
@@ -124,12 +124,12 @@ const cartSlice = createSlice({
     .addCase(handleFetchCart.fulfilled, (state, action)=>{
       state.cartLoading = false;
       state.cartError = false;
-      state.cartItems = action.payload.data;
+      state.cartItems = action.payload?.data;
       
     })
     .addCase(handleFetchCart.rejected, (state, action)=>{
       state.cartLoading = false;
-      state.cartError = action.payload.error || action.payload;
+      state.cartError = action.payload?.error || action?.payload || 'Something went wrong!';
     })
 
     //remove from cart 
