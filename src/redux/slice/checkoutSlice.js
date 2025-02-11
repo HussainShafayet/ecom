@@ -75,7 +75,7 @@ export const handleGetCheckoutContent = createAsyncThunk('profile/handleGetCheck
   } catch (error) {
     console.log(error);
     
-    return rejectWithValue(error.response.data);
+    return rejectWithValue(error?.response?.data);
   }
 });
 
@@ -153,7 +153,7 @@ const checkoutSlice = createSlice({
       })
       .addCase(handleGetCheckoutContent.rejected, (state, action)=>{
           state.isLoading = false;
-          state.responseError = action.payload.errors;
+          state.responseError = action.payload?.errors || 'Something went wrong';
           
       })
 

@@ -19,6 +19,7 @@ import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/
 import {handleGetAddress} from '../redux/slice/profileSlice';
 import {ShowAddress} from '../components/checkout';
 import debounce from 'lodash.debounce'; // Import lodash debounce
+import {CheckoutSkeleton} from '../components/common/skeleton';
 
 
  
@@ -35,7 +36,7 @@ const Checkout = () => {
   const {cartLoading} = useSelector((state)=>state.cart);
   const navigate = useNavigate();
 
-  const { formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, delivery_charges } = useSelector(
+  const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, delivery_charges, responseError } = useSelector(
     (state) => state.checkout
   );
   const { isAuthenticated } = useSelector(
@@ -279,6 +280,15 @@ const Checkout = () => {
   }
 
   return (
+    <>
+    {isLoading ? 
+      <CheckoutSkeleton />
+     :
+      responseError ? (
+      <div className="text-center text-red-500 font-semibold py-4">
+        {responseError} - Please try again later.
+      </div>
+    ) :
     <div className="mx-auto px-1 lg:flex lg:space-x-3 mb-3">
      {/* Right Section: Order Summary */}
      <div className="lg:lg:w-7/12 mt-12 lg:mt-0">
@@ -406,6 +416,7 @@ const Checkout = () => {
           </div>
         </div>
       </div>
+      {/*form section*/}
       <div className="lg:w-5/12">
         <h2 className="text-2xl font-bold mb-1">Checkout</h2>
         
@@ -617,11 +628,9 @@ const Checkout = () => {
           </button>
         </form>
       </div>
-
-     
-
-
     </div>
+    }
+    </>
   );
 };
 
