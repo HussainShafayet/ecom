@@ -129,6 +129,7 @@ const cartSlice = createSlice({
     })
     .addCase(handleFetchCart.rejected, (state, action)=>{
       state.cartLoading = false;
+      state.cartItems = [];
       state.cartError = action.payload?.error || action?.payload || 'Something went wrong!';
     })
 

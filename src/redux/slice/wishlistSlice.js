@@ -108,8 +108,8 @@ const wishlistSlice = createSlice({
       .addCase(fetchtoWishlist.rejected, (state, action)=>{
         state.isLoading = false;
         state.error = false;
-        
-        state.error = action.payload?.error || action.payload;
+        state.items = [];
+        state.error = action?.payload?.error || action?.payload || 'Something went wrong!';
       })
   
       //remove from cart 
