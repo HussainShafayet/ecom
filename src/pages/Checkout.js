@@ -230,6 +230,7 @@ const Checkout = () => {
       if (!formData.district) formErrors.district = 'District is required';
       if (!formData.upazila) formErrors.upazila = 'Upazila/thana is required';
     }
+    if (shippingCost === 0) formErrors.delivery_charge = 'Delivery Charge is required';
     if (!formData.address) formErrors.address = 'Address is required';
     return formErrors;
   };
@@ -387,6 +388,7 @@ const Checkout = () => {
               <span>Shipping</span>
               <span>{shippingCost.toFixed(2)}</span>
             </div>
+            {errors.delivery_charge && <p className="text-red-500 text-xs mt-1">{errors.delivery_charge}</p>}
             <hr className="my-3" />
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
