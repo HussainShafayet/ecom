@@ -14,7 +14,7 @@ import {
   initializeCheckout,
   setSelectedAddressId,
 } from '../redux/slice/checkoutSlice';
-import {handleAddtoCart, handleFetchCart, handleRemovetoCart, removeFromCart, selectCartItems, selectTotalPrice, updateQuantity} from '../redux/slice/cartSlice';
+import {clearCart, handleAddtoCart, handleFetchCart, handleRemovetoCart, removeFromCart, selectCartItems, selectTotalPrice, updateQuantity} from '../redux/slice/cartSlice';
 import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
 import {handleGetAddress} from '../redux/slice/profileSlice';
 import {ShowAddress} from '../components/checkout';
@@ -51,6 +51,7 @@ const Checkout = () => {
     //}
     //isAuthenticated && dispatch(handleGetAddress());
     isCheckoutFulfilled && dispatch(resetForm());
+    isCheckoutFulfilled && dispatch(clearCart());
     isCheckoutFulfilled && navigate(`/order-confirmation/${order_id}`);
   }, [isCheckoutFulfilled,dispatch]);
 
