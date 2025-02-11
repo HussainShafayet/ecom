@@ -4,7 +4,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {getUser} from '../../redux/slice/authSlice';
 import {useNavigate} from 'react-router-dom';
 import {handleAddressCreate, handleGetAddress, handleGetProfile, handleProfileUpdate, resetAddressForm, setDistricts, setErrors, setIsAddAddress, setUpazilas, updateAddressFormData, updateTouched} from '../../redux/slice/profileSlice';
-import {Loader} from '../../components/common';
+import {ErrorDisplay, Loader} from '../../components/common';
 import {AddressItem} from '../../components/profile';
 import { WishList } from '../user';
 import {dhakaCityData, districtsData, divisionsData, upazilasData} from '../../data/location';
@@ -14,7 +14,7 @@ const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const dispatch = useDispatch();
   const {isAuthenticated,user} = useSelector((state)=>state.auth);
-  const {isLoading, profile, error, adrressLoading,addresses, addressError, isAddAddress, addressFormData, touched, errors, districts,upazilas} = useSelector((state)=>state.profile);
+  const {isLoading, profile, error, adrressLoading,addresses, addressError, isAddAddress, addressFormData, touched, errors, districts,upazilas, updateLoading, updateError, updateDone} = useSelector((state)=>state.profile);
 
   const navigate = useNavigate();
   
@@ -30,6 +30,10 @@ const Profile = () => {
     }
     isAuthenticated && dispatch(handleGetProfile());
   }, [dispatch, isAuthenticated, navigate]);
+
+  useEffect(()=>{
+    updateDone && setIsEditing(false); // Exit edit mode
+  }, [updateDone, dispatch])
 
   const handleTabChange = (tab)=>{
     setSelectedTab(tab.id);
@@ -64,7 +68,6 @@ const Profile = () => {
     //console.log(formDataObj, 'form');
     dispatch(handleProfileUpdate(formDataObj));
     //handleUpdate(formData); // Call parent function to update profile
-    setIsEditing(false); // Exit edit mode
   };
 
 
@@ -242,6 +245,8 @@ const Profile = () => {
                       </button>
                     </>
                   ) : (
+                    <>
+                    <ErrorDisplay errors={updateError} />
                     <form onSubmit={handleSubmit} className="space-y-4">
                       {/* Editable Name Field */}
                       <div>
@@ -346,14 +351,21 @@ const Profile = () => {
                         >
                           Cancel
                         </button>
-                        <button
-                          type="submit"
-                          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                        <button type="submit" className={`px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors transform duration-200 cursor-pointer ${
+                            updateLoading ? 'cursor-wait' : 'hover:scale-105'
+                          }`}
+                          disabled={updateLoading}
+                        
                         >
-                          Save Changes
-                        </button>
+                        {updateLoading ? (
+                            <Loader message="Progreccing" />
+                          ) : (
+                            "Save Changes"
+                          )}
+                      </button>
                       </div>
                     </form>
+                    </>
                   )}
                 </div>
               </div>
@@ -524,11 +536,17 @@ const Profile = () => {
                         >
                           Cancel
                         </button>
-                        <button
-                          type="submit"
-                          className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
-                        >
-                          Save
+                        <button type="submit" className={`px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors transform duration-200 cursor-pointer ${
+                              adrressLoading ? 'cursor-wait' : 'hover:scale-105'
+                            }`}
+                            disabled={adrressLoading}
+                          
+                          >
+                          {adrressLoading ? (
+                              <Loader message="Progreccing" />
+                            ) : (
+                              "Save"
+                            )}
                         </button>
                       </div>
                     </form>

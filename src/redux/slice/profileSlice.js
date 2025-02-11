@@ -6,6 +6,7 @@ const initialState = {
     error: null,
     updateLoading:false,
     updateError: null,
+    updateDone: false,
     adrressLoading: false,
     addresses: [],
     addressError: null,
@@ -162,11 +163,13 @@ const profileSlice = createSlice({
         })
         .addCase(handleProfileUpdate.fulfilled, (state, action)=>{
             state.updateLoading = false;
+            state.updateDone = true;
             state.profile = action.payload;
         })
         .addCase(handleProfileUpdate.rejected, (state, action)=>{
             state.updateLoading = false;
-            state.updateError = action.payload.error
+            state.updateDone = false;
+            state.updateError = action.payload?.error || action.payload?.errors || 'Something went wrong';
         })
 
 
@@ -182,6 +185,7 @@ const profileSlice = createSlice({
         })
         .addCase(handleGetAddress.rejected, (state, action)=>{
             state.adrressLoading = false;
+            state.addresses = [];
             state.addressError = action.payload.error || action.payload;
         })
 
