@@ -188,9 +188,10 @@ const Checkout = () => {
     const formErrors = validateForm();
 
     if (Object.keys(formErrors).length === 0) {
-      const {name,phone_number, email,title, shipping_type,shipping_area, division,district, upazila, address, payment_type } = formData;
+      const {name,phone_code,phone_number, email,title, shipping_type,shipping_area, division,district, upazila, address, payment_type } = formData;
       const checkoutBody ={
-        name, phone_number,email,shipping_type,shipping_area,
+        name,email,shipping_type,shipping_area,
+        phone_number: phone_code + phone_number,
         shipping: null,
         "shipping_division": division,
         "shipping_district": district,
@@ -467,7 +468,7 @@ const Checkout = () => {
             <h3 className="text-lg font-semibold flex items-center mb-1">
               <FaCheckCircle className="mr-2 text-green-500" /> Personal Information
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
               <div>
                 <input
                   type="text"
@@ -482,19 +483,34 @@ const Checkout = () => {
                 {touched.name && errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
               <div>
+               <div className={`flex items-center border ${touched.phone_number && errors.phone_number ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70`}>
+                {/*<FaPhone className="text-gray-400 m-3" title="Phone" />*/}
+                <select
+                  id="country-code"
+                  className="bg-gray-100 text-gray-700 font-medium px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
+                  defaultValue="+880"
+                >
+                  <option value="+880">+880</option>
+                </select>
                 <input
                   type="tel"
+                  id="phone"
                   name="phone_number"
-                  placeholder="Phone Number"
+                  placeholder="Phone number"
                   value={formData.phone_number}
                   onChange={handleChange}
                   onBlur={handleBlur}
+                  maxLength={10}
+                  className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
                   required
-                  className={`border ${touched.phone_number && errors.phone_number ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 />
-                {touched.phone_number && errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
+                
               </div>
-              <div>
+              {touched.phone_number && errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
+              </div>
+             
+            </div>
+            <div>
                 <input
                   type="email"
                   name="email"
@@ -505,7 +521,6 @@ const Checkout = () => {
                   className={`border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 />
               </div>
-            </div>
           </div>
           
 

@@ -10,6 +10,7 @@ const initialState = {
   formData: {
     name: '',
     email: '',
+    phone_code: '+880',
     phone_number: '',
     title: '',
     address: '',
