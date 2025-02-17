@@ -167,7 +167,7 @@ const SignUp = () => {
               Phone Number
             </label>
             <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-              <FaPhone className="text-gray-400 m-3" title="Phone" />
+              {/*<FaPhone className="text-gray-400 m-3" title="Phone" />*/}
               <select
                 id="country-code"
                 className="bg-gray-100 text-gray-700 font-medium px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"

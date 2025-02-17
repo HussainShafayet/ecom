@@ -101,63 +101,58 @@ const SignIn = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-teal-400 to-blue-600 relative overflow-hidden p-4">
-      {/* Left Side with Image or Brand Message */}
-      <div className="hidden lg:flex w-1/2 h-full items-center justify-center bg-cover bg-center" style={{ backgroundImage: `url(https://cdn-icons-png.flaticon.com/512/1804/1804486.png)` }}>
-        <div className="bg-black bg-opacity-60 p-10 rounded-lg max-w-sm text-center">
-          <h2 className="text-white text-4xl font-extrabold mb-4">Welcome to Our Store</h2>
-          <p className="text-white text-lg">Discover the best products with exclusive offers. Log in to explore!</p>
+    <div className="flex flex-col lg:flex-row items-center lg:justify-center min-h-screen bg-gradient-to-r from-teal-400 to-blue-600 relative overflow-hidden p-4">
+      {/* Left Side - Image or Brand Message */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-cover bg-center p-6 lg:p-10" style={{ backgroundImage: `url(https://cdn-icons-png.flaticon.com/512/1804/1804486.png)` }}>
+        <div className="bg-black bg-opacity-60 p-6 md:p-8 rounded-lg max-w-lg text-center">
+          <h2 className="text-white text-3xl md:text-4xl font-extrabold mb-3 md:mb-4">Welcome to Our Store</h2>
+          <p className="text-white text-base md:text-lg">Discover the best products with exclusive offers. Log in to explore!</p>
         </div>
       </div>
 
       {/* Right Side - Login Form with Glassmorphism */}
-      <div className="w-full lg:w-1/2 h-full flex items-center justify-center p-6 lg:p-12 relative z-10">
-        <div className="bg-white bg-opacity-30 backdrop-blur-lg shadow-lg rounded-2xl p-10 md:p-12 w-full max-w-md">
-          {/* Logo or Title */}
-          <h2 className="text-3xl font-bold text-center text-blue-800 mb-8">Sign In</h2>
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-12 relative z-9">
+        <div className="bg-white bg-opacity-30 backdrop-blur-lg shadow-md rounded-2xl p-6 sm:p-8 md:p-10 w-full max-w-lg">
+          {/* Title */}
+          <h2 className="text-2xl md:text-3xl font-bold text-center text-blue-800 mb-6 md:mb-8">Sign In</h2>
 
           <ErrorDisplay errors={signinError} />
-         
+
           {/* Phone Number */}
           <div className="mb-4">
-            <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">
-              Phone Number
-            </label>
+            <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">Phone Number</label>
             <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-              <FaPhone className="text-gray-400 m-3" title="Phone" />
               <select
                 id="country-code"
-                className="bg-gray-100 text-gray-700 font-medium px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
+                className="bg-gray-100 text-gray-700 font-medium px-2 sm:px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
                 defaultValue="+880"
               >
                 <option value="+880">+880</option>
               </select>
               <input
-                type="number"
+                type="tel"
                 id="phone"
                 name="phone_number"
-                placeholder="Enter your phone number"
+                placeholder="Phone Number"
                 value={formData.phone_number}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
+                className="w-full px-3 py-2 border-none focus:outline-none rounded-r-md"
+                required
+
               />
             </div>
             {errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
           </div>
 
-          {/* Login Button with Loading Animation */}
+          {/* Login Button with Animation */}
           <button
             onClick={handleLogin}
             disabled={signinLoading}
             className={`w-full bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold py-3 rounded-lg shadow-lg transition-all transform duration-200 ${
-              signinLoading ? 'cursor-wait' : 'hover:scale-105'
+              signinLoading ? 'cursor-wait' : 'hover:scale-105 active:scale-95'
             }`}
           >
-            {signinLoading ? (
-              <Loader message="Signing In" />
-            ) : (
-              "Sign In"
-            )}
+            {signinLoading ? <Loader message="Signing In" /> : "Sign In"}
           </button>
 
           {/* Divider */}
@@ -168,11 +163,11 @@ const SignIn = () => {
           </div>
 
           {/* Social Media Buttons */}
-          <div className="flex justify-center space-x-4 mb-6">
-            <button className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition duration-200 shadow-md">
+          <div className="flex justify-center space-x-3 sm:space-x-4 mb-6">
+            <button className="w-10 sm:w-12 h-10 sm:h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition duration-200 shadow-md">
               <FaFacebook className="text-white text-lg" />
             </button>
-            <button className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition duration-200 shadow-md">
+            <button className="w-10 sm:w-12 h-10 sm:h-12 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition duration-200 shadow-md">
               <FaGoogle className="text-white text-lg" />
             </button>
           </div>
@@ -187,6 +182,7 @@ const SignIn = () => {
         </div>
       </div>
     </div>
+
   );
 };
 
