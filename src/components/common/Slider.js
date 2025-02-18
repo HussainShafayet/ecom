@@ -6,7 +6,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 import { Link } from 'react-router-dom';
 import {useState} from 'react';
-
+import {FaChevronLeft, FaChevronRight} from 'react-icons/fa6';
 
 const Slider = ({image_sliders}) => {
     const [currentSlide, setCurrentSlide] = useState(1);
@@ -35,9 +35,10 @@ const Slider = ({image_sliders}) => {
 
         <Swiper
             modules={[Navigation, Pagination, Autoplay, EffectFade, Parallax]}
-            spaceBetween={30}
-            slidesPerView={1}
-            navigation
+            navigation={{
+                nextEl: ".custom-swiper-button-next",
+                prevEl: ".custom-swiper-button-prev",
+            }}
             pagination={{ clickable: true }}
             autoplay={{ delay: 3000 }}
             effect="fade"
@@ -54,13 +55,27 @@ const Slider = ({image_sliders}) => {
                             <img
                                 src={slide.media}
                                 alt="Slide"
-                                className="w-full h-full object-contain" // Use object-cover if needed
+                                className="w-full h-full object-contain"
                             />
                         </div>
                     </Link>
                 </SwiperSlide>
             ))}
+            {/* Custom Navigation Buttons */}
+            {/* left Arrow */}
+             <button
+                className="custom-swiper-button-prev absolute left-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white  h-24 w-8 rounded-sm shadow-lg hover:scale-105 transition-transform z-10"
+            >
+                <FaChevronLeft size={30} />
+            </button>
+            {/* Right Arrow */}
+            <button
+                className="custom-swiper-button-next absolute right-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white h-24 w-8 rounded-sm shadow-lg hover:scale-105 transition-transform z-10"
+            >
+                <FaChevronRight size={30} />
+            </button>
         </Swiper>
+
     </div>
     </>
   )
