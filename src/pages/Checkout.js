@@ -320,9 +320,9 @@ const Checkout = () => {
         {checkoutContentError} - Please try again later.
       </div>
     ) :
-    <div className="mx-auto px-1 lg:flex lg:space-x-3 mb-3">
+    <div className="mx-auto px-1 lg:flex  mb-3 gap-3">
      {/* Right Section: Order Summary */}
-     <div className="lg:lg:w-7/12 mt-12 lg:mt-0">
+     <div className="lg:w-7/12">
         <h3 className="text-2xl font-bold mb-4">Order Summary</h3>
         {cartLoading ? 
           <OrderSummarySkeleton />
@@ -456,6 +456,7 @@ const Checkout = () => {
           </div>
           }
       </div>
+
       {/*form section*/}
       <div className="lg:w-5/12">
         <h2 className="text-2xl font-bold mb-1">Checkout</h2>
