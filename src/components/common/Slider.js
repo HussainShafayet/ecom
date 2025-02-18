@@ -25,7 +25,7 @@ const Slider = ({image_sliders}) => {
     }
   return (
     <>
-    <div className="relative h-full w-full border rounded-sm">
+    <div className="relative h-full w-full border rounded-sm group">
         {/*<div className="absolute top-0 left-0 w-full h-1 bg-gray-300">
             <div
                 className="bg-blue-500 h-full"
@@ -63,14 +63,14 @@ const Slider = ({image_sliders}) => {
             ))}
             {/* Custom Navigation Buttons */}
             {/* left Arrow */}
-             <button
-                className="custom-swiper-button-prev absolute left-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white  h-24 w-8 rounded-sm shadow-lg hover:scale-105 transition-transform z-10"
+            <button
+                className="custom-swiper-button-prev absolute left-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white h-24 w-8 rounded-sm shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:scale-105 z-10"
             >
                 <FaChevronLeft size={30} />
             </button>
             {/* Right Arrow */}
             <button
-                className="custom-swiper-button-next absolute right-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white h-24 w-8 rounded-sm shadow-lg hover:scale-105 transition-transform z-10"
+                className="custom-swiper-button-next absolute right-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-l from-gray-400 to-gray-600 text-white h-24 w-8 rounded-sm shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:scale-105 z-10"
             >
                 <FaChevronRight size={30} />
             </button>
