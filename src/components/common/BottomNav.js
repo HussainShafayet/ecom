@@ -42,7 +42,7 @@ const BottomNav = () => {
       };
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-300 shadow-md md:hidden">
+    <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-300 shadow-md md:hidden z-50">
       <div className="flex justify-around items-center py-2">
         {/* Home */}
         <Link to="/" className="flex flex-col items-center text-gray-700 hover:text-blue-500 transition">
