@@ -101,7 +101,7 @@ const SignIn = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row items-center lg:justify-center min-h-screen bg-gradient-to-r from-teal-400 to-blue-600 relative overflow-hidden p-4">
+    <div className="flex flex-col lg:flex-row items-center lg:justify-center min-h-screen bg-gradient-to-r to-slate-400 from-slate-50 relative overflow-hidden p-4">
       {/* Left Side - Image or Brand Message */}
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-cover bg-center p-6 lg:p-10" style={{ backgroundImage: `url(https://cdn-icons-png.flaticon.com/512/1804/1804486.png)` }}>
         <div className="bg-black bg-opacity-60 p-6 md:p-8 rounded-lg max-w-lg text-center">

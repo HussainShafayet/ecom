@@ -118,13 +118,13 @@ const SignUp = () => {
   return (
     <div className="flex items-center justify-center min-h-screen  p-6 relative overflow-hidden">
       {/* Background Animated Pattern */}
-      <div className="absolute inset-0 opacity-30 animate-pulse"></div>
+      {/*<div className="absolute inset-0 opacity-30 animate-pulse"></div>*/}
 
       {/* Decorative Circles */}
-      <div className="absolute top-0 left-1/2 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl -translate-x-1/2"></div>
-      <div className="absolute bottom-0 right-1/3 w-72 h-72 bg-pink-300 opacity-20 rounded-full blur-3xl"></div>
+      {/*<div className="absolute top-0 left-1/2 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl -translate-x-1/2"></div>
+      <div className="absolute bottom-0 right-1/3 w-72 h-72 bg-pink-300 opacity-20 rounded-full blur-3xl"></div>*/}
 
-      <div className="relative z-10 w-full max-w-lg p-8 bg-white bg-opacity-80 rounded-2xl shadow-2xl backdrop-blur-lg">
+      <div className="relative w-full max-w-lg p-8 bg-white bg-opacity-80 rounded-2xl shadow-lg backdrop-blur-lg">
         <div className="flex flex-wrap justify-between items-center mb-6">
           <h2 className="text-3xl font-bold text-center text-blue-700">
             Create Account
