@@ -64,13 +64,13 @@ const HeroSection = () => {
       <div className="lg:w-2/6 gap-4 w-full  flex flex-col">
 
         
-          <div className="relative w-full border h-3/5">
-              {/* Left Arrow */}
+          <div className="relative w-full border h-3/5 group">
+            {/* left Arrow */}
             <button
-              onClick={handlePrevious}
-              className="absolute left-0-0 top-1/2 transform -translate-y-1/2 text-blue-500 p-1 rounded-full hover:scale-110 transition-transform z-10"
+                onClick={handlePrevious}
+                className="absolute left-0-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white h-24 w-8 rounded-sm shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:scale-105 z-10"
             >
-              <FaChevronLeft size={50} className="text-blue-500" />
+                <FaChevronLeft size={30} />
             </button>
             <div className='relative h-full'>
               <Link to={currentVideo && getLink(currentVideo)} target='_blank' className='absolute right-2 top-2 z-10 cursor-pointer text-blue-500 hover:underline'>{currentVideo?.caption?currentVideo?.caption :'Click'}</Link>
@@ -88,10 +88,10 @@ const HeroSection = () => {
             </div>
             {/* Right Arrow */}
             <button
-              onClick={handleNext}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 text-blue-500 p-1 rounded-full hover:scale-110 transition-transform z-10"
+                onClick={handleNext}
+                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-l from-gray-400 to-gray-600 text-white h-24 w-8 rounded-sm shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:scale-105 z-10"
             >
-              <FaChevronRight size={50} className="text-blue-500" />
+                <FaChevronRight size={30} />
             </button>
           </div>
 
