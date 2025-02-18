@@ -61,13 +61,13 @@ const CategoriesSection = () => {
           View All
         </Link>
       </div>
-      <div className="relative">
+      <div className="relative group">
         {/* Left Arrow */}
         <button
           onClick={scrollLeft}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white p-3 h-20 w-8 rounded-sm shadow-lg hover:scale-105 transition-transform z-10"
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white h-20 w-8 rounded-sm shadow-lg hover:scale-105 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         >
-          <FaChevronLeft size={16} />
+          <FaChevronLeft size={30} />
         </button>
 
         {/* Categories Container */}
@@ -85,13 +85,13 @@ const CategoriesSection = () => {
                 </span>
               )}
               <Link to={`/products/?category=${category.slug}`} target='_blank'>
-                <div className="relative group cursor-pointer min-w-[150px]">
+                <div className="relative cursor-pointer min-w-[150px] hover:scale-95 transition-transform transform">
                   <img
                     src={category.image}
                     alt={category.name}
-                    className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
+                    className="w-full h-36 object-cover rounded-lg"
                   />
-                  <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 hover:opacity-100 transition-opacity">
                     <span className="text-lg font-semibold">{category.name}</span>
                   </div>
                 </div>
@@ -103,9 +103,9 @@ const CategoriesSection = () => {
         {/* Right Arrow */}
         <button
           onClick={scrollRight}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white p-3 h-20 w-8 rounded-sm shadow-lg hover:scale-105 transition-transform z-10"
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-gray-400 to-gray-600 text-white h-20 w-8 rounded-sm shadow-lg hover:scale-105 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         >
-          <FaChevronRight size={16} />
+          <FaChevronRight size={30} />
         </button>
       </div>
     </div>
