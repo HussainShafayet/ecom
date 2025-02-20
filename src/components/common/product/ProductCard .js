@@ -77,150 +77,156 @@ const ProductCard = ({ product, cardForTrending }) => {
     dispatch(removeFromWishlist(product.id));
   }
 
+  const DiscountBadge = ({ discountValue, discountType }) => (
+    <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
+      {discountValue}{discountType === 'percentage' ? '%' : '৳'} OFF
+    </span>
+  );
+
+  const TrendingBadge = ({ isHot }) => (
+    <div className="absolute top-7 left-1 bg-red-500 text-white px-1 py-1 rounded-full text-xs font-semibold uppercase">
+      {isHot ? "Hot Picks" : "Trending"}
+    </div>
+  );
+  
+  const WishlistButton = ({ isFavourite, handleAddToWishlist, handleRemoveToWishlist }) => (
+    <button className="absolute top-2 right-2 text-gray-600 hover:text-red-500">
+      {isFavourite ? (
+        <FaHeart className="w-5 h-5" title="Remove from Wishlist" onClick={handleRemoveToWishlist} />
+      ) : (
+        <FaRegHeart className="w-5 h-5" title="Add to Wishlist" onClick={handleAddToWishlist} />
+      )}
+    </button>
+  );
+  const ProductImage = ({ product, isImageLoaded, setIsImageLoaded }) => (
+    <Link to={`/products/detail/${product.slug}`} className="block h-36 relative">
+      <img
+        src={product.image}
+        alt={product.title}
+        loading="lazy"
+        className={`w-full h-full object-contain rounded-md mb-2 transition-opacity duration-500 ${
+          isImageLoaded ? "opacity-100" : "opacity-0"
+        }`}
+        onLoad={() => setIsImageLoaded(true)}
+      />
+      {!isImageLoaded && (
+        <div className="absolute inset-0 w-full h-36 bg-gray-300 animate-pulse rounded-md mb-2" />
+      )}
+    </Link>
+  );
+  const ProductTitle = ({ name, slug }) => (
+    <h3 className="text-md font-semibold mb-1">
+      <Link to={`/products/detail/${slug}`} className="hover:text-blue-500">
+        {name}
+      </Link>
+    </h3>
+  );
+  const ProductStats = ({ views, orders }) => (
+    <div className="flex items-center text-xs text-gray-600 mb-2 space-x-4">
+      <div className="flex items-center">
+        <FaEye className="mr-1 text-gray-500" /> {views} views
+      </div>
+      <div className="flex items-center">
+        <FaShoppingCart className="mr-1 text-gray-500" /> {orders} orders
+      </div>
+    </div>
+  );
+  const ProductPrice = ({ hasDiscount, discountPrice, basePrice }) => (
+    hasDiscount ? (
+      <div className="mb-2 flex flex-row space-x-1">
+        <p className="text-3x text-green-600 font-semibold">{discountPrice}</p>
+        <p className="text-gray-500 line-through">{basePrice}</p>
+      </div>
+    ) : (
+      <p className="text-2xl text-green-600 font-semibold mb-2">{basePrice}</p>
+    )
+  );
+  const ProductRating = ({ rating, reviews }) => (
+    <div className="flex items-center mb-2">
+      {Array(Math.ceil(rating)).fill(0).map((_, i) => (
+        <svg key={i} className="h-4 w-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 17.27L18.18 21 16.54 14.24 22 9.27 14.81 8.63 12 2 9.19 8.63 2 9.27 7.46 14.24 5.82 21z" />
+        </svg>
+      ))}
+      <span className="ml-2 text-xs text-gray-600">({rating.toFixed(1)})</span>
+      <span className="ml-2 text-xs text-gray-600">{reviews} reviews</span>
+    </div>
+  );
+  const ActionButtons = ({ hasVariants, handleAddToCart, handleBuyNow }) => (
+    <div className="flex space-x-2 mt-2">
+      {!hasVariants && (
+        <button onClick={handleAddToCart} className="flex-grow bg-blue-500 text-white font-bold py-1 rounded hover:bg-blue-600 transition-colors text-xs">
+          Add to Cart
+        </button>
+      )}
+      <button onClick={handleBuyNow} className="flex-grow bg-green-500 text-white font-bold py-1 rounded hover:bg-green-600 transition-colors text-xs">
+        Buy Now
+      </button>
+    </div>
+  );
+  
+  const OutOfStock = () => (
+    <div className="text-center">
+      <span className="font-bold text-red-500">Out of Stock</span>
+    </div>
+  );
+  
 
   return (
     <div className="border rounded-lg shadow-md bg-white hover:shadow-lg transition duration-200 relative p-3">
       
-      {/* Out of Stock Overlay */}
-      {/*{!product.availability_status && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 text-white flex items-center justify-center text-lg font-bold z-10">
-          Out of Stock
-        </div>
-      )}*/}
-      
       {/* Discount Badge */}
       {product.has_discount && (
-        <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-          {product.discount_value}{product.discount_type == 'percentage'?'%':'৳'} OFF
-        </span>
+        <DiscountBadge 
+          discountValue={product.discount_value} 
+          discountType={product.discount_type} 
+        />
       )}
-      {cardForTrending && 
-        <>
-          {/* Badge */}
-          <div className="absolute top-7 left-1 bg-red-500 text-white px-1 py-1 rounded-full text-xs font-semibold uppercase">
-            {product.isHot ? "Hot Picks" : "Trending"}
-          </div>
-        </>
-      }
-      
 
-      {/* Wishlist Icon */}
-      <button
-          //onClick={handleWishlistToggle}
-          className="absolute top-2 right-2 text-gray-600 hover:text-red-500"
-        >
-          {product.is_favourite ? 
-          
-          <FaHeart className="w-5 h-5" title='Remove from Wishlist' onClick={handleRemoveToWishlist} /> : 
-          
-          <FaRegHeart className="w-5 h-5" title='Add to Wishlist' onClick={handleAddToWishlist} />}
-        </button>
+      {/* Trending Badge */}
+      {cardForTrending && <TrendingBadge isHot={product.isHot} />}
+
+      {/* Wishlist Button */}
+      <WishlistButton 
+        isFavourite={product.is_favourite} 
+        handleAddToWishlist={handleAddToWishlist} 
+        handleRemoveToWishlist={handleRemoveToWishlist} 
+      />
 
       {/* Product Image */}
-      <Link to={`/products/detail/${product.slug}`} className="block h-36">
-        {/* Main Product Image */}
-        <img
-          src={product.image}
-          alt={product.title}
-          loading="lazy"
-          className={`w-full h-full object-contain rounded-md mb-2 transition-opacity duration-500 ${
-            isImageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          onLoad={() => setIsImageLoaded(true)} // Set image loaded state
-        />
-
-        {/* Blurred Placeholder */}
-        {!isImageLoaded && (
-          <img
-            src={blurImage}
-            alt="Loading"
-            className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
-          />
-        )}
-      </Link>
-
+      <ProductImage 
+        product={product} 
+        isImageLoaded={isImageLoaded} 
+        setIsImageLoaded={setIsImageLoaded} 
+      />
 
       <div className="p-2">
-        {/* Product Title */}
-        <h3 className="text-md font-semibold mb-1">
-          <Link to={`/products/detail/${product.slug}`} className="hover:text-blue-500">
-            {product.name}
-          </Link>
-        </h3>
+        <ProductTitle name={product.name} slug={product.slug} />
 
-        {/* Product Brand */}
         <p className="text-xs text-gray-500 mb-2">
           <span className="font-semibold">{product.brand_name}</span>
         </p>
 
-        {/* View Count and Order Count */}
-        <div className="flex items-center text-xs text-gray-600 mb-2 space-x-4">
-          <div className="flex items-center">
-            <FaEye className="mr-1 text-gray-500" /> {product.total_views} views
-          </div>
-          <div className="flex items-center">
-            <FaShoppingCart className="mr-1 text-gray-500" /> {product.total_orders} orders
-          </div>
-        </div>
+        <ProductStats views={product.total_views} orders={product.total_orders} />
 
-         {/* Product Price */}
-         {product.has_discount ? (
-              <div className="mb-2 flex flex-row space-x-1">
-                <p className="text-3x text-green-600 font-semibold">
-                  {product.discount_price}
-                </p>
-                <p className="text-gray-500 line-through">
-                  {product.base_price}
-                </p>
-              </div>
-            ) : (
-              <p className="text-2xl text-green-600 font-semibold mb-2">
-                {product.base_price}
-              </p>
-            )}
+        <ProductPrice 
+          hasDiscount={product.has_discount} 
+          discountPrice={product.discount_price} 
+          basePrice={product.base_price} 
+        />
 
-        {/* Product Rating */}
-        <div className="flex items-center mb-2">
-          {Array(Math.ceil(product.avg_rating))
-            .fill(0)
-            .map((_, i) => (
-              <svg
-                key={i}
-                className="h-4 w-4 text-yellow-500"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 17.27L18.18 21 16.54 14.24 22 9.27 14.81 8.63 12 2 9.19 8.63 2 9.27 7.46 14.24 5.82 21z" />
-              </svg>
-            ))}
-          <span className="ml-2 text-xs text-gray-600">({product.avg_rating.toFixed(1)})</span>
-          <span className="ml-2 text-xs text-gray-600">{product.total_reviews} reviews</span>
-        </div>
+        <ProductRating rating={product.avg_rating} reviews={product.total_reviews} />
 
-        {/* Button Group */}
-        {product.availability_status? 
-          <div className="flex space-x-2 mt-2">
-            {!product.has_variants && 
-              <button
-                onClick={handleAddToCart}
-                className="flex-grow bg-blue-500 text-white font-bold py-1 rounded hover:bg-blue-600 transition-colors text-xs"
-              >
-                Add to Cart
-              </button>
-            }
-            <button
-              onClick={handleBuyNow}
-              className="flex-grow bg-green-500 text-white font-bold py-1 rounded hover:bg-green-600 transition-colors text-xs"
-            >
-              Buy Now
-            </button>
-          </div>
-          :
-          <div className='text-center'>
-            <span className='font-bold text-red-500'>Out of Stock</span>
-          </div>
-          
-        }
+        {/* Stock & Action Buttons */}
+        {product.availability_status ? (
+          <ActionButtons 
+            hasVariants={product.has_variants} 
+            handleAddToCart={handleAddToCart} 
+            handleBuyNow={handleBuyNow} 
+          />
+        ) : (
+          <OutOfStock />
+        )}
       </div>
     </div>
   );
