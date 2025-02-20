@@ -90,7 +90,7 @@ const ProductCard = ({ product, cardForTrending }) => {
   );
   
   const WishlistButton = ({ isFavourite, handleAddToWishlist, handleRemoveToWishlist }) => (
-    <button className="absolute top-2 right-2 text-gray-600 hover:text-red-500">
+    <button className="absolute top-2 right-2 text-gray-600 hover:text-red-500 z-10">
       {isFavourite ? (
         <FaHeart className="w-5 h-5" title="Remove from Wishlist" onClick={handleRemoveToWishlist} />
       ) : (
@@ -99,12 +99,12 @@ const ProductCard = ({ product, cardForTrending }) => {
     </button>
   );
   const ProductImage = ({ product, isImageLoaded, setIsImageLoaded }) => (
-    <Link to={`/products/detail/${product.slug}`} className="block h-36 relative">
+    <Link to={`/products/detail/${product.slug}`} className="relative">
       <img
         src={product.image}
         alt={product.title}
         loading="lazy"
-        className={`w-full h-full object-contain rounded-md mb-2 transition-opacity duration-500 ${
+        className={`w-full h-36 object-contain rounded-md mb-2 transition-opacity duration-500 ${
           isImageLoaded ? "opacity-100" : "opacity-0"
         }`}
         onLoad={() => setIsImageLoaded(true)}
