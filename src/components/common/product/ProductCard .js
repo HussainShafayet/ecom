@@ -115,21 +115,25 @@ const ProductCard = ({ product, cardForTrending }) => {
     </Link>
   );
   const ProductTitle = ({ name, slug }) => (
-    <h3 className="text-md font-semibold mb-1">
-      <Link to={`/products/detail/${slug}`} className="hover:text-blue-500">
+    <h3 className="text-sm sm:text-lg font-semibold mb-1 truncate w-full">
+      <Link to={`/products/detail/${slug}`} className="hover:text-blue-500 transition-colors duration-200">
         {name}
       </Link>
     </h3>
+
+
   );
   const ProductStats = ({ views, orders }) => (
-    <div className="flex items-center text-xs text-gray-600 mb-2 space-x-4">
-      <div className="flex items-center">
+    <div className="hidden lg:flex lg:items-center lg:space-x-4 text-xs text-gray-600 mb-2">
+      {/* Show both icons on large screens, but stack them on smaller screens */}
+      <span className="flex items-center mb-1 lg:mb-0">
         <FaEye className="mr-1 text-gray-500" /> {views} views
-      </div>
-      <div className="flex items-center">
+      </span>
+      <span className="flex items-center">
         <FaShoppingCart className="mr-1 text-gray-500" /> {orders} orders
-      </div>
+      </span>
     </div>
+
   );
   const ProductPrice = ({ hasDiscount, discountPrice, basePrice }) => (
     hasDiscount ? (
@@ -203,7 +207,7 @@ const ProductCard = ({ product, cardForTrending }) => {
       <div className="p-2">
         <ProductTitle name={product.name} slug={product.slug} />
 
-        <p className="text-xs text-gray-500 mb-2">
+        <p className="hidden lg:block text-xs text-gray-500 mb-2">
           <span className="font-semibold">{product.brand_name}</span>
         </p>
 
