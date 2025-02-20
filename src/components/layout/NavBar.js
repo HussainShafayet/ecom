@@ -61,7 +61,7 @@ const Navbar = () => {
         <div className="flex items-center space-x-3 md:space-x-4">
           <Link to='/'>
             <img
-              src="https://img.freepik.com/premium-psd/engraved-black-logo-mockup_125540-223.jpg"
+              src={`${process.env.PUBLIC_URL}/static image/gocart-logo.jpeg`}
               alt="Website Logo"
               className="w-10 h-10 md:w-12 md:h-12 rounded-full hover:shadow-lg transition-shadow duration-300"
             />
