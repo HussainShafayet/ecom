@@ -44,6 +44,21 @@ export const createReview = createAsyncThunk('review/createReview', async (formD
      }
 } );
 
+//update reivew 
+export const updateReview = createAsyncThunk('review/updateReview', async ({formData, review_id}, {rejectWithValue}) =>{
+    try {
+        console.log(formData, review_id);
+        
+        // Import axiosSetup only when needed to avoid circular dependency issues
+        const api = (await import('../../api/axiosSetup')).default;
+        const response = await api.put(`products/reviews/${review_id}/`, formData);
+       console.log('update review response', response);
+       return response.data.data;
+     } catch (error) {
+       return rejectWithValue(error.response.data);
+     }
+} );
+
 const reviewSlice = createSlice({
     name: 'review',
     initialState,
@@ -92,6 +107,27 @@ const reviewSlice = createSlice({
             state.addReviewCompleted = true;
         })
         .addCase(createReview.rejected, (state, action)=>{
+            state.addReviewLoading = false;
+            state.addReviewError = action.payload.error;
+        })
+
+        //update to review 
+        .addCase(updateReview.pending, (state)=>{
+            state.addReviewLoading = true;
+        })
+        .addCase(updateReview.fulfilled, (state, action)=>{
+            state.addReviewLoading = false;
+            state.addReviewError = false;
+            // Find the index of the review to update
+                const index = state.reviews.findIndex(review => review.id === action.payload.id);
+                console.log(index, action.payload);
+                
+                if (index !== -1) {
+                    // Replace the old review with the updated one
+                    state.reviews[index] = { ...state.reviews[index], ...action.payload };
+                }
+        })
+        .addCase(updateReview.rejected, (state, action)=>{
             state.addReviewLoading = false;
             state.addReviewError = action.payload.error;
         })

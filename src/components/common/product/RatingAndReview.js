@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { FaStar, FaUserCircle } from "react-icons/fa";
+import { FaEdit, FaStar, FaUserCircle } from "react-icons/fa";
 import {useDispatch, useSelector} from "react-redux";
 import {useLocation, useNavigate} from "react-router-dom";
-import {createReview, fetchReviews, resetReviewFormData, setMediaFiles, updateReviewFormData} from "../../../redux/slice/reviewSlice";
+import {createReview, fetchReviews, resetReviewFormData, setMediaFiles, updateReview, updateReviewFormData} from "../../../redux/slice/reviewSlice";
 
 const RatingAndReview = ({ product }) => {
   const [hoverRating, setHoverRating] = useState(0);
-  const [reviewerName, setReviewerName] = useState("");
+  const [can_edited, setCanEdited] = useState(null);
   const {isAuthenticated, user} = useSelector((state)=>state.auth);
   const navigate = useNavigate();
   const location = useLocation();
@@ -63,8 +63,13 @@ const RatingAndReview = ({ product }) => {
     // Append media files
     reviewFormData.media.forEach((file) => formData.append("media[]", file));
     console.log(formData);
+    if (can_edited) {
+      dispatch(updateReview({formData, review_id:can_edited}));
+      setCanEdited(null);
+    } else {
+      dispatch(createReview(formData));
+    }
     
-    dispatch(createReview(formData));
 
     //if (rating && reviewText.trim() && user.trim()) {
     //  const newReview = {
@@ -79,6 +84,16 @@ const RatingAndReview = ({ product }) => {
     //  setReviewerName(""); // Reset reviewer name
     //}
   };
+
+  const handleCanEdited = (review) => {
+    setCanEdited(review.id);
+    console.log(review);
+    
+    dispatch(dispatch(updateReviewFormData({ ['product_id']: review.product_id})));
+    dispatch(dispatch(updateReviewFormData({ ['rating']: review.rating})));
+    dispatch(dispatch(updateReviewFormData({ ['comment']: review.comment})));
+    dispatch(dispatch(updateReviewFormData({ ['media']: review.media_urls})));
+  }
   return (
     <div className="shadow-md rounded-lg p-4">
       {/* Header */}
@@ -98,12 +113,21 @@ const RatingAndReview = ({ product }) => {
                 {/* Reviewer Name */}
                 <div className="flex items-center space-x-2">
                   <FaUserCircle className="text-gray-400 w-6 h-6" />
-                  <span className="text-sm font-medium text-gray-800">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-800">
                     {review.user_name}
-                  </span>
+                    </span>
+                    {/* Review Date */}
+                    <span className="text-xs text-gray-500">{new Date(review.created_at).toLocaleDateString()}</span>
+                  </div>
+                  
                 </div>
-                {/* Review Date */}
-                <span className="text-xs text-gray-500">{new Date(review.created_at).toLocaleDateString()}</span>
+                {/* edit */}
+                {review.can_edited &&
+                  <FaEdit className="text-gray-500 hover:text-blue-500 w-6 h-6 cursor-pointer"
+                  onClick={() => handleCanEdited(review)}
+                   />
+                }
               </div>
               {/* Review Rating */}
               <div className="flex items-center mb-2">
@@ -159,7 +183,7 @@ const RatingAndReview = ({ product }) => {
 
         {isAuthenticated ?
         <div className="space-y-4">
-          {can_review ? 
+          {can_review || can_edited ? 
           <form onSubmit={handleSubmitReview} className="space-y-4 p-4 border rounded-md shadow-md">
             {/* Rating Selector */}
             <div className="flex items-center">
@@ -230,13 +254,26 @@ const RatingAndReview = ({ product }) => {
 
 
             {/* Submit Button */}
+            <div className="flex justify-center items-center space-x-2">
+            {can_edited && 
+            <button
+              type="button"
+              onClick={() => setCanEdited(false)}
+              className="px-4 py-2 w-full bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+            >
+              Cancel
+            </button>
+            }
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-all disabled:opacity-50"
+              className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all disabled:opacity-50"
               disabled={!reviewFormData.rating || !reviewFormData.comment.trim()}
             >
-              Submit Review
+            {can_edited? 'Update Review' : 'Submit Review' }
+              
             </button>
+            
+            </div>
           </form>
         : 
         <p className="text-gray-600">
