@@ -18,7 +18,20 @@ const RatingAndReview = ({ product }) => {
 
   useEffect(() => {
     product.id && dispatch(fetchReviews(product.id));
-  }, [product.id])
+  }, [product.id]);
+
+  const getFileType = (url) => {
+    if (!url) return "unknown";
+  
+    const extension = url.split(".").pop().toLowerCase();
+    const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"];
+    const videoExtensions = ["mp4", "webm", "ogg", "mov", "avi", "mkv"];
+  
+    if (imageExtensions.includes(extension)) return "image";
+    if (videoExtensions.includes(extension)) return "video";
+    
+    return "unknown";
+  };
 
   const handleRedirectSignIn = () => {
     navigate('/signin', { state: { from: location } });
@@ -89,18 +102,18 @@ const RatingAndReview = ({ product }) => {
               <div className="flex overflow-x-auto space-x-4 p-2">
                 {review.media_urls.map((file, index) => (
                   <div key={index} className="flex-none w-36 sm:w-44 md:w-52">
-                    {/*{file.type.startsWith("image/") ? (*/}
+                    {getFileType(file.file) === 'image' ? (
                       <img
                         src={file.file}
                         className="w-full h-auto rounded-lg shadow-md"
                         alt={`Review media ${index}`}
                       />
-                    {/*) : file.type.startsWith("video/") ? (
+                    ) : getFileType(file.file) === 'video' ? (
                       <video controls className="w-full h-auto rounded-lg shadow-md">
                         <source src={file.file} type={file.type} />
                         Your browser does not support the video tag.
                       </video>
-                    ) : null}*/}
+                    ) : null}
                   </div>
                 ))}
               </div>
