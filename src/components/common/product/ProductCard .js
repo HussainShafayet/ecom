@@ -19,6 +19,7 @@ const ProductCard = ({ product, cardForTrending }) => {
       cartBody.product_id = product.id;
       cartBody.quantity = 1;
       cartBody.variant_id = product.variant_id;
+      cartBody.action = 'increase';
       dispatch(handleAddtoCart(cartBody));
     }else{
       const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
@@ -36,6 +37,7 @@ const ProductCard = ({ product, cardForTrending }) => {
         cartBody.product_id = product.id;
         cartBody.quantity = 1;
         cartBody.variant_id = product.variant_id;
+        cartBody.action = 'increase';
         dispatch(handleAddtoCart(cartBody));
       }else{
         const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));

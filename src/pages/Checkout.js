@@ -78,9 +78,9 @@ const Checkout = () => {
       if (difference !== 0) {
       const cartBody = {};
       cartBody.product_id = product.id;
-      cartBody.quantity = difference;
+      cartBody.quantity = Math.abs(difference);
       cartBody.variant_id = product.variant_id;
-      
+      cartBody.action = difference < 0 ? 'decrease' : 'increase';
       dispatch(handleAddtoCart(cartBody));
       setOriginalQuantities((prev) => ({
         ...prev,
