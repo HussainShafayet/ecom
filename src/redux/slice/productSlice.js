@@ -161,7 +161,7 @@ const productSlice = createSlice({
             state.relatedProductsLoading = false;
             state.isLoading = false;
             //state.products = [];
-            state.error = action.error.message;
+            state.error = action.error.message || 'Something went wrong';
         });
 
 
@@ -186,7 +186,7 @@ const productSlice = createSlice({
             state.relatedProductsLoading = false;
             state.new_arrival_Loading = false;
             //state.products = [];
-            state.new_arrival_error = action.error.message;
+            state.new_arrival_error = action.error.message || 'Something went wrong';
         });
 
 
@@ -211,7 +211,7 @@ const productSlice = createSlice({
             state.relatedProductsLoading = false;
             state.best_selling_Loading = false;
             //state.products = [];
-            state.best_selling_error = action.error.message;
+            state.best_selling_error = action.error.message || 'Something went wrong';
         });
 
 
@@ -236,7 +236,7 @@ const productSlice = createSlice({
             state.relatedProductsLoading = false;
             state.flash_sale_Loading = false;
             //state.products = [];
-            state.flash_sale_error = action.error.message;
+            state.flash_sale_error = action.error?.message || 'Something went wrong';
         });
 
 
@@ -261,7 +261,7 @@ const productSlice = createSlice({
             state.relatedProductsLoading = false;
             state.featured_Loading = false;
             //state.products = [];
-            state.featured_error = action.error.message;
+            state.featured_error = action.error?.message || 'Something went wrong';
         });
 
 
@@ -294,7 +294,7 @@ const productSlice = createSlice({
         builder.addCase(fetchProductById.rejected,(state, action)=>{
             state.isLoading = false;
             state.product = null;
-            state.error = action.payload.message;
+            state.error = action.payload?.message || 'Something went wrong';
         });
 
         //get search suggestions
