@@ -17,11 +17,12 @@ const initialState = {
     addReviewLoading: false,
     addReviewError: null,
     addReviewCompleted: false,
+    updateReviewCompleted: false,
 }
 //get reivews 
 export const fetchReviews = createAsyncThunk('review/fetchRevies', async (product_id, {rejectWithValue}) =>{
     try {
-        // Import axiosSetup only when needed to avoid circular dependency issues
+        // Import axiosSetup only when debounceneeded to avoid circular dependency issues
         const api = (await import('../../api/axiosSetup')).default;
         const response = await api.get(`products/reviews/?product_id=${product_id}`);
        console.log('fetch reviews response', response);
@@ -47,8 +48,6 @@ export const createReview = createAsyncThunk('review/createReview', async (formD
 //update reivew 
 export const updateReview = createAsyncThunk('review/updateReview', async ({formData, review_id}, {rejectWithValue}) =>{
     try {
-        console.log(formData, review_id);
-        
         // Import axiosSetup only when needed to avoid circular dependency issues
         const api = (await import('../../api/axiosSetup')).default;
         const response = await api.put(`products/reviews/${review_id}/`, formData);
@@ -64,7 +63,7 @@ const reviewSlice = createSlice({
     initialState,
     reducers: {
         setMediaFiles : (state, action) => {
-            state.reviewFormData.media = [...state.reviewFormData.media, action.payload]
+            state.reviewFormData.media = [...state.reviewFormData.media, ...action.payload]
         },
         updateReviewFormData : (state, action ) => {
             state.reviewFormData = {...state.reviewFormData, ...action.payload}
@@ -92,7 +91,7 @@ const reviewSlice = createSlice({
         })
         .addCase(fetchReviews.rejected, (state, action)=>{
             state.reviewLoading = false;
-            state.reviewError = action.payload.error;
+            state.reviewError = action.payload?.error || 'Something wend wrong!';
         })
 
 
@@ -103,33 +102,35 @@ const reviewSlice = createSlice({
         .addCase(createReview.fulfilled, (state, action)=>{
             state.addReviewLoading = false;
             state.addReviewError = false;
+            state.addReviewCompleted = false;
             state.reviews = [...state.reviews, action.payload];
             state.addReviewCompleted = true;
         })
         .addCase(createReview.rejected, (state, action)=>{
             state.addReviewLoading = false;
-            state.addReviewError = action.payload.error;
+            state.addReviewError = action.payload?.error || 'Something went wrong!';
         })
 
         //update to review 
         .addCase(updateReview.pending, (state)=>{
             state.addReviewLoading = true;
+            state.updateReviewCompleted = false;
         })
         .addCase(updateReview.fulfilled, (state, action)=>{
             state.addReviewLoading = false;
             state.addReviewError = false;
             // Find the index of the review to update
-                const index = state.reviews.findIndex(review => review.id === action.payload.id);
-                console.log(index, action.payload);
-                
-                if (index !== -1) {
-                    // Replace the old review with the updated one
-                    state.reviews[index] = { ...state.reviews[index], ...action.payload };
-                }
+            const index = state.reviews.findIndex(review => review.id === action.payload.id);
+            
+            if (index !== -1) {
+                // Replace the old review with the updated one
+                state.reviews[index] = { ...state.reviews[index], ...action.payload };
+            }
+            state.updateReviewCompleted = true;
         })
         .addCase(updateReview.rejected, (state, action)=>{
             state.addReviewLoading = false;
-            state.addReviewError = action.payload.error;
+            state.addReviewError = action.payload?.error || 'Something went wrong!';
         })
     }),
 });

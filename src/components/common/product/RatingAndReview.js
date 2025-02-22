@@ -3,6 +3,7 @@ import { FaEdit, FaStar, FaUserCircle } from "react-icons/fa";
 import {useDispatch, useSelector} from "react-redux";
 import {useLocation, useNavigate} from "react-router-dom";
 import {createReview, fetchReviews, resetReviewFormData, setMediaFiles, updateReview, updateReviewFormData} from "../../../redux/slice/reviewSlice";
+import Loader from "../Loader";
 
 const RatingAndReview = ({ product }) => {
   const [hoverRating, setHoverRating] = useState(0);
@@ -11,7 +12,7 @@ const RatingAndReview = ({ product }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const {reviewLoading, reviews, reviewError, can_review, reviewFormData, addReviewCompleted} = useSelector((state)=> state.review);
+  const {reviewLoading, reviews, reviewError, can_review, reviewFormData, addReviewCompleted, updateReviewCompleted} = useSelector((state)=> state.review);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -21,7 +22,11 @@ const RatingAndReview = ({ product }) => {
 
   useEffect(() => {
     addReviewCompleted && dispatch(resetReviewFormData());
-  }, [addReviewCompleted])
+  }, [addReviewCompleted]);
+
+  useEffect(() => {
+    updateReviewCompleted && setCanEdited(null);
+  }, [updateReviewCompleted])
 
   const getFileType = (url) => {
     if (!url) return "unknown";
@@ -43,7 +48,9 @@ const RatingAndReview = ({ product }) => {
    // Handle File Upload
    const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    dispatch(setMediaFiles(files));
+    
+    files.length > 0 && dispatch(setMediaFiles(files));
+    
   };
 
   const handleSubmitReview = (e) => {
@@ -53,7 +60,7 @@ const RatingAndReview = ({ product }) => {
       return;
     }
 
-    console.log(reviewFormData);
+    //console.log(reviewFormData);
     // Initialize FormData
     const formData = new FormData();
     formData.append("product_id", reviewFormData.product_id);
@@ -61,38 +68,23 @@ const RatingAndReview = ({ product }) => {
     formData.append("comment", reviewFormData.comment);
 
     // Append media files
-    reviewFormData.media.forEach((file) => formData.append("media[]", file));
-    console.log(formData);
+    reviewFormData.media.forEach((file) => formData.append("media", file));
+
     if (can_edited) {
       dispatch(updateReview({formData, review_id:can_edited}));
-      setCanEdited(null);
     } else {
       dispatch(createReview(formData));
     }
-    
-
-    //if (rating && reviewText.trim() && user.trim()) {
-    //  const newReview = {
-    //    reviewerName: user,
-    //    comment: reviewText,
-    //    rating,
-    //    date: new Date().toLocaleDateString(), // Add current date
-    //  };
-    ////  onAddReview(newReview);
-    //  setRating(0); // Reset rating
-    //  setReviewText(""); // Reset review text
-    //  setReviewerName(""); // Reset reviewer name
-    //}
   };
 
   const handleCanEdited = (review) => {
     setCanEdited(review.id);
-    console.log(review);
     
     dispatch(dispatch(updateReviewFormData({ ['product_id']: review.product_id})));
     dispatch(dispatch(updateReviewFormData({ ['rating']: review.rating})));
     dispatch(dispatch(updateReviewFormData({ ['comment']: review.comment})));
     dispatch(dispatch(updateReviewFormData({ ['media']: review.media_urls})));
+    
   }
   return (
     <div className="shadow-md rounded-lg p-4">
@@ -148,15 +140,15 @@ const RatingAndReview = ({ product }) => {
               <p className="text-gray-700 text-sm">{review.comment}</p>
               <div className="flex overflow-x-auto space-x-4 p-2">
                 {review.media_urls.map((file, index) => (
-                  <div key={index} className="flex-none w-36 sm:w-44 md:w-52">
+                  <div key={index} className="flex-none w-36 sm:w-44 md:w-52 h-36 sm:h-44 md:h-52">
                     {getFileType(file.file) === 'image' ? (
                       <img
                         src={file.file}
-                        className="w-full h-auto rounded-lg shadow-md"
+                        className="w-full h-full rounded-lg shadow-md object-cover"
                         alt={`Review media ${index}`}
                       />
                     ) : getFileType(file.file) === 'video' ? (
-                      <video controls className="w-full h-auto rounded-lg shadow-md">
+                      <video controls className="w-full h-full rounded-lg shadow-md">
                         <source src={file.file} type={file.type} />
                         Your browser does not support the video tag.
                       </video>
@@ -225,28 +217,50 @@ const RatingAndReview = ({ product }) => {
 
             {/* Preview Selected Files */}
             {reviewFormData.media.length > 0 && (
+              
                 <div className="flex overflow-x-auto space-x-4 mt-2 p-2">
                   {reviewFormData.media.map((file, index) => (
-                    <div key={index} className="flex-none w-24">
-                      {file instanceof Blob ? (
+                    <div key={index} className="flex-none w-24 h-24">
+                      {file instanceof Blob  ? (
                         file.type.startsWith("image/") ? (
                           <img
-                            src={URL.createObjectURL(file)}
-                            className="w-full h-auto rounded-lg shadow-md"
+                            src={URL.createObjectURL(file) || file.file}
+                            className="w-full h-full rounded-lg shadow-md object-cover"
                             alt={`Upload ${index}`}
                             onLoad={(e) => URL.revokeObjectURL(e.target.src)} // Cleanup URL
                           />
                         ) : file.type.startsWith("video/") ? (
                           <video
                             controls
-                            className="w-full h-auto rounded-lg shadow-md"
+                            className="w-full h-full rounded-lg shadow-md"
                             onLoadedData={(e) => URL.revokeObjectURL(e.target.currentSrc)} // Cleanup URL
                           >
                             <source src={URL.createObjectURL(file)} type={file.type} />
                             Your browser does not support the video tag.
                           </video>
                         ) : null
-                      ) : null}
+                      ) : file.file ? 
+                      (
+                        getFileType(file.file) === 'image' ? (
+                          <img
+                            src={file.file}
+                            className="w-full h-full rounded-lg shadow-md object-cover"
+                            alt={`Upload ${index}`}
+                            //onLoad={(e) => URL.revokeObjectURL(e.target.src)} // Cleanup URL
+                          />
+                          ) : getFileType(file.file) === 'video' ? (
+                            <video
+                              controls
+                              className="w-full h-full rounded-lg shadow-md"
+                              //onLoadedData={(e) => URL.revokeObjectURL(e.target.currentSrc)} // Cleanup URL
+                            >
+                              <source src={file.file} />
+                              Your browser does not support the video tag.
+                            </video>
+                        ): null
+                      
+                      )
+                       : null}
                     </div>
                   ))}
                 </div>
@@ -266,10 +280,19 @@ const RatingAndReview = ({ product }) => {
             }
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all disabled:opacity-50"
-              disabled={!reviewFormData.rating || !reviewFormData.comment.trim()}
+              className={`w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all disabled:opacity-50${reviewLoading ? 'cursor-wait' : 'hover:scale-105'
+              }`}
+              disabled={!reviewFormData.rating || !reviewFormData.comment.trim() || reviewLoading}
+              
             >
-            {can_edited? 'Update Review' : 'Submit Review' }
+            {reviewLoading ? (
+              <Loader message="Progreccing" />
+            ) : (
+              <>
+                {can_edited? 'Update Review' : 'Submit Review' }
+              </>
+            )}
+            
               
             </button>
             
