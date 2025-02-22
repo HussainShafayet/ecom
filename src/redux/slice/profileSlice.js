@@ -208,8 +208,8 @@ const profileSlice = createSlice({
         })
         .addCase(handleAddressUpdate.fulfilled, (state, action)=>{
             state.adrressLoading = false;
-            const updateObj = action.payload.data;
-
+            const updateObj = action.payload;
+            
             state.addresses = state.addresses.map((item)=>{
                 return item.id === updateObj.id ? ({...item, ...updateObj}) : item
             });
