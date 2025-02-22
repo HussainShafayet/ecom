@@ -1,4 +1,5 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import {updateAddressFormData} from "./profileSlice";
 
 const initialState = {
     reviewLoading: false,
@@ -11,7 +12,11 @@ const initialState = {
         rating: 0,
         comment: '',
         media: [],
-    }
+    },
+
+    addReviewLoading: false,
+    addReviewError: null,
+    addReviewCompleted: false,
 }
 //get reivews 
 export const fetchReviews = createAsyncThunk('review/fetchRevies', async (product_id, {rejectWithValue}) =>{
@@ -26,12 +31,36 @@ export const fetchReviews = createAsyncThunk('review/fetchRevies', async (produc
      }
 } );
 
+//add reivew 
+export const createReview = createAsyncThunk('review/createReview', async (formData, {rejectWithValue}) =>{
+    try {
+        // Import axiosSetup only when needed to avoid circular dependency issues
+        const api = (await import('../../api/axiosSetup')).default;
+        const response = await api.post(`products/reviews/`, formData);
+       console.log('create review response', response);
+       return response.data.data;
+     } catch (error) {
+       return rejectWithValue(error.response.data);
+     }
+} );
+
 const reviewSlice = createSlice({
     name: 'review',
     initialState,
     reducers: {
         setMediaFiles : (state, action) => {
             state.reviewFormData.media = [...state.reviewFormData.media, action.payload]
+        },
+        updateReviewFormData : (state, action ) => {
+            state.reviewFormData = {...state.reviewFormData, ...action.payload}
+        },
+        resetReviewFormData: (state)=> {
+            state.reviewFormData = {
+                product_id: '',
+                rating: 0,
+                comment: '',
+                media: [],
+            }
         }
     },
     extraReducers: ((builder)=>{
@@ -50,8 +79,24 @@ const reviewSlice = createSlice({
             state.reviewLoading = false;
             state.reviewError = action.payload.error;
         })
+
+
+         //create to review 
+         .addCase(createReview.pending, (state)=>{
+            state.addReviewLoading = true;
+        })
+        .addCase(createReview.fulfilled, (state, action)=>{
+            state.addReviewLoading = false;
+            state.addReviewError = false;
+            state.reviews = [...state.reviews, action.payload];
+            state.addReviewCompleted = true;
+        })
+        .addCase(createReview.rejected, (state, action)=>{
+            state.addReviewLoading = false;
+            state.addReviewError = action.payload.error;
+        })
     }),
 });
 
-export const {setMediaFiles} = reviewSlice.actions;
+export const {setMediaFiles,updateReviewFormData, resetReviewFormData} = reviewSlice.actions;
 export default reviewSlice.reducer;

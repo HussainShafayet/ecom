@@ -2,23 +2,26 @@ import React, { useEffect, useState } from "react";
 import { FaStar, FaUserCircle } from "react-icons/fa";
 import {useDispatch, useSelector} from "react-redux";
 import {useLocation, useNavigate} from "react-router-dom";
-import {fetchReviews, setMediaFiles} from "../../../redux/slice/reviewSlice";
+import {createReview, fetchReviews, resetReviewFormData, setMediaFiles, updateReviewFormData} from "../../../redux/slice/reviewSlice";
 
 const RatingAndReview = ({ product }) => {
-  const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [reviewText, setReviewText] = useState("");
   const [reviewerName, setReviewerName] = useState("");
   const {isAuthenticated, user} = useSelector((state)=>state.auth);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const {reviewLoading, reviews, reviewError, can_review, reviewFormData} = useSelector((state)=> state.review);
+  const {reviewLoading, reviews, reviewError, can_review, reviewFormData, addReviewCompleted} = useSelector((state)=> state.review);
   const dispatch = useDispatch();
 
   useEffect(() => {
     product.id && dispatch(fetchReviews(product.id));
-  }, [product.id]);
+    product && dispatch(updateReviewFormData({ ['product_id']: product.id }))
+  }, [product]);
+
+  useEffect(() => {
+    addReviewCompleted && dispatch(resetReviewFormData());
+  }, [addReviewCompleted])
 
   const getFileType = (url) => {
     if (!url) return "unknown";
@@ -43,24 +46,38 @@ const RatingAndReview = ({ product }) => {
     dispatch(setMediaFiles(files));
   };
 
-  const handleSubmitReview = () => {
+  const handleSubmitReview = (e) => {
+    e.preventDefault();
     if (!isAuthenticated) {
      handleRedirectSignIn(); // Redirect to login if not authenticated
       return;
     }
+
+    console.log(reviewFormData);
+    // Initialize FormData
+    const formData = new FormData();
+    formData.append("product_id", reviewFormData.product_id);
+    formData.append("rating", reviewFormData.rating);
+    formData.append("comment", reviewFormData.comment);
+
+    // Append media files
+    reviewFormData.media.forEach((file) => formData.append("media[]", file));
+    console.log(formData);
     
-    if (rating && reviewText.trim() && user.trim()) {
-      const newReview = {
-        reviewerName: user,
-        comment: reviewText,
-        rating,
-        date: new Date().toLocaleDateString(), // Add current date
-      };
-    //  onAddReview(newReview);
-      setRating(0); // Reset rating
-      setReviewText(""); // Reset review text
-      setReviewerName(""); // Reset reviewer name
-    }
+    dispatch(createReview(formData));
+
+    //if (rating && reviewText.trim() && user.trim()) {
+    //  const newReview = {
+    //    reviewerName: user,
+    //    comment: reviewText,
+    //    rating,
+    //    date: new Date().toLocaleDateString(), // Add current date
+    //  };
+    ////  onAddReview(newReview);
+    //  setRating(0); // Reset rating
+    //  setReviewText(""); // Reset review text
+    //  setReviewerName(""); // Reset reviewer name
+    //}
   };
   return (
     <div className="shadow-md rounded-lg p-4">
@@ -153,11 +170,11 @@ const RatingAndReview = ({ product }) => {
                   <FaStar
                     key={i}
                     className={`h-8 w-8 cursor-pointer ${
-                      i < (hoverRating || rating)
+                      i < (hoverRating || reviewFormData.rating)
                         ? "text-yellow-500"
                         : "text-gray-300"
                     }`}
-                    onClick={() => setRating(i + 1)}
+                    onClick={() => dispatch(updateReviewFormData({ ['rating']: i+1}))}
                     onMouseEnter={() => setHoverRating(i + 1)}
                     onMouseLeave={() => setHoverRating(0)}
                   />
@@ -167,8 +184,8 @@ const RatingAndReview = ({ product }) => {
             {/* Review Textarea */}
             <textarea
               placeholder="Share your experience..."
-              value={reviewText}
-              onChange={(e) => setReviewText(e.target.value)}
+              value={reviewFormData.comment}
+              onChange={(e) => dispatch(updateReviewFormData({ ['comment']: e.target.value }))}
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
               rows="4"
             ></textarea>
@@ -216,7 +233,7 @@ const RatingAndReview = ({ product }) => {
             <button
               type="submit"
               className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-all disabled:opacity-50"
-              disabled={!rating || !reviewText.trim()}
+              disabled={!reviewFormData.rating || !reviewFormData.comment.trim()}
             >
               Submit Review
             </button>
