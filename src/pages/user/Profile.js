@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { FaUserEdit, FaBoxOpen, FaMapMarkerAlt, FaCreditCard, FaLock, FaPlus, FaHeart, FaBell, FaHistory, FaCamera, FaPlusCircle } from 'react-icons/fa';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FaUserEdit, FaBoxOpen, FaMapMarkerAlt, FaCreditCard, FaLock, FaPlus, FaHeart, FaBell, FaHistory, FaCamera, FaPlusCircle, FaSpinner } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
 import {getUser} from '../../redux/slice/authSlice';
 import {useNavigate} from 'react-router-dom';
@@ -9,18 +9,20 @@ import {AddressItem} from '../../components/profile';
 import { WishList } from '../user';
 import {dhakaCityData, districtsData, divisionsData, upazilasData} from '../../data/location';
 import {ProfileSkeleton} from '../../components/common/skeleton';
+import {debounce} from 'lodash';
 
 const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const dispatch = useDispatch();
   const {isAuthenticated,user} = useSelector((state)=>state.auth);
-  const {isLoading, profile, error, adrressLoading,addresses, addressError, isAddAddress, addressFormData, touched, errors, districts,upazilas, updateLoading, updateError, updateDone} = useSelector((state)=>state.profile);
+  const {isLoading, profile, error, adrressLoading,addresses, addressError, isAddAddress, addressFormData, touched, errors, districts,upazilas, updateLoading, updateError, updateDone} = useSelector((state)=> state.profile);
 
   const navigate = useNavigate();
   
 
   const [isEditing, setIsEditing] = useState(false); // State to toggle edit mode
   const [formData, setFormData] = useState({ ...profile }); // State to store form data
+  const [image, setImage] = useState(profile?.profile_picture || "");
 
  
   
@@ -33,7 +35,21 @@ const Profile = () => {
 
   useEffect(()=>{
     updateDone && setIsEditing(false); // Exit edit mode
-  }, [updateDone, dispatch])
+  }, [updateDone, dispatch]);
+
+  useEffect(()=>{
+    setImage(profile?.profile_picture);
+  }, [profile?.profile_picture]);
+
+  // Debounced API call
+  const debouncedAfterFileInput = useCallback(
+    debounce((file) => {
+      const formData = new FormData();
+      formData.append("profile_picture", file);
+      dispatch(handleProfileUpdate(formData));
+    }, 1000),
+    [dispatch] // Add dispatch as a dependency
+  );
 
   const handleTabChange = (tab)=>{
     setSelectedTab(tab.id);
@@ -63,7 +79,7 @@ const Profile = () => {
 
     // Append all form fields to the FormData object
     Object.entries(formData).forEach(([key, value]) => {
-      formDataObj.append(key, value);
+      value && formDataObj.append(key, value);
     });
     //console.log(formDataObj, 'form');
     dispatch(handleProfileUpdate(formDataObj));
@@ -160,6 +176,20 @@ const Profile = () => {
   }
 
 
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result); // Preview image before upload
+      };
+      reader.readAsDataURL(file);
+      debouncedAfterFileInput(file);
+    }
+  };
+
+
 
   //if (isLoading) {
   //  return <div className='container h-screen flex justify-center'><Loader message='Loading Profile' /></div>
@@ -214,14 +244,32 @@ const Profile = () => {
               <div className="rounded-lg bg-gray-100 p-6 shadow-md flex flex-col md:flex-row gap-6">
                 {/* Profile Image Section */}
                 <div className="flex-shrink-0 relative w-32 h-32 mx-auto md:mx-0 rounded-full overflow-hidden bg-gray-200 shadow-md">
+                {/* Loader Overlay */}
+                  {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
+                      <FaSpinner className="animate-spin text-white text-3xl" />
+                    </div>
+                  )}
                   <img
-                    src={profile?.profile_picture || "https://img.freepik.com/premium-photo/stylish-man-flat-vector-profile-picture-ai-generated_606187-310.jpg"} // Placeholder for the profile image
+                    src={image || "https://img.freepik.com/premium-photo/stylish-man-flat-vector-profile-picture-ai-generated_606187-310.jpg"}
                     alt="Profile"
-                    className="w-full h-full object-cover"
+                    className={`w-full h-full object-cover ${isLoading ? "opacity-50" : ""}`}
                   />
-                  <button className="absolute bottom-0 right-12 p-1 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+                  
+                  {/* Hidden file input */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    id="fileInput"
+                    onChange={handleFileChange}
+                  />
+                  
+                  {/* Camera Button */}
+                  <label htmlFor="fileInput" className="absolute bottom-0 right-12 p-1 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors cursor-pointer">
                     <FaCamera />
-                  </button>
+                  </label>
+                  )}
                 </div>
 
                 {/* Personal Information Card */}
@@ -235,7 +283,7 @@ const Profile = () => {
                       {profile?.email && <p className="mb-2"><strong>Email:</strong> {profile.email}</p>}
                       {profile?.phone_number && <p className="mb-2"><strong>Phone:</strong> {profile.phone_number}</p>}
                       {profile?.date_of_birth && <p className="mb-2"><strong>Date of Birth:</strong> {profile?.date_of_birth}</p>}
-                      {profile?.gender && <p className="mb-2"><strong>Gender:</strong> {profile.gender}</p>}
+                      {profile?.gender && <p className="mb-2"><strong>Gender:</strong> {profile.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : ''}</p>}
 
                       <button
                         onClick={handleShowInfoEdit}
@@ -336,9 +384,9 @@ const Profile = () => {
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                         >
                           <option value="">Select Gender</option>
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                          <option value="Other">Other</option>
+                          <option value="male">Male</option>
+                          <option value="female">Female</option>
+                          <option value="other">Other</option>
                         </select>
                       </div>
 
