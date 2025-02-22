@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaStar, FaUserCircle } from "react-icons/fa";
 import {useDispatch, useSelector} from "react-redux";
 import {useLocation, useNavigate} from "react-router-dom";
-import {fetchReviews} from "../../../redux/slice/reviewSlice";
+import {fetchReviews, setMediaFiles} from "../../../redux/slice/reviewSlice";
 
 const RatingAndReview = ({ product }) => {
   const [rating, setRating] = useState(0);
@@ -13,7 +13,7 @@ const RatingAndReview = ({ product }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const {reviewLoading, reviews, reviewError, can_review} = useSelector((state)=> state.review);
+  const {reviewLoading, reviews, reviewError, can_review, reviewFormData} = useSelector((state)=> state.review);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -36,6 +36,12 @@ const RatingAndReview = ({ product }) => {
   const handleRedirectSignIn = () => {
     navigate('/signin', { state: { from: location } });
   }
+
+   // Handle File Upload
+   const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    dispatch(setMediaFiles(files));
+  };
 
   const handleSubmitReview = () => {
     if (!isAuthenticated) {
@@ -137,7 +143,7 @@ const RatingAndReview = ({ product }) => {
         {isAuthenticated ?
         <div className="space-y-4">
           {can_review ? 
-          <>
+          <form onSubmit={handleSubmitReview} className="space-y-4 p-4 border rounded-md shadow-md">
             {/* Rating Selector */}
             <div className="flex items-center">
               <span className="text-gray-600 font-medium mr-4">Your Rating:</span>
@@ -167,15 +173,54 @@ const RatingAndReview = ({ product }) => {
               rows="4"
             ></textarea>
 
+            {/* File Input Field */}
+            <input
+              type="file"
+              multiple
+              accept="image/*,video/*"
+              onChange={handleFileChange}
+              className="w-full border border-gray-300 p-2 rounded-md cursor-pointer"
+            />
+
+            {/* Preview Selected Files */}
+            {reviewFormData.media.length > 0 && (
+                <div className="flex overflow-x-auto space-x-4 mt-2 p-2">
+                  {reviewFormData.media.map((file, index) => (
+                    <div key={index} className="flex-none w-24">
+                      {file instanceof Blob ? (
+                        file.type.startsWith("image/") ? (
+                          <img
+                            src={URL.createObjectURL(file)}
+                            className="w-full h-auto rounded-lg shadow-md"
+                            alt={`Upload ${index}`}
+                            onLoad={(e) => URL.revokeObjectURL(e.target.src)} // Cleanup URL
+                          />
+                        ) : file.type.startsWith("video/") ? (
+                          <video
+                            controls
+                            className="w-full h-auto rounded-lg shadow-md"
+                            onLoadedData={(e) => URL.revokeObjectURL(e.target.currentSrc)} // Cleanup URL
+                          >
+                            <source src={URL.createObjectURL(file)} type={file.type} />
+                            Your browser does not support the video tag.
+                          </video>
+                        ) : null
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+
             {/* Submit Button */}
             <button
-              onClick={handleSubmitReview}
+              type="submit"
               className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-all disabled:opacity-50"
               disabled={!rating || !reviewText.trim()}
             >
               Submit Review
             </button>
-          </>
+          </form>
         : 
         <p className="text-gray-600">
           You have to buy this product for eligable to add a review.

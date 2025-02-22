@@ -5,6 +5,13 @@ const initialState = {
     reviews: [],
     reviewError: null,
     can_review: false,
+
+    reviewFormData: {
+        product_id: '',
+        rating: 0,
+        comment: '',
+        media: [],
+    }
 }
 //get reivews 
 export const fetchReviews = createAsyncThunk('review/fetchRevies', async (product_id, {rejectWithValue}) =>{
@@ -22,6 +29,11 @@ export const fetchReviews = createAsyncThunk('review/fetchRevies', async (produc
 const reviewSlice = createSlice({
     name: 'review',
     initialState,
+    reducers: {
+        setMediaFiles : (state, action) => {
+            state.reviewFormData.media = [...state.reviewFormData.media, action.payload]
+        }
+    },
     extraReducers: ((builder)=>{
         builder
         //fetch to reviews 
@@ -41,4 +53,5 @@ const reviewSlice = createSlice({
     }),
 });
 
+export const {setMediaFiles} = reviewSlice.actions;
 export default reviewSlice.reducer;
