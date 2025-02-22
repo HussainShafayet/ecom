@@ -781,7 +781,7 @@ useEffect(() => {
 
         {/* Review and Rating Section */}
         <section className='mt-4' ref={reviewsRef}>
-          <RatingAndReview reviews={product.reviews} product={product} />
+          <RatingAndReview product={product} />
         </section>
 
 

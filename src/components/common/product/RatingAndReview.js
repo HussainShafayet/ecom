@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaStar, FaUserCircle } from "react-icons/fa";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {useLocation, useNavigate} from "react-router-dom";
+import {fetchReviews} from "../../../redux/slice/reviewSlice";
 
-const RatingAndReview = ({ reviews = [], product }) => {
+const RatingAndReview = ({ product }) => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
@@ -11,6 +12,13 @@ const RatingAndReview = ({ reviews = [], product }) => {
   const {isAuthenticated, user} = useSelector((state)=>state.auth);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const {reviewLoading, reviews, reviewError} = useSelector((state)=> state.review);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    product.id && dispatch(fetchReviews(product.id));
+  }, [product.id])
 
   const handleRedirectSignIn = () => {
     navigate('/signin', { state: { from: location } });
@@ -55,11 +63,11 @@ const RatingAndReview = ({ reviews = [], product }) => {
                 <div className="flex items-center space-x-2">
                   <FaUserCircle className="text-gray-400 w-6 h-6" />
                   <span className="text-sm font-medium text-gray-800">
-                    {review.reviewerName}
+                    {review.user_name}
                   </span>
                 </div>
                 {/* Review Date */}
-                <span className="text-xs text-gray-500">{new Date(review.date).toLocaleDateString()}</span>
+                <span className="text-xs text-gray-500">{new Date(review.created_at).toLocaleDateString()}</span>
               </div>
               {/* Review Rating */}
               <div className="flex items-center mb-2">
@@ -78,6 +86,26 @@ const RatingAndReview = ({ reviews = [], product }) => {
               </div>
               {/* Review Text */}
               <p className="text-gray-700 text-sm">{review.comment}</p>
+              <div className="flex overflow-x-auto space-x-4 p-2">
+                {review.media_urls.map((file, index) => (
+                  <div key={index} className="flex-none w-36 sm:w-44 md:w-52">
+                    {/*{file.type.startsWith("image/") ? (*/}
+                      <img
+                        src={file.file}
+                        className="w-full h-auto rounded-lg shadow-md"
+                        alt={`Review media ${index}`}
+                      />
+                    {/*) : file.type.startsWith("video/") ? (
+                      <video controls className="w-full h-auto rounded-lg shadow-md">
+                        <source src={file.file} type={file.type} />
+                        Your browser does not support the video tag.
+                      </video>
+                    ) : null}*/}
+                  </div>
+                ))}
+              </div>
+
+
             </div>
           ))}
         </div>

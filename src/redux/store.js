@@ -11,6 +11,7 @@ import cartReducer, { cartMiddleware } from './slice/cartSlice';
 import wishListReducer, { wishlistMiddleware } from './slice/wishlistSlice';
 import contentReducer from './slice/contentSlice';
 import profileReducer from './slice/profileSlice';
+import reviewReducer from './slice/reviewSlice';
 
 // ✅ Persist Only `isAuthenticated` (Not Full auth Slice)
 const authPersistConfig = {
@@ -35,7 +36,8 @@ const rootReducer = combineReducers({
   cart: cartReducer,            // ✅ Persisted
   wishList: wishListReducer,    // ✅ Persisted
   content: contentReducer,      // Not persisted
-  profile: profileReducer       // Not persisted
+  profile: profileReducer,       // Not persisted
+  review: reviewReducer,        // not persisted
 });
 
 // Apply Persist Reducer
