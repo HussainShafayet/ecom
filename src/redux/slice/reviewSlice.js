@@ -4,6 +4,7 @@ const initialState = {
     reviewLoading: false,
     reviews: [],
     reviewError: null,
+    can_review: false,
 }
 //get reivews 
 export const fetchReviews = createAsyncThunk('review/fetchRevies', async (product_id, {rejectWithValue}) =>{
@@ -31,6 +32,7 @@ const reviewSlice = createSlice({
             state.reviewLoading = false;
             state.reviewError = false;
             state.reviews = action.payload?.results || [];
+            state.can_review = action.payload?.can_review || false;
         })
         .addCase(fetchReviews.rejected, (state, action)=>{
             state.reviewLoading = false;

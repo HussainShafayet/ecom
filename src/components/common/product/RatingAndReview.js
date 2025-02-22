@@ -13,7 +13,7 @@ const RatingAndReview = ({ product }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const {reviewLoading, reviews, reviewError} = useSelector((state)=> state.review);
+  const {reviewLoading, reviews, reviewError, can_review} = useSelector((state)=> state.review);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -123,44 +123,52 @@ const RatingAndReview = ({ product }) => {
 
         {isAuthenticated ?
         <div className="space-y-4">
+          {can_review ? 
+          <>
+            {/* Rating Selector */}
+            <div className="flex items-center">
+              <span className="text-gray-600 font-medium mr-4">Your Rating:</span>
+              {Array(5)
+                .fill(0)
+                .map((_, i) => (
+                  <FaStar
+                    key={i}
+                    className={`h-8 w-8 cursor-pointer ${
+                      i < (hoverRating || rating)
+                        ? "text-yellow-500"
+                        : "text-gray-300"
+                    }`}
+                    onClick={() => setRating(i + 1)}
+                    onMouseEnter={() => setHoverRating(i + 1)}
+                    onMouseLeave={() => setHoverRating(0)}
+                  />
+                ))}
+            </div>
 
-          {/* Rating Selector */}
-          <div className="flex items-center">
-            <span className="text-gray-600 font-medium mr-4">Your Rating:</span>
-            {Array(5)
-              .fill(0)
-              .map((_, i) => (
-                <FaStar
-                  key={i}
-                  className={`h-8 w-8 cursor-pointer ${
-                    i < (hoverRating || rating)
-                      ? "text-yellow-500"
-                      : "text-gray-300"
-                  }`}
-                  onClick={() => setRating(i + 1)}
-                  onMouseEnter={() => setHoverRating(i + 1)}
-                  onMouseLeave={() => setHoverRating(0)}
-                />
-              ))}
-          </div>
+            {/* Review Textarea */}
+            <textarea
+              placeholder="Share your experience..."
+              value={reviewText}
+              onChange={(e) => setReviewText(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              rows="4"
+            ></textarea>
 
-          {/* Review Textarea */}
-          <textarea
-            placeholder="Share your experience..."
-            value={reviewText}
-            onChange={(e) => setReviewText(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            rows="4"
-          ></textarea>
+            {/* Submit Button */}
+            <button
+              onClick={handleSubmitReview}
+              className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-all disabled:opacity-50"
+              disabled={!rating || !reviewText.trim()}
+            >
+              Submit Review
+            </button>
+          </>
+        : 
+        <p className="text-gray-600">
+          You have to buy this product for eligable to add a review.
+        </p>
+        }
 
-          {/* Submit Button */}
-          <button
-            onClick={handleSubmitReview}
-            className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-all disabled:opacity-50"
-            disabled={!rating || !reviewText.trim()}
-          >
-            Submit Review
-          </button>
         </div>
         : (
         <p className="text-gray-600">
