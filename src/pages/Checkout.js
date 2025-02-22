@@ -488,7 +488,7 @@ const Checkout = () => {
                 {/*<FaPhone className="text-gray-400 m-3" title="Phone" />*/}
                 <select
                   id="country-code"
-                  className="bg-gray-100 text-gray-700 font-medium px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
+                  className="bg-gray-100 text-gray-700 font-medium p-2 border-r border-gray-300 focus:outline-none rounded-l-md"
                   defaultValue="+880"
                 >
                   <option value="+880">+880</option>
@@ -502,7 +502,7 @@ const Checkout = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   maxLength={10}
-                  className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
+                  className="w-full p-2 border-none focus:outline-none rounded-r-md"
                   required
                 />
                 

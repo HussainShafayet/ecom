@@ -150,7 +150,7 @@ const checkoutSlice = createSlice({
           
           state.user_info = user_info;
           state.formData.name = user_info?.name || '';
-          state.formData.phone_number = user_info?.phone_number || '';
+          state.formData.phone_number = user_info?.phone_number.replace(/^\+\d{1,3}/, "") || '';
           state.formData.email = user_info?.email || '';
           
       })
