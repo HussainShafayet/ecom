@@ -9,7 +9,7 @@ const VerifyOtp = () => {
   const { verifyOtpLoading, verifyOtpMessage, verifyOtpError, signinMessage,isAuthenticated } = useSelector((state) => state.auth);
   const { cartItems} = useSelector((state) => state.cart);
   const { items } = useSelector((state) => state.wishList);
-  const { user_id } = useParams();
+  const { token } = useParams();
   const navigate = useNavigate();
   const location = useLocation().state?.from || '/';
 
@@ -29,7 +29,7 @@ const VerifyOtp = () => {
         product_id: item.id,
     }));
   };  
-  const [formData, setFormData] = useState({ user_id: user_id, otp: "", "cart": setLocalCart(),
+  const [formData, setFormData] = useState({ token: token , otp: "", "cart": setLocalCart(),
     "favorite": setLocalFavorite() });
   const [errors, setErrors] = useState({});
 
@@ -45,7 +45,7 @@ const VerifyOtp = () => {
   // Form validation
   const validateForm = () => {
     const errors = {};
-    if (!formData.user_id) errors.user_id = "User ID is required.";
+    if (!formData.token) errors.token = "Token is required.";
     if (!formData.otp) errors.otp = "OTP is required.";
     else if (!/^\d{6}$/.test(formData.otp)) errors.otp = "OTP must be a 6-digit number.";
     return errors;
@@ -75,8 +75,8 @@ const VerifyOtp = () => {
   //handle resend otp
   const handleResendOtp = (e) =>{
     e.preventDefault();
-    //console.log(formData.user_id);
-    dispatch(resendOtp({user_id:formData.user_id}));
+    //console.log(formData.token);
+    dispatch(resendOtp({token:formData.token}));
   }
 
   

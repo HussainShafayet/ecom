@@ -51,7 +51,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/wishlist" element={<WishList />} />
             </Route>
-            <Route path="/verify-otp/:user_id" element={<VerifyOtp />} />
+            <Route path="/verify-otp/:token" element={<VerifyOtp />} />
 
 
             {/* Others Pages */}

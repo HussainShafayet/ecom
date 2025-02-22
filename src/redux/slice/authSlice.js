@@ -20,7 +20,7 @@ const initialState = {
     signinError: null,
     verifyOtpMessage: null,
     verifyOtpError: null,
-    user_id: null,
+    token: null,
   }
 
 // Async action for signup
@@ -184,7 +184,7 @@ const authSlice = createSlice({
         state.signinLoading = false;
         state.signinMessage = action.payload.message;
         state.signinError = null;
-        state.user_id = action.payload.data.user_id;
+        state.token = action.payload.data.token;
         //temp
         state.verifyOtpMessage = action.payload.message;
         
@@ -233,7 +233,10 @@ const authSlice = createSlice({
         state.signupLoading = false;
         state.signupMessage = action.payload.message;
         state.signupError = null;
-        state.user_id = action.payload.data.user_id;
+        state.token = action.payload.data.token;
+
+        //temp
+        state.verifyOtpMessage = action.payload.message;
         
       })
       .addCase(signUpUser.rejected, (state, action) =>{
