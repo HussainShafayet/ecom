@@ -56,7 +56,7 @@ const RatingAndReview = ({ product }) => {
   const handleSubmitReview = (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-     handleRedirectSignIn(); // Redirect to login if not authenticated
+     handleRedirectSignIn();
       return;
     }
 
