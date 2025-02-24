@@ -6,7 +6,7 @@ import { Home, Products, ProductDetails, Cart, NotFound, Checkout, Categories, O
 import {useDispatch} from 'react-redux';
 import {loadUserFromStorage} from './redux/slice/authSlice';
 import {useEffect, useRef} from 'react';
-import {ProtectedRoute, ScrollToTop} from './components/common';
+import {GlobalErrorHandler, ProtectedRoute, ScrollToTop} from './components/common';
 import {AboutUs, Contact, FAQPage, OrderTracking, PrivacyPolicy} from './pages/others';
 import {BestSelling, FeaturedProducts, FlashSale, NewArrival} from './components/sections';
 
@@ -21,51 +21,53 @@ function App() {
   
   return (
       <Router>
-        <ScrollToTop scrollContainerRef={scrollContainerRef} />{/* Add ScrollToTop here */}
-        <Layout scrollContainerRef={scrollContainerRef}> {/* Directly wrap Layout around Routes */}
-          <Routes>
-            {/* Pages */}
-            <Route path="/" element={<Home />} />
-            <Route path="/products" element={<Products scrollContainerRef={scrollContainerRef} />} />
-            <Route path='/products/category/:category' element={<Products scrollContainerRef={scrollContainerRef} />} />
-            <Route path="/products/detail/:slug" element={<ProductDetails />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
+        <GlobalErrorHandler>
+          <ScrollToTop scrollContainerRef={scrollContainerRef} />{/* Add ScrollToTop here */}
+          <Layout scrollContainerRef={scrollContainerRef}> {/* Directly wrap Layout around Routes */}
+            <Routes>
+              {/* Pages */}
+              <Route path="/" element={<Home />} />
+              <Route path="/products" element={<Products scrollContainerRef={scrollContainerRef} />} />
+              <Route path='/products/category/:category' element={<Products scrollContainerRef={scrollContainerRef} />} />
+              <Route path="/products/detail/:slug" element={<ProductDetails />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
 
-            {/*home page section*/}
-            <Route path='/products/flash-sale' element={<FlashSale forRoute={true} />} />
-            <Route path='/products/new-arrival' element={<NewArrival forRoute={true} />} />
-            <Route path='/products/best-selling' element={<BestSelling forRoute={true} />} />
-            <Route path='/products/featured' element={<FeaturedProducts forRoute={true} />} />
-            <Route path='/categories' element={<Categories forRoute={true} />} />
+              {/*home page section*/}
+              <Route path='/products/flash-sale' element={<FlashSale forRoute={true} />} />
+              <Route path='/products/new-arrival' element={<NewArrival forRoute={true} />} />
+              <Route path='/products/best-selling' element={<BestSelling forRoute={true} />} />
+              <Route path='/products/featured' element={<FeaturedProducts forRoute={true} />} />
+              <Route path='/categories' element={<Categories forRoute={true} />} />
 
-            {/*order */}
-            <Route path='/order-confirmation/:orderId' element={<OrderConfirmation />} />
+              {/*order */}
+              <Route path='/order-confirmation/:orderId' element={<OrderConfirmation />} />
 
-            {/* User Pages */}
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            
-            {/* Protect Route */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/wishlist" element={<WishList />} />
-            </Route>
-            <Route path="/verify-otp/:token" element={<VerifyOtp />} />
-
-
-            {/* Others Pages */}
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/aboutus" element={<AboutUs />} />
-            <Route path="/order-tracking" element={<OrderTracking />} />
-            <Route path="/faq" element={<FAQPage />} />
-            <Route path='privacy-policy' element={<PrivacyPolicy />} />
+              {/* User Pages */}
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
+              
+              {/* Protect Route */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/wishlist" element={<WishList />} />
+              </Route>
+              <Route path="/verify-otp/:token" element={<VerifyOtp />} />
 
 
-            {/* Catch-all Not Found Route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
+              {/* Others Pages */}
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/aboutus" element={<AboutUs />} />
+              <Route path="/order-tracking" element={<OrderTracking />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path='privacy-policy' element={<PrivacyPolicy />} />
+
+
+              {/* Catch-all Not Found Route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </GlobalErrorHandler>
       </Router>
   );
 }

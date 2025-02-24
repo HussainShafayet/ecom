@@ -4,6 +4,7 @@ import {refreshToken} from '../redux/slice/authSlice';
 import store from '../redux/store';
 import Cookies from 'js-cookie';
 import {Logout} from '../redux/slice/authActions';
+import {setGlobalError} from '../redux/slice/globalErrorSlice';
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_BASE_URL,
@@ -24,8 +25,15 @@ api.interceptors.response.use(
   (response) => response, // Return response if no errors
   async (error) => {
     if (!error.response) {
-      // Network error (no response from server)
-      console.log("Network error: Check your internet connection.");
+      
+      // Network Error or Server Down
+      store.dispatch(setGlobalError("Network error: Unable to connect to the server"));
+    } else if (error.response.status >= 500) {
+      // Server Errors (5xx)
+      store.dispatch(setGlobalError("Server error: Please try again later"));
+    } else if (error.response.status === 404) {
+      // Not Found
+      store.dispatch(setGlobalError("Data not found"));
     } else {
 
       const originalRequest = error.config;
