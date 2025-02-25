@@ -11,6 +11,7 @@ const HeroSection = () => {
   
   const {isLoading, image_sliders, video_sliders, left_banner, right_banner, error} = useSelector((state)=> state.content);
   const dispatch = useDispatch();
+  const sectionError = useSelector((state) => state.globalError.sectionErrors["home-content"]);
 
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const currentVideo = video_sliders?.[currentVideoIndex];
@@ -20,6 +21,12 @@ const HeroSection = () => {
     dispatch(fetchHomeContent());
     
    }, [dispatch]);
+
+   if (sectionError) {
+    return <div className="text-center text-red-500 font-semibold py-4">
+      {sectionError} - Please try again later.
+    </div>;
+  }
 
 
   const handleNext = () => {

@@ -10,6 +10,7 @@ import {SectionSkeleton} from '../common/skeleton';
 const BestSelling = ({forRoute}) => {
   const {best_selling_Loading, best_selling:products, best_selling_error} = useSelector((state)=> state.product);
    const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
+   const sectionError = useSelector((state) => state.globalError.sectionErrors["best-sale"]);
 
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
 
@@ -22,13 +23,11 @@ const BestSelling = ({forRoute}) => {
    dispatch(fetchBestSellingProducts({page_size:12}));
   }, [dispatch]);
 
-  //if (best_selling_Loading) {
-  //  return <div className='container h-20 flex justify-center'><Loader message='Loading Best Selling' /></div>
-  //}
-
-  //if (best_selling_error) {
-  //  return <div>{best_selling_error}</div>;
-  //}
+  if (sectionError) {
+    return <div className="text-center text-red-500 font-semibold py-4">
+      {sectionError} - Please try again later.
+    </div>;
+  }
 
   const getLink = (item)=>{
     switch (item.type) {

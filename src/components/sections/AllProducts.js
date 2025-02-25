@@ -7,7 +7,7 @@ import {SectionSkeleton} from '../common/skeleton';
 
 const AllProducts = () => {
   const {isLoading, items:products, error} = useSelector((state)=> state.product);
-
+  const sectionError = useSelector((state) => state.globalError.sectionErrors["products"]);
 
     const dispatch = useDispatch();
 
@@ -17,42 +17,11 @@ const AllProducts = () => {
 
 
 
-    // // Countdown timer function for each product
-    //const calculateTimeLeft = (endDate) => {
-    //  const difference = new Date(endDate) - new Date();
-    //  let timeLeft = {};
-
-    //  if (difference > 0) {
-    //    timeLeft = {
-    //      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-    //      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-    //      minutes: Math.floor((difference / 1000 / 60) % 60),
-    //      seconds: Math.floor((difference / 1000) % 60),
-    //    };
-    //  }
-    //  return timeLeft;
-    //};
-
-    //const [timers, setTimers] = useState(
-    //  products.map((deal) => calculateTimeLeft(new Date().setDate(new Date().getDate() + 1)))
-    //);
-
-    //useEffect(() => {
-    //  const timerId = setInterval(() => {
-    //    setTimers(products.map((deal) => calculateTimeLeft(new Date().setDate(new Date().getDate() + 1))));
-    //  }, 1000);
-
-    //  return () => clearInterval(timerId);
-    //}, [products]);
-
-
-    //if (isLoading) {
-    //  return <div className='container h-20 flex justify-center'><Loader message='Loading Deals And Discount' /></div>
-    //}
-
-    //if (error) {
-    //    return <div>{error}</div>;
-    //}
+    if (sectionError) {
+      return <div className="text-center text-red-500 font-semibold py-4">
+        {sectionError} - Please try again later.
+      </div>;
+    }
 
   return (
     <>

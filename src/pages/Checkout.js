@@ -35,13 +35,15 @@ const Checkout = () => {
   const dispatch = useDispatch();
   const {cartLoading, cartItems, cartError} = useSelector((state)=>state.cart);
   const navigate = useNavigate();
-
+ 
   const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, delivery_charges, responseError, checkoutContentLoading, checkoutContentError} = useSelector(
     (state) => state.checkout
   );
+  
   const { isAuthenticated } = useSelector(
     (state) => state.auth
   );
+   const contentError = useSelector((state) => state.globalError.sectionErrors["checkout-content"]);
    const [confirmDelete, setConfirmDelete] = useState({});
    const [originalQuantities, setOriginalQuantities] = useState({}); // Store original quantities
 
@@ -90,6 +92,8 @@ const Checkout = () => {
     }, 1000),
     []
   );
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -308,6 +312,13 @@ const Checkout = () => {
         <div className="h-6 bg-gray-400 rounded w-full my-3"></div>
       </div>
     )
+  }
+
+
+  if (contentError) {
+    return <div className="text-center text-red-500 font-semibold py-4">
+      {contentError} - Please try again later.
+    </div>;
   }
 
   return (

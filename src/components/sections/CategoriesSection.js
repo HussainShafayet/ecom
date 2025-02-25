@@ -8,6 +8,7 @@ import CategorySectionSkeleton from '../common/skeleton/CategorySectionSkeleton'
 
 const CategoriesSection = () => {
   const { isLoading, categories, error } = useSelector((state) => state.category);
+  const sectionError = useSelector((state) => state.globalError.sectionErrors["categories"]);
   const dispatch = useDispatch();
   const scrollRef = useRef(null);
 
@@ -15,13 +16,11 @@ const CategoriesSection = () => {
     dispatch(fetchAllCategories({page:1, page_size:12}));
   }, [dispatch]);
 
-  //if (isLoading) {
-  //  return <div className='container h-20 flex justify-center'><Loader message='Loading Categories' /></div>
-  //}
-
-  //if (error) {
-  //  return <div className="text-center text-red-500">{error}</div>;
-  //}
+  if (sectionError) {
+    return <div className="text-center text-red-500 font-semibold py-4">
+      {sectionError} - Please try again later.
+    </div>;
+  }
 
   const scrollLeft = () => {
     scrollRef.current.scrollBy({

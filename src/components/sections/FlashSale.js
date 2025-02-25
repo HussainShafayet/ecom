@@ -10,6 +10,7 @@ import {SectionSkeleton} from '../common/skeleton';
 const FlashSale = ({forRoute}) => {
     const {flash_sale_Loading, flash_sale:products, flash_sale_error} = useSelector((state)=> state.product);
     const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
+    const sectionError = useSelector((state) => state.globalError.sectionErrors["flash-sale"]);
 
     const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
 
@@ -22,13 +23,11 @@ const FlashSale = ({forRoute}) => {
       dispatch(fetchFlashSaleProducts({page_size: 12}));
     }, [dispatch]);
 
-    //if (flash_sale_Loading) {
-    //  return <div className='container h-20 flex justify-center'><Loader message='Loading Trending' /></div>
-    //}
-
-    //if (flash_sale_error) {
-    //    return <div>{flash_sale_error}</div>;
-    //}
+    if (sectionError) {
+      return <div className="text-center text-red-500 font-semibold py-4">
+        {sectionError} - Please try again later.
+      </div>;
+    }
 
     const getLink = (item)=>{
       switch (item.type) {

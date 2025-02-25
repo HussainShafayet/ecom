@@ -70,7 +70,7 @@ export const handleGetCheckoutContent = createAsyncThunk('profile/handleGetCheck
       const api = (await import('../../api/axiosSetup')).default;
       response = await api.get('/content/checkout/');
     } else {
-      response = await publicApi.get(`/content/checkout/`, { section: "chekout-content"});
+      response = await publicApi.get(`/content/checkout/`, { section: "checkout-content"});
     }
      
     console.log('get checkout content response',response);

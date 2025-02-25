@@ -10,6 +10,7 @@ import {SectionSkeleton} from '../common/skeleton';
 const FeaturedProducts = ({forRoute}) => {
   const {featured_Loading, featured:products, featured_error} = useSelector((state)=> state.product);
   const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
+  const sectionError = useSelector((state) => state.globalError.sectionErrors["featured"]);
 
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
 
@@ -23,14 +24,11 @@ const FeaturedProducts = ({forRoute}) => {
    dispatch(fetchFeaturedProducts({page_size:12}));
   }, [dispatch]);
 
-  //if (featured_Loading) {
-  //  return <div className='container h-20 flex justify-center'><Loader message='Loading Featured Products' /></div>
-  //}
-
-
-  //if (featured_error) {
-  //  return <div>{featured_error}</div>;
-  //}
+  if (sectionError) {
+    return <div className="text-center text-red-500 font-semibold py-4">
+      {sectionError} - Please try again later.
+    </div>;
+  }
 
 
   const getLink = (item)=>{

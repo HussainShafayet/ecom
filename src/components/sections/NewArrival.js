@@ -10,6 +10,7 @@ import {SectionSkeleton} from '../common/skeleton';
 const NewArrival = ({forRoute}) => {
   const {new_arrival_Loading, new_arrival:products, new_arrival_error} = useSelector((state)=> state.product);
   const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
+  const sectionError = useSelector((state) => state.globalError.sectionErrors["new-arrival"])
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
 
   const dispatch = useDispatch();
@@ -21,13 +22,11 @@ const NewArrival = ({forRoute}) => {
    dispatch(fetchNewArrivalProducts({page_size:12}));
   }, [dispatch]);
 
-  //if (new_arrival_Loading) {
-  //  return <div className='container h-20 flex justify-center'><Loader message='Loading New Arrival' /></div>
-  //}
-
-  //if (new_arrival_error) {
-  //  return <div>{new_arrival_error}</div>;
-  //}
+  if (sectionError) {
+    return <div className="text-center text-red-500 font-semibold py-4">
+      {sectionError} - Please try again later.
+    </div>;
+  }
 
   const getLink = (item)=>{
     switch (item.type) {
