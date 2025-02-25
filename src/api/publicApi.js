@@ -1,9 +1,8 @@
 import axios from "axios";
-import {setGlobalError} from "../redux/slice/globalErrorSlice";
+import {setGlobalError, setSectionError} from "../redux/slice/globalErrorSlice";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL;
 
-// Public API instance (No Auth)
 const publicApi = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -11,25 +10,25 @@ const publicApi = axios.create({
   },
 });
 
-// Response Interceptor for Global Error Handling
 publicApi.interceptors.response.use(
-  (response) => response, // Return response if no errors
+  (response) => response,
   (error) => {
     import("../redux/store").then(({ default: store }) => {
+      const section = error.config?.section; // Get the section from the API call config
+      console.log(section);
+      
       if (!error.response) {
+        // Network-level error: Treat as global
         store.dispatch(setGlobalError("Network error: Unable to connect to the server"));
-      } else if (error.response.status === 404) {
-        store.dispatch(setGlobalError("Requested resource not found"));
-      } else if (error.response.status >= 500) {
-        store.dispatch(setGlobalError("Server error: Please try again later"));
-      } else if (error.response.status === 400) {
-        store.dispatch(setGlobalError("Invalid request. Please check your input."));
-      } else if (error.response.status === 403) {
-        store.dispatch(setGlobalError("You do not have permission to access this resource."));
-      } else if (error.response.status === 429) {
-        store.dispatch(setGlobalError("Too many requests. Please try again later."));
       } else {
-        store.dispatch(setGlobalError("An unexpected error occurred. Please try again."));
+        const errorMessage = getErrorMessage(error.response.status);
+        if (section) {
+          // Section-specific error
+          store.dispatch(setSectionError({ section, error: errorMessage }));
+        } else {
+          // No section specified: Treat as global
+          store.dispatch(setGlobalError(errorMessage));
+        }
       }
     });
 
@@ -37,5 +36,24 @@ publicApi.interceptors.response.use(
   }
 );
 
+function getErrorMessage(status) {
+  switch (status) {
+    case 404:
+      return "Requested resource not found";
+    case 500:
+    case 502:
+    case 503:
+    case 504:
+      return "Server error: Please try again later";
+    case 400:
+      return "Invalid request. Please check your input.";
+    case 403:
+      return "You do not have permission to access this resource.";
+    case 429:
+      return "Too many requests. Please try again later.";
+    default:
+      return "An unexpected error occurred. Please try again.";
+  }
+}
 
 export default publicApi;

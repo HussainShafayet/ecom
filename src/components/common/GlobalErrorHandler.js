@@ -1,17 +1,17 @@
 import { useSelector, useDispatch } from "react-redux";
-import {clearGlobalError} from "../../redux/slice/globalErrorSlice";
+import {clearAllErrors} from "../../redux/slice/globalErrorSlice";
 
 const GlobalErrorHandler = ({ children }) => {
-  const { hasError, message } = useSelector(state => state.globalError);
+  const { globalError } = useSelector(state => state.globalError);
   const dispatch = useDispatch();
 
   // Retry button to re-check API status
   const handleRetry = () => {
-    dispatch(clearGlobalError());
+    dispatch(clearAllErrors());
     window.location.reload(); // Reload to check if API is back
   };
 
-  if (hasError) {
+  if (globalError) {
     return (
       <div style={{
         position: "fixed", top: 0, left: 0, width: "100%", height: "100vh",
@@ -20,7 +20,7 @@ const GlobalErrorHandler = ({ children }) => {
       }}>
         <div>
           <h2>⚠️ Error Detected</h2>
-          <p>{message}</p>
+          <p>{globalError}</p>
           <button onClick={handleRetry} style={{
             backgroundColor: "#721c24", color: "white", border: "none",
             padding: "10px 20px", cursor: "pointer", marginTop: "10px"

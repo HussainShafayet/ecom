@@ -75,7 +75,7 @@ export const fetchFeaturedProducts = createAsyncThunk("product/fetchFeaturedProd
 });
 
 // Fetch a single product by its slug
-export const fetchProductById = createAsyncThunk("product/getProductById", async (slug) => {
+export const fetchProductById = createAsyncThunk("product/getProductById", async (slug, {rejectWithValue}) => {
     try {
       const response = await getProductById(slug);
       console.log('get product res', response);
@@ -96,7 +96,7 @@ export const fetchProductById = createAsyncThunk("product/getProductById", async
             const api = (await import('../../api/axiosSetup')).default;
             response = await api.get(`/products/search-suggestions/?q=${searchValue}`);
         } else {
-            response = await publicApi.get(`/products/search-suggestions/?q=${searchValue}`);
+            response = await publicApi.get(`/products/search-suggestions/?q=${searchValue}`, { section: "search-suggestions"});
         }
        
   
@@ -104,7 +104,7 @@ export const fetchProductById = createAsyncThunk("product/getProductById", async
       
       return response?.data?.data || [];
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error?.response?.data);
     }
   });
 
@@ -185,7 +185,8 @@ const productSlice = createSlice({
             state.relatedProductsLoading = false;
             state.new_arrival_Loading = false;
             //state.products = [];
-            state.new_arrival_error = action.error.message || 'Something went wrong';
+            
+            state.new_arrival_error = action?.error?.message || 'Something went wrong';
         });
 
 
@@ -293,6 +294,8 @@ const productSlice = createSlice({
         builder.addCase(fetchProductById.rejected,(state, action)=>{
             state.isLoading = false;
             state.product = null;
+            console.log(action.payload);
+            
             state.error = action?.payload?.message || 'Something went wrong';
         });
 

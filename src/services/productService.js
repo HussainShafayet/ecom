@@ -44,7 +44,7 @@ export const getAllProducts = async (page_size = null, ordering = null, page = n
     query += `search=${search}&`; // Add search
   }
 
-  return await publicApi.get(`/products?${query}`);
+  return await publicApi.get(`/products?${query}`, { section: "products"});
 };
 
 // new arrival products
@@ -67,7 +67,7 @@ export const getNewArrivalProducts = async (page, page_size) => {
     query += `page_size=${page_size}&`; // Add skip for pagination
   }
   
-  return await publicApi.get(`/products/new-arrivals?${query}`);
+  return await publicApi.get(`/products/new-arrivals?${query}`, { section: "new-arrival"});
 };
 
 // best-selling products
@@ -90,7 +90,7 @@ export const getBestSellingProducts = async (page , page_size) => {
     query += `page_size=${page_size}&`; // Add skip for pagination
   }
 
-  return await publicApi.get(`/products/best-selling?${query}`);
+  return await publicApi.get(`/products/best-selling?${query}`, { section: "best-sale"});
 };
 
 
@@ -114,7 +114,7 @@ export const getFlashSaleProducts = async (page, page_size) => {
     query += `page_size=${page_size}&`; // Add skip for pagination
   }
 
-  return await publicApi.get(`/products/flash-sale?${query}`);
+  return await publicApi.get(`/products/flash-sale?${query}`, { section: "flash-sale"});
 };
 
 
@@ -138,13 +138,13 @@ export const getFeaturedProducts = async (page, page_size) => {
     query += `page_size=${page_size}&`; // Add skip for pagination
   }
 
-  return await publicApi.get(`/products/featured?${query}`);
+  return await publicApi.get(`/products/featured?${query}`, { section: "featured"});
 };
 
 
 // Fetch a single product by its slug
 export const getProductById = async (slug) => {
-    return await publicApi.get(`/products/detail/${slug}`);
+    return await publicApi.get(`/products/detail/${slug}`, { section: "product-details"});
 };
 
 //export default productService;
