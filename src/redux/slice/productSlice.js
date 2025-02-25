@@ -39,16 +39,15 @@ export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", asy
     let response = await getAllProducts(page_size, ordering, page, category, brands,tags, min_price, max_price, sizes, colors,discount_type, discount_value,search);
     console.log('get all product res', response);
     
-    return {data: response.data.data.results, error: response.message};
+    return {data: response?.data?.data?.results || [], error: response.message};
 });
 
 //get new arrival products
 export const fetchNewArrivalProducts = createAsyncThunk("product/fetchNewArrivalProducts", async ({page=1, page_size=null})=>{
-
     let response = await getNewArrivalProducts(page, page_size);
     console.log('get new arrival product res', response);
     
-    return {data: response.data.data.results, error: response.message};
+    return {data: response?.data?.data?.results || [], error: response?.message};
 });
 
 //get Best Selling products
@@ -56,7 +55,7 @@ export const fetchBestSellingProducts = createAsyncThunk("product/fetchBestSelli
     let response = await getBestSellingProducts(page, page_size);
     console.log('get best selling product res', response);
     
-    return {data: response.data.data.results, error: response.message};
+    return {data: response?.data?.data?.results, error: response?.message};
 });
 
 //get flash sale products
@@ -64,7 +63,7 @@ export const fetchFlashSaleProducts = createAsyncThunk("product/fetchFlashSalePr
     let response = await getFlashSaleProducts(page, page_size);
     console.log('get flash sale product res', response);
     
-    return {data: response.data.data.results, error: response.message};
+    return {data: response?.data?.data?.results || [], error: response.message};
 });
 
 //get featured products
@@ -72,7 +71,7 @@ export const fetchFeaturedProducts = createAsyncThunk("product/fetchFeaturedProd
     let response = await getFeaturedProducts(page, page_size);
     console.log('get fetured products res', response);
     
-    return {data: response.data.data.results, error: response.message};
+    return {data: response?.data?.data?.results || [], error: response.message};
 });
 
 // Fetch a single product by its slug
@@ -80,7 +79,7 @@ export const fetchProductById = createAsyncThunk("product/getProductById", async
     try {
       const response = await getProductById(slug);
       console.log('get product res', response);
-      return response.data.data;
+      return response?.data?.data || [];
     } catch (error) {
       console.error(`Error fetching product with ID ${slug}:`, error);
       throw error;  // Let the caller handle the error
@@ -103,7 +102,7 @@ export const fetchProductById = createAsyncThunk("product/getProductById", async
   
       console.log('suggestions response',response);
       
-      return response?.data?.data;
+      return response?.data?.data || [];
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -151,17 +150,17 @@ const productSlice = createSlice({
             state.isLoading = false;
             state.error = null;
             state.items = action.meta.arg.page > 1 
-            ? [...state.items, ...action.payload.data] 
-            : action.payload.data;
-        state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            ? [...state.items, ...action?.payload?.data] 
+            : action?.payload?.data;
+        state.hasMore = action?.payload?.data.length === action.meta.arg.limit; // Check if more pages are available
             
-            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
         });
         builder.addCase(fetchAllProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
             state.isLoading = false;
             //state.products = [];
-            state.error = action.error.message || 'Something went wrong';
+            state.error = action?.error?.message || 'Something went wrong';
         });
 
 
@@ -176,11 +175,11 @@ const productSlice = createSlice({
             state.new_arrival_Loading = false;
             state.new_arrival_error = null;
             state.new_arrival = action.meta.arg.page > 1 
-            ? [...state.new_arrival, ...action.payload.data] 
-            : action.payload.data;
-            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            ? [...state.new_arrival, ...action?.payload?.data] 
+            : action?.payload?.data;
+            state.hasMore = action.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
             
-            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            state.hasMore = action.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
         });
         builder.addCase(fetchNewArrivalProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
@@ -201,17 +200,17 @@ const productSlice = createSlice({
             state.best_selling_Loading = false;
             state.best_selling_error = null;
             state.best_selling = action.meta.arg.page > 1 
-            ? [...state.best_selling, ...action.payload.data] 
-            : action.payload.data;
-            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            ? [...state.best_selling, ...action?.payload?.data] 
+            : action?.payload?.data;
+            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
             
-            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
         });
         builder.addCase(fetchBestSellingProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
             state.best_selling_Loading = false;
             //state.products = [];
-            state.best_selling_error = action.error.message || 'Something went wrong';
+            state.best_selling_error = action?.error?.message || 'Something went wrong';
         });
 
 
@@ -226,17 +225,17 @@ const productSlice = createSlice({
             state.flash_sale_Loading = false;
             state.flash_sale_error = null;
             state.flash_sale = action.meta.arg.page > 1 
-            ? [...state.flash_sale, ...action.payload.data] 
-            : action.payload.data;
-            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            ? [...state.flash_sale, ...action?.payload?.data] 
+            : action?.payload?.data;
+            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
             
-            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
         });
         builder.addCase(fetchFlashSaleProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
             state.flash_sale_Loading = false;
             //state.products = [];
-            state.flash_sale_error = action.error?.message || 'Something went wrong';
+            state.flash_sale_error = action?.error?.message || 'Something went wrong';
         });
 
 
@@ -251,17 +250,17 @@ const productSlice = createSlice({
             state.featured_Loading = false;
             state.featured_error = null;
             state.featured = action.meta.arg.page > 1 
-            ? [...state.featured, ...action.payload.data] 
-            : action.payload.data;
-            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            ? [...state.featured, ...action?.payload?.data] 
+            : action?.payload?.data;
+            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
             
-            state.hasMore = action.payload.data.length === action.meta.arg.limit; // Check if more pages are available
+            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
         });
         builder.addCase(fetchFeaturedProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
             state.featured_Loading = false;
             //state.products = [];
-            state.featured_error = action.error?.message || 'Something went wrong';
+            state.featured_error = action?.error?.message || 'Something went wrong';
         });
 
 
@@ -294,7 +293,7 @@ const productSlice = createSlice({
         builder.addCase(fetchProductById.rejected,(state, action)=>{
             state.isLoading = false;
             state.product = null;
-            state.error = action.payload?.message || 'Something went wrong';
+            state.error = action?.payload?.message || 'Something went wrong';
         });
 
         //get search suggestions

@@ -33,11 +33,11 @@ export const handleGetProfile = createAsyncThunk('profile/handleGetProfile', asy
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.get('/accounts/profile/');
       console.log('get profile response',response);
-      return response.data.data;
+      return response?.data?.data;
     } catch (error) {
         console.log('get profile error: ', error);
         
-      return rejectWithValue(error.response?.data || error.message || error);
+      return rejectWithValue(error?.response?.data || error?.message || error);
     }
 });
 
@@ -48,9 +48,9 @@ export const handleProfileUpdate = createAsyncThunk('profile/handleProfileUpdate
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.put('/accounts/profile/', formData);
       console.log('profile update response',response);
-      return response.data.data;
+      return response?.data?.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error?.response?.data);
     }
 });
 
@@ -61,7 +61,7 @@ export const handleGetAddress = createAsyncThunk('profile/handleGetAddress', asy
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.get('/accounts/addresses/');
       console.log('get address response',response);
-      return response.data.data;
+      return response?.data?.data || [];
     } catch (error) {
         console.log('get address error: ', error);
         
@@ -76,7 +76,7 @@ export const handleAddressCreate = createAsyncThunk('profile/handleAddressCreate
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.post('/accounts/addresses/', formData);
       console.log('create address response',response);
-      return response.data.data;
+      return response?.data?.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -89,7 +89,7 @@ export const handleAddressUpdate = createAsyncThunk('profile/handleAddressUpdate
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.put(`/accounts/addresses/${formData.id}/`, formData);
       console.log('update address response',response);
-      return response.data.data;
+      return response?.data?.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -149,12 +149,13 @@ const profileSlice = createSlice({
         })
         .addCase(handleGetProfile.fulfilled, (state, action)=>{
             state.isLoading = false;
-            state.profile = action.payload;
+            state.error = null;
+            state.profile = action?.payload;
         })
         .addCase(handleGetProfile.rejected, (state, action)=>{
             state.isLoading = false;
             
-            state.error = action.payload.error || action.payload;
+            state.error = action?.payload?.error || action?.payload  || 'Something went wrong!';
         })
 
         //profile update
@@ -164,12 +165,13 @@ const profileSlice = createSlice({
         .addCase(handleProfileUpdate.fulfilled, (state, action)=>{
             state.updateLoading = false;
             state.updateDone = true;
-            state.profile = action.payload;
+            state.updateError = null;
+            state.profile = action?.payload;
         })
         .addCase(handleProfileUpdate.rejected, (state, action)=>{
             state.updateLoading = false;
             state.updateDone = false;
-            state.updateError = action.payload?.error || action.payload?.errors || 'Something went wrong';
+            state.updateError = action?.payload?.error || action?.payload?.errors || 'Something went wrong';
         })
 
 
@@ -180,13 +182,14 @@ const profileSlice = createSlice({
         })
         .addCase(handleGetAddress.fulfilled, (state, action)=>{
             state.adrressLoading = false;
-            state.addresses = action.payload;
+            state.addressError = null;
+            state.addresses = action?.payload || [];
             
         })
         .addCase(handleGetAddress.rejected, (state, action)=>{
             state.adrressLoading = false;
             state.addresses = [];
-            state.addressError = action.payload.error || action.payload;
+            state.addressError = action?.payload?.error || action?.payload  || 'Something went wrong!';
         })
 
         //address create
@@ -195,11 +198,12 @@ const profileSlice = createSlice({
         })
         .addCase(handleAddressCreate.fulfilled, (state, action)=>{
             state.adrressLoading = false;
+            state.addressError = null;
             state.addresses = [...state.addresses, action.payload];
         })
         .addCase(handleAddressCreate.rejected, (state, action)=>{
             state.adrressLoading = false;
-            state.addressError = action.payload.error;
+            state.addressError = action?.payload?.error  || 'Something went wrong!';
         })
 
          //address update
@@ -208,6 +212,7 @@ const profileSlice = createSlice({
         })
         .addCase(handleAddressUpdate.fulfilled, (state, action)=>{
             state.adrressLoading = false;
+            state.addressError =  null;
             const updateObj = action.payload;
             
             state.addresses = state.addresses.map((item)=>{
@@ -217,7 +222,7 @@ const profileSlice = createSlice({
         })
         .addCase(handleAddressUpdate.rejected, (state, action)=>{
             state.adrressLoading = false;
-            state.addressError = action.payload.error;
+            state.addressError = action?.payload?.error  || 'Something went wrong!';
         })
 
 
@@ -227,6 +232,7 @@ const profileSlice = createSlice({
         })
         .addCase(handleAddressDelete.fulfilled, (state, action)=>{
             state.adrressLoading = false;
+            state.addressError = null;
             
             const delete_id = action.payload;
 
@@ -235,7 +241,7 @@ const profileSlice = createSlice({
         })
         .addCase(handleAddressDelete.rejected, (state, action)=>{
             state.adrressLoading = false;
-            state.addressError = action.payload.error;
+            state.addressError = action?.payload?.error  || 'Something went wrong!';
         })
         
     }

@@ -108,7 +108,7 @@ const reviewSlice = createSlice({
         })
         .addCase(createReview.rejected, (state, action)=>{
             state.addReviewLoading = false;
-            state.addReviewError = action.payload?.error || 'Something went wrong!';
+            state.addReviewError = action?.payload?.error || 'Something went wrong!';
         })
 
         //update to review 
@@ -130,7 +130,7 @@ const reviewSlice = createSlice({
         })
         .addCase(updateReview.rejected, (state, action)=>{
             state.addReviewLoading = false;
-            state.addReviewError = action.payload?.error || 'Something went wrong!';
+            state.addReviewError = action?.payload?.error || 'Something went wrong!';
         })
     }),
 });

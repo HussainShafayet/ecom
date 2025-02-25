@@ -28,7 +28,7 @@ export const handleAddtoWishlist = createAsyncThunk('cart/handleAddtoWishlist', 
      const api = (await import('../../api/axiosSetup')).default;
      const response = await api.post('/accounts/favourite/', formData);
     console.log('add to wishlist response',response);
-    return response.data;
+    return response?.data;
   } catch (error) {
     return rejectWithValue(error.response.data);
   }
@@ -41,7 +41,7 @@ export const fetchtoWishlist = createAsyncThunk('cart/fetchtoWishlist', async (_
      const api = (await import('../../api/axiosSetup')).default;
      const response = await api.get('/accounts/favourite/');
     console.log('fetch to wishlist response',response);
-    return response.data;
+    return response?.data || [];
   } catch (error) {
     console.log('fetch wish list error: ', error);
     
@@ -56,7 +56,7 @@ export const handleRemovetoWishlist = createAsyncThunk('cart/handleRemovetoWishl
      const api = (await import('../../api/axiosSetup')).default;
      const response = await api.put('/accounts/favourite/', formData);
     console.log('remove to wishlist response',response);
-    return response.data;
+    return response?.data;
   } catch (error) {
     return rejectWithValue(error.response.data);
   }
@@ -88,26 +88,26 @@ const wishlistSlice = createSlice({
       })
       .addCase(handleAddtoWishlist.fulfilled, (state, action)=>{
         state.isLoading = false;
-        state.error = false;
+        state.error = null;
       })
       .addCase(handleAddtoWishlist.rejected, (state, action)=>{
         state.isLoading = false;
-        state.error = action.payload.error;
+        state.error = action?.payload?.error  || 'Something went wrong!';
       })
   
        //get wishlist 
        .addCase(fetchtoWishlist.pending, (state)=>{
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(fetchtoWishlist.fulfilled, (state, action)=>{
         state.isLoading = false;
-        state.error = false;
-        state.items = action.payload.data;
+        state.error = null;
+        state.items = action?.payload?.data;
         
       })
       .addCase(fetchtoWishlist.rejected, (state, action)=>{
         state.isLoading = false;
-        state.error = false;
         state.items = [];
         state.error = action?.payload?.error || action?.payload || 'Something went wrong!';
       })
@@ -118,12 +118,12 @@ const wishlistSlice = createSlice({
       })
       .addCase(handleRemovetoWishlist.fulfilled, (state, action)=>{
         state.isLoading = false;
-        state.error = false;
+        state.error = null;
         
       })
       .addCase(handleRemovetoWishlist.rejected, (state, action)=>{
         state.isLoading = false;
-        state.error = action.payload.error;
+        state.error = action?.payload?.error  || 'Something went wrong!';
       })
     }
 });

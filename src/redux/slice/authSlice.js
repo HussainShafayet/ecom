@@ -32,7 +32,7 @@ export const signUpUser = createAsyncThunk('auth/signUpUser', async (credentials
 
     console.log('signup response',response);
     
-    return response.data;
+    return response?.data;
   } catch (error) {
     return rejectWithValue(error.response.data);
   }
@@ -47,9 +47,9 @@ export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (credentials, 
 
     console.log('verifyotp response',response);
     
-    return response.data.data;
+    return response?.data?.data;
   } catch (error) {
-    return rejectWithValue(error.response.data);
+    return rejectWithValue(error?.response?.data);
   }
 });
 
@@ -62,7 +62,7 @@ export const resendOtp = createAsyncThunk('auth/resendOtp', async (credentials, 
 
     console.log('resend otp response',response);
     
-    return response.data;
+    return response?.data;
   } catch (error) {
     return rejectWithValue(error.response.data);
   }
@@ -77,7 +77,7 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
 
     console.log('signin response',response);
     
-    return response.data; // { accessToken, refreshToken, user }
+    return response?.data; // { accessToken, refreshToken, user }
   } catch (error) {
     return rejectWithValue(error.response.data);
   }
@@ -99,10 +99,10 @@ export const refreshToken = createAsyncThunk('auth/refreshToken', async (credent
         }
     });
     console.log('refresh token response', response);
-    return response.data;
+    return response?.data;
   } catch (error) {
     console.log('refresh error', error);
-    throw error.response.data;
+    throw error?.response?.data;
   }
 });
 
@@ -135,7 +135,7 @@ export const logoutUser = createAsyncThunk('auth/logoutUser', async (credential,
         }
     });
     console.log('logout response', response);
-    return response.data;
+    return response?.data;
 } catch (error) {
     console.error('Error submitting form:', error.response?.data || error.message);
     return rejectWithValue(error.response.data);
@@ -182,29 +182,29 @@ const authSlice = createSlice({
       .addCase(signInUser.fulfilled, (state, action) => {
         //console.log(action.payload);
         state.signinLoading = false;
-        state.signinMessage = action.payload.message;
+        state.signinMessage = action?.payload?.message;
         state.signinError = null;
-        state.token = action.payload.data.token;
+        state.token = action?.payload?.data?.token;
         //temp
-        state.verifyOtpMessage = action.payload.message;
+        state.verifyOtpMessage = action?.payload?.message;
         
       })
       .addCase(signInUser.rejected, (state, action)=>{
         state.signinLoading = false;
-        state.signinError = action.payload.errors;
+        state.signinError = action.payload?.errors || 'Something went wrong!';
       })
 
 
 
       .addCase(refreshToken.fulfilled, (state, action) => {
         //console.log(action);
-        state.accessToken = action.payload.data.access; // Update the access token
+        state.accessToken = action?.payload?.data?.access; // Update the access token
         state.isAuthenticated = true;
-        Cookies.set('access_token', action.payload.data.access, {
+        Cookies.set('access_token', action?.payload?.data?.access, {
           secure: true, // Ensures cookies are sent only over HTTPS
           sameSite: 'Strict', // Prevents CSRF attacks
         });
-        Cookies.set('refresh_token', action.payload.data.refresh, {
+        Cookies.set('refresh_token', action?.payload?.data?.refresh, {
           secure: true, // Ensures cookies are sent only over HTTPS
           sameSite: 'Strict', // Prevents CSRF attacks
         });
@@ -231,17 +231,17 @@ const authSlice = createSlice({
       })
       .addCase(signUpUser.fulfilled, (state, action) =>{
         state.signupLoading = false;
-        state.signupMessage = action.payload.message;
+        state.signupMessage = action?.payload?.message;
         state.signupError = null;
-        state.token = action.payload.data.token;
+        state.token = action?.payload?.data?.token;
 
         //temp
-        state.verifyOtpMessage = action.payload.message;
+        state.verifyOtpMessage = action?.payload?.message;
         
       })
       .addCase(signUpUser.rejected, (state, action) =>{
         state.signupLoading = false;
-        state.signupError = action.payload.errors;
+        state.signupError = action.payload?.errors  || 'Something went wrong!';
       })
 
       //verifyOtp
@@ -251,19 +251,19 @@ const authSlice = createSlice({
       })
       .addCase(verifyOtp.fulfilled, (state, action) =>{
         state.verifyOtpLoading = false;
-        state.verifyOtpMessage = action.payload.message;
+        state.verifyOtpMessage = action?.payload?.message;
         state.verifyOtpError = null;
         
         //state.user = action.payload.profile.username;
-        state.accessToken = action.payload.tokens.access;
-        state.refreshToken = action.payload.tokens.refresh;
+        state.accessToken = action?.payload?.tokens?.access;
+        state.refreshToken = action?.payload?.tokens?.refresh;
         state.isAuthenticated = true;
         
-        Cookies.set('refresh_token', action.payload.tokens.refresh, {
+        Cookies.set('refresh_token', action?.payload?.tokens?.refresh, {
           secure: true, // Ensures cookies are sent only over HTTPS
           sameSite: 'Strict', // Prevents CSRF attacks
         });
-        Cookies.set('access_token', action.payload.tokens.access, {
+        Cookies.set('access_token', action?.payload?.tokens?.access, {
           secure: true, // Ensures cookies are sent only over HTTPS
           sameSite: 'Strict', // Prevents CSRF attacks
         });
@@ -274,7 +274,7 @@ const authSlice = createSlice({
       })
       .addCase(verifyOtp.rejected, (state, action) =>{
         state.verifyOtpLoading = false;
-        state.verifyOtpError = action.payload.errors;
+        state.verifyOtpError = action.payload?.errors  || 'Something went wrong!';
       })
 
 
@@ -285,12 +285,12 @@ const authSlice = createSlice({
       })
       .addCase(resendOtp.fulfilled, (state, action) =>{
         state.verifyOtpLoading = false;
-        state.verifyOtpMessage = action.payload.message;
+        state.verifyOtpMessage = action?.payload?.message;
         state.verifyOtpError = null;
       })
       .addCase(resendOtp.rejected, (state, action) =>{
         state.verifyOtpLoading = false;
-        state.verifyOtpError = action.payload.errors;
+        state.verifyOtpError = action.payload?.errors  || 'Something went wrong!';
       })
   },
 });

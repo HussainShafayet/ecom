@@ -54,9 +54,9 @@ export const handleCheckout = createAsyncThunk('checkout/handleCheckout', async 
      }
      response.data.success && dispatch(clearCart());
     console.log('order post response',response);
-    return response.data.data;
+    return response?.data?.data;
   } catch (error) {
-    return rejectWithValue(error.response.data);
+    return rejectWithValue(error?.response?.data);
   }
 });
 
@@ -74,7 +74,7 @@ export const handleGetCheckoutContent = createAsyncThunk('profile/handleGetCheck
     }
      
     console.log('get checkout content response',response);
-    return response.data.data;
+    return response?.data?.data;
   } catch (error) {
     console.log(error);
     
@@ -127,12 +127,13 @@ const checkoutSlice = createSlice({
       })
       .addCase(handleCheckout.fulfilled, (state, action)=>{
           state.isLoading = false;
+          state.responseError = null;
           state.isCheckoutFulfilled = true;
-          state.order_id = action.payload.order_id;
+          state.order_id = action?.payload?.order_id;
       })
       .addCase(handleCheckout.rejected, (state, action)=>{
           state.isLoading = false;
-          state.responseError = action.payload.errors;
+          state.responseError = action?.payload?.errors  || 'Something went wrong!';
           
       })
 

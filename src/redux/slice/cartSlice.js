@@ -26,7 +26,7 @@ export const handleAddtoCart = createAsyncThunk('cart/handleAddtoCart', async (f
      const api = (await import('../../api/axiosSetup')).default;
      const response = await api.post('/accounts/cart/', formData);
     console.log('add to cart response',response);
-    return response.data;
+    return response?.data;
   } catch (error) {
     return rejectWithValue(error.response.data);
   }
@@ -39,7 +39,7 @@ export const handleFetchCart = createAsyncThunk('cart/handleFetchCart', async (_
      const api = (await import('../../api/axiosSetup')).default;
      const response = await api.get('/accounts/cart/');
     console.log('get cart response',response);
-    return response?.data;
+    return response?.data || [];
   } catch (error) {
     console.log('fetch error cart:', error);
     
@@ -54,7 +54,7 @@ export const handleRemovetoCart = createAsyncThunk('cart/handleRemovetoCart', as
      const api = (await import('../../api/axiosSetup')).default;
      const response = await api.put('/accounts/cart/', formData);
     console.log('remove to cart response',response);
-    return response.data;
+    return response?.data;
   } catch (error) {
     return rejectWithValue(error?.response?.data || error.message || 'Something went wrong!');
   }
@@ -116,7 +116,7 @@ const cartSlice = createSlice({
     .addCase(handleAddtoCart.rejected, (state, action)=>{
       state.cartLoading = false;
       state.cartError = false;
-      state.cartError = action.payload.error;
+      state.cartError = action.payload?.error  || 'Something went wrong!';
     })
 
      //get cart 
@@ -126,7 +126,7 @@ const cartSlice = createSlice({
     .addCase(handleFetchCart.fulfilled, (state, action)=>{
       state.cartLoading = false;
       state.cartError = false;
-      state.cartItems = action.payload?.data;
+      state.cartItems = action?.payload?.data;
       
     })
     .addCase(handleFetchCart.rejected, (state, action)=>{
@@ -146,7 +146,7 @@ const cartSlice = createSlice({
     })
     .addCase(handleRemovetoCart.rejected, (state, action)=>{
       state.cartLoading = false;
-      state.cartError = action.payload.error;
+      state.cartError = action?.payload?.error  || 'Something went wrong!';
     })
   }
 });
