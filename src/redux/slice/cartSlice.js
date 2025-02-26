@@ -17,7 +17,11 @@ const initialState = {
   cartLoading: false,
   cartItems: [],
   cartError: null,
+  cartFetchLoading: false,
+  cartFetchError: null,
   cartAddedSuccessfull: false,
+  cartRemoveLoading: false,
+  cartRemoveError: null,
 };
 
 // Async action for add to cart
@@ -53,11 +57,11 @@ export const handleRemovetoCart = createAsyncThunk('cart/handleRemovetoCart', as
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.put('/accounts/cart/', formData);
+     const response = await api.put('/accounts/cart/', formData, {section: 'cart-remove'});
     console.log('remove to cart response',response);
     return response?.data;
   } catch (error) {
-    return rejectWithValue(error?.response?.data || error.message || 'Something went wrong!');
+    return rejectWithValue(error?.response?.data || error?.message || 'Something went wrong!');
   }
 });
 
@@ -139,16 +143,17 @@ const cartSlice = createSlice({
 
     //remove from cart 
     .addCase(handleRemovetoCart.pending, (state)=>{
-      state.cartLoading = true;
+      state.cartRemoveLoading = true;
     })
     .addCase(handleRemovetoCart.fulfilled, (state, action)=>{
-      state.cartLoading = false;
+      state.cartRemoveLoading = false;
+      state.cartRemoveError = null;
       //console.log(action);
       
     })
     .addCase(handleRemovetoCart.rejected, (state, action)=>{
       state.cartLoading = false;
-      state.cartError = action?.payload?.error  || 'Something went wrong!';
+      state.cartRemoveError = action?.payload?.error  || 'Something went wrong!';
     })
   }
 });

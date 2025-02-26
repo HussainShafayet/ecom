@@ -12,7 +12,7 @@ const Cart = () => {
   //const cartItems = useSelector(selectCartItems);
   const totalPrice = useSelector(selectTotalPrice);
   const [confirmDelete, setConfirmDelete] = useState({});
-  const {cartLoading, cartItems, cartError} = useSelector((state)=> state.cart);
+  const {cartItems, cartFetchLoading, cartFetchError, cartRemoveLoading, cartRemoveError} = useSelector((state)=> state.cart);
 
   const {isLoading, items:products, error} = useSelector((state)=> state.product);
   const {isAuthenticated} = useSelector((state)=> state.auth);
@@ -88,13 +88,18 @@ const Cart = () => {
     <>
    
       <div className="mx-auto">
-      {cartLoading ? <CartSkeleton /> :
-        cartError ? (
+      {cartFetchLoading ? <CartSkeleton /> :
+        cartFetchError ? (
         <div className="text-center text-red-500 font-semibold py-4">
-          {cartError} - Please try again later.
+          {cartFetchError} - Please try again later.
         </div>
       ) :
       <>
+          {cartRemoveError &&
+            <div className="text-center text-red-500 font-semibold py-4">
+              {cartRemoveError} - Please try again later.
+            </div>
+          }
           {cartItems.length === 0 ? (
             <div className="text-center">
               <h3 className="text-2xl mb-4">Your cart is empty</h3>
