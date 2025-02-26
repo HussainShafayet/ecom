@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
 import {clearCart} from './cartSlice';
 import axios from 'axios';
+import publicApi from '../../api/publicApi';
 
 
 const initialState = {
@@ -26,15 +27,13 @@ const initialState = {
 // Async action for signup
 export const signUpUser = createAsyncThunk('auth/signUpUser', async (credentials, { rejectWithValue }) => {
   try {
-     // Import axiosSetup only when needed to avoid circular dependency issues
-     const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('/accounts/register/', credentials);
+     const response = await publicApi.post('/accounts/register/', credentials, {section: 'sign-up'});
 
     console.log('signup response',response);
     
     return response?.data;
   } catch (error) {
-    return rejectWithValue(error.response.data);
+    return rejectWithValue(error.response?.data);
   }
 });
 
