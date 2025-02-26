@@ -16,6 +16,7 @@ const Cart = () => {
 
   const {isLoading, items:products, error} = useSelector((state)=> state.product);
   const {isAuthenticated} = useSelector((state)=> state.auth);
+  const fetchCartError = useSelector((state) => state.globalError.sectionErrors["fetch-cart"]);
   const dispatch = useDispatch();
   const [originalQuantities, setOriginalQuantities] = useState({}); // Store original quantities
 
@@ -49,9 +50,11 @@ const Cart = () => {
   );
  
  
-  // if (error) {
-  //   return <div>{error}</div>;
-  // }
+  if (fetchCartError) {
+    return <div className="text-center text-red-500 font-semibold py-4">
+      {fetchCartError} - Please try again later.
+    </div>;
+  }
   const handleRemoveItem = (item) =>{
     isAuthenticated ? dispatch(handleRemovetoCart({product_id: item.id})):
     dispatch(removeFromCart(item));

@@ -38,7 +38,7 @@ export const handleFetchCart = createAsyncThunk('cart/handleFetchCart', async (_
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.get('/accounts/cart/');
+     const response = await api.get('/accounts/cart/',  {section: "fetch-cart"});
     console.log('get cart response',response);
     return response?.data || [];
   } catch (error) {
