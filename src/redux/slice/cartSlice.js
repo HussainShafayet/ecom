@@ -17,6 +17,7 @@ const initialState = {
   cartLoading: false,
   cartItems: [],
   cartError: null,
+  cartAddedSuccessfull: false,
 };
 
 // Async action for add to cart
@@ -24,7 +25,7 @@ export const handleAddtoCart = createAsyncThunk('cart/handleAddtoCart', async (f
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('/accounts/cart/', formData);
+     const response = await api.post('/accounts/cart/', formData, {section: 'add-cart'});
     console.log('add to cart response',response);
     return response?.data;
   } catch (error) {
@@ -112,11 +113,12 @@ const cartSlice = createSlice({
     })
     .addCase(handleAddtoCart.fulfilled, (state, action)=>{
       state.cartLoading = false;
+      state.cartAddedSuccessfull = true;
     })
     .addCase(handleAddtoCart.rejected, (state, action)=>{
       state.cartLoading = false;
       state.cartError = false;
-      state.cartError = action.payload?.error  || 'Something went wrong!';
+      state.cartError = action.payload?.errors   || 'Something went wrong!';
     })
 
      //get cart 

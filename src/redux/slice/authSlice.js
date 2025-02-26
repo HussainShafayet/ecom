@@ -132,7 +132,7 @@ export const logoutUser = createAsyncThunk('auth/logoutUser', async (credential,
     return response?.data;
 } catch (error) {
     console.error('Error submitting form:', error.response?.data || error.message);
-    return rejectWithValue(error.response.data);
+    return rejectWithValue(error.response?.data || error?.message);
 }
 });
 

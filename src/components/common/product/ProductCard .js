@@ -9,6 +9,8 @@ import blurImage from '../../../assets/images/blur.jpg';
 
 const ProductCard = ({ product, cardForTrending }) => {
   const {isAuthenticated} = useSelector((state)=> state.auth);
+  const {cartLoading, cartError, cartAddedSuccessfull} = useSelector((state)=> state.cart);
+  const addcartError = useSelector((state) => state.globalError.sectionErrors["add-cart"]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
@@ -39,12 +41,14 @@ const ProductCard = ({ product, cardForTrending }) => {
         cartBody.variant_id = product.variant_id;
         cartBody.action = 'increase';
         dispatch(handleAddtoCart(cartBody));
+        cartAddedSuccessfull && navigate('/checkout');
       }else{
         const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
         dispatch(addToCart(clonedProduct));
+        navigate(`/checkout`);
       }
 
-      navigate(`/checkout`);
+      
     }
     
   };
@@ -161,12 +165,15 @@ const ProductCard = ({ product, cardForTrending }) => {
   const ActionButtons = ({ hasVariants, handleAddToCart, handleBuyNow }) => (
     <div className="flex space-x-2 mt-2">
       {!hasVariants && (
-        <button onClick={handleAddToCart} className="flex-grow bg-blue-500 text-white font-bold py-1 rounded hover:bg-blue-600 transition-colors text-xs">
-          Add to Cart
+        <button onClick={handleAddToCart} className="flex-grow bg-blue-500 text-white font-bold py-1 rounded hover:bg-blue-600 transition-colors text-xs disabled:cursor-not-allowed"
+        disabled={cartLoading}
+        >
+          {cartLoading ? 'Loading...' : 'Add to Cart'}
         </button>
       )}
-      <button onClick={handleBuyNow} className="flex-grow bg-green-500 text-white font-bold py-1 rounded hover:bg-green-600 transition-colors text-xs">
-        Buy Now
+      <button onClick={handleBuyNow} className="flex-grow bg-green-500 text-white font-bold py-1 rounded hover:bg-green-600 transition-colors text-xs disabled:cursor-not-allowed" disabled={cartLoading} >
+        
+        {cartLoading ? 'Loading...' : 'Buy Now'}
       </button>
     </div>
   );

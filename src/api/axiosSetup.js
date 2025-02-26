@@ -23,7 +23,8 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const section = originalRequest?.section; // Get section from config
-
+    console.log(section);
+    
     if (!error.response) {
       // Network Error: Treat as global
       store.dispatch(setGlobalError("Network error: Unable to connect to the server"));

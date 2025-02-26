@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FaStar, FaChevronDown, FaShareAlt, FaTag, FaBox, FaWeightHanging, FaRulerCombined, FaCubes, FaTools, FaCopy, FaTwitter, FaWhatsapp, FaFacebookF, FaFacebook } from 'react-icons/fa';
-import { InputField, Loader, ProductCard, RatingAndReview, RichTextToHTML } from '../components/common/'; // Star and dropdown icons
+import { ErrorDisplay, InputField, Loader, ProductCard, RatingAndReview, RichTextToHTML } from '../components/common/'; // Star and dropdown icons
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts, setSelectedColor, setSelectedSize} from '../redux/slice/productSlice';
 //import {addToCart} from '../redux/slice/cartSlice';
@@ -14,6 +14,8 @@ const ProductDetails = () => {
   const { slug } = useParams();
   const {isLoading, product, error, mainImage, items:products, quantity, relatedProductsLoading, selectedColor, selectedSize} = useSelector((state)=> state.product);
   const {isAuthenticated} = useSelector((state)=> state.auth);
+  const {cartLoading, cartError, cartAddedSuccessfull} = useSelector((state)=> state.cart);
+  const addcartError = useSelector((state) => state.globalError.sectionErrors["add-cart"]);
 
   
   const [selectedRatingFilter, setSelectedRatingFilter] = useState(null); // Filter reviews by rating
@@ -150,13 +152,15 @@ useEffect(() => {
       cartBody.variant_id = selectedSize?.variant_id || selectedColor?.variant_id;
       cartBody.action = 'increase';
       dispatch(handleAddtoCart(cartBody));
+      cartAddedSuccessfull && navigate('/checkout');
     }else{
       const clonedProduct = dispatch(handleClonedProduct(product, selectedSize, selectedColor, quantity));
       
       dispatch(addToCart(clonedProduct));
+      navigate('/checkout');
     }
     
-    navigate('/checkout');
+   
   };
 
   const calculateDiscountedPrice = (price, discountPercentage) => {
@@ -260,6 +264,14 @@ useEffect(() => {
       </div>
     ) :
     <div className="container mx-auto  my-6">
+    {Array.isArray(cartError) ? 
+      <ErrorDisplay errors={cartError} /> :
+        <>
+          {addcartError && <div className="text-center text-red-500 font-semibold py-4">
+          {addcartError}.
+        </div>}
+        </>
+      }
       {product &&
       <>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -552,17 +564,19 @@ useEffect(() => {
               {/* Buy Now Button */}
               <button
                 onClick={handleBuyNow}
-                className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
+                className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:cursor-not-allowed"
+                disabled={cartLoading}
               >
-                Buy Now
+                {cartLoading ? 'Loading...' : 'Buy Now'}
               </button>
 
               {/* Add to Cart Button */}
               <button
                 onClick={handleAddToCart}
-                className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+                className={`bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors  disabled:cursor-not-allowed`}
+                disabled={cartLoading}
               >
-                Add to Cart
+                {cartLoading ? 'Loading...' : 'Add to Cart'}
               </button>
               </>
               : (!product.colors && (!product.sizes || product?.sizes?.length == 0) && product.availability_status)?
@@ -570,18 +584,20 @@ useEffect(() => {
                 {/* Buy Now Button */}
                 <button
                   onClick={handleBuyNow}
-                  className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
+                  className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:cursor-not-allowed"
+                  disabled={cartLoading}
                 >
-                  Buy Now
+                  {cartLoading ? 'Loading...' : 'Buy Now'}
                 </button>
 
                 {/* Add to Cart Button */}
                 <button
-                  onClick={handleAddToCart}
-                  className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  Add to Cart
-                </button>
+                onClick={handleAddToCart}
+                className={`bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors  disabled:cursor-not-allowed`}
+                disabled={cartLoading}
+              >
+                {cartLoading ? 'Loading...' : 'Add to Cart'}
+              </button>
                 </>
                 : 
                 <div className='text-center'>
