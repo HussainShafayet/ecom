@@ -7,6 +7,10 @@ import {useLocation, useNavigate, useParams} from "react-router-dom";
 const VerifyOtp = () => {
   const dispatch = useDispatch();
   const { verifyOtpLoading, verifyOtpMessage, verifyOtpError, signinMessage,isAuthenticated } = useSelector((state) => state.auth);
+  const verifyError = useSelector((state) => state.globalError.sectionErrors["verify-otp"]);
+  const resendError = useSelector((state) => state.globalError.sectionErrors["resend-otp"])
+
+  
   const { cartItems} = useSelector((state) => state.cart);
   const { items } = useSelector((state) => state.wishList);
   const { token } = useParams();
@@ -83,10 +87,15 @@ const VerifyOtp = () => {
 
   return (
     <div className="max-w-sm mx-auto mt-12 p-6 border rounded shadow-md">
-      <h1 className="text-2xl font-bold mb-6 text-center">Verify OTP</h1>
-
       {/*Error message*/}
-      <ErrorDisplay errors={verifyOtpError} />
+      { Array.isArray(verifyOtpError) ? 
+        <ErrorDisplay errors={verifyOtpError} /> :
+      <>
+      {verifyError || resendError && <div className="text-center text-red-500 font-semibold py-4">
+        {verifyError || resendError}.
+      </div>}
+      </>
+      }
       {/* Success Message */}
       <SuccessMessage message={verifyOtpMessage||signinMessage} />
       

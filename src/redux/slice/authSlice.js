@@ -40,14 +40,13 @@ export const signUpUser = createAsyncThunk('auth/signUpUser', async (credentials
 // Async action for verify-otp
 export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (credentials, { rejectWithValue }) => {
   try {
-     // Import axiosSetup only when needed to avoid circular dependency issues
-     const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('/accounts/verify-otp/', credentials);
+     const response = await publicApi.post('/accounts/verify-otp/', credentials, {section: 'verify-otp'});
 
     console.log('verifyotp response',response);
     
     return response?.data?.data;
   } catch (error) {
+    
     return rejectWithValue(error?.response?.data);
   }
 });
@@ -55,15 +54,13 @@ export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (credentials, 
 // Async action for resend otp
 export const resendOtp = createAsyncThunk('auth/resendOtp', async (credentials, { rejectWithValue }) => {
   try {
-     // Import axiosSetup only when needed to avoid circular dependency issues
-     const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('/accounts/resend-otp/', credentials);
+     const response = await publicApi.post('/accounts/resend-otp/', credentials, {section: 'resend-otp'});
 
     console.log('resend otp response',response);
     
     return response?.data;
   } catch (error) {
-    return rejectWithValue(error.response.data);
+    return rejectWithValue(error.response?.data);
   }
 });
 
@@ -244,7 +241,6 @@ const authSlice = createSlice({
       })
 
       //verifyOtp
-
       .addCase(verifyOtp.pending, (state, action)=>{
         state.verifyOtpLoading = true;
       })
@@ -272,6 +268,8 @@ const authSlice = createSlice({
 
       })
       .addCase(verifyOtp.rejected, (state, action) =>{
+        console.log(action.payload);
+        
         state.verifyOtpLoading = false;
         state.verifyOtpError = action.payload?.errors  || 'Something went wrong!';
       })
