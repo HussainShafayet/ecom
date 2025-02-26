@@ -12,6 +12,7 @@ const SignIn = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const {signinLoading, signinMessage, signinError,token, isAuthenticated } = useSelector((state) => state.auth);
+  const sectionError = useSelector((state) => state.globalError.sectionErrors["sign-in"]);
   const [formData, setFormData] = useState({ phone_number: '', country_code: '+880' });
 
 
@@ -116,7 +117,14 @@ const SignIn = () => {
           {/* Title */}
           <h2 className="text-2xl md:text-3xl font-bold text-center text-blue-800 mb-6 md:mb-8">Sign In</h2>
 
-          <ErrorDisplay errors={signinError} />
+          {Array.isArray(signinError) ? 
+          <ErrorDisplay errors={signinError} /> :
+            <>
+              {sectionError && <div className="text-center text-red-500 font-semibold py-4">
+              {sectionError}.
+            </div>}
+            </>
+          }
 
           {/* Phone Number */}
           <div className="mb-4">

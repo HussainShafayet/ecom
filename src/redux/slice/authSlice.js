@@ -54,7 +54,7 @@ export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (credentials, 
 // Async action for resend otp
 export const resendOtp = createAsyncThunk('auth/resendOtp', async (credentials, { rejectWithValue }) => {
   try {
-     const response = await publicApi.post('/accounts/resend-otp/', credentials, {section: 'resend-otp'});
+    const response = await publicApi.post('/accounts/resend-otp/', credentials, {section: 'resend-otp'});
 
     console.log('resend otp response',response);
     
@@ -67,9 +67,7 @@ export const resendOtp = createAsyncThunk('auth/resendOtp', async (credentials, 
 // Async action for login
 export const signInUser = createAsyncThunk('auth/signInUser', async (credentials, { rejectWithValue }) => {
   try {
-     // Import axiosSetup only when needed to avoid circular dependency issues
-     const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('/accounts/login/', credentials);
+    const response = await publicApi.post('/accounts/login/', credentials, {section: 'sign-in'});
 
     console.log('signin response',response);
     
