@@ -48,9 +48,9 @@ export const handleCheckout = createAsyncThunk('checkout/handleCheckout', async 
      const isAuthenticated = getState().auth.isAuthenticated;
      let response = null;
      if (isAuthenticated) {
-      response = await api.post('/orders/', formData);
+      response = await api.post('/orders/', formData, { section: "checkout"});
      }else{
-      response = await publicApi.post(`/orders/`, formData);
+      response = await publicApi.post(`/orders/`, formData, { section: "checkout"});
      }
      response.data.success && dispatch(clearCart());
     console.log('order post response',response);
@@ -68,7 +68,7 @@ export const handleGetCheckoutContent = createAsyncThunk('profile/handleGetCheck
     let response = {}
     if (isAuthenticated) {
       const api = (await import('../../api/axiosSetup')).default;
-      response = await api.get('/content/checkout/');
+      response = await api.get('/content/checkout/', { section: "checkout-content"});
     } else {
       response = await publicApi.get(`/content/checkout/`, { section: "checkout-content"});
     }
