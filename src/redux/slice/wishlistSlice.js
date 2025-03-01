@@ -26,7 +26,7 @@ export const handleAddtoWishlist = createAsyncThunk('cart/handleAddtoWishlist', 
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.post('/accounts/favourite/', formData);
+     const response = await api.post('/accounts/favourite/', formData, { section: "add-wishlist"});
     console.log('add to wishlist response',response);
     return response?.data;
   } catch (error) {
@@ -39,7 +39,7 @@ export const fetchtoWishlist = createAsyncThunk('cart/fetchtoWishlist', async (_
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.get('/accounts/favourite/');
+     const response = await api.get('/accounts/favourite/', { section: "get-wishlist"});
     console.log('fetch to wishlist response',response);
     return response?.data || [];
   } catch (error) {
@@ -54,7 +54,7 @@ export const handleRemovetoWishlist = createAsyncThunk('cart/handleRemovetoWishl
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
-     const response = await api.put('/accounts/favourite/', formData);
+     const response = await api.put('/accounts/favourite/', formData, { section: "remove-wishlist"});
     console.log('remove to wishlist response',response);
     return response?.data;
   } catch (error) {

@@ -94,7 +94,7 @@ export const fetchProductById = createAsyncThunk("product/getProductById", async
         if (isAuthenticated) {
             // Import axiosSetup only when needed to avoid circular dependency issues
             const api = (await import('../../api/axiosSetup')).default;
-            response = await api.get(`/products/search-suggestions/?q=${searchValue}`);
+            response = await api.get(`/products/search-suggestions/?q=${searchValue}`, { section: "search-suggestions"});
         } else {
             response = await publicApi.get(`/products/search-suggestions/?q=${searchValue}`, { section: "search-suggestions"});
         }

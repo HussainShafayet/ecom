@@ -31,7 +31,7 @@ export const handleGetProfile = createAsyncThunk('profile/handleGetProfile', asy
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
-       const response = await api.get('/accounts/profile/');
+       const response = await api.get('/accounts/profile/', { section: "get-profile"});
       console.log('get profile response',response);
       return response?.data?.data;
     } catch (error) {
@@ -46,7 +46,7 @@ export const handleProfileUpdate = createAsyncThunk('profile/handleProfileUpdate
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
-       const response = await api.put('/accounts/profile/', formData);
+       const response = await api.put('/accounts/profile/', formData, { section: "profile-update"});
       console.log('profile update response',response);
       return response?.data?.data;
     } catch (error) {
@@ -59,7 +59,7 @@ export const handleGetAddress = createAsyncThunk('profile/handleGetAddress', asy
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
-       const response = await api.get('/accounts/addresses/');
+       const response = await api.get('/accounts/addresses/', { section: "get-address"});
       console.log('get address response',response);
       return response?.data?.data || [];
     } catch (error) {
@@ -74,7 +74,7 @@ export const handleAddressCreate = createAsyncThunk('profile/handleAddressCreate
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
-       const response = await api.post('/accounts/addresses/', formData);
+       const response = await api.post('/accounts/addresses/', formData, { section: "create-address"});
       console.log('create address response',response);
       return response?.data?.data;
     } catch (error) {
@@ -87,7 +87,7 @@ export const handleAddressUpdate = createAsyncThunk('profile/handleAddressUpdate
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
-       const response = await api.put(`/accounts/addresses/${formData.id}/`, formData);
+       const response = await api.put(`/accounts/addresses/${formData.id}/`, formData, { section: "update-address"});
       console.log('update address response',response);
       return response?.data?.data;
     } catch (error) {
@@ -99,7 +99,7 @@ export const handleAddressDelete = createAsyncThunk('profile/handleAddressDelete
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
-       const response = await api.delete(`/accounts/addresses/${id}/`);
+       const response = await api.delete(`/accounts/addresses/${id}/`, { section: "delete-address"});
       console.log('address delete response', response);
       return id //response.data.data;
     } catch (error) {
