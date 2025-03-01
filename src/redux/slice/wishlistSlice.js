@@ -18,6 +18,10 @@ const initialState = {
   isLoading: false,
   items: [],
   error: null,
+  addWishlistLoading: false,
+  addWishlistError: null,
+  removeWishlistLoading: false,
+  removeWishlistError: null,
 };
 
 
@@ -84,15 +88,15 @@ const wishlistSlice = createSlice({
       builder
       //add to wishlist 
       .addCase(handleAddtoWishlist.pending, (state)=>{
-        state.isLoading = true;
+        state.addWishlistLoading = true;
       })
       .addCase(handleAddtoWishlist.fulfilled, (state, action)=>{
-        state.isLoading = false;
-        state.error = null;
+        state.addWishlistLoading = false;
+        state.addWishlistError = null;
       })
       .addCase(handleAddtoWishlist.rejected, (state, action)=>{
-        state.isLoading = false;
-        state.error = action?.payload?.error  || 'Something went wrong!';
+        state.addWishlistLoading = false;
+        state.addWishlistError = action?.payload?.error  || 'Something went wrong!';
       })
   
        //get wishlist 
@@ -114,16 +118,16 @@ const wishlistSlice = createSlice({
   
       //remove from cart 
       .addCase(handleRemovetoWishlist.pending, (state)=>{
-        state.isLoading = true;
+        state.removeWishlistLoading = true;
       })
       .addCase(handleRemovetoWishlist.fulfilled, (state, action)=>{
-        state.isLoading = false;
-        state.error = null;
+        state.removeWishlistLoading = false;
+        state.removeWishlistError = null;
         
       })
       .addCase(handleRemovetoWishlist.rejected, (state, action)=>{
-        state.isLoading = false;
-        state.error = action?.payload?.error  || 'Something went wrong!';
+        state.removeWishlistLoading = false;
+        state.removeWishlistError = action?.payload?.error  || 'Something went wrong!';
       })
     }
 });
