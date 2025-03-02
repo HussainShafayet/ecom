@@ -81,9 +81,6 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
 // Async action to refresh access token
 export const refreshToken = createAsyncThunk('auth/refreshToken', async (credentials , { rejectWithValue, getState }) => {
   try {
-    
-    //const api = (await import('../../api/axiosSetup')).default;
-    //const response = await api.post('api/accounts/token/refresh/', credentials);
     const { accessToken } = getState().auth;
     const baseUrl = process.env.REACT_APP_BASE_URL;
     const response = await axios.post(`${baseUrl}accounts/token/refresh/`,credentials, {
