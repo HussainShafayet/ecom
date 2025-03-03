@@ -56,21 +56,18 @@ const Navbar = () => {
         <Link to="/deals">Flash Sale! Up to 50% Off Selected Items</Link>
       </div>
 
-      <div className="container mx-auto px-4 py-2 flex justify-between items-center gap-2">
+      <div className="container mx-auto px-4 py-1 flex justify-between items-center gap-2">
         {/* Logo Section */}
         <div className="flex items-center space-x-3 md:space-x-4">
           <Link to='/'>
             <img
-              src={`${process.env.PUBLIC_URL}/static image/gocart-logo.jpeg`}
+              src={`${process.env.PUBLIC_URL}/static image/gocart-logo.svg`}
               alt="Website Logo"
-              className="w-10 h-10 md:w-12 md:h-12 rounded-full hover:shadow-lg transition-shadow duration-300"
+              className="w-12 h-12 md:w-16 md:h-16 transition-shadow duration-300"
             />
           </Link>
           
-          <Link to='/' className="flex flex-col items-start md:items-center">
-            <span className="text-lg md:text-2xl font-bold tracking-wide hidden sm:block">GoCart</span>
-            <p className="text-xs font-light hidden sm:block md:-mt-1">Happy To Shopping</p>
-          </Link>
+          
         </div>
 
        
