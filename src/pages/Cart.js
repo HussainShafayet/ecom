@@ -125,7 +125,9 @@ const Cart = () => {
               <div className="lg:col-span-2 max-h-screen overflow-y-auto scrollbar-custom relative">
                 <div className='flex justify-between items-center'>
                   <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
-                  <span className='text-blue-500 cursor-pointer hover:underline transition-colors' onClick={() => setConfirmAllDelete(true)}>Clear Cart</span>
+                  {cartItems.length > 0 && 
+                    <span className='text-blue-500 cursor-pointer hover:underline transition-colors' onClick={() => setConfirmAllDelete(true)}>Clear Cart</span>
+                  }
                 </div>
                 
 
@@ -242,32 +244,32 @@ const Cart = () => {
 
 
 
-                 {/* Confirm Delete Warning in Card */}
+                 {/* Confirm All Delete Warning in Card */}
                  {confirmAllDelete && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
-                          <div className="text-center">
-                            <p className="text-gray-800 mb-2">Are you sure you want to remove all item?</p>
-                            <div className="flex justify-center gap-2">
-                              <button
-                                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
-                                onClick={() => {
-                                  //removeFromCart(item.id);
-                                  handleRemoveAllItem()
-                                  setConfirmAllDelete(false);
-                                }}
-                              >
-                                Yes
-                              </button>
-                              <button
-                                className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
-                                onClick={() => setConfirmAllDelete(false)}
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
+                      <div className="text-center">
+                        <p className="text-gray-800 mb-2">Are you sure you want to remove all item?</p>
+                        <div className="flex justify-center gap-2">
+                          <button
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
+                            onClick={() => {
+                              //removeFromCart(item.id);
+                              handleRemoveAllItem()
+                              setConfirmAllDelete(false);
+                            }}
+                          >
+                            Yes
+                          </button>
+                          <button
+                            className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
+                            onClick={() => setConfirmAllDelete(false)}
+                          >
+                            Cancel
+                          </button>
                         </div>
-                      )}
+                      </div>
+                    </div>
+                  )}
               </div>
 
               {/* Order Summary */}
