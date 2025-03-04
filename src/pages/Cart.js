@@ -153,13 +153,18 @@ const Cart = () => {
 
                       {/* Product Details */}
                       <div className="flex-1 text-sm">
-                        <h2 className="font-semibold mb-1">{item.name}</h2>
-                        <p className="text-gray-500 mb-1">
-                          <span>{item.category}</span> • <span>{item.brand_name}</span> • <span>{item.avg_rating}</span>
-                        </p>
-                        <p className="text-gray-500 mb-2">
-                          {item.color_name && <span>Color: {item.color_name}</span>}
-                          {item.size_name && <span> • Size: {item.size_name}</span>}
+                      <h2
+                          className="font-semibold text-sm truncate"
+                          title={item.name} // Tooltip for full name
+                        >
+                          {item.name}
+                        </h2>
+                        <p className="text-gray-500 text-sm truncate">
+                          {item.brand_name && <span>Brand: {item.brand_name} • </span>}
+                          {item.color_name && <span>Color: {item.color_name} • </span>}
+                          
+                          {item.size_name && <span>Size: {item.size_name} • </span>}
+                          {item.color_name && <span>Avg Rating: {item.avg_rating}</span>}
                         </p>
                         {item.has_discount ? (
                           <div className="flex flex-row space-x-1">

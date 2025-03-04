@@ -289,7 +289,7 @@ const Checkout = () => {
 
   const OrderSummarySkeleton = () => {
     return (
-      <div className="bg-gray-100 rounded-lg shadow-md p-4">
+      <div className="bg-gray-100 rounded-lg shadow-md p-4 sm:p-2">
         {/* Cart Items Skeleton */}
         {[...Array(3)].map((_, index) => (
           <div key={index} className="flex items-center justify-between gap-2 mb-2 border p-2 rounded-md bg-gray-200">
@@ -344,7 +344,7 @@ const Checkout = () => {
             </div>
           ) :
           <div className="bg-gray-100 rounded-lg shadow-md sticky top-20">
-            <div className="max-h-svh overflow-auto scrollbar-custom p-4">
+            <div className="max-h-svh overflow-auto scrollbar-custom p-4 sm:p-2">
               {cartItems.map((item, index) => (
                 <div
                   key={index}
@@ -357,22 +357,41 @@ const Checkout = () => {
                     className="w-20 h-20 object-contain rounded-md flex-shrink-0"
                   />
 
-                  {/* Name and Quantity */}
+                  
+                  {/* Product Details */}
                   <div className="flex-grow min-w-0">
-                    <h4
+                    <h2
                       className="font-semibold text-sm truncate"
                       title={item.name} // Tooltip for full name
                     >
                       {item.name}
-                    </h4>
+                    </h2>
+                    <p className="text-gray-500 text-sm truncate mb-2">
+                      {item.brand_name && <span>Brand: {item.brand_name} • </span>}
+                      {item.color_name && <span>Color: {item.color_name} • </span>}
+                      
+                      {item.size_name && <span>Size: {item.size_name} • </span>}
+                      {item.color_name && <span>Avg Rating: {item.avg_rating}</span>}
+                    </p>
+                  
                     <div className="flex items-center gap-2 mt-1">
+                      {item.quantity === 1? 
+                      <>
+                        {/* Remove Button */}
+                        <button
+                          className="bg-red-400 text-white p-[0.5rem] rounded-full hover:bg-red-600 transition-colors"
+                          onClick={() => setConfirmDelete({ id: item.id, variant_id: item.variant_id })}
+                        >
+                          <FaTrash />
+                        </button>
+                      </> :
                       <button
                         onClick={() => handleUpdateQuantity(item.id, item.quantity -1, item)}
                         disabled={item.quantity <= 1}
                         className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
                       >
                         -
-                      </button>
+                      </button>}
                       <input
                           type="number"
                           value={item.quantity}
@@ -389,15 +408,8 @@ const Checkout = () => {
                       >
                         +
                       </button>
-
-                      {/* Remove Button */}
-                      <button
-                        className="bg-red-400 text-white p-[0.5rem] rounded-full hover:bg-red-600 transition-colors"
-                        onClick={() => setConfirmDelete({ id: item.id, variant_id: item.variant_id })}
-                      >
-                        <FaTrash />
-                      </button>
                     </div>
+                    
                   </div>
 
                   {/* Price */}
@@ -438,7 +450,7 @@ const Checkout = () => {
               ))}
             </div>
 
-            <div className="p-4">
+            <div className="p-4 sm:p-2">
               <hr className="my-3" />
               <div className="flex justify-between">
                 <span>Subtotal</span>
