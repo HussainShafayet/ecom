@@ -122,7 +122,7 @@ const Cart = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             
               {/* Scrollable Cart Items Section */}
-              <div className="lg:col-span-2 max-h-screen overflow-y-auto scrollbar-custom relative">
+              <div className="lg:col-span-2 relative">
                 <div className='flex justify-between items-center'>
                   <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
                   {cartItems.length > 0 && 
@@ -131,60 +131,50 @@ const Cart = () => {
                 </div>
                 
 
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto scrollbar-custom">
                   {cartItems.map((item, index) => (
                     <div
                       key={index}
-                      className="border rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 bg-white flex flex-col md:flex-row items-center gap-3 relative"
+                      className="border rounded-lg shadow-sm hover:shadow-md transition-shadow p-2 bg-white flex flex-row items-center gap-3 relative w-full"
                     >
                       {/* Product Image */}
-                      <div className="relative w-24 h-24 md:w-32 md:h-32 overflow-hidden rounded-lg">
+                      <div className="w-20 h-20 sm:w-12 sm:h-12 md:w-24 md:h-24  rounded-lg">
                         <img
                           src={item.image}
                           alt={item.name}
                           className="w-full h-full object-contain"
                         />
-                        {item.has_discount && (
-                          <span className="absolute top-1 left-1 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                          ({item.discount_value}{item.discount_type == 'percentage'?'%':'৳'} OFF)
-                          </span>
-                        )}
                       </div>
 
                       {/* Product Details */}
-                      <div className="flex-1 text-sm">
-                      <h2
-                          className="font-semibold text-sm truncate"
-                          title={item.name} // Tooltip for full name
-                        >
+                      <div className="flex-1 text-xs sm:text-sm md:text-base w-full">
+                        <h2 className="font-semibold truncate w-full" title={item.name}>
                           {item.name}
                         </h2>
-                        <p className="text-gray-500 text-sm truncate">
+                        <p className="text-gray-500 text-wrap">
                           {item.brand_name && <span>Brand: {item.brand_name} • </span>}
                           {item.color_name && <span>Color: {item.color_name} • </span>}
-                          
                           {item.size_name && <span>Size: {item.size_name} • </span>}
-                          {item.color_name && <span>Avg Rating: {item.avg_rating}</span>}
+                          {item.avg_rating && <span>Avg Rating: {item.avg_rating}</span>}
                         </p>
+
+                        {/* Price Section */}
                         {item.has_discount ? (
                           <div className="flex flex-row space-x-1">
-                            <p className=" text-gray-500 line-through">
-                              {item.base_price}
-                            </p>
-                            <p className="text-2x text-green-600 font-semibold">
-                            {item.discount_price} <span className="text-red-500">({item.discount_value}{item.discount_type == 'percentage'?'%':'৳'} OFF)</span>
+                            <p className="text-gray-500 line-through">{item.base_price}</p>
+                            <p className="text-green-600 font-semibold">
+                              {item.discount_price}{' '}
+                              <span className="text-red-500">({item.discount_value}{item.discount_type == 'percentage' ? '%' : '৳'} OFF)</span>
                             </p>
                           </div>
                         ) : (
-                          <p className="text-2x text-green-600 font-semibold">
-                            {item.base_price}
-                          </p>
+                          <p className="text-green-600 font-semibold">{item.base_price}</p>
                         )}
 
                         {/* Quantity Selector */}
-                        <div className="flex items-center">
+                        <div className="flex items-center mt-2">
                           <button
-                            onClick={() => handleUpdateQuantity(item.id, item.quantity -1, item)}
+                            onClick={() => handleUpdateQuantity(item.id, item.quantity - 1, item)}
                             className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-l"
                             disabled={item.quantity === 1}
                           >
@@ -194,10 +184,10 @@ const Cart = () => {
                             type="number"
                             value={item.quantity}
                             onChange={(e) => {
-                              const newValue = parseInt(e.target.value, 10) || 1; // Ensure it's a number
+                              const newValue = parseInt(e.target.value, 10) || 1;
                               handleUpdateQuantity(item.id, newValue, item);
                             }}
-                            className="w-10 text-center border-l border-r"
+                            className="w-12 text-center border-l border-r"
                             min="1"
                           />
                           <button
@@ -226,8 +216,7 @@ const Cart = () => {
                               <button
                                 className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
                                 onClick={() => {
-                                  //removeFromCart(item.id);
-                                  handleRemoveItem(item)
+                                  handleRemoveItem(item);
                                   setConfirmDelete({});
                                 }}
                               >
@@ -244,6 +233,7 @@ const Cart = () => {
                         </div>
                       )}
                     </div>
+
                   ))}
                 </div>
 
