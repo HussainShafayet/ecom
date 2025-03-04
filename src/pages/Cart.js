@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTrash, FaArrowRight } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {removeFromCart, updateQuantity, selectCartItems, selectTotalPrice, handleFetchCart, handleRemovetoCart, handleAddtoCart} from '../redux/slice/cartSlice';
+import {removeFromCart, updateQuantity, selectCartItems, selectTotalPrice, handleFetchCart, handleRemovetoCart, handleAddtoCart, clearCart} from '../redux/slice/cartSlice';
 import {fetchAllProducts} from '../redux/slice/productSlice';
 import {Loader, ProductCard} from '../components/common';
 import debounce from 'lodash.debounce'; // Import lodash debounce
@@ -12,6 +12,7 @@ const Cart = () => {
   //const cartItems = useSelector(selectCartItems);
   const totalPrice = useSelector(selectTotalPrice);
   const [confirmDelete, setConfirmDelete] = useState({});
+  const [confirmAllDelete, setConfirmAllDelete] = useState(false);
   const {cartItems, cartFetchLoading, cartFetchError, cartRemoveLoading, cartRemoveError} = useSelector((state)=> state.cart);
 
   const {isLoading, items:products, error} = useSelector((state)=> state.product);
@@ -56,9 +57,19 @@ const Cart = () => {
     </div>;
   }
   const handleRemoveItem = (item) =>{
-    isAuthenticated ? dispatch(handleRemovetoCart({product_id: item.id})):
+    isAuthenticated && dispatch(handleRemovetoCart({product_id: item.id, variant_id: item.variant_id}));
     dispatch(removeFromCart(item));
   }
+
+  const handleRemoveAllItem = () => {
+    const removeList = cartItems?.map(element => 
+      element.variant_id 
+        ? { product_id: element.id, variant_id: element.variant_id } 
+        : { product_id: element.id }
+    ) || [];
+    isAuthenticated && dispatch(handleRemovetoCart(removeList));
+    dispatch(clearCart());
+  };
 
   const handleUpdateQuantity = (id, newQuantity, item) => {
     let prevQuantity = 0;
@@ -111,8 +122,12 @@ const Cart = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             
               {/* Scrollable Cart Items Section */}
-              <div className="lg:col-span-2 max-h-screen overflow-y-auto scrollbar-custom">
-                <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
+              <div className="lg:col-span-2 max-h-screen overflow-y-auto scrollbar-custom relative">
+                <div className='flex justify-between items-center'>
+                  <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
+                  <span className='text-blue-500 cursor-pointer hover:underline transition-colors' onClick={() => setConfirmAllDelete(true)}>Clear Cart</span>
+                </div>
+                
 
                 <div className="flex flex-col gap-3">
                   {cartItems.map((item, index) => (
@@ -224,6 +239,35 @@ const Cart = () => {
                     </div>
                   ))}
                 </div>
+
+
+
+                 {/* Confirm Delete Warning in Card */}
+                 {confirmAllDelete && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
+                          <div className="text-center">
+                            <p className="text-gray-800 mb-2">Are you sure you want to remove all item?</p>
+                            <div className="flex justify-center gap-2">
+                              <button
+                                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
+                                onClick={() => {
+                                  //removeFromCart(item.id);
+                                  handleRemoveAllItem()
+                                  setConfirmAllDelete(false);
+                                }}
+                              >
+                                Yes
+                              </button>
+                              <button
+                                className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
+                                onClick={() => setConfirmAllDelete(false)}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
               </div>
 
               {/* Order Summary */}
