@@ -291,7 +291,7 @@ const Checkout = () => {
     return (
       <div className="bg-gray-100 rounded-lg shadow-md p-4 sm:p-2">
         {/* Cart Items Skeleton */}
-        {[...Array(3)].map((_, index) => (
+        {[...Array(5)].map((_, index) => (
           <div key={index} className="flex items-center justify-between gap-2 mb-2 border p-2 rounded-md bg-gray-200">
             <div className="w-20 h-20 bg-gray-300 rounded-md"></div>
             <div className="flex-grow min-w-0">
@@ -344,7 +344,7 @@ const Checkout = () => {
             </div>
           ) :
           <div className="bg-gray-100 rounded-lg shadow-md sticky top-20">
-            <div className="max-h-svh overflow-auto scrollbar-custom p-4 sm:p-2">
+            <div className="max-h-[60vh] overflow-y-auto scrollbar-custom p-4 sm:p-2">
               {cartItems.map((item, index) => (
                 <div
                   key={index}
