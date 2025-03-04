@@ -374,37 +374,41 @@ const Checkout = () => {
                       {item.color_name && <span>Avg Rating: {item.avg_rating}</span>}
                     </p>
                   
-                    <div className="flex items-center gap-2 mt-1">
-                      {item.quantity === 1? 
-                      <>
-                        {/* Remove Button */}
+                    <div className="flex items-center gap-3 mt-1">
+                      {/* Decrease Quantity / Remove Button */}
+                      {item.quantity === 1 ? (
                         <button
-                          className="bg-red-400 text-white p-[0.5rem] rounded-full hover:bg-red-600 transition-colors"
+                          className="bg-red-500 text-white p-[0.5rem] rounded-full hover:bg-red-700 transition duration-200 shadow-md flex justify-center items-center"
                           onClick={() => setConfirmDelete({ id: item.id, variant_id: item.variant_id })}
                         >
                           <FaTrash />
                         </button>
-                      </> :
-                      <button
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity -1, item)}
-                        disabled={item.quantity <= 1}
-                        className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
-                      >
-                        -
-                      </button>}
+                      ) : (
+                        <button
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1, item)}
+                          disabled={item.quantity <= 1}
+                          className="p-[0.2rem] w-8 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
+                        >
+                          -
+                        </button>
+                      )}
+
+                      {/* Quantity Input Field */}
                       <input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => {
-                            const newValue = parseInt(e.target.value, 10) || 1; // Ensure it's a number
-                            handleUpdateQuantity(item.id, newValue, item);
-                          }}
-                          className="w-10 text-center border-l border-r"
-                          min="1"
-                        />
+                        type="number"
+                        value={item.quantity}
+                        onChange={(e) => {
+                          const newValue = parseInt(e.target.value, 10) || 1;
+                          handleUpdateQuantity(item.id, newValue, item);
+                        }}
+                        className="w-12 text-center border border-gray-300 rounded-md py-[0.2rem]"
+                        min="1"
+                      />
+
+                      {/* Increase Quantity Button */}
                       <button
                         onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item)}
-                        className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-200"
+                        className="w-8 p-[0.2rem] border border-gray-300 rounded-md text-gray-700 hover:bg-gray-200 transition flex justify-center items-center"
                       >
                         +
                       </button>
