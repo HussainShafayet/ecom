@@ -8,7 +8,6 @@ import {Logout} from '../../redux/slice/authActions';
 import SearchDropdown from '../common/SearchDropdown';
 
 const Navbar = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [authMenuOpen, setAuthMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   //const isAuthenticated = false; // Replace with actual authentication status
@@ -38,7 +37,6 @@ const Navbar = () => {
       }, []);
 
 
-  const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleAuthMenu = () => setAuthMenuOpen(!authMenuOpen);
   const toggleProfileMenu = () => setProfileMenuOpen(!profileMenuOpen);
 
@@ -92,6 +90,10 @@ const Navbar = () => {
               </span>
             )}
           </div>
+          {/* Wishlist Icon */}
+          <Link to="/wishlist" className="text-gray-700 hover:text-blue-500">
+            <FaHeart size={20} />
+          </Link>
 
           {!isAuthenticated ? (
             <>
@@ -127,11 +129,6 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              {/* Wishlist Icon */}
-              <Link to="/wishlist" className="text-gray-700 hover:text-blue-500">
-                <FaHeart size={20} />
-              </Link>
-
               {/* Profile Dropdown for Authenticated Users */}
               <div className="relative" ref={profileRef}>
                 <button
@@ -170,56 +167,6 @@ const Navbar = () => {
           )}
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {menuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-300">
-          <div className="flex flex-col space-y-4 px-4 py-2">
-            <Link to="/" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
-              Home
-            </Link>
-            <Link to="/products" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
-              Shop
-            </Link>
-            <Link to="/cart" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
-              Cart
-            </Link>
-            {!isAuthenticated ? (
-              <>
-                <Link to="/signin" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
-                  Sign In
-                </Link>
-                <Link to="/signup" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
-                  Sign Up
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link to="/wishlist" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
-                  Wishlist
-                </Link>
-                <Link to="/profile" className="text-gray-700 hover:text-blue-500" onClick={toggleMenu}>
-                  Profile
-                </Link>
-                <button className="text-gray-700 hover:text-blue-500" onClick={handleLogout}>
-                  Logout
-                </button>
-              </>
-            )}
-            {/* Mobile Search Bar */}
-            <div className="flex items-center">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="border border-gray-300 rounded-full py-2 px-4 focus:outline-none focus:border-blue-500 w-full"
-              />
-              <button className="ml-2 text-gray-500 hover:text-blue-500">
-                <FaSearch />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   );
 };

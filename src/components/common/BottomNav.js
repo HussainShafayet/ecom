@@ -71,15 +71,12 @@ const BottomNav = () => {
         )}
         </div>
 
-        {isAuthenticated && 
-            <>
-            {/* wishlist */}
-            <Link to="/wishlist" className="flex flex-col items-center text-gray-700 hover:text-blue-500 transition">
-            <FaHeart size={22} />
-            <span className="text-xs">Wishlist</span>
-            </Link>
-            </>
-        }
+        
+        {/* wishlist */}
+        <Link to="/wishlist" className="flex flex-col items-center text-gray-700 hover:text-blue-500 transition">
+        <FaHeart size={22} />
+        <span className="text-xs">Wishlist</span>
+        </Link>
         
         {/* User */}
         {!isAuthenticated ?

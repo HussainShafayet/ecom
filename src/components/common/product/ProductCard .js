@@ -68,6 +68,8 @@ const ProductCard = ({ product, cardForTrending }) => {
   };
 
   const handleAddToWishlist = () =>{
+    console.log(product);
+    //product.is_favourite = true;
     if (isAuthenticated) {
        dispatch(handleAddtoWishlist({product_id: product.id}));
     } else {

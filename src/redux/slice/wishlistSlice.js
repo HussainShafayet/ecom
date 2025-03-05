@@ -74,7 +74,9 @@ const wishlistSlice = createSlice({
     addToWishlist: (state, action) => {
       const existingItem = state.items.find(item => item.id === action.payload.id);
       if (!existingItem) {
-        state.items.push(action.payload);
+        const clonedObj = {...action.payload};
+        clonedObj.is_favourite = true;
+        state.items.push(clonedObj);
       }
     },
     removeFromWishlist: (state, action) => {

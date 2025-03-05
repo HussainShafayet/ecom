@@ -32,6 +32,7 @@ function App() {
               <Route path="/products/detail/:slug" element={<ProductDetails />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/wishlist" element={<WishList />} />
 
               {/*home page section*/}
               <Route path='/products/flash-sale' element={<FlashSale forRoute={true} />} />
@@ -50,7 +51,6 @@ function App() {
               {/* Protect Route */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/wishlist" element={<WishList />} />
               </Route>
               <Route path="/verify-otp/:token" element={<VerifyOtp />} />
 
