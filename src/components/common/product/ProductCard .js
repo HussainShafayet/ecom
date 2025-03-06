@@ -85,7 +85,7 @@ const ProductCard = ({ product, cardForTrending }) => {
   }
 
   const checkFavourite = (favId) => {
-    return favouriteIds[favId];
+    return favouriteIds && favouriteIds[favId];
   }
 
   const DiscountBadge = ({ discountValue, discountType }) => (
@@ -191,67 +191,67 @@ const ProductCard = ({ product, cardForTrending }) => {
   
 
   return (
-    <div className="border rounded-lg shadow-md bg-white hover:shadow-lg transition duration-200 relative p-2 min-h-[300px] flex flex-col">
-  {/* Wishlist Button - Separate from <Link> */}
-  <WishlistButton 
-    isFavourite={checkFavourite(product.id)} 
-    handleAddToWishlist={handleAddToWishlist} 
-    handleRemoveToWishlist={handleRemoveToWishlist} 
-  />
-
-  {/* Clickable Card Content */}
-  <Link to={`/products/detail/${product.slug}`} className="flex-1">
-    {/* Discount Badge */}
-    {product.has_discount && (
-      <DiscountBadge 
-        discountValue={product.discount_value} 
-        discountType={product.discount_type} 
-      />
-    )}
-
-    {/* Trending Badge */}
-    {cardForTrending && <TrendingBadge isHot={product.isHot} />}
-
-    {/* Product Image */}
-    <ProductImage 
-      product={product} 
-      isImageLoaded={isImageLoaded} 
-      setIsImageLoaded={setIsImageLoaded} 
-    />
-
-    <div>
-      <ProductTitle name={product.name} slug={product.slug} />
-      <p className="hidden lg:block text-xs text-gray-500 mb-1">
-        <span className="font-semibold">{product.brand_name}</span>
-      </p>
-
-      <ProductStats views={product.total_views} orders={product.total_orders} />
-
-      <ProductPrice 
-        hasDiscount={product.has_discount} 
-        discountPrice={product.discount_price} 
-        basePrice={product.base_price} 
+    <div className="border rounded-lg shadow-md bg-white hover:shadow-lg transition duration-200 relative p-2 min-h-[230px] sm:min-h-[300px] flex flex-col">
+    {/* Wishlist Button - Separate from <Link> */}
+      <WishlistButton 
+        isFavourite={checkFavourite(product.id)} 
+        handleAddToWishlist={handleAddToWishlist} 
+        handleRemoveToWishlist={handleRemoveToWishlist} 
       />
 
-      {product.avg_rating > 0 && 
-        <ProductRating rating={product.avg_rating} reviews={product.total_reviews} />
-      }
+      {/* Clickable Card Content */}
+      <Link to={`/products/detail/${product.slug}`} className="flex-1">
+        {/* Discount Badge */}
+        {product.has_discount && (
+          <DiscountBadge 
+            discountValue={product.discount_value} 
+            discountType={product.discount_type} 
+          />
+        )}
+
+        {/* Trending Badge */}
+        {cardForTrending && <TrendingBadge isHot={product.isHot} />}
+
+        {/* Product Image */}
+        <ProductImage 
+          product={product} 
+          isImageLoaded={isImageLoaded} 
+          setIsImageLoaded={setIsImageLoaded} 
+        />
+
+        <div>
+          <ProductTitle name={product.name} slug={product.slug} />
+          <p className="hidden lg:block text-xs text-gray-500 mb-1">
+            <span className="font-semibold">{product.brand_name}</span>
+          </p>
+
+          <ProductStats views={product.total_views} orders={product.total_orders} />
+
+          <ProductPrice 
+            hasDiscount={product.has_discount} 
+            discountPrice={product.discount_price} 
+            basePrice={product.base_price} 
+          />
+
+          {product.avg_rating > 0 && 
+            <ProductRating rating={product.avg_rating} reviews={product.total_reviews} />
+          }
+        </div>
+      </Link>
+
+      {/* Stock & Action Buttons */}
+      <div className="mt-1">
+        {product.availability_status ? (
+          <ActionButtons 
+            hasVariants={product.has_variants} 
+            handleAddToCart={handleAddToCart} 
+            handleBuyNow={handleBuyNow} 
+          />
+        ) : (
+          <OutOfStock />
+        )}
+      </div>
     </div>
-  </Link>
-
-  {/* Stock & Action Buttons */}
-  <div className="mt-1">
-    {product.availability_status ? (
-      <ActionButtons 
-        hasVariants={product.has_variants} 
-        handleAddToCart={handleAddToCart} 
-        handleBuyNow={handleBuyNow} 
-      />
-    ) : (
-      <OutOfStock />
-    )}
-  </div>
-</div>
 
   );
 };
