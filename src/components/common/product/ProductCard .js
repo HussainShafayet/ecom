@@ -115,18 +115,18 @@ const ProductCard = ({ product, cardForTrending }) => {
         src={product.image}
         alt={product.title}
         loading="lazy"
-        className={`w-full h-36 object-contain rounded-md mb-2 transition-opacity duration-500 ${
+        className={`w-full h-32 sm:h-36 object-contain rounded-md  transition-opacity duration-500 ${
           isImageLoaded ? "opacity-100" : "opacity-0"
         }`}
         onLoad={() => setIsImageLoaded(true)}
       />
       {!isImageLoaded && (
-        <div className="absolute inset-0 w-full h-36 bg-gray-300 animate-pulse rounded-md mb-2" />
+        <div className="absolute inset-0 w-full h-32 sm:h-36 bg-gray-300 animate-pulse rounded-md " />
       )}
     </div>
   );
   const ProductTitle = ({ name, slug }) => (
-    <h3 className="text-sm sm:text-lg font-semibold mb-1 truncate" title={name}>
+    <h3 className="text-sm sm:text-lg font-semibold truncate" title={name}>
       <span className="hover:text-blue-500 transition-colors duration-200">
         {name}
       </span>
@@ -135,7 +135,7 @@ const ProductCard = ({ product, cardForTrending }) => {
 
   );
   const ProductStats = ({ views, orders }) => (
-    <div className="hidden lg:flex lg:items-center lg:space-x-4 text-xs text-gray-600 mb-2">
+    <div className="hidden lg:flex lg:items-center lg:space-x-4 text-xs text-gray-600">
       {/* Show both icons on large screens, but stack them on smaller screens */}
       <span className="flex items-center mb-1 lg:mb-0">
         <FaEye className="mr-1 text-gray-500" /> {views} views
@@ -148,16 +148,16 @@ const ProductCard = ({ product, cardForTrending }) => {
   );
   const ProductPrice = ({ hasDiscount, discountPrice, basePrice }) => (
     hasDiscount ? (
-      <div className="mb-2 flex flex-row space-x-1">
-        <p className="text-3x text-green-600 font-semibold">{discountPrice}</p>
-        <p className="text-gray-500 line-through">{basePrice}</p>
+      <div className="flex items-end flex-row space-x-2">
+        <p className="text-xl text-green-600 font-semibold">{discountPrice}</p>
+        <p className="text-xs text-gray-500 line-through mb-[0.1rem]">{basePrice}</p>
       </div>
     ) : (
-      <p className="text-2xl text-green-600 font-semibold mb-2">{basePrice}</p>
+      <p className="text-xl text-green-600 font-semibold">{basePrice}</p>
     )
   );
   const ProductRating = ({ rating, reviews }) => (
-    <div className="flex items-center mb-2">
+    <div className="flex items-center">
       {Array(Math.ceil(rating)).fill(0).map((_, i) => (
         <svg key={i} className="h-4 w-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 17.27L18.18 21 16.54 14.24 22 9.27 14.81 8.63 12 2 9.19 8.63 2 9.27 7.46 14.24 5.82 21z" />
@@ -168,7 +168,7 @@ const ProductCard = ({ product, cardForTrending }) => {
     </div>
   );
   const ActionButtons = ({ hasVariants, handleAddToCart, handleBuyNow }) => (
-    <div className="flex space-x-2 mt-2">
+    <div className="flex space-x-2">
       {!hasVariants && (
         <button onClick={handleAddToCart} className="flex-grow bg-blue-500 text-white font-bold py-1 rounded hover:bg-blue-600 transition-colors text-xs disabled:cursor-not-allowed"
         disabled={cartLoading}
@@ -191,64 +191,68 @@ const ProductCard = ({ product, cardForTrending }) => {
   
 
   return (
-    <div className="border rounded-lg shadow-md bg-white hover:shadow-lg transition duration-200 relative p-3">
-      {/* Wishlist Button */}
-      <WishlistButton 
-        isFavourite={checkFavourite(product.id)} 
-        handleAddToWishlist={handleAddToWishlist} 
-        handleRemoveToWishlist={handleRemoveToWishlist} 
+    <div className="border rounded-lg shadow-md bg-white hover:shadow-lg transition duration-200 relative p-2 min-h-[300px] flex flex-col">
+  {/* Wishlist Button - Separate from <Link> */}
+  <WishlistButton 
+    isFavourite={checkFavourite(product.id)} 
+    handleAddToWishlist={handleAddToWishlist} 
+    handleRemoveToWishlist={handleRemoveToWishlist} 
+  />
+
+  {/* Clickable Card Content */}
+  <Link to={`/products/detail/${product.slug}`} className="flex-1">
+    {/* Discount Badge */}
+    {product.has_discount && (
+      <DiscountBadge 
+        discountValue={product.discount_value} 
+        discountType={product.discount_type} 
+      />
+    )}
+
+    {/* Trending Badge */}
+    {cardForTrending && <TrendingBadge isHot={product.isHot} />}
+
+    {/* Product Image */}
+    <ProductImage 
+      product={product} 
+      isImageLoaded={isImageLoaded} 
+      setIsImageLoaded={setIsImageLoaded} 
+    />
+
+    <div>
+      <ProductTitle name={product.name} slug={product.slug} />
+      <p className="hidden lg:block text-xs text-gray-500 mb-1">
+        <span className="font-semibold">{product.brand_name}</span>
+      </p>
+
+      <ProductStats views={product.total_views} orders={product.total_orders} />
+
+      <ProductPrice 
+        hasDiscount={product.has_discount} 
+        discountPrice={product.discount_price} 
+        basePrice={product.base_price} 
       />
 
-      <Link to={`/products/detail/${product.slug}`}>
-        {/* Discount Badge */}
-        {product.has_discount && (
-          <DiscountBadge 
-            discountValue={product.discount_value} 
-            discountType={product.discount_type} 
-          />
-        )}
-
-        {/* Trending Badge */}
-        {cardForTrending && <TrendingBadge isHot={product.isHot} />}
-
-        
-
-        {/* Product Image */}
-        <ProductImage 
-          product={product} 
-          isImageLoaded={isImageLoaded} 
-          setIsImageLoaded={setIsImageLoaded} 
-        />
-
-        
-        <ProductTitle name={product.name} slug={product.slug} />
-
-        <p className="hidden lg:block text-xs text-gray-500 mb-2">
-          <span className="font-semibold">{product.brand_name}</span>
-        </p>
-
-        <ProductStats views={product.total_views} orders={product.total_orders} />
-
-        <ProductPrice 
-          hasDiscount={product.has_discount} 
-          discountPrice={product.discount_price} 
-          basePrice={product.base_price} 
-        />
-        {product.avg_rating > 0 && 
-          <ProductRating rating={product.avg_rating} reviews={product.total_reviews} />
-        }
-      </Link>
-         {/* Stock & Action Buttons */}
-         {product.availability_status ? (
-          <ActionButtons 
-            hasVariants={product.has_variants} 
-            handleAddToCart={handleAddToCart} 
-            handleBuyNow={handleBuyNow} 
-          />
-        ) : (
-          <OutOfStock />
-        )}
+      {product.avg_rating > 0 && 
+        <ProductRating rating={product.avg_rating} reviews={product.total_reviews} />
+      }
     </div>
+  </Link>
+
+  {/* Stock & Action Buttons */}
+  <div className="mt-1">
+    {product.availability_status ? (
+      <ActionButtons 
+        hasVariants={product.has_variants} 
+        handleAddToCart={handleAddToCart} 
+        handleBuyNow={handleBuyNow} 
+      />
+    ) : (
+      <OutOfStock />
+    )}
+  </div>
+</div>
+
   );
 };
 
