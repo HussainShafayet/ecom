@@ -121,7 +121,7 @@ const FeaturedProducts = ({forRoute}) => {
               </Link>
             }
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -151,7 +151,7 @@ const FeaturedProducts = ({forRoute}) => {
               <span>Not found</span>
             </div>:
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
