@@ -54,6 +54,7 @@ const ProductCard = ({ product, cardForTrending }) => {
   };
 
   const wishlist = useSelector(state => state.wishList.items);
+  const favouriteIds = useSelector(state => state.wishList.favouriteIds);
   
   // Check if the product is already in the wishlist
   const isInWishlist = wishlist.some(item => item.id === product.id);
@@ -68,8 +69,6 @@ const ProductCard = ({ product, cardForTrending }) => {
   };
 
   const handleAddToWishlist = () =>{
-    console.log(product);
-    //product.is_favourite = true;
     if (isAuthenticated) {
        dispatch(handleAddtoWishlist({product_id: product.id}));
     } else {
@@ -83,6 +82,10 @@ const ProductCard = ({ product, cardForTrending }) => {
     }
     
     dispatch(removeFromWishlist(product.id));
+  }
+
+  const checkFavourite = (favId) => {
+    return favouriteIds[favId];
   }
 
   const DiscountBadge = ({ discountValue, discountType }) => (
@@ -203,7 +206,7 @@ const ProductCard = ({ product, cardForTrending }) => {
 
       {/* Wishlist Button */}
       <WishlistButton 
-        isFavourite={product.is_favourite} 
+        isFavourite={checkFavourite(product.id)} 
         handleAddToWishlist={handleAddToWishlist} 
         handleRemoveToWishlist={handleRemoveToWishlist} 
       />

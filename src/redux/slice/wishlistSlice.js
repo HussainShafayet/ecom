@@ -17,6 +17,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 const initialState = {
   isLoading: false,
   items: [],
+  favouriteIds: {},
   error: null,
   addWishlistLoading: false,
   addWishlistError: null,
@@ -72,18 +73,30 @@ const wishlistSlice = createSlice({
   initialState,
   reducers: {
     addToWishlist: (state, action) => {
-      const existingItem = state.items.find(item => item.id === action.payload.id);
-      if (!existingItem) {
+      const product = action.payload;
+      if (!product || !product.id) {
+        console.error("Invalid product:", product);
+        return;
+      }
+
+      if (!state.favouriteIds[product.id]) {
         const clonedObj = {...action.payload};
+        
         clonedObj.is_favourite = true;
         state.items.push(clonedObj);
+        state.favouriteIds[product.id] = product.id; // Redux Toolkit handles mutation correctly
       }
+      
     },
     removeFromWishlist: (state, action) => {
       state.items = state.items.filter(item => item.id !== action.payload);
+      const newFavouriteIds = { ...state.favouriteIds };
+      delete newFavouriteIds[action.payload]; // Remove from lookup object safely
+      state.favouriteIds = newFavouriteIds;
     },
     clearWishlist: (state) => {
       state.items = [];
+      state.favouriteIds = {};
     },
   },
   extraReducers: (builder) => {
