@@ -135,8 +135,8 @@ const ProductCard = ({ product, cardForTrending }) => {
 
   );
   const ProductStats = ({ views, orders }) => (
-    <div className="hidden lg:flex lg:items-center lg:space-x-4 text-xs text-gray-600">
-      {/* Show both icons on large screens, but stack them on smaller screens */}
+    <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-3 text-xs text-gray-600">
+      {/* Views and Orders stack on small screens, inline on large screens */}
       <span className="flex items-center mb-1 lg:mb-0">
         <FaEye className="mr-1 text-gray-500" /> {views} views
       </span>
@@ -144,29 +144,31 @@ const ProductCard = ({ product, cardForTrending }) => {
         <FaShoppingCart className="mr-1 text-gray-500" /> {orders} orders
       </span>
     </div>
-
   );
+  
   const ProductPrice = ({ hasDiscount, discountPrice, basePrice }) => (
     hasDiscount ? (
       <div className="flex items-end flex-row space-x-2">
-        <p className="text-xl text-green-600 font-semibold">{discountPrice}</p>
-        <p className="text-xs text-gray-500 line-through mb-[0.1rem]">{basePrice}</p>
+        <p className="text-lg sm:text-xl text-green-600 font-semibold truncate">{discountPrice}</p>
+        <p className="text-xs text-gray-500 line-through mb-[0.1rem] truncate">{basePrice}</p>
       </div>
     ) : (
-      <p className="text-xl text-green-600 font-semibold">{basePrice}</p>
+      <p className="text-lg sm:text-xl text-green-600 font-semibold truncate">{basePrice}</p>
     )
   );
+  
   const ProductRating = ({ rating, reviews }) => (
-    <div className="flex items-center">
+    <div className="flex items-center flex-wrap text-xs sm:text-sm">
       {Array(Math.ceil(rating)).fill(0).map((_, i) => (
-        <svg key={i} className="h-4 w-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+        <svg key={i} className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 17.27L18.18 21 16.54 14.24 22 9.27 14.81 8.63 12 2 9.19 8.63 2 9.27 7.46 14.24 5.82 21z" />
         </svg>
       ))}
-      <span className="ml-2 text-xs text-gray-600">({rating.toFixed(1)})</span>
-      <span className="ml-2 text-xs text-gray-600">{reviews} reviews</span>
+      <span className="ml-1 sm:ml-2 text-gray-600 truncate">({rating.toFixed(1)})</span>
+      <span className="ml-1 sm:ml-2 text-gray-600 truncate">{reviews} reviews</span>
     </div>
   );
+  
   const ActionButtons = ({ hasVariants, handleAddToCart, handleBuyNow }) => (
     <div className="flex space-x-2">
       {!hasVariants && (
@@ -221,8 +223,8 @@ const ProductCard = ({ product, cardForTrending }) => {
 
         <div>
           <ProductTitle name={product.name} slug={product.slug} />
-          <p className="hidden lg:block text-xs text-gray-500 mb-1">
-            <span className="font-semibold">{product.brand_name}</span>
+          <p className="text-xs text-gray-500 mb-1">
+            <span className="line-clamp-2 font-semibold">{product.brand_name}</span>
           </p>
 
           <ProductStats views={product.total_views} orders={product.total_orders} />
