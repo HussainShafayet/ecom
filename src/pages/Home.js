@@ -12,7 +12,7 @@ const Home = () => {
       <BestSelling />
       <FeaturedProducts />
       <AllProducts />
-      <Testimonials />
+      {/*<Testimonials />*/}
       
       
     </>

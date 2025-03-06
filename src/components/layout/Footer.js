@@ -123,7 +123,7 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Customer Service</h3>
             <ul className="space-y-2">
-              <li><Link to="/contact" className="hover:text-gray-100 transition">Support Center</Link></li>
+              {/*<li><Link to="/contact" className="hover:text-gray-100 transition">Support Center</Link></li>*/}
               <li><Link to="/faq" className="hover:text-gray-100 transition">FAQ</Link></li>
             </ul>
           </div>
