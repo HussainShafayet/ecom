@@ -110,7 +110,7 @@ const ProductCard = ({ product, cardForTrending }) => {
     </button>
   );
   const ProductImage = ({ product, isImageLoaded, setIsImageLoaded }) => (
-    <Link to={`/products/detail/${product.slug}`} className="relative">
+    <div  className="relative">
       <img
         src={product.image}
         alt={product.title}
@@ -123,13 +123,13 @@ const ProductCard = ({ product, cardForTrending }) => {
       {!isImageLoaded && (
         <div className="absolute inset-0 w-full h-36 bg-gray-300 animate-pulse rounded-md mb-2" />
       )}
-    </Link>
+    </div>
   );
   const ProductTitle = ({ name, slug }) => (
-    <h3 className="text-sm sm:text-lg font-semibold mb-1 truncate w-full">
-      <Link to={`/products/detail/${slug}`} className="hover:text-blue-500 transition-colors duration-200">
+    <h3 className="text-sm sm:text-lg font-semibold mb-1 truncate" title={name}>
+      <span className="hover:text-blue-500 transition-colors duration-200">
         {name}
-      </Link>
+      </span>
     </h3>
 
 
@@ -192,18 +192,6 @@ const ProductCard = ({ product, cardForTrending }) => {
 
   return (
     <div className="border rounded-lg shadow-md bg-white hover:shadow-lg transition duration-200 relative p-3">
-      
-      {/* Discount Badge */}
-      {product.has_discount && (
-        <DiscountBadge 
-          discountValue={product.discount_value} 
-          discountType={product.discount_type} 
-        />
-      )}
-
-      {/* Trending Badge */}
-      {cardForTrending && <TrendingBadge isHot={product.isHot} />}
-
       {/* Wishlist Button */}
       <WishlistButton 
         isFavourite={checkFavourite(product.id)} 
@@ -211,14 +199,28 @@ const ProductCard = ({ product, cardForTrending }) => {
         handleRemoveToWishlist={handleRemoveToWishlist} 
       />
 
-      {/* Product Image */}
-      <ProductImage 
-        product={product} 
-        isImageLoaded={isImageLoaded} 
-        setIsImageLoaded={setIsImageLoaded} 
-      />
+      <Link to={`/products/detail/${product.slug}`}>
+        {/* Discount Badge */}
+        {product.has_discount && (
+          <DiscountBadge 
+            discountValue={product.discount_value} 
+            discountType={product.discount_type} 
+          />
+        )}
 
-      <div className="p-2">
+        {/* Trending Badge */}
+        {cardForTrending && <TrendingBadge isHot={product.isHot} />}
+
+        
+
+        {/* Product Image */}
+        <ProductImage 
+          product={product} 
+          isImageLoaded={isImageLoaded} 
+          setIsImageLoaded={setIsImageLoaded} 
+        />
+
+        
         <ProductTitle name={product.name} slug={product.slug} />
 
         <p className="hidden lg:block text-xs text-gray-500 mb-2">
@@ -232,11 +234,12 @@ const ProductCard = ({ product, cardForTrending }) => {
           discountPrice={product.discount_price} 
           basePrice={product.base_price} 
         />
-
-        <ProductRating rating={product.avg_rating} reviews={product.total_reviews} />
-
-        {/* Stock & Action Buttons */}
-        {product.availability_status ? (
+        {product.avg_rating > 0 && 
+          <ProductRating rating={product.avg_rating} reviews={product.total_reviews} />
+        }
+      </Link>
+         {/* Stock & Action Buttons */}
+         {product.availability_status ? (
           <ActionButtons 
             hasVariants={product.has_variants} 
             handleAddToCart={handleAddToCart} 
@@ -245,7 +248,6 @@ const ProductCard = ({ product, cardForTrending }) => {
         ) : (
           <OutOfStock />
         )}
-      </div>
     </div>
   );
 };
