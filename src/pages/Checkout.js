@@ -351,11 +351,13 @@ const Checkout = () => {
                   className="flex items-center justify-between gap-2 mb-2 relative border p-1"
                 >
                   {/* Image */}
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-20 h-20 object-contain rounded-md flex-shrink-0"
-                  />
+                  <Link to={`/products/detail/${item.slug}`}>
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-20 h-20 object-contain rounded-md flex-shrink-0"
+                    />
+                  </Link>
 
                   
                   {/* Product Details */}
@@ -364,7 +366,9 @@ const Checkout = () => {
                       className="font-semibold text-sm truncate"
                       title={item.name} // Tooltip for full name
                     >
-                      {item.name}
+                     <Link to={`/products/detail/${item.slug}`} className="hover:text-blue-500 transition-colors duration-200">
+                        {item.name}
+                      </Link>
                     </h2>
                     <p className="text-gray-500 text-sm truncate mb-2">
                       {item.brand_name && <span>Brand: {item.brand_name} • </span>}

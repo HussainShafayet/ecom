@@ -138,18 +138,24 @@ const Cart = () => {
                       className="border rounded-lg shadow-sm hover:shadow-md transition-shadow p-2 bg-white flex flex-row items-center gap-3 relative w-full"
                     >
                       {/* Product Image */}
-                      <div className="w-20 h-20 sm:w-12 sm:h-12 md:w-24 md:h-24  rounded-lg">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
+                      <Link to={`/products/detail/${item.slug}`} className="relative">
+                        <div className="w-20 h-20 sm:w-12 sm:h-12 md:w-24 md:h-24  rounded-lg">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      </Link>
+                      
 
                       {/* Product Details */}
                       <div className="flex-1 text-xs sm:text-sm md:text-base w-full">
                         <h2 className="font-semibold truncate w-full" title={item.name}>
-                          {item.name}
+                          <Link to={`/products/detail/${item.slug}`} className="hover:text-blue-500 transition-colors duration-200">
+                            {item.name}
+                          </Link>
+                     
                         </h2>
                         <p className="text-gray-500 text-wrap">
                           {item.brand_name && <span>Brand: {item.brand_name} • </span>}
