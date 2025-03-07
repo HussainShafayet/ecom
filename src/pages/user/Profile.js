@@ -76,14 +76,21 @@ const Profile = () => {
     e.preventDefault();
     // Create a new FormData instance
     const formDataObj = new FormData();
-
-    // Append all form fields to the FormData object
+  
+    // Append only changed fields
     Object.entries(formData).forEach(([key, value]) => {
-      value && formDataObj.append(key, value);
+      if (value !== profile[key] && value !== '') { // Only add if changed and not empty
+        formDataObj.append(key, value);
+      }
     });
-    //console.log(formDataObj, 'form');
+  
+    // Only dispatch if there are changes
+    if (formDataObj.entries().next().done) {
+      console.log('No changes detected.');
+      return;
+    }
+    
     dispatch(handleProfileUpdate(formDataObj));
-    //handleUpdate(formData); // Call parent function to update profile
   };
 
 
