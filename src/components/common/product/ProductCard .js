@@ -196,7 +196,7 @@ const ProductCard = ({ product, cardForTrending }) => {
     <div className="border rounded-lg shadow-md bg-white hover:shadow-lg transition duration-200 relative p-2 min-h-[230px] sm:min-h-[300px] flex flex-col">
     {/* Wishlist Button - Separate from <Link> */}
       <WishlistButton 
-        isFavourite={checkFavourite(product.id)} 
+        isFavourite={product.is_favourite || checkFavourite(product.id)} 
         handleAddToWishlist={handleAddToWishlist} 
         handleRemoveToWishlist={handleRemoveToWishlist} 
       />

@@ -33,6 +33,7 @@ export const handleAddtoWishlist = createAsyncThunk('cart/handleAddtoWishlist', 
      const api = (await import('../../api/axiosSetup')).default;
      const response = await api.post('/accounts/favourite/', formData, { section: "add-wishlist"});
     console.log('add to wishlist response',response);
+    response.data = formData;
     return response?.data;
   } catch (error) {
     return rejectWithValue(error.response.data);
@@ -108,6 +109,8 @@ const wishlistSlice = createSlice({
       .addCase(handleAddtoWishlist.fulfilled, (state, action)=>{
         state.addWishlistLoading = false;
         state.addWishlistError = null;
+        const {product_id} = action.payload;
+        state.favouriteIds[product_id] =product_id;
       })
       .addCase(handleAddtoWishlist.rejected, (state, action)=>{
         state.addWishlistLoading = false;
