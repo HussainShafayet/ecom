@@ -20,22 +20,23 @@ const ProductCard = ({ product, cardForTrending }) => {
 
   const handleAddToCart = async () => {
     try {
+      let clonedProduct;
       if (isAuthenticated) {
-        const cartBody = {};
-        cartBody.product_id = product.id;
-        cartBody.quantity = 1;
-        cartBody.variant_id = product.variant_id;
-        cartBody.action = 'increase';
+        const cartBody = {
+          product_id: product.id,
+          quantity: 1,
+          variant_id: product.variant_id,
+          action: 'increase'
+        };
         const response = await dispatch(handleAddtoCart(cartBody)).unwrap();
         if (response.success) {
-          const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
-          dispatch(addToCart(clonedProduct));
+          clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
         }
       }else{
-        const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
-        
-        dispatch(addToCart(clonedProduct));
+        clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
       }
+
+      clonedProduct && dispatch(addToCart(clonedProduct));
     } catch (error) {
       console.log('handle add to cart error: ', error)
     }
@@ -46,21 +47,24 @@ const ProductCard = ({ product, cardForTrending }) => {
       if (product.has_variants) {
         navigate(`/products/detail/${product.slug}`);
       } else {
+        let clonedProduct;
         if (isAuthenticated) {
-          const cartBody = {};
-          cartBody.product_id = product.id;
-          cartBody.quantity = 1;
-          cartBody.variant_id = product.variant_id;
-          cartBody.action = 'increase';
+          const cartBody = {
+            product_id: product.id,
+            quantity: 1,
+            variant_id: product.variant_id,
+            action: 'increase'
+          };
           const response = await dispatch(handleAddtoCart(cartBody)).unwrap();
           if (response.success) {
-            const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
-            dispatch(addToCart(clonedProduct));
-            navigate('/checkout');
+            clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
           }
           
         }else{
-          const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
+          clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
+        }
+
+        if (clonedProduct) {
           dispatch(addToCart(clonedProduct));
           navigate(`/checkout`);
         }
