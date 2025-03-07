@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToCart, handleAddtoCart, handleClonedProduct } from '../../../redux/slice/cartSlice';
@@ -11,9 +11,12 @@ const ProductCard = ({ product, cardForTrending }) => {
   const {isAuthenticated} = useSelector((state)=> state.auth);
   const {cartLoading, cartError, cartAddedSuccessfull} = useSelector((state)=> state.cart);
   const addcartError = useSelector((state) => state.globalError.sectionErrors["add-cart"]);
+  const {items:wishlist, favouriteIds, removeFavouriteItem} = useSelector ((state) => state.wishList);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
+  const [productFavourite, setProductFavourite] = useState(product?.is_favourite || false);
+
 
   const handleAddToCart = () => {
      if (isAuthenticated) {
@@ -53,8 +56,7 @@ const ProductCard = ({ product, cardForTrending }) => {
     
   };
 
-  const wishlist = useSelector(state => state.wishList.items);
-  const favouriteIds = useSelector(state => state.wishList.favouriteIds);
+  
   
   // Check if the product is already in the wishlist
   const isInWishlist = wishlist.some(item => item.id === product.id);
@@ -76,12 +78,16 @@ const ProductCard = ({ product, cardForTrending }) => {
     }
    
   }
-  const handleRemoveToWishlist = () =>{
-    if (isAuthenticated) {
-      dispatch(handleRemovetoWishlist({product_id: product.id}));
+  const handleRemoveToWishlist = async () =>{
+    try {
+      if (isAuthenticated) {
+          const response = await dispatch(handleRemovetoWishlist({ product_id: product.id })).unwrap();
+          response.success && setProductFavourite(false);
+      }
+      dispatch(removeFromWishlist(product.id));
+    } catch (error) {
+        console.error("Error removing from wishlist:", error);
     }
-    
-    dispatch(removeFromWishlist(product.id));
   }
 
   const checkFavourite = (favId) => {
@@ -196,7 +202,7 @@ const ProductCard = ({ product, cardForTrending }) => {
     <div className="border rounded-lg shadow-md bg-white hover:shadow-lg transition duration-200 relative p-2 min-h-[230px] sm:min-h-[300px] flex flex-col">
     {/* Wishlist Button - Separate from <Link> */}
       <WishlistButton 
-        isFavourite={product.is_favourite || checkFavourite(product.id)} 
+        isFavourite={checkFavourite(product.id) || productFavourite} 
         handleAddToWishlist={handleAddToWishlist} 
         handleRemoveToWishlist={handleRemoveToWishlist} 
       />
