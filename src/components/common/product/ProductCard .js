@@ -18,42 +18,58 @@ const ProductCard = ({ product, cardForTrending }) => {
   const [productFavourite, setProductFavourite] = useState(product?.is_favourite || false);
 
 
-  const handleAddToCart = () => {
-     if (isAuthenticated) {
-      const cartBody = {};
-      cartBody.product_id = product.id;
-      cartBody.quantity = 1;
-      cartBody.variant_id = product.variant_id;
-      cartBody.action = 'increase';
-      dispatch(handleAddtoCart(cartBody));
-    }else{
-      const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
-      
-      dispatch(addToCart(clonedProduct));
-    }
-  };
-
-  const handleBuyNow = () => {
-    if (product.has_variants) {
-      navigate(`/products/detail/${product.slug}`);
-    } else {
+  const handleAddToCart = async () => {
+    try {
       if (isAuthenticated) {
         const cartBody = {};
         cartBody.product_id = product.id;
         cartBody.quantity = 1;
         cartBody.variant_id = product.variant_id;
         cartBody.action = 'increase';
-        dispatch(handleAddtoCart(cartBody));
-        cartAddedSuccessfull && navigate('/checkout');
+        const response = await dispatch(handleAddtoCart(cartBody)).unwrap();
+        if (response.success) {
+          const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
+          dispatch(addToCart(clonedProduct));
+        }
       }else{
         const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
+        
         dispatch(addToCart(clonedProduct));
-        navigate(`/checkout`);
       }
-
-      
+    } catch (error) {
+      console.log('handle add to cart error: ', error)
     }
-    
+  };
+
+  const handleBuyNow = async() => {
+    try {
+      if (product.has_variants) {
+        navigate(`/products/detail/${product.slug}`);
+      } else {
+        if (isAuthenticated) {
+          const cartBody = {};
+          cartBody.product_id = product.id;
+          cartBody.quantity = 1;
+          cartBody.variant_id = product.variant_id;
+          cartBody.action = 'increase';
+          const response = await dispatch(handleAddtoCart(cartBody)).unwrap();
+          if (response.success) {
+            const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
+            dispatch(addToCart(clonedProduct));
+            navigate('/checkout');
+          }
+          
+        }else{
+          const clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
+          dispatch(addToCart(clonedProduct));
+          navigate(`/checkout`);
+        }
+
+        
+      }
+     } catch (error) {
+      console.log('handle buy now error: ', error);
+    }
   };
 
   

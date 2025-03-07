@@ -126,40 +126,62 @@ useEffect(() => {
     return reviews.filter(review => review.rating === selectedRatingFilter); // Filter by selected rating
   };
 
-  const handleAddToCart = () => {
-   
-    
-    if (isAuthenticated) {
-      const cartBody = {};
-      cartBody.product_id = product.id;
-      cartBody.quantity = quantity;
-      cartBody.variant_id = selectedSize?.variant_id || selectedColor?.variant_id;
-      cartBody.action = 'increase';
-      dispatch(handleAddtoCart(cartBody));
-    }else{
-      const clonedProduct = dispatch(handleClonedProduct(product, selectedSize, selectedColor, quantity));
+  const handleAddToCart = async () => {
+    try {
+      if (isAuthenticated) {
+        const cartBody = {};
+        cartBody.product_id = product.id;
+        cartBody.quantity = quantity;
+        cartBody.variant_id = selectedSize?.variant_id || selectedColor?.variant_id;
+        cartBody.action = 'increase';
+        const response = await dispatch(handleAddtoCart(cartBody)).unwrap();
+        if (response.success) {
+          const clonedProduct = dispatch(handleClonedProduct(product, selectedSize, selectedColor, quantity));
       
-      dispatch(addToCart(clonedProduct));
+          dispatch(addToCart(clonedProduct));
+        }
+      }else{
+        const clonedProduct = dispatch(handleClonedProduct(product, selectedSize, selectedColor, quantity));
+      
+        dispatch(addToCart(clonedProduct));
+      }
+    } catch (error) {
+      console.log('handle add to cart error: ', error)
     }
-    
   };
 
-  const handleBuyNow = () => {
-    if (isAuthenticated) {
-      const cartBody = {};
-      cartBody.product_id = product.id;
-      cartBody.quantity = quantity;
-      cartBody.variant_id = selectedSize?.variant_id || selectedColor?.variant_id;
-      cartBody.action = 'increase';
-      dispatch(handleAddtoCart(cartBody));
-      cartAddedSuccessfull && navigate('/checkout');
-    }else{
-      const clonedProduct = dispatch(handleClonedProduct(product, selectedSize, selectedColor, quantity));
+  const handleBuyNow = async () => {
+
+    try {
+      if (product.has_variants) {
+        navigate(`/products/detail/${product.slug}`);
+      } else {
+        if (isAuthenticated) {
+          const cartBody = {};
+          cartBody.product_id = product.id;
+          cartBody.quantity = quantity;
+          cartBody.variant_id = selectedSize?.variant_id || selectedColor?.variant_id;
+          cartBody.action = 'increase';
+          const response = await dispatch(handleAddtoCart(cartBody)).unwrap();
+          if (response.success) {
+            const clonedProduct = dispatch(handleClonedProduct(product, selectedSize, selectedColor, quantity));
       
-      dispatch(addToCart(clonedProduct));
-      navigate('/checkout');
+            dispatch(addToCart(clonedProduct));
+            navigate('/checkout');
+          }
+          
+        }else{
+          const clonedProduct = dispatch(handleClonedProduct(product, selectedSize, selectedColor, quantity));
+      
+          dispatch(addToCart(clonedProduct));
+          navigate('/checkout');
+        }
+
+        
+      }
+      } catch (error) {
+      console.log('handle buy now error: ', error);
     }
-    
    
   };
 
