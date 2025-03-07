@@ -134,13 +134,28 @@ const AddressItem = ({ address, onUpdate }) => {
       };
   
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
       e.preventDefault();
-      //console.log(editedAddress);
-     
-      dispatch(handleAddressUpdate(editedAddress));
-    //  onUpdate(editedAddress); // Pass updated address to parent
-      setIsEditing(false); // Exit edit mode
+      try {
+         // Create an object with only updated fields
+        const updatedFields = Object.keys(editedAddress).reduce((acc, key) => {
+          if (editedAddress[key] !== address[key]) {  // Check if value changed
+            acc[key] = editedAddress[key];
+          }
+          return acc;
+        }, {});
+
+        // Only dispatch if there are changes
+        if (Object.keys(updatedFields).length === 0) {
+          console.log('No changes detected.');
+          return;
+        }
+        
+        const response = await dispatch(handleAddressUpdate(editedAddress)).unwrap();
+        //!response.success && setIsEditing(false); // Exit edit mode
+      } catch (error) {
+        console.log('handle address update error: ', error);
+      }
     };
 
     const handleDelete = () => {
@@ -361,28 +376,28 @@ const AddressItem = ({ address, onUpdate }) => {
 
 
         {confirmDelete && (
-          <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-10">
-              <div className="bg-white p-6 rounded-lg shadow-lg">
-                  <h3 className="text-lg font-semibold">Confirm Delete</h3>
-                  <p className="text-gray-600">Are you sure you want to delete this address?</p>
-                  <div className="mt-4 flex justify-end space-x-2">
-                      <button
-                          onClick={() => setConfirmDelete(null)}
-                          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                      >
-                          Cancel
-                      </button>
-                      <button
-                          onClick={() => {
-                              handleDelete();
-                              setConfirmDelete(null);
-                            }}
-                          className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
-                      >
-                          Delete
-                      </button>
-                  </div>
-              </div>
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-10 p-2">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+                <h3 className="text-lg font-semibold">Confirm Delete</h3>
+                <p className="text-gray-600">Are you sure you want to delete this address?</p>
+                <div className="mt-4 flex justify-end space-x-2">
+                    <button
+                        onClick={() => setConfirmDelete(null)}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={() => {
+                            handleDelete();
+                            setConfirmDelete(null);
+                          }}
+                        className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
           </div>
       )}
 
