@@ -4,26 +4,8 @@ import {useDispatch, useSelector} from "react-redux";
 import {searchSuggestions, suggestionsInputTime} from "../../redux/slice/productSlice";
 import {Link, useNavigate} from "react-router-dom";
 
-const items = [
-    "Apple iPhone 13",
-    "Samsung Galaxy S22",
-    "Sony Headphones",
-    "MacBook Pro",
-    "Dell XPS 15",
-    "HP Spectre",
-    "Google Pixel 6",
-    "AirPods Pro",
-    "Logitech MX Master",
-    "Samsung Smart TV",
-  ];
-
-//  const handleSelection = (item) => {
-//    console.log("Selected:", item);
-//  };
-
 const SearchDropdown = () => {
   const [query, setQuery] = useState("");
-  const [filteredItems, setFilteredItems] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const dropdownRef = useRef(null);
@@ -64,8 +46,6 @@ const SearchDropdown = () => {
       dispatch(suggestionsInputTime());
       debouncedAfterInput(value);
     } else {
-      setIsDropdownOpen(false);
-      navigate(`/products`);
       debouncedAfterInput.cancel(); // Cancel debounce when input is cleared
     }
   };
@@ -99,7 +79,7 @@ const SearchDropdown = () => {
       />
       {isDropdownOpen && (
         <ul className="absolute left-0 w-full mt-1 bg-white border border-gray-300 shadow-lg rounded-md max-h-[80vh] overflow-y-auto">
-        {suggestionsLoading?
+        {suggestionsLoading && suggestions.length == 0 ?
         <div className="animate-pulse p-3">
             {Array.from({ length: 10 }).map((_, index) => (
             <li
