@@ -349,19 +349,38 @@ const Profile = () => {
                       </div>
 
                       {/* Editable Phone Number Field */}
-                      {/*<div>
-                        <label htmlFor="phone_number" className="block text-gray-700 font-medium mb-1">
-                          Phone Number
-                        </label>
-                        <input
-                          type="text"
-                          id="phone_number"
-                          name="phone_number"
-                          value={formData.phone_number || ''}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
-                      </div>*/}
+                      <div>
+                        <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">Phone Number</label>
+                        <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
+                          {/* Country Code (non-editable) */}
+                          <select
+                            id="country-code"
+                            className="bg-gray-100 text-gray-700 font-medium px-2 sm:px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
+                            value="+880"
+                            disabled
+                          >
+                            <option value="+880">+880</option>
+                          </select>
+
+                          {/* Editable phone number */}
+                          <input
+                            type="tel"
+                            id="phone"
+                            name="phone_number"
+                            placeholder="Phone Number"
+                            value={formData.phone_number.replace('+880', '')} // Remove country code for display
+                            onChange={(e) => {
+                              const phoneNumber = e.target.value;
+                              const fullPhoneNumber = `+880${phoneNumber}`;
+                              handleChange({ target: { name: 'phone_number', value: fullPhoneNumber } });
+                            }}
+                            className="w-full px-3 py-2 border-none focus:outline-none rounded-r-md"
+                            required
+                            maxLength={10}
+                          />
+                        </div>
+                      </div>
+
 
                       {/* Editable Date of Birth Field */}
                       <div>
