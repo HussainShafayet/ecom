@@ -6,7 +6,6 @@ const initialState = {
     error: null,
     updateLoading:false,
     updateError: null,
-    updateDone: false,
     adrressLoading: false,
     addresses: [],
     addressError: null,
@@ -24,6 +23,10 @@ const initialState = {
     touched: {},
     districts: [],
     upazilas: [],
+    isSendOtpLoading: false,
+    sendOtpMessage: '',
+    sendOtpToken: '',
+    isSendOtpError: null,
 };
 
 //get profile
@@ -107,6 +110,30 @@ export const handleAddressDelete = createAsyncThunk('profile/handleAddressDelete
     }
 });
 
+export const handleSendOtp = createAsyncThunk('profile/handleSendOtp', async (formData, { rejectWithValue }) => {
+    try {
+       // Import axiosSetup only when needed to avoid circular dependency issues
+       const api = (await import('../../api/axiosSetup')).default;
+       const response = await api.post(`accounts/request-otp/`,formData, { section: "send-otp-verify"});
+      console.log('send otp for verify response', response);
+      return  response?.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+});
+
+export const handleSubmitOtp = createAsyncThunk('profile/handleSubmitOtp', async (formData, { rejectWithValue }) => {
+    try {
+       // Import axiosSetup only when needed to avoid circular dependency issues
+       const api = (await import('../../api/axiosSetup')).default;
+       const response = await api.post(`accounts/verify-otp-for-profile/`,formData, { section: "submit-otp"});
+      console.log('submit otp response', response);
+      return  response?.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+});
+
 const profileSlice = createSlice({
     name: 'profile',
     initialState,
@@ -164,13 +191,11 @@ const profileSlice = createSlice({
         })
         .addCase(handleProfileUpdate.fulfilled, (state, action)=>{
             state.updateLoading = false;
-            state.updateDone = true;
             state.updateError = null;
             state.profile = action?.payload;
         })
         .addCase(handleProfileUpdate.rejected, (state, action)=>{
             state.updateLoading = false;
-            state.updateDone = false;
             state.updateError = action?.payload?.error || action?.payload?.errors || 'Something went wrong';
         })
 
@@ -242,6 +267,36 @@ const profileSlice = createSlice({
         .addCase(handleAddressDelete.rejected, (state, action)=>{
             state.adrressLoading = false;
             state.addressError = action?.payload?.error  || 'Something went wrong!';
+        })
+
+        //send otp
+        .addCase(handleSendOtp.pending, (state)=>{
+            state.isSendOtpLoading = true;
+        })
+        .addCase(handleSendOtp.fulfilled, (state, action)=>{
+            state.isSendOtpLoading = false;
+            state.isSendOtpError = null;
+            
+            state.sendOtpMessage = action.payload?.message;
+            state.sendOtpToken = action.payload?.data?.token;
+            
+        })
+        .addCase(handleSendOtp.rejected, (state, action)=>{
+            state.isSendOtpLoading = false;
+            state.isSendOtpError = action?.payload?.errors  || 'Something went wrong!';
+        })
+
+        //submit otp
+        .addCase(handleSubmitOtp.pending, (state)=>{
+            state.isSendOtpLoading = true;
+        })
+        .addCase(handleSubmitOtp.fulfilled, (state, action)=>{
+            state.isSendOtpLoading = false;
+            state.isSendOtpError = null;
+        })
+        .addCase(handleSubmitOtp.rejected, (state, action)=>{
+            state.isSendOtpLoading = false;
+            state.isSendOtpError = action?.payload?.errors  || 'Something went wrong!';
         })
         
     }

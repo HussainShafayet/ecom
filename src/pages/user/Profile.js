@@ -3,26 +3,33 @@ import { FaUserEdit, FaBoxOpen, FaMapMarkerAlt, FaCreditCard, FaLock, FaPlus, Fa
 import {useDispatch, useSelector} from 'react-redux';
 import {getUser} from '../../redux/slice/authSlice';
 import {useNavigate} from 'react-router-dom';
-import {handleAddressCreate, handleGetAddress, handleGetProfile, handleProfileUpdate, resetAddressForm, setDistricts, setErrors, setIsAddAddress, setUpazilas, updateAddressFormData, updateTouched} from '../../redux/slice/profileSlice';
-import {ErrorDisplay, Loader} from '../../components/common';
+import {handleAddressCreate, handleGetAddress, handleGetProfile, handleProfileUpdate, handleSendOtp, handleSubmitOtp, resetAddressForm, setDistricts, setErrors, setIsAddAddress, setUpazilas, updateAddressFormData, updateTouched} from '../../redux/slice/profileSlice';
+import {ErrorDisplay, Loader, SuccessMessage} from '../../components/common';
 import {AddressItem} from '../../components/profile';
 import { WishList } from '../user';
 import {dhakaCityData, districtsData, divisionsData, upazilasData} from '../../data/location';
 import {ProfileSkeleton} from '../../components/common/skeleton';
-import {debounce} from 'lodash';
+import {debounce, set} from 'lodash';
 
 const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const dispatch = useDispatch();
   const {isAuthenticated,user} = useSelector((state)=>state.auth);
-  const {isLoading, profile, error, adrressLoading,addresses, addressError, isAddAddress, addressFormData, touched, errors, districts,upazilas, updateLoading, updateError, updateDone} = useSelector((state)=> state.profile);
+  const {isLoading, profile, error, adrressLoading,addresses, addressError, isAddAddress, addressFormData, touched, errors, districts,upazilas, updateLoading, updateError, isSendOtpLoading,
+    sendOtpMessage,
+    sendOtpToken,
+    isSendOtpError} = useSelector((state)=> state.profile);
 
   const navigate = useNavigate();
   
 
   const [isEditing, setIsEditing] = useState(false); // State to toggle edit mode
-  const [formData, setFormData] = useState({ ...profile }); // State to store form data
+  const [formData, setFormData] = useState({}); // State to store form data
   const [image, setImage] = useState(profile?.profile_picture || "");
+  const [numberVerify, setNumberVerify] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [isVerify, setIsVerified] = useState(false);
+  const [prevNumber, setPrevNumber] = useState('');
 
  
   
@@ -32,10 +39,6 @@ const Profile = () => {
     }
     isAuthenticated && dispatch(handleGetProfile());
   }, [dispatch, isAuthenticated, navigate]);
-
-  useEffect(()=>{
-    updateDone && setIsEditing(false); // Exit edit mode
-  }, [updateDone, dispatch]);
 
   useEffect(()=>{
     setImage(profile?.profile_picture);
@@ -61,7 +64,8 @@ const Profile = () => {
 
   const handleShowInfoEdit = ()=>{
     setIsEditing(true);
-    setFormData({...profile})
+    setFormData({...profile});
+    setPrevNumber(profile?.phone_number);
   }
 
 
@@ -72,25 +76,34 @@ const Profile = () => {
   };
 
   // Handle form submissiontrue
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Create a new FormData instance
-    const formDataObj = new FormData();
-  
-    // Append only changed fields
-    Object.entries(formData).forEach(([key, value]) => {
-      if (value !== profile[key] && value !== '') { // Only add if changed and not empty
-        formDataObj.append(key, value);
-      }
-    });
-  
-    // Only dispatch if there are changes
-    if (formDataObj.entries().next().done) {
-      console.log('No changes detected.');
-      return;
-    }
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+      // Create a new FormData instance
+      const formDataObj = new FormData();
     
-    dispatch(handleProfileUpdate(formDataObj));
+      // Append only changed fields
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== profile[key] && value !== '') { // Only add if changed and not empty
+          formDataObj.append(key, value);
+        }
+      });
+    
+      // Only dispatch if there are changes
+      if (formDataObj.entries().next().done) {
+        console.log('No changes detected.');
+        return;
+      }else if(prevNumber !== formData.phone_number && !isVerify){
+        alert('Verify your phone number.');
+        return
+      }
+      
+      const resonse = await dispatch(handleProfileUpdate(formDataObj)).unwrap();
+      resonse && setIsEditing(false);
+    } catch (error) {
+      console.log('handleSubmit errror: ', error);
+      
+    }
   };
 
 
@@ -195,6 +208,40 @@ const Profile = () => {
       debouncedAfterFileInput(file);
     }
   };
+
+  const handleVerifyClick = async ()=> {
+    try {
+      const phoneNumber = formData.phone_number;
+      if (!phoneNumber || phoneNumber.replace('+880', '').length < 10) {
+        alert('Please enter a valid phone number.');
+        return;
+      }
+
+      const response = await dispatch(handleSendOtp({phone_number: phoneNumber})).unwrap();
+      response.success && setNumberVerify(true);
+   } catch (error) {
+      console.log('handle send otp error: ', error);
+      
+    }
+  }
+
+  const handleVerifyNumber = async  (e) => {
+    e.preventDefault();
+    try {
+      const response = await dispatch(handleSubmitOtp({token: sendOtpToken, otp})).unwrap();
+      if(response.success)  {
+        setNumberVerify(false)
+        setIsVerified(true);
+        setOtp('');
+      };
+      
+    } catch (error) {
+      console.log('handle verify otp error', error);
+      
+    }
+
+    
+  }
 
 
 
@@ -350,9 +397,11 @@ const Profile = () => {
 
                       {/* Editable Phone Number Field */}
                       <div>
-                        <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">Phone Number</label>
+                        <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">
+                          Phone Number
+                        </label>
                         <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-                          {/* Country Code (non-editable) */}
+                          {/* Country Code */}
                           <select
                             id="country-code"
                             className="bg-gray-100 text-gray-700 font-medium px-2 sm:px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
@@ -362,22 +411,39 @@ const Profile = () => {
                             <option value="+880">+880</option>
                           </select>
 
-                          {/* Editable phone number */}
+                          {/* Phone Number Input */}
                           <input
                             type="tel"
                             id="phone"
                             name="phone_number"
                             placeholder="Phone Number"
+                            maxLength={10}
                             value={formData.phone_number.replace('+880', '')} // Remove country code for display
                             onChange={(e) => {
                               const phoneNumber = e.target.value;
                               const fullPhoneNumber = `+880${phoneNumber}`;
                               handleChange({ target: { name: 'phone_number', value: fullPhoneNumber } });
+                              setIsVerified(false);
                             }}
-                            className="w-full px-3 py-2 border-none focus:outline-none rounded-r-md"
+                            className="w-full px-3 py-2 border-none focus:outline-none"
                             required
-                            maxLength={10}
                           />
+
+                          {/* Verify Button */}
+                          {prevNumber !== formData.phone_number && 
+                            <button
+                              type="button"
+                              onClick={handleVerifyClick}
+                              disabled={isSendOtpLoading}
+                              className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 disabled:opacity-50"
+                              disabled={isVerify}
+                            >
+                              {isSendOtpLoading ? 'Sending...' : 
+                              
+                              isVerify? 'Verified': 
+                              'Verify'}
+                            </button>
+                          }
                         </div>
                       </div>
 
@@ -439,6 +505,64 @@ const Profile = () => {
                       </button>
                       </div>
                     </form>
+
+                    {/*number verify*/}
+                    {numberVerify && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-10">
+                            <div className="bg-white p-3 rounded-lg shadow-lg">
+                                <h3 className="text-lg font-semibold">Verify Number</h3>
+                                {/* Success Message */}
+                                <span className='text-green-500 text-sm'>{sendOtpMessage}</span>
+                                 { Array.isArray(isSendOtpError) ? 
+                                    <ErrorDisplay errors={isSendOtpError} /> :
+                                  <>
+                                  {isSendOtpError && <div className="text-center text-red-500 font-semibold py-4">
+                                    {isSendOtpError}.
+                                  </div>}
+                                  </>
+                                  }
+                                <form onSubmit={handleVerifyNumber}>
+                                  <div>
+                                    <label htmlFor="otp" className="block text-gray-700 font-medium mb-1">
+                                      OTP
+                                    </label>
+                                    <input
+                                      type="number"
+                                      id="otp"
+                                      name="otp"
+                                      value={otp}
+                                      onChange={(e)=> setOtp(e.target.value)}
+                                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    />
+                                  </div>
+                               
+                                <div className="mt-4 flex justify-end space-x-2">
+                                    <button
+                                        onClick={() => {
+                                          setNumberVerify(false)
+                                          setOtp(''); 
+                                        }}
+                                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className={`px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors transform duration-200 cursor-pointer ${
+                                          isSendOtpLoading ? 'cursor-wait' : 'hover:scale-105'
+                                        }`}
+                                        disabled={isSendOtpLoading}
+                                      
+                                      >
+                                      {isSendOtpLoading ? (
+                                          <Loader message="Progreccing" />
+                                        ) : (
+                                          "Submit"
+                                        )}
+                                    </button>
+                                </div>
+                                </form>
+                            </div>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
