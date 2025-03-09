@@ -23,10 +23,46 @@ const initialState = {
     touched: {},
     districts: [],
     upazilas: [],
-    isSendOtpLoading: false,
-    sendOtpMessage: '',
-    sendOtpToken: '',
-    isSendOtpError: null,
+
+    loading: {
+        phone: false,
+        email: false,
+    },
+    otpToken: {
+        phone: '',
+        email: '',
+    },
+    message: {
+        phone: '',
+        email: '',
+    },
+    verifyPopup: {
+        phone: false,
+        email: false,
+    },
+    verified: {
+        email: false,
+        phone: false,
+    },
+    verifyError: {
+        phone: null,
+        email: null,
+    },
+    otpSubmitLoading: {
+        email: false,
+        phone: false,
+    },
+    otpSubmitError: {
+        email: null,
+        phone: null,
+    },
+    previousValue: {
+        email: '',
+        phone: '',
+    },
+    otp: '',
+    infoEditing: false,
+    image: '',
 };
 
 //get profile
@@ -110,25 +146,25 @@ export const handleAddressDelete = createAsyncThunk('profile/handleAddressDelete
     }
 });
 
-export const handleSendOtp = createAsyncThunk('profile/handleSendOtp', async (formData, { rejectWithValue }) => {
+export const handleSendOtp = createAsyncThunk('profile/handleSendOtp', async ({ formData, field }, { rejectWithValue }) => {
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.post(`accounts/request-otp/`,formData, { section: "send-otp-verify"});
       console.log('send otp for verify response', response);
-      return  response?.data;
+      return { data: response?.data, field };
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
 });
 
-export const handleSubmitOtp = createAsyncThunk('profile/handleSubmitOtp', async (formData, { rejectWithValue }) => {
+export const handleSubmitOtp = createAsyncThunk('profile/handleSubmitOtp', async ({formData, field}, { rejectWithValue }) => {
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.post(`accounts/verify-otp-for-profile/`,formData, { section: "submit-otp"});
       console.log('submit otp response', response);
-      return  response?.data;
+      return { data: response?.data, field };
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -166,7 +202,28 @@ const profileSlice = createSlice({
             state.touched = {};
             state.districts = [];
             state.upazilas = [];
-        }, 
+        },
+        statusUpdateVerifyPopup: (state, action) => {
+            const {field} = action.payload;
+            state.verifyPopup[field] = false;
+        },
+        statusUpdateVerified: (state, action) => {
+            const {field} = action.payload;
+            state.verified[field] = false;
+        },
+        setOtp: (state, action) => {
+            state.otp = action.payload;
+        },
+        setInfoEditing: (state, action) => {
+            state.infoEditing = action.payload;
+        },
+        updatePreviousValue: (state, action) => {
+            const {field, value} = action.payload;
+            state.previousValue[field] = value;
+        },
+        setImage: (state, action) => {
+            state.image = action.payload;
+        },
     },
     extraReducers: (builder) =>{
         builder
@@ -193,6 +250,7 @@ const profileSlice = createSlice({
             state.updateLoading = false;
             state.updateError = null;
             state.profile = action?.payload;
+            state.infoEditing = false;
         })
         .addCase(handleProfileUpdate.rejected, (state, action)=>{
             state.updateLoading = false;
@@ -270,33 +328,54 @@ const profileSlice = createSlice({
         })
 
         //send otp
-        .addCase(handleSendOtp.pending, (state)=>{
-            state.isSendOtpLoading = true;
+        .addCase(handleSendOtp.pending, (state, action)=>{
+            const field = action.meta.arg.field; // 'phone' or 'email'
+            
+            state.loading[field] = true;
+            state.verifyError[field] = null; // Clear previous errors
+            
         })
         .addCase(handleSendOtp.fulfilled, (state, action)=>{
-            state.isSendOtpLoading = false;
-            state.isSendOtpError = null;
+            const field = action.meta.arg.field;
             
-            state.sendOtpMessage = action.payload?.message;
-            state.sendOtpToken = action.payload?.data?.token;
+            state.loading[field] = false;
+            state.message[field] = action.payload?.data?.message;
+            state.otpToken[field] = action.payload?.data?.data?.token;
+            state.verifyPopup[field] = true;
             
         })
         .addCase(handleSendOtp.rejected, (state, action)=>{
-            state.isSendOtpLoading = false;
-            state.isSendOtpError = action?.payload?.errors  || 'Something went wrong!';
+            const field = action.meta.arg.field;
+            const {errors, error } = action.payload;
+            
+            state.loading[field] = false;
+            state.verifyError[field] = errors || error?.message || 'Failed to send OTP';
         })
 
         //submit otp
-        .addCase(handleSubmitOtp.pending, (state)=>{
-            state.isSendOtpLoading = true;
+        .addCase(handleSubmitOtp.pending, (state, action)=>{
+            const field = action.meta.arg.field; // 'phone' or 'email'
+            
+            state.otpSubmitLoading[field] = true;
+            state.otpSubmitError[field] = null; // Clear previous errors
         })
         .addCase(handleSubmitOtp.fulfilled, (state, action)=>{
-            state.isSendOtpLoading = false;
-            state.isSendOtpError = null;
+            const field = action.meta.arg.field;
+            
+            state.otpSubmitLoading[field] = false;
+            state.verifyPopup[field] = false;
+            state.verified[field] = true;
+
+            //clear
+            state.message[field] = ''
+            state.otp = '';
         })
         .addCase(handleSubmitOtp.rejected, (state, action)=>{
-            state.isSendOtpLoading = false;
-            state.isSendOtpError = action?.payload?.errors  || 'Something went wrong!';
+            const field = action.meta.arg.field;
+            const {errors, error } = action.payload;
+            
+            state.otpSubmitLoading[field] = false;
+            state.otpSubmitError[field] = errors || error?.message || 'Failed to submit OTP';
         })
         
     }
@@ -307,6 +386,12 @@ setErrors,
   setDistricts,
   setUpazilas,
   resetAddressForm,
+  statusUpdateVerifyPopup,
+  statusUpdateVerified, 
+  setOtp,
+  setInfoEditing,
+  updatePreviousValue,
+  setImage,
 } = profileSlice.actions;
 
 export default profileSlice.reducer;

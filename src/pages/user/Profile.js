@@ -3,7 +3,7 @@ import { FaUserEdit, FaBoxOpen, FaMapMarkerAlt, FaCreditCard, FaLock, FaPlus, Fa
 import {useDispatch, useSelector} from 'react-redux';
 import {getUser} from '../../redux/slice/authSlice';
 import {useNavigate} from 'react-router-dom';
-import {handleAddressCreate, handleGetAddress, handleGetProfile, handleProfileUpdate, handleSendOtp, handleSubmitOtp, resetAddressForm, setDistricts, setErrors, setIsAddAddress, setUpazilas, updateAddressFormData, updateTouched} from '../../redux/slice/profileSlice';
+import {handleAddressCreate, handleGetAddress, handleGetProfile, handleProfileUpdate, handleSendOtp, handleSubmitOtp, resetAddressForm, setDistricts, setErrors, setImage, setInfoEditing, setIsAddAddress, setOtp, setUpazilas, statusUpdateVerified, statusUpdateVerifyPopup, updateAddressFormData, updatePreviousValue, updateTouched} from '../../redux/slice/profileSlice';
 import {ErrorDisplay, Loader, SuccessMessage} from '../../components/common';
 import {AddressItem} from '../../components/profile';
 import { WishList } from '../user';
@@ -15,21 +15,13 @@ const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const dispatch = useDispatch();
   const {isAuthenticated,user} = useSelector((state)=>state.auth);
-  const {isLoading, profile, error, adrressLoading,addresses, addressError, isAddAddress, addressFormData, touched, errors, districts,upazilas, updateLoading, updateError, isSendOtpLoading,
-    sendOtpMessage,
-    sendOtpToken,
-    isSendOtpError} = useSelector((state)=> state.profile);
+  const {isLoading, profile, error, adrressLoading,addresses, addressError, isAddAddress, addressFormData, touched, errors, districts,upazilas, updateLoading, updateError, loading, otpToken, message, verifyError, verifyPopup, verified, otpSubmitLoading, otpSubmitError, otp, infoEditing, previousValue, image} = useSelector((state)=> state.profile);
 
   const navigate = useNavigate();
   
 
-  const [isEditing, setIsEditing] = useState(false); // State to toggle edit mode
   const [formData, setFormData] = useState({}); // State to store form data
-  const [image, setImage] = useState(profile?.profile_picture || "");
-  const [numberVerify, setNumberVerify] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [isVerify, setIsVerified] = useState(false);
-  const [prevNumber, setPrevNumber] = useState('');
+
 
  
   
@@ -41,7 +33,7 @@ const Profile = () => {
   }, [dispatch, isAuthenticated, navigate]);
 
   useEffect(()=>{
-    setImage(profile?.profile_picture);
+    dispatch(setImage(profile?.profile_picture));
   }, [profile?.profile_picture]);
 
   // Debounced API call
@@ -63,9 +55,10 @@ const Profile = () => {
   }
 
   const handleShowInfoEdit = ()=>{
-    setIsEditing(true);
+    dispatch(setInfoEditing(true));
     setFormData({...profile});
-    setPrevNumber(profile?.phone_number);
+    dispatch(updatePreviousValue({field: 'phone', value: profile?.phone_number || ''}));
+    dispatch(updatePreviousValue({field: 'email', value: profile?.email || ''}));
   }
 
 
@@ -76,7 +69,7 @@ const Profile = () => {
   };
 
   // Handle form submissiontrue
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     try {
       e.preventDefault();
       // Create a new FormData instance
@@ -93,13 +86,16 @@ const Profile = () => {
       if (formDataObj.entries().next().done) {
         console.log('No changes detected.');
         return;
-      }else if(prevNumber !== formData.phone_number && !isVerify){
+      }else if(previousValue.email !== formData.email && !verified.email){
+        alert('Verify your email.');
+        return
+      }else if(previousValue.phone !== formData.phone_number && !verified.phone){
         alert('Verify your phone number.');
         return
       }
       
-      const resonse = await dispatch(handleProfileUpdate(formDataObj)).unwrap();
-      resonse && setIsEditing(false);
+      dispatch(handleProfileUpdate(formDataObj));
+      
     } catch (error) {
       console.log('handleSubmit errror: ', error);
       
@@ -202,45 +198,47 @@ const Profile = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result); // Preview image before upload
+        dispatch(setImage(reader.result)); // Preview image before upload
       };
       reader.readAsDataURL(file);
       debouncedAfterFileInput(file);
     }
   };
 
-  const handleVerifyClick = async ()=> {
+  const handleVerifyClick = (type)=> {
     try {
-      const phoneNumber = formData.phone_number;
-      if (!phoneNumber || phoneNumber.replace('+880', '').length < 10) {
-        alert('Please enter a valid phone number.');
-        return;
+      if (type === 'phone') {
+        const phoneNumber = formData.phone_number;
+        if (!phoneNumber || phoneNumber.replace('+880', '').length < 10) {
+          alert('Please enter a valid phone number.');
+          return;
+        }
+         dispatch(handleSendOtp({ formData: {phone_number: phoneNumber}, field: type}));
+         
+      } else if (type == 'email') {
+        const email = formData.email;
+        if (!email) {
+          alert('Please enter a valid Email.');
+          return;
+        }
+        dispatch(handleSendOtp({ formData: {email: email}, field: type }));
       }
-
-      const response = await dispatch(handleSendOtp({phone_number: phoneNumber})).unwrap();
-      response.success && setNumberVerify(true);
+      
    } catch (error) {
       console.log('handle send otp error: ', error);
       
     }
   }
 
-  const handleVerifyNumber = async  (e) => {
-    e.preventDefault();
+  const handleVerify = (type) => {
     try {
-      const response = await dispatch(handleSubmitOtp({token: sendOtpToken, otp})).unwrap();
-      if(response.success)  {
-        setNumberVerify(false)
-        setIsVerified(true);
-        setOtp('');
-      };
+      
+      dispatch(handleSubmitOtp({formData: {token: otpToken[type], otp}, field: type}));
       
     } catch (error) {
       console.log('handle verify otp error', error);
       
     }
-
-    
   }
 
 
@@ -294,16 +292,16 @@ const Profile = () => {
 
           {/* Content Section */}
           <div className="p-6">
-          {selectedTab === 'overview' && (
+          {selectedTab === 'overview' && 
               <div className="rounded-lg bg-gray-100 p-6 shadow-md flex flex-col md:flex-row gap-6">
                 {/* Profile Image Section */}
                 <div className="flex-shrink-0 relative w-32 h-32 mx-auto md:mx-0 rounded-full overflow-hidden bg-gray-200 shadow-md">
-                {/* Loader Overlay */}
-                  {isLoading && (
+                  {/* Loader Overlay */}
+                  {isLoading && 
                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
                       <FaSpinner className="animate-spin text-white text-3xl" />
                     </div>
-                  )}
+                  }
                   <img
                     src={image || "https://img.freepik.com/premium-photo/stylish-man-flat-vector-profile-picture-ai-generated_606187-310.jpg"}
                     alt="Profile"
@@ -323,14 +321,13 @@ const Profile = () => {
                   <label htmlFor="fileInput" className="absolute bottom-0 right-12 p-1 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors cursor-pointer">
                     <FaCamera />
                   </label>
-                  )}
                 </div>
 
                 {/* Personal Information Card */}
                 <div className="flex-1 bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                   <h3 className="font-semibold text-lg mb-4">Personal Information</h3>
                   
-                  {!isEditing ? (
+                  {!infoEditing ? (
                     <>
                       {profile?.name && <p className="mb-2"><strong>Name:</strong> {profile.name}</p>}
                       {profile?.username && <p className="mb-2"><strong>User Name:</strong> {profile?.username}</p>}
@@ -385,14 +382,36 @@ const Profile = () => {
                         <label htmlFor="email" className="block text-gray-700 font-medium mb-1">
                           Email
                         </label>
-                        <input
-                          type="email"
-                          id="email"
-                          name="email"
-                          value={formData.email || ''}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
+                        <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
+
+                          {/* Phone Number Input */}
+                          <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value={formData.email || ''}
+                            onChange={(e) => {
+                              handleChange({target:{name: 'email', value: e.target.value}});
+                              dispatch(statusUpdateVerified({field: 'email'}))
+                            }}
+                            className="w-full px-3 py-2 border-none focus:outline-none"
+                          />
+
+                          {/* Verify Button */}
+                          {previousValue.email !== formData.email && 
+                            <button
+                              type="button"
+                              onClick={()=>handleVerifyClick('email')}
+                              disabled={loading.email || verified.email}
+                              className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 disabled:opacity-50"
+                            >
+                              {loading.email ? 'Sending...' : 
+                              
+                              verified.email ? 'Verified': 
+                              'Verify'}
+                            </button>
+                          }
+                        </div>
                       </div>
 
                       {/* Editable Phone Number Field */}
@@ -423,24 +442,23 @@ const Profile = () => {
                               const phoneNumber = e.target.value;
                               const fullPhoneNumber = `+880${phoneNumber}`;
                               handleChange({ target: { name: 'phone_number', value: fullPhoneNumber } });
-                              setIsVerified(false);
+                              dispatch(statusUpdateVerified({field: 'phone'}))
                             }}
                             className="w-full px-3 py-2 border-none focus:outline-none"
                             required
                           />
 
                           {/* Verify Button */}
-                          {prevNumber !== formData.phone_number && 
+                          {previousValue.phone !== formData.phone_number &&
                             <button
                               type="button"
-                              onClick={handleVerifyClick}
-                              disabled={isSendOtpLoading}
+                              onClick={()=>handleVerifyClick('phone')}
+                              disabled={loading.phone || verified.phone}
                               className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 disabled:opacity-50"
-                              disabled={isVerify}
                             >
-                              {isSendOtpLoading ? 'Sending...' : 
+                              {loading.phone ? 'Sending...' : 
                               
-                              isVerify? 'Verified': 
+                              verified.phone ? 'Verified': 
                               'Verify'}
                             </button>
                           }
@@ -486,7 +504,7 @@ const Profile = () => {
                       <div className="flex justify-end space-x-2">
                         <button
                           type="button"
-                          onClick={() => setIsEditing(false)}
+                          onClick={() => dispatch(setInfoEditing(false))}
                           className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
                         >
                           Cancel
@@ -505,69 +523,77 @@ const Profile = () => {
                       </button>
                       </div>
                     </form>
-
                     {/*number verify*/}
-                    {numberVerify && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-10">
-                            <div className="bg-white p-3 rounded-lg shadow-lg">
-                                <h3 className="text-lg font-semibold">Verify Number</h3>
-                                {/* Success Message */}
-                                <span className='text-green-500 text-sm'>{sendOtpMessage}</span>
-                                 { Array.isArray(isSendOtpError) ? 
-                                    <ErrorDisplay errors={isSendOtpError} /> :
-                                  <>
-                                  {isSendOtpError && <div className="text-center text-red-500 font-semibold py-4">
-                                    {isSendOtpError}.
-                                  </div>}
-                                  </>
-                                  }
-                                <form onSubmit={handleVerifyNumber}>
-                                  <div>
-                                    <label htmlFor="otp" className="block text-gray-700 font-medium mb-1">
-                                      OTP
-                                    </label>
-                                    <input
-                                      type="number"
-                                      id="otp"
-                                      name="otp"
-                                      value={otp}
-                                      onChange={(e)=> setOtp(e.target.value)}
-                                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                    />
-                                  </div>
-                               
-                                <div className="mt-4 flex justify-end space-x-2">
-                                    <button
-                                        onClick={() => {
-                                          setNumberVerify(false)
-                                          setOtp(''); 
-                                        }}
-                                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button type="submit" className={`px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors transform duration-200 cursor-pointer ${
-                                          isSendOtpLoading ? 'cursor-wait' : 'hover:scale-105'
-                                        }`}
-                                        disabled={isSendOtpLoading}
-                                      
-                                      >
-                                      {isSendOtpLoading ? (
-                                          <Loader message="Progreccing" />
-                                        ) : (
-                                          "Submit"
-                                        )}
-                                    </button>
+                    {(verifyPopup.email || verifyPopup.phone) && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-10">
+                          <div className="bg-white p-3 rounded-lg shadow-lg">
+                              <h3 className="text-lg font-semibold">
+                              Verify {verifyPopup.email? 'Email': 'Number'}
+                              
+                              </h3>
+                              {/* Success Message */}
+                              <span className='text-green-500 text-sm'>{message.email || message.phone}</span>
+                                { Array.isArray((verifyError.email || verifyError.phone) || (otpSubmitError.email || otpSubmitError.phone)) ? 
+                                  <ErrorDisplay errors={(verifyError.email || verifyError.phone) || (otpSubmitError.email || otpSubmitError.phone)} /> :
+                                <>
+                                {(verifyError.email || verifyError.phone) || (otpSubmitError.email || otpSubmitError.phone) && <div className="text-center text-red-500 font-semibold py-4">
+                                  {(verifyError.email || verifyError.phone) || (otpSubmitError.email || otpSubmitError.phone)}.
+                                </div>}
+                                </>
+                                }
+                              <form onSubmit={(e)=>{
+                                e.preventDefault();
+                                handleVerify(verifyPopup.email ? 'email' : 'phone')
+                              } 
+                                
+                              }>
+                                <div>
+                                  <label htmlFor="otp" className="block text-gray-700 font-medium mb-1">
+                                    OTP
+                                  </label>
+                                  <input
+                                    type="number"
+                                    id="otp"
+                                    name="otp"
+                                    value={otp}
+                                    onChange={(e)=> dispatch(setOtp(e.target.value))}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    required
+                                  />
                                 </div>
-                                </form>
-                            </div>
-                        </div>
-                      )}
+                              
+                              <div className="mt-4 flex justify-end space-x-2">
+                                  <button
+                                      onClick={() => {
+                                        dispatch(statusUpdateVerifyPopup({field: verifyPopup.email? 'email' : 'phone'}))
+                                        setOtp(''); 
+                                      }}
+                                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                                  >
+                                      Cancel
+                                  </button>
+                                  <button type="submit" className={`px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors transform duration-200 cursor-pointer ${
+                                        otpSubmitLoading.email || otpSubmitLoading.phone ? 'cursor-wait' : 'hover:scale-105'
+                                      }`}
+                                      disabled={otpSubmitLoading.email || otpSubmitLoading.phone}
+                                    
+                                    >
+                                    {otpSubmitLoading.email || otpSubmitLoading.phone ? (
+                                        <Loader message="Progreccing" />
+                                      ) : (
+                                        "Submit"
+                                      )}
+                                  </button>
+                              </div>
+                              </form>
+                          </div>
+                      </div>
+                    )}
                     </>
                   )}
                 </div>
               </div>
-            )}
+            }
 
           
 
