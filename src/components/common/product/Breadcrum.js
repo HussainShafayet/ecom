@@ -13,7 +13,7 @@ const Breadcrumb = () => {
       <Link to="/" className="text-blue-500 hover:underline cursor-pointer">Home</Link>
       
       {/* Map through the path parts to create breadcrumb links */}
-      {pathParts.map((part, index) => {
+      {pathParts?.map((part, index) => {
         const pathTo = `/${pathParts.slice(0, index + 1).join('/')}`;
 
         // Check if this is the last item in the path

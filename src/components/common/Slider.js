@@ -48,7 +48,7 @@ const Slider = ({image_sliders}) => {
             className="h-full"
             onSlideChange={(swiper) => setCurrentSlide(swiper.realIndex + 1)}
         >
-            {image_sliders.map((slide) => (
+            {image_sliders?.map((slide) => (
                 <SwiperSlide key={slide.order}>
                     <Link to={getLink(slide)} target="_blank">
                         <div className="relative flex items-center justify-center text-center text-white h-full">

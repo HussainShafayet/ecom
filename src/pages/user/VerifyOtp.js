@@ -20,7 +20,7 @@ const VerifyOtp = () => {
    //set local cart items
    const setLocalCart = () => {
     const localCartItems = cartItems || [];
-    return localCartItems.map(item => ({
+    return localCartItems?.map(item => ({
         product_id: item.id,
         quantity: item.quantity,
         variant_id: item.variant_id,
@@ -29,7 +29,7 @@ const VerifyOtp = () => {
    //set local favorite items
    const setLocalFavorite = () => {
     const localWishItems = items || [];
-    return localWishItems.map(item => ({
+    return localWishItems?.map(item => ({
         product_id: item.id,
     }));
   };  

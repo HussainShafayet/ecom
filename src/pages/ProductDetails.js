@@ -305,7 +305,7 @@ useEffect(() => {
           {/* Product Image Gallery */}
           <div className="flex gap-2">
             <div className="flex flex-col space-y-1 h-full overflow-auto custom-scrollbar-custom">
-              {(selectedColor?selectedColor:product).media_files.map((image, index) => (
+              {(selectedColor?selectedColor:product)?.media_files?.map((image, index) => (
                 <div key={image.file_url}>
                   {image.file_type === 'image'? 
                     <img
@@ -408,7 +408,7 @@ useEffect(() => {
              <div className="mt-6 mb-3 flex items-center space-x-2">
                 <span className="font-semibold">Color:</span>
                 <div className="flex items-center gap-3">
-                  {product.colors.map((color, index) => (
+                  {product?.colors?.map((color, index) => (
                     <button
                       key={index}
                       onClick={() => handleSelectColor(color)}
@@ -441,7 +441,7 @@ useEffect(() => {
               <div className="flex items-center space-x-2 my-2">
                 <span className="font-semibold">Size:</span>
                 <div className="flex gap-3">
-                  {selectedColor?.sizes.map((variant, index) => (
+                  {selectedColor?.sizes?.map((variant, index) => (
                     <button
                       key={index}
                       onClick={() => handleSelectSize(variant)}
@@ -462,7 +462,7 @@ useEffect(() => {
               <div className="flex items-center space-x-2 my-2">
                 <span className="font-semibold">Size:</span>
                 <div className="flex gap-3">
-                  {product?.sizes.map((variant, index) => (
+                  {product?.sizes?.map((variant, index) => (
                     <button
                       key={index}
                       onClick={() => handleSelectSize(variant)}
@@ -738,7 +738,7 @@ useEffect(() => {
                 <li className="flex items-center">
                   <FaTag className="text-blue-500 mr-2" />
                   <span className="font-semibold mr-1">Category:</span> 
-                  {product?.categories.map((category, index) =>(
+                  {product?.categories?.map((category, index) =>(
                     <Link key={index} to={`/products/?category=${category.slug}`}  className={`text-blue-500 hover:text-blue-600 underline transition-all mr-1`} target='_blank'>
                       {category.name} 
                     </Link>
@@ -755,7 +755,7 @@ useEffect(() => {
                 <li className="flex items-center">
                   <FaTag className="text-blue-500 mr-2" />
                   <span className="font-semibold mr-1">Tags:</span> 
-                  {product?.tags.map((tag, index) =>(
+                  {product?.tags?.map((tag, index) =>(
                     <Link key={index} to={`/products/?tags=${tag.name}`}  className={`text-blue-500 hover:text-blue-600 underline transition-all mr-1`} target='_blank'>
                       {tag.name} 
                     </Link>
@@ -838,7 +838,7 @@ useEffect(() => {
         </div>:
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {products.map((product) => (
+          {products?.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

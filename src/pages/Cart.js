@@ -132,7 +132,7 @@ const Cart = () => {
                 
 
                 <div className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto scrollbar-custom">
-                  {cartItems.map((item, index) => (
+                  {cartItems?.map((item, index) => (
                     <div
                       key={index}
                       className="border rounded-lg shadow-sm hover:shadow-md transition-shadow p-2 bg-white flex flex-row items-center gap-3 relative w-full"
@@ -327,7 +327,7 @@ const Cart = () => {
             </div>:
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              {products.map((product) => (
+              {products?.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

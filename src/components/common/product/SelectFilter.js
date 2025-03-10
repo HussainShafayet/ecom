@@ -23,7 +23,7 @@ const SelectFilter = ({ items, type }) => {
 
   return (
       <ul className="space-y-1">
-        {items.map((item) => (
+        {items?.map((item) => (
           <li key={item.name || item.value || item} className="flex items-center">
           {type === 'colors' ? (
             <>

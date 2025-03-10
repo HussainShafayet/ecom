@@ -112,7 +112,7 @@ const OrderTracking = () => {
       <section>
         <h3 className="text-2xl font-semibold text-gray-800 mb-4 text-center">Order Status</h3>
         <div className="flex items-center space-x-4 overflow-x-auto md:justify-center">
-          {orderStatus.map((step, index) => (
+          {orderStatus?.map((step, index) => (
             <div key={index} className="flex flex-col items-center">
               <div className={`w-12 h-12 flex items-center justify-center rounded-full ${step.completed ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-500'}`}>
                 {step.icon}

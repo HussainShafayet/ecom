@@ -668,7 +668,7 @@ const Profile = () => {
                                 className={`border ${touched.area && errors.area ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                                 >
                                 <option value="">Select Area in</option>
-                                {dhakaCityData.map((area) => (
+                                {dhakaCityData?.map((area) => (
                                     <option key={area.id} value={area.name}>{area.name}</option>
                                 ))}
                                 </select>
@@ -688,7 +688,7 @@ const Profile = () => {
                                 className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                                 >
                                 <option value="">Select Division</option>
-                                {divisionsData.map((division) => (
+                                {divisionsData?.map((division) => (
                                     <option key={division.id} value={division.name}>{division.name}</option>
                                 ))}
                                 </select>
@@ -706,7 +706,7 @@ const Profile = () => {
                                 disabled={!addressFormData.division}
                                 >
                                 <option value="">Select District</option>
-                                {districts.map((district) => (
+                                {districts?.map((district) => (
                                     <option key={district.id} value={district.name}>{district.name}</option>
                                 ))}
                                 </select>
@@ -724,7 +724,7 @@ const Profile = () => {
                                 disabled={!addressFormData.district}
                                 >
                                 <option value="">Select Upazila/Thana</option>
-                                {upazilas.map((station) => (
+                                {upazilas?.map((station) => (
                                     <option key={station.id} value={station.name}>{station.name}</option>
                                 ))}
                                 </select>
@@ -778,7 +778,7 @@ const Profile = () => {
                 }
                 {addresses?.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                    {addresses.map((address) => (
+                    {addresses?.map((address) => (
                       <AddressItem key={address.id} address={address} />
                     ))}
                   </div>

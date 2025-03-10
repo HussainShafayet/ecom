@@ -123,7 +123,7 @@ const HeroSection = () => {
                   <img
                     src={blurImage}
                     alt="Loading"
-                    className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
+                    className="absolute inset-0 w-full h-full rounded-md mb-2 animate-pulse object-cover"
                   />
                 )}
               </Link>
@@ -147,7 +147,7 @@ const HeroSection = () => {
                   <img
                     src={blurImage}
                     alt="Loading"
-                    className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
+                    className="absolute inset-0 w-full h-full rounded-md mb-2 animate-pulse object-cover"
                   />
                 )}
               </Link>

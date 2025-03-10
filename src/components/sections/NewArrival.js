@@ -103,7 +103,7 @@ const NewArrival = ({forRoute}) => {
         </div>
         }
 
-        {products.length != 0  &&
+        {products?.length != 0  &&
         <div className='my-5'>
           <h2 className="text-3xl font-bold">New Arrival</h2>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -125,7 +125,7 @@ const NewArrival = ({forRoute}) => {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {products.map((product) => (
+            {products?.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -134,7 +134,7 @@ const NewArrival = ({forRoute}) => {
         }
 
 
-        {products.length != 0 &&
+        {products?.length != 0 &&
           <>
           {forRoute && 
             <div className='my-5'>

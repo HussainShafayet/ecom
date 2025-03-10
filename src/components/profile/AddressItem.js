@@ -241,7 +241,7 @@ const AddressItem = ({ address, onUpdate }) => {
                     className={`border ${touched.area && errors.area ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                     >
                     <option value="">Select Area in</option>
-                    {dhakaCityData.map((area) => (
+                    {dhakaCityData?.map((area) => (
                         <option key={area.id} value={area.name}>{area.name}</option>
                     ))}
                     </select>
@@ -261,7 +261,7 @@ const AddressItem = ({ address, onUpdate }) => {
                     className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                     >
                     <option value="">Select Division</option>
-                    {divisionsData.map((division) => (
+                    {divisionsData?.map((division) => (
                         <option key={division.id} value={division.name}>{division.name}</option>
                     ))}
                     </select>
@@ -279,7 +279,7 @@ const AddressItem = ({ address, onUpdate }) => {
                     disabled={!editedAddress.division}
                     >
                     <option value="">Select District</option>
-                    {districts.map((district) => (
+                    {districts?.map((district) => (
                         <option key={district.id} value={district.name}>{district.name}</option>
                     ))}
                     </select>
@@ -297,7 +297,7 @@ const AddressItem = ({ address, onUpdate }) => {
                     disabled={!editedAddress.district}
                     >
                     <option value="">Select Upazila/Thana</option>
-                    {upazillas.map((station) => (
+                    {upazillas?.map((station) => (
                         <option key={station.id} value={station.name}>{station.name}</option>
                     ))}
                     </select>

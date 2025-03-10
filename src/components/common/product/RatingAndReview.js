@@ -96,7 +96,7 @@ const RatingAndReview = ({ product }) => {
       {/* Existing Reviews */}
       {reviews.length > 0 ? (
         <div className="space-y-6 mb-8">
-          {reviews.map((review, index) => (
+          {reviews?.map((review, index) => (
             <div
               key={index}
               className="p-4 border border-gray-200 rounded-lg bg-white transition-transform"
@@ -139,7 +139,7 @@ const RatingAndReview = ({ product }) => {
               {/* Review Text */}
               <p className="text-gray-700 text-sm">{review.comment}</p>
               <div className="flex overflow-x-auto space-x-4 p-2">
-                {review.media_urls.map((file, index) => (
+                {review?.media_urls?.map((file, index) => (
                   <div key={index} className="flex-none w-36 sm:w-44 md:w-52 h-36 sm:h-44 md:h-52">
                     {getFileType(file.file) === 'image' ? (
                       <img
@@ -219,7 +219,7 @@ const RatingAndReview = ({ product }) => {
             {reviewFormData.media.length > 0 && (
               
                 <div className="flex overflow-x-auto space-x-4 mt-2 p-2">
-                  {reviewFormData.media.map((file, index) => (
+                  {reviewFormData?.media?.map((file, index) => (
                     <div key={index} className="flex-none w-24 h-24">
                       {file instanceof Blob  ? (
                         file.type.startsWith("image/") ? (

@@ -103,7 +103,7 @@ const FlashSale = ({forRoute}) => {
         }
        
          
-          {products.length != 0 &&
+          {products?.length != 0 &&
           <div className='my-5'>
             <h2 className="text-3xl font-bold">Flash Sale</h2>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -121,7 +121,7 @@ const FlashSale = ({forRoute}) => {
               }
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              {products.map((product) => (
+              {products?.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -130,7 +130,7 @@ const FlashSale = ({forRoute}) => {
         
         {forRoute && 
           <>
-          {products.length != 0  &&
+          {products?.length != 0  &&
             <div className='my-5'>
               <h2 className="text-3xl font-bold">Recomendent Products</h2>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -149,7 +149,7 @@ const FlashSale = ({forRoute}) => {
               
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                {products.map((product) => (
+                {products?.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>

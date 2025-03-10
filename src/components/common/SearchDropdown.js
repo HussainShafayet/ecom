@@ -97,7 +97,7 @@ const SearchDropdown = () => {
           </div>:
           <>
             {suggestions.length > 0 ? (
-              suggestions.map((item, index) => (
+              suggestions?.map((item, index) => (
               <Link to={`/products?search=${item}`} key={item}>
                 <li
                   className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${

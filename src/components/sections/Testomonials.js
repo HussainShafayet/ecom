@@ -51,7 +51,7 @@ const Testimonials = () => {
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {reviews.map((review) => (
+        {reviews?.map((review) => (
           <div key={review.id} className="p-6 bg-white shadow-lg rounded-lg hover:shadow-xl transition-shadow duration-300">
             
             {/* Customer Photo */}

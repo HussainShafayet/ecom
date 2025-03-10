@@ -129,7 +129,7 @@ const Categories = () => {
                 </div>:
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                    {flash_sale.map((category) => (
+                    {flash_sale?.map((category) => (
                         <>
                         {/* Discount Badge */}
                         {category.has_discount && (
@@ -182,7 +182,7 @@ const Categories = () => {
             </div>:
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                {new_arrival.map((category) => (
+                {new_arrival?.map((category) => (
                     <>
                     {/* Discount Badge */}
                     {category.has_discount && (
@@ -235,7 +235,7 @@ const Categories = () => {
             </div>:
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                {best_selling.map((category) => (
+                {best_selling?.map((category) => (
                     <>
                     {/* Discount Badge */}
                     {category.has_discount && (
@@ -288,7 +288,7 @@ const Categories = () => {
                 </div>:
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                    {featured.map((category) => (
+                    {featured?.map((category) => (
                         <div key={category.id}>
                         {/* Discount Badge */}
                         {category.has_discount && (

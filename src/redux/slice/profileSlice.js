@@ -298,7 +298,7 @@ const profileSlice = createSlice({
             state.addressError =  null;
             const updateObj = action.payload;
             
-            state.addresses = state.addresses.map((item)=>{
+            state.addresses = state.addresses?.map((item)=>{
                 return item.id === updateObj.id ? ({...item, ...updateObj}) : item
             });
             

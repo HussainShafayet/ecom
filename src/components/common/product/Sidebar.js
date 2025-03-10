@@ -57,7 +57,7 @@ const Sidebar = ({ onClose }) => {
         {/* Render Children */}
         {isExpanded && category.children.length > 0 && (
           <ul className="pl-4 border-l border-gray-300 space-y-1">
-            {category.children.map((child) => (
+            {category?.children?.map((child) => (
               <CategoryItem key={child.slug} category={child} />
             ))}
           </ul>
@@ -175,7 +175,7 @@ const Sidebar = ({ onClose }) => {
           ) : (
             <ul className="space-y-1 max-h-44 overflow-y-auto">
               {categories &&
-                categories.map((category) => (
+                categories?.map((category) => (
                   <CategoryItem key={category.slug} category={category} />
                 ))}
             </ul>
@@ -216,7 +216,7 @@ const Sidebar = ({ onClose }) => {
         {/* Discount */}
         <Accordion title="Discounts" icon={<FaFilter className="text-red-500" />}>
           <ul className="space-y-1">
-            {discounts.map((discount, index) => (
+            {discounts?.map((discount, index) => (
               <li key={index} className="flex items-center">
                 <input
                   type="radio"

@@ -207,7 +207,7 @@ const Checkout = () => {
         "delivery_charge": shippingCost,
         "total_price": grandTotal.toFixed(2),
       }
-      cartItems.map((cart)=>{
+      cartItems?.map((cart)=>{
         checkoutBody.items.push({
             "product_id": cart.id,
             "variant_id": cart.variant_id,
@@ -345,7 +345,7 @@ const Checkout = () => {
           ) :
           <div className="bg-gray-100 rounded-lg shadow-md sticky top-20">
             <div className="max-h-[60vh] overflow-y-auto scrollbar-custom p-4 sm:p-2">
-              {cartItems.map((item, index) => (
+              {cartItems?.map((item, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between gap-2 mb-2 relative border p-1"
@@ -608,7 +608,7 @@ const Checkout = () => {
                     className={`border ${touched.shipping_area && errors.shipping_area ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                   >
                     <option value="">Select Area in Dhaka City</option>
-                    {dhakaCityData.map((area) => (
+                    {dhakaCityData?.map((area) => (
                       <option key={area.id} value={area.name}>{area.name}</option>
                     ))}
                   </select>
@@ -630,7 +630,7 @@ const Checkout = () => {
                     className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                   >
                     <option value="">Select Division</option>
-                    {divisionsData.map((division) => (
+                    {divisionsData?.map((division) => (
                       <option key={division.id} value={division.name}>{division.name}</option>
                     ))}
                   </select>
@@ -648,7 +648,7 @@ const Checkout = () => {
                     disabled={!formData.division}
                   >
                     <option value="">Select District</option>
-                    {districts.map((district) => (
+                    {districts?.map((district) => (
                       <option key={district.id} value={district.name}>{district.name}</option>
                     ))}
                   </select>
@@ -666,7 +666,7 @@ const Checkout = () => {
                     disabled={!formData.district}
                   >
                     <option value="">Select Upazila/Thana</option>
-                    {upazilas.map((station) => (
+                    {upazilas?.map((station) => (
                       <option key={station.id} value={station.name}>{station.name}</option>
                     ))}
                   </select>
