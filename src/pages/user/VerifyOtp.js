@@ -109,14 +109,14 @@ const VerifyOtp = () => {
             type="text"
             id="otp"
             name="otp"
-            value={formData.otp}
+            value={formData?.otp}
             onChange={handleChange}
             maxLength="6"
             className={`w-full px-3 py-2 border rounded focus:outline-none ${
-              errors.otp ? "border-red-500" : "border-gray-300"
+              errors?.otp ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.otp && <p className="text-red-500 text-sm">{errors.otp}</p>}
+          {errors?.otp && <p className="text-red-500 text-sm">{errors?.otp}</p>}
         </div>
         <div className="text-end mb-4">
             <span className="text-blue-500 hover:text-blue-600 underline transition-all cursor-pointer" onClick={handleResendOtp}>Resend OTP</span>

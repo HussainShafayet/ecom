@@ -22,10 +22,10 @@ const Navbar = () => {
   // Close menu if clicked outside
   useEffect(() => {
       const handleClickOutside = (event) => {
-      if (authRef.current && !authRef.current.contains(event.target)) {
+      if (authRef?.current && !authRef?.current.contains(event.target)) {
           setAuthMenuOpen(false);
       }
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
+      if (profileRef?.current && !profileRef?.current.contains(event.target)) {
           setProfileMenuOpen(false);
       }
       };

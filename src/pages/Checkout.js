@@ -25,12 +25,6 @@ import {Loader} from '../components/common';
 
  
 
-//const locations = {
-//  "Dhaka": { "Dhaka": ["Dhanmondi", "Gulshan", "Banani", "Uttara"], "Gazipur": ["Sreepur", "Kaliakoir", "Tongi"] },
-//  "Chittagong": { "Chittagong": ["Pahartali", "Kotwali", "Halishahar"], "Cox's Bazar": ["Cox's Bazar Sadar", "Teknaf"] },
-//  "Sylhet": { "Sylhet": ["Sylhet Sadar", "Beanibazar"], "Habiganj": ["Habiganj Sadar", "Madhabpur"] },
-//};
-
 const Checkout = () => {
   const dispatch = useDispatch();
   const {cartLoading, cartItems, cartError} = useSelector((state)=>state.cart);
@@ -79,14 +73,14 @@ const Checkout = () => {
     debounce((product, difference) => {
       if (difference !== 0) {
       const cartBody = {};
-      cartBody.product_id = product.id;
+      cartBody.product_id = product?.id;
       cartBody.quantity = Math.abs(difference);
-      cartBody.variant_id = product.variant_id;
+      cartBody.variant_id = product?.variant_id;
       cartBody.action = difference < 0 ? 'decrease' : 'increase';
       dispatch(handleAddtoCart(cartBody));
       setOriginalQuantities((prev) => ({
         ...prev,
-        [product.id]: null,
+        [product?.id]: null,
       }));
       }
     }, 1000),
@@ -100,7 +94,7 @@ const Checkout = () => {
     dispatch(updateFormData({ [name]: value }));
 
     // Validate field on change and clear error if valid
-    if (value.trim()) {
+    if (value?.trim()) {
       dispatch(setErrors({ ...errors, [name]: '' }));
     }
     
@@ -209,10 +203,10 @@ const Checkout = () => {
       }
       cartItems?.map((cart)=>{
         checkoutBody.items.push({
-            "product_id": cart.id,
-            "variant_id": cart.variant_id,
-            "quantity": cart.quantity,
-            "price": cart.has_discount? cart.discount_price : cart.base_price,
+            "product_id": cart?.id,
+            "variant_id": cart?.variant_id,
+            "quantity": cart?.quantity,
+            "price": cart?.has_discount? cart?.discount_price : cart?.base_price,
         })
       });
 
@@ -245,9 +239,9 @@ const Checkout = () => {
   };
 
   const getLocationType = ()=>{
-    if (formData.shipping_type === 'inside_dhaka') {
+    if (formData?.shipping_type === 'inside_dhaka') {
       return 'md:grid-cols-2'
-    }else if(formData.shipping_type === 'outside_dhaka'){
+    }else if(formData?.shipping_type === 'outside_dhaka'){
       return 'md:grid-cols-4 sm:grid-cols-2'
     } else {
       return 'grid-cols-1'
@@ -256,7 +250,7 @@ const Checkout = () => {
 
   const totalPrice = useSelector(selectTotalPrice);
   
-  const shippingCost = formData.shipping_type && delivery_charges[formData.shipping_type] ? delivery_charges[formData.shipping_type] : 0;
+  const shippingCost = formData?.shipping_type && delivery_charges[formData.shipping_type] ? delivery_charges[formData.shipping_type] : 0;
   
   const grandTotal = totalPrice + shippingCost;
 
@@ -267,14 +261,14 @@ const Checkout = () => {
      } else {
         setOriginalQuantities((prev) => ({
          ...prev,
-         [id]: item.quantity,
+         [id]: item?.quantity,
        }));
-       prevQuantity = item.quantity;
+       prevQuantity = item?.quantity;
      }
      const difference = newQuantity - prevQuantity; // Calculate actual difference
      
      // Update UI immediately
-     dispatch(updateQuantity({ id, quantity: newQuantity, variant_id: item.variant_id }));
+     dispatch(updateQuantity({ id, quantity: newQuantity, variant_id: item?.variant_id }));
  
      // Only send API request if the quantity actually changed
      if (isAuthenticated && difference !== 0) {
@@ -283,7 +277,7 @@ const Checkout = () => {
  };
 
   const handleRemoveItem = (item) =>{
-    dispatch(handleRemovetoCart({product_id: item.id}));
+    dispatch(handleRemovetoCart({product_id: item?.id}));
     dispatch(removeFromCart(item));
   }
 
@@ -351,10 +345,10 @@ const Checkout = () => {
                   className="flex items-center justify-between gap-2 mb-2 relative border p-1"
                 >
                   {/* Image */}
-                  <Link to={`/products/detail/${item.slug}`}>
+                  <Link to={`/products/detail/${item?.slug}`}>
                     <img
-                      src={item.image}
-                      alt={item.name}
+                      src={item?.image}
+                      alt={item?.name}
                       className="w-20 h-20 object-contain rounded-md flex-shrink-0"
                     />
                   </Link>
@@ -364,33 +358,33 @@ const Checkout = () => {
                   <div className="flex-grow min-w-0">
                     <h2
                       className="font-semibold text-sm truncate"
-                      title={item.name} // Tooltip for full name
+                      title={item?.name} // Tooltip for full name
                     >
-                     <Link to={`/products/detail/${item.slug}`} className="hover:text-blue-500 transition-colors duration-200">
-                        {item.name}
+                     <Link to={`/products/detail/${item?.slug}`} className="hover:text-blue-500 transition-colors duration-200">
+                        {item?.name}
                       </Link>
                     </h2>
                     <p className="text-gray-500 text-sm truncate mb-2">
-                      {item.brand_name && <span>Brand: {item.brand_name} • </span>}
-                      {item.color_name && <span>Color: {item.color_name} • </span>}
+                      {item?.brand_name && <span>Brand: {item?.brand_name} • </span>}
+                      {item?.color_name && <span>Color: {item?.color_name} • </span>}
                       
-                      {item.size_name && <span>Size: {item.size_name} • </span>}
-                      {item.color_name && <span>Avg Rating: {item.avg_rating}</span>}
+                      {item?.size_name && <span>Size: {item?.size_name} • </span>}
+                      {item?.color_name && <span>Avg Rating: {item?.avg_rating}</span>}
                     </p>
                   
                     <div className="flex items-center gap-3 mt-1">
                       {/* Decrease Quantity / Remove Button */}
-                      {item.quantity === 1 ? (
+                      {item?.quantity === 1 ? (
                         <button
                           className="bg-red-500 text-white p-[0.5rem] rounded-full hover:bg-red-700 transition duration-200 shadow-md flex justify-center items-center"
-                          onClick={() => setConfirmDelete({ id: item.id, variant_id: item.variant_id })}
+                          onClick={() => setConfirmDelete({ id: item?.id, variant_id: item?.variant_id })}
                         >
                           <FaTrash />
                         </button>
                       ) : (
                         <button
-                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1, item)}
-                          disabled={item.quantity <= 1}
+                          onClick={() => handleUpdateQuantity(item?.id, item?.quantity - 1, item)}
+                          disabled={item?.quantity <= 1}
                           className="p-[0.2rem] w-8 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
                         >
                           -
@@ -400,10 +394,10 @@ const Checkout = () => {
                       {/* Quantity Input Field */}
                       <input
                         type="number"
-                        value={item.quantity}
+                        value={item?.quantity}
                         onChange={(e) => {
                           const newValue = parseInt(e.target.value, 10) || 1;
-                          handleUpdateQuantity(item.id, newValue, item);
+                          handleUpdateQuantity(item?.id, newValue, item);
                         }}
                         className="w-12 text-center border border-gray-300 rounded-md py-[0.2rem]"
                         min="1"
@@ -411,7 +405,7 @@ const Checkout = () => {
 
                       {/* Increase Quantity Button */}
                       <button
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item)}
+                        onClick={() => handleUpdateQuantity(item?.id, item?.quantity + 1, item)}
                         className="w-8 p-[0.2rem] border border-gray-300 rounded-md text-gray-700 hover:bg-gray-200 transition flex justify-center items-center"
                       >
                         +
@@ -422,15 +416,15 @@ const Checkout = () => {
 
                   {/* Price */}
                   <div className="text-sm font-semibold text-right flex-shrink-0">
-                    {item.has_discount
-                      ? (item.discount_price * item.quantity).toFixed(2)
-                      : (item.base_price * item.quantity).toFixed(2)}
+                    {item?.has_discount
+                      ? (item?.discount_price * item?.quantity).toFixed(2)
+                      : (item?.base_price * item?.quantity).toFixed(2)}
                   </div>
 
 
 
                   {/* Confirm Delete Warning in Card */}
-                  {confirmDelete?.id === item.id && confirmDelete?.variant_id === item.variant_id && (
+                  {confirmDelete?.id === item?.id && confirmDelete?.variant_id === item.variant_id && (
                       <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
                         <div className="text-center">
                           <p className="text-gray-800 mb-2">Are you sure you want to remove this item?</p>
@@ -468,7 +462,7 @@ const Checkout = () => {
                 <span>Shipping</span>
                 <span>{shippingCost.toFixed(2)}</span>
               </div>
-              {errors.delivery_charge && <p className="text-red-500 text-xs mt-1">{errors.delivery_charge}</p>}
+              {errors?.delivery_charge && <p className="text-red-500 text-xs mt-1">{errors?.delivery_charge}</p>}
               <hr className="my-3" />
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
@@ -506,16 +500,16 @@ const Checkout = () => {
                   type="text"
                   name="name"
                   placeholder="Full Name"
-                  value={formData.name}
+                  value={formData?.name}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   required
-                  className={`border ${touched.name && errors.name ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                  className={`border ${touched?.name && errors?.name ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 />
-                {touched.name && errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                {touched?.name && errors?.name && <p className="text-red-500 text-xs mt-1">{errors?.name}</p>}
               </div>
               <div>
-               <div className={`flex items-center border ${touched.phone_number && errors.phone_number ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70`}>
+               <div className={`flex items-center border ${touched.phone_number && errors?.phone_number ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70`}>
                 {/*<FaPhone className="text-gray-400 m-3" title="Phone" />*/}
                 <select
                   id="country-code"
@@ -529,7 +523,7 @@ const Checkout = () => {
                   id="phone"
                   name="phone_number"
                   placeholder="Phone number"
-                  value={formData.phone_number}
+                  value={formData?.phone_number}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   maxLength={10}
@@ -538,7 +532,7 @@ const Checkout = () => {
                 />
                 
               </div>
-              {touched.phone_number && errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
+              {touched?.phone_number && errors?.phone_number && <p className="text-red-500 text-xs mt-1">{errors?.phone_number}</p>}
               </div>
              
             </div>
@@ -547,7 +541,7 @@ const Checkout = () => {
                   type="email"
                   name="email"
                   placeholder="Email Address (optional)"
-                  value={formData.email}
+                  value={formData?.email}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   className={`border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
@@ -572,7 +566,7 @@ const Checkout = () => {
                 type="text"
                 name="title"
                 placeholder="Home or office"
-                value={formData.title}
+                value={formData?.title}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 className={`border border-gray-300 p-2 rounded-lg w-full`}
@@ -583,7 +577,7 @@ const Checkout = () => {
               <div>
                 <select
                   name="shipping_type"
-                  value={formData.shipping_type || ''}
+                  value={formData?.shipping_type || ''}
                   onChange={handleLocationType}
                   onBlur={handleBlur}
                   required
@@ -593,84 +587,84 @@ const Checkout = () => {
                   <option value="inside_dhaka">In Dhaka City</option>
                   <option value="outside_dhaka">Out of Dhaka City</option>
                 </select>
-                {touched.shipping_type && errors.shipping_type && <p className="text-red-500 text-xs mt-1">{errors.shipping_type}</p>}
+                {touched?.shipping_type && errors?.shipping_type && <p className="text-red-500 text-xs mt-1">{errors?.shipping_type}</p>}
               </div>
 
-              {formData.shipping_type === 'inside_dhaka' && (
+              {formData?.shipping_type === 'inside_dhaka' && (
               <div className="grid grid-cols-1 gap-3">
                 <div className="w-full">
                   <select
                     name="shipping_area"
-                    value={formData.shipping_area || ''}
+                    value={formData?.shipping_area || ''}
                     onChange={handleDhakaArea}
                     onBlur={handleBlur}
                     required
-                    className={`border ${touched.shipping_area && errors.shipping_area ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                    className={`border ${touched?.shipping_area && errors?.shipping_area ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                   >
                     <option value="">Select Area in Dhaka City</option>
                     {dhakaCityData?.map((area) => (
-                      <option key={area.id} value={area.name}>{area.name}</option>
+                      <option key={area?.id} value={area?.name}>{area?.name}</option>
                     ))}
                   </select>
-                  {touched.shipping_area && errors.shipping_area && <p className="text-red-500 text-xs mt-1">{errors.shipping_area}</p>}
+                  {touched?.shipping_area && errors?.shipping_area && <p className="text-red-500 text-xs mt-1">{errors?.shipping_area}</p>}
                 </div>
               </div>
             )}
              
            
-            {formData.shipping_type === 'outside_dhaka' && (
+            {formData?.shipping_type === 'outside_dhaka' && (
               <>
                 <div>
                   <select
                     name="division"
-                    value={formData.division || ''}
+                    value={formData?.division || ''}
                     onChange={handleDivisionChange}
                     onBlur={handleBlur}
                     required
-                    className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                    className={`border ${touched?.division && errors?.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                   >
                     <option value="">Select Division</option>
                     {divisionsData?.map((division) => (
-                      <option key={division.id} value={division.name}>{division.name}</option>
+                      <option key={division?.id} value={division?.name}>{division?.name}</option>
                     ))}
                   </select>
-                  {touched.division && errors.division && <p className="text-red-500 text-xs mt-1">{errors.division}</p>}
+                  {touched?.division && errors?.division && <p className="text-red-500 text-xs mt-1">{errors?.division}</p>}
                 </div>
 
                 <div>
                   <select
                     name="district"
-                    value={formData.district || ''}
+                    value={formData?.district || ''}
                     onChange={handleDistrictChange}
                     onBlur={handleBlur}
                     required
-                    className={`border ${touched.district && errors.district ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                    className={`border ${touched?.district && errors?.district ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                     disabled={!formData.division}
                   >
                     <option value="">Select District</option>
                     {districts?.map((district) => (
-                      <option key={district.id} value={district.name}>{district.name}</option>
+                      <option key={district?.id} value={district?.name}>{district?.name}</option>
                     ))}
                   </select>
-                  {touched.district && errors.district && <p className="text-red-500 text-xs mt-1">{errors.district}</p>}
+                  {touched?.district && errors?.district && <p className="text-red-500 text-xs mt-1">{errors?.district}</p>}
                 </div>
 
                 <div>
                   <select
                     name="upazila"
-                    value={formData.upazila || ''}
+                    value={formData?.upazila || ''}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     required
-                    className={`border ${touched.upazila && errors.upazila ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                    disabled={!formData.district}
+                    className={`border ${touched?.upazila && errors?.upazila ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                    disabled={!formData?.district}
                   >
                     <option value="">Select Upazila/Thana</option>
                     {upazilas?.map((station) => (
-                      <option key={station.id} value={station.name}>{station.name}</option>
+                      <option key={station?.id} value={station?.name}>{station?.name}</option>
                     ))}
                   </select>
-                  {touched.upazila && errors.upazila && <p className="text-red-500 text-xs mt-1">{errors.upazila}</p>}
+                  {touched?.upazila && errors?.upazila && <p className="text-red-500 text-xs mt-1">{errors?.upazila}</p>}
                 </div>
               </>
             )}
@@ -681,13 +675,13 @@ const Checkout = () => {
                 type="text"
                 name="address"
                 placeholder="Delivery Address"
-                value={formData.address}
+                value={formData?.address}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 required
-                className={`border ${touched.address && errors.address ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                className={`border ${touched?.address && errors?.address ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
               />
-              {touched.address && errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
+              {touched?.address && errors?.address && <p className="text-red-500 text-xs mt-1">{errors?.address}</p>}
             </div>
           </div>
 

@@ -242,7 +242,7 @@ const Products = ({scrollContainerRef}) => {
           {/* Product List Section (Right) */}
 
           <InfiniteScroll
-              dataLength={products.length}
+              dataLength={products?.length}
               next={fetchMoreProducts}
               hasMore={hasMore}
               loader={<div className="text-center">Loading more products...</div>}

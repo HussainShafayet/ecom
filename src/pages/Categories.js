@@ -32,13 +32,13 @@ const Categories = () => {
     //}
 
     const getLink = (item)=>{
-        switch (item.type) {
+        switch (item?.type) {
             case 'product':
-                return `/products/detail/${item.link}`
+                return `/products/detail/${item?.link}`
             case 'category':
-                return `/products/?category=${item.link}`
+                return `/products/?category=${item?.link}`
             default:
-                return item.external_link;
+                return item?.external_link;
         }
     }
   
@@ -88,7 +88,7 @@ const Categories = () => {
             }
             {right_banner?.media_type === 'video' && 
                 <div className='relative h-full'>
-                <Link to={getLink(right_banner)} target='_blank' className='absolute right-2 top-2 z-10 text-blue-500 hover:underline text:2x'>{right_banner.caption?right_banner.caption :'Click'}</Link>
+                <Link to={getLink(right_banner)} target='_blank' className='absolute right-2 top-2 z-10 text-blue-500 hover:underline text:2x'>{right_banner?.caption?right_banner?.caption :'Click'}</Link>
                 {/* Video */}
                 <video
                     src={right_banner?.media}
@@ -132,20 +132,20 @@ const Categories = () => {
                     {flash_sale?.map((category) => (
                         <>
                         {/* Discount Badge */}
-                        {category.has_discount && (
+                        {category?.has_discount && (
                         <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                            {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
+                            {category?.discount_amount}{category?.discount_type == 'percentage'?'%':'৳'} OFF
                         </span>
                         )}
-                        <Link to={`/products/?category=${category.slug}`} key={category.id} target='_blank'>
+                        <Link to={`/products/?category=${category?.slug}`} key={category?.id} target='_blank'>
                         <div className="relative group cursor-pointer min-w-[150px]">
                             <img
-                            src={category.image}
-                            alt={category.name}
+                            src={category?.image}
+                            alt={category?.name}
                             className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
                             />
                             <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-lg font-semibold">{category.name}</span>
+                            <span className="text-lg font-semibold">{category?.name}</span>
                             </div>
                         </div>
                         </Link>
@@ -177,7 +177,7 @@ const Categories = () => {
     
             {/* Categories Container */}
             
-            {new_arrival.length === 0  ? <div className='text-center'>
+            {new_arrival?.length === 0  ? <div className='text-center'>
                 <span>Not found</span>
             </div>:
 
@@ -185,20 +185,20 @@ const Categories = () => {
                 {new_arrival?.map((category) => (
                     <>
                     {/* Discount Badge */}
-                    {category.has_discount && (
+                    {category?.has_discount && (
                     <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                        {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
+                        {category?.discount_amount}{category?.discount_type == 'percentage'?'%':'৳'} OFF
                     </span>
                     )}
-                    <Link to={`/products/?category=${category.slug}`} key={category.id} target='_blank'>
+                    <Link to={`/products/?category=${category?.slug}`} key={category?.id} target='_blank'>
                     <div className="relative group cursor-pointer min-w-[150px]">
                         <img
-                        src={category.image}
-                        alt={category.name}
+                        src={category?.image}
+                        alt={category?.name}
                         className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-lg font-semibold">{category.name}</span>
+                        <span className="text-lg font-semibold">{category?.name}</span>
                         </div>
                     </div>
                     </Link>
@@ -230,7 +230,7 @@ const Categories = () => {
     
             {/* Categories Container */}
             
-            {best_selling.length === 0  ? <div className='text-center'>
+            {best_selling?.length === 0  ? <div className='text-center'>
                 <span>Not found</span>
             </div>:
 
@@ -238,20 +238,20 @@ const Categories = () => {
                 {best_selling?.map((category) => (
                     <>
                     {/* Discount Badge */}
-                    {category.has_discount && (
+                    {category?.has_discount && (
                     <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                        {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
+                        {category?.discount_amount}{category?.discount_type == 'percentage'?'%':'৳'} OFF
                     </span>
                     )}
-                    <Link to={`/products/?category=${category.slug}`} key={category.id} target='_blank'>
+                    <Link to={`/products/?category=${category?.slug}`} key={category?.id} target='_blank'>
                     <div className="relative group cursor-pointer min-w-[150px]">
                         <img
-                        src={category.image}
-                        alt={category.name}
+                        src={category?.image}
+                        alt={category?.name}
                         className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-lg font-semibold">{category.name}</span>
+                        <span className="text-lg font-semibold">{category?.name}</span>
                         </div>
                     </div>
                     </Link>
@@ -283,28 +283,28 @@ const Categories = () => {
         
                 {/* Categories Container */}
                 
-                {featured.length === 0  ? <div className='text-center'>
+                {featured?.length === 0  ? <div className='text-center'>
                     <span>Not found</span>
                 </div>:
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                     {featured?.map((category) => (
-                        <div key={category.id}>
+                        <div key={category?.id}>
                         {/* Discount Badge */}
-                        {category.has_discount && (
+                        {category?.has_discount && (
                         <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                            {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
+                            {category?.discount_amount}{category?.discount_type == 'percentage'?'%':'৳'} OFF
                         </span>
                         )}
-                        <Link to={`/products/?category=${category.slug}`} target='_blank'>
+                        <Link to={`/products/?category=${category?.slug}`} target='_blank'>
                         <div className="relative group cursor-pointer min-w-[150px]">
                             <img
-                            src={category.image}
-                            alt={category.name}
+                            src={category?.image}
+                            alt={category?.name}
                             className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
                             />
                             <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-lg font-semibold">{category.name}</span>
+                            <span className="text-lg font-semibold">{category?.name}</span>
                             </div>
                         </div>
                         </Link>

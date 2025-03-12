@@ -11,11 +11,11 @@ const ShowAddress = () => {
   const handleAddressSelection = (id) => {
     dispatch(setSelectedAddressId(id));
 
-    const addressItem = addresses.find((item) => item.id === id);
+    const addressItem = addresses.find((item) => item?.id === id);
     const { shipping_type, area, division, district, thana, address } = addressItem;
 
     dispatch(updateFormData({
-      title: addressItem.title || '',
+      title: addressItem?.title || '',
       shipping_type,
       shipping_area: area,
       division,
@@ -25,13 +25,13 @@ const ShowAddress = () => {
     }));
 
     if (shipping_type === 'outside_dhaka') {
-      const divisionItem = divisionsData.find((item) => item.name === division);
+      const divisionItem = divisionsData?.find((item) => item.name === division);
       if (divisionItem) {
-        const divisionDist = districtsData.filter((item) => item.division_id === divisionItem.id);
+        const divisionDist = districtsData?.filter((item) => item.division_id === divisionItem.id);
         dispatch(setDistricts(divisionDist || []));
-        const districtItem = divisionDist.find((item) => item.name === district);
+        const districtItem = divisionDist?.find((item) => item.name === district);
         if (districtItem) {
-          const upzillaDist = upazilasData.filter((item) => item.district_id === districtItem.id);
+          const upzillaDist = upazilasData?.filter((item) => item.district_id === districtItem.id);
           dispatch(setUpazilas(upzillaDist || []));
         }
       }
@@ -48,20 +48,20 @@ const ShowAddress = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {addresses?.map((address) => (
             <div
-              key={address.id}
-              onClick={() => handleAddressSelection(address.id)}
+              key={address?.id}
+              onClick={() => handleAddressSelection(address?.id)}
               className={`p-3 border rounded-md shadow-sm cursor-pointer transition ${
-                selectedAddressId === address.id ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                selectedAddressId === address?.id ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
               }`}
             >
               <h4 className="font-semibold text-md mb-1">
-                {address.title || 'Untitled Address'}
+                {address?.title || 'Untitled Address'}
               </h4>
               <p className="text-sm text-gray-600 truncate">
-                {address.address}
+                {address?.address}
               </p>
               <p className="text-xs text-gray-500">
-                {address.shipping_type.replace('_', ' ')}
+                {address?.shipping_type.replace('_', ' ')}
               </p>
             </div>
           ))}

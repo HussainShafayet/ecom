@@ -142,14 +142,14 @@ const SignIn = () => {
                 id="phone"
                 name="phone_number"
                 placeholder="Phone Number"
-                value={formData.phone_number}
+                value={formData?.phone_number}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border-none focus:outline-none rounded-r-md"
                 required
 
               />
             </div>
-            {errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
+            {errors?.phone_number && <p className="text-red-500 text-xs mt-1">{errors?.phone_number}</p>}
           </div>
 
           {/* Login Button with Animation */}

@@ -78,22 +78,22 @@ const CategoriesSection = () => {
           >
             {categories &&
               categories?.map((category) => (
-                <div key={category.id}>
+                <div key={category?.id}>
                 {/* Discount Badge */}
-                {category.has_discount && (
+                {category?.has_discount && (
                   <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                    {category.discount_amount}{category.discount_type == 'percentage'?'%':'৳'} OFF
+                    {category?.discount_amount}{category?.discount_type == 'percentage'?'%':'৳'} OFF
                   </span>
                 )}
-                <Link to={`/products/?category=${category.slug}`} target='_blank'>
+                <Link to={`/products/?category=${category?.slug}`} target='_blank'>
                   <div className="relative cursor-pointer min-w-[150px] hover:scale-95 transition-transform transform">
                     <img
-                      src={category.image}
-                      alt={category.name}
+                      src={category?.image}
+                      alt={category?.name}
                       className="w-full h-36 object-cover rounded-lg"
                     />
                     <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 hover:opacity-100 transition-opacity">
-                      <span className="text-lg font-semibold">{category.name}</span>
+                      <span className="text-lg font-semibold">{category?.name}</span>
                     </div>
                   </div>
                 </Link>

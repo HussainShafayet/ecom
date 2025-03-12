@@ -182,7 +182,7 @@ const AddressItem = ({ address, onUpdate }) => {
               <FaEdit className="w-5 h-5" />
           </button>
           <button
-              onClick={()=>setConfirmDelete(address.id)}
+              onClick={()=>setConfirmDelete(address?.id)}
               className="text-gray-500 hover:text-red-500"
           >
               <FaTrash className="w-5 h-5" />
@@ -197,7 +197,7 @@ const AddressItem = ({ address, onUpdate }) => {
               <input
                 type="text"
                 name="title"
-                value={editedAddress.title || ''}
+                value={editedAddress?.title || ''}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -208,7 +208,7 @@ const AddressItem = ({ address, onUpdate }) => {
               <input
                 type="text"
                 name="address"
-                value={editedAddress.address || ''}
+                value={editedAddress?.address || ''}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -217,7 +217,7 @@ const AddressItem = ({ address, onUpdate }) => {
             <div>
             <select
                 name="shipping_type"
-                value={editedAddress.shipping_type || ''}
+                value={editedAddress?.shipping_type || ''}
                 onChange={handleLocationType}
                 onBlur={handleBlur}
                 required
@@ -227,63 +227,63 @@ const AddressItem = ({ address, onUpdate }) => {
                 <option value="inside_dhaka">In Dhaka City</option>
                 <option value="outside_dhaka">Out of Dhaka City</option>
             </select>
-            {touched.shipping_type && errors.shipping_type && <p className="text-red-500 text-xs mt-1">{errors.shipping_type}</p>}
+            {touched?.shipping_type && errors?.shipping_type && <p className="text-red-500 text-xs mt-1">{errors?.shipping_type}</p>}
             </div>
-            {editedAddress.shipping_type === 'inside_dhaka' && (
+            {editedAddress?.shipping_type === 'inside_dhaka' && (
                 <div className="grid grid-cols-1 gap-3">
                 <div className="w-full">
                     <select
                     name="shipping_area"
-                    value={editedAddress.area || ''}
+                    value={editedAddress?.area || ''}
                     onChange={handleDhakaArea}
                     onBlur={handleBlur}
                     required
-                    className={`border ${touched.area && errors.area ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                    className={`border ${touched?.area && errors?.area ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                     >
                     <option value="">Select Area in</option>
                     {dhakaCityData?.map((area) => (
-                        <option key={area.id} value={area.name}>{area.name}</option>
+                        <option key={area?.id} value={area?.name}>{area?.name}</option>
                     ))}
                     </select>
-                    {touched.area && errors.area && <p className="text-red-500 text-xs mt-1">{errors.area}</p>}
+                    {touched?.area && errors?.area && <p className="text-red-500 text-xs mt-1">{errors?.area}</p>}
                 </div>
                 </div>
             )}
-             {editedAddress.shipping_type === 'outside_dhaka' && (
+             {editedAddress?.shipping_type === 'outside_dhaka' && (
                 <>
                 <div>
                     <select
                     name="division"
-                    value={editedAddress.division || ''}
+                    value={editedAddress?.division || ''}
                     onChange={handleDivisionChange}
                     onBlur={handleBlur}
                     required
-                    className={`border ${touched.division && errors.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                    className={`border ${touched?.division && errors?.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
                     >
                     <option value="">Select Division</option>
                     {divisionsData?.map((division) => (
-                        <option key={division.id} value={division.name}>{division.name}</option>
+                        <option key={division?.id} value={division?.name}>{division?.name}</option>
                     ))}
                     </select>
-                    {touched.division && errors.division && <p className="text-red-500 text-xs mt-1">{errors.division}</p>}
+                    {touched?.division && errors?.division && <p className="text-red-500 text-xs mt-1">{errors?.division}</p>}
                 </div>
 
                <div>
                     <select
                     name="district"
-                    value={editedAddress.district || ''}
+                    value={editedAddress?.district || ''}
                     onChange={handleDistrictChange}
                     onBlur={handleBlur}
                     required
-                    className={`border ${touched.district && errors.district ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                    disabled={!editedAddress.division}
+                    className={`border ${touched?.district && errors?.district ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                    disabled={!editedAddress?.division}
                     >
                     <option value="">Select District</option>
                     {districts?.map((district) => (
-                        <option key={district.id} value={district.name}>{district.name}</option>
+                        <option key={district?.id} value={district?.name}>{district?.name}</option>
                     ))}
                     </select>
-                    {touched.district && errors.district && <p className="text-red-500 text-xs mt-1">{errors.district}</p>}
+                    {touched?.district && errors?.district && <p className="text-red-500 text-xs mt-1">{errors?.district}</p>}
                 </div>
 
                 <div>
@@ -294,47 +294,17 @@ const AddressItem = ({ address, onUpdate }) => {
                     onBlur={handleBlur}
                     required
                     className={`border ${touched.thana && errors.thana ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                    disabled={!editedAddress.district}
+                    disabled={!editedAddress?.district}
                     >
                     <option value="">Select Upazila/Thana</option>
                     {upazillas?.map((station) => (
-                        <option key={station.id} value={station.name}>{station.name}</option>
+                        <option key={station?.id} value={station?.name}>{station?.name}</option>
                     ))}
                     </select>
-                    {touched.thana && errors.thana && <p className="text-red-500 text-xs mt-1">{errors.thana}</p>}
+                    {touched?.thana && errors?.thana && <p className="text-red-500 text-xs mt-1">{errors?.thana}</p>}
                 </div>
                 </>
             )}
-            {/*<div>
-              <label className="block text-sm font-medium text-gray-700">Division</label>
-              <input
-                type="text"
-                name="division"
-                value={editedAddress.division || ''}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">District</label>
-              <input
-                type="text"
-                name="district"
-                value={editedAddress.district || ''}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Thana</label>
-              <input
-                type="text"
-                name="thana"
-                value={editedAddress.thana || ''}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>*/}
            
             <div className="flex justify-end space-x-2">
               <button
@@ -361,15 +331,15 @@ const AddressItem = ({ address, onUpdate }) => {
         ) : (
           // Display Address Details
           <div className="space-y-2">
-            {address.title && (
+            {address?.title && (
               <h2 className="text-xl font-semibold text-gray-800">{address.title}</h2>
             )}
-            {renderField("Address", address.address)}
-            {renderField("Shipping Type", address.shipping_type)}
-            {renderField("Area", address.area)}
-            {renderField("Division", address.division)}
-            {renderField("District", address.district)}
-            {renderField("Thana", address.thana)}
+            {renderField("Address", address?.address)}
+            {renderField("Shipping Type", address?.shipping_type)}
+            {renderField("Area", address?.area)}
+            {renderField("Division", address?.division)}
+            {renderField("District", address?.district)}
+            {renderField("Thana", address?.thana)}
             
           </div>
         )}

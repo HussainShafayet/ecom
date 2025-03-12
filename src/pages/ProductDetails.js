@@ -39,7 +39,7 @@ const ProductDetails = () => {
 
   useEffect(() => {
     if (product?.category) {
-      dispatch(fetchAllProducts({category: product.category, limit:30}))
+      dispatch(fetchAllProducts({category: product?.category, limit:30}))
     }
   }, [dispatch, product]);
 // Handle clicks outside each dropdown
@@ -65,28 +65,6 @@ useEffect(() => {
     document.removeEventListener('mousedown', handleClickOutside);
   };
 }, []);
-
-
-  //if (isLoading) {
-  //  return <div><Loader message='Loading product details' /></div>;
-  //}
-
-  //if (error) {
-  //  return <div className="text-center text-red-500">{error}</div>;
-  //}
-
-  //if (!isLoading && !product) {
-  //  return <div className="text-center text-gray-600">
-  //          <h1 className="text-2xl font-bold">Product Not Found</h1>
-  //          <p>The product you are looking for does not exist or may have been removed.</p>
-  //          <Link
-  //            to="/products"
-  //            className="mt-4 inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
-  //          >
-  //            Back to Products
-  //          </Link>
-  //    </div>;
-  //}
 
 
 
@@ -123,7 +101,7 @@ useEffect(() => {
     if (!selectedRatingFilter) {
       return reviews; // Show all reviews if no filter is selected
     }
-    return reviews.filter(review => review.rating === selectedRatingFilter); // Filter by selected rating
+    return reviews?.filter(review => review?.rating === selectedRatingFilter); // Filter by selected rating
   };
 
   const handleAddToCart = async () => {
@@ -132,7 +110,7 @@ useEffect(() => {
   
       if (isAuthenticated) {
         const cartBody = {
-          product_id: product.id,
+          product_id: product?.id,
           quantity,
           variant_id: selectedSize?.variant_id || selectedColor?.variant_id,
           action: 'increase'
@@ -159,12 +137,12 @@ useEffect(() => {
 
     try {
       if (product.has_variants) {
-        navigate(`/products/detail/${product.slug}`);
+        navigate(`/products/detail/${product?.slug}`);
       } else {
         let clonedProduct;
         if (isAuthenticated) {
           const cartBody = {
-            product_id: product.id,
+            product_id: product?.id,
             quantity,
             variant_id: selectedSize?.variant_id || selectedColor?.variant_id,
             action: 'increase'
@@ -208,8 +186,8 @@ useEffect(() => {
 
   const handleSelectColor = (color) =>{
     dispatch(setSelectedColor(color))
-    dispatch(setMainImage(color.media_files[0]));
-    dispatch(setSelectedSize(color.sizes[0]))
+    dispatch(setMainImage(color?.media_files[0]));
+    dispatch(setSelectedSize(color?.sizes[0]))
     
     
   }
@@ -223,8 +201,8 @@ useEffect(() => {
     if (navigator.share) {
       navigator
         .share({
-          title: product.title,
-          text: `Check out this product: ${product.title}`,
+          title: product?.title,
+          text: `Check out this product: ${product?.title}`,
           url: window.location.href,
         })
         .then(() => console.log("Product shared successfully!"))
@@ -277,8 +255,8 @@ useEffect(() => {
   };
 
   // Assume discountPercentage is a property of the product (e.g., product.discountPercentage)
-  const discountPercentage = product && product.discountPercentage || 0;
-  const discountedPrice = product && calculateDiscountedPrice(product.price, discountPercentage) || 0;
+  const discountPercentage = product && product?.discountPercentage || 0;
+  const discountedPrice = product && calculateDiscountedPrice(product?.price, discountPercentage) || 0;
 
   
 
@@ -306,17 +284,17 @@ useEffect(() => {
           <div className="flex gap-2">
             <div className="flex flex-col space-y-1 h-full overflow-auto custom-scrollbar-custom">
               {(selectedColor?selectedColor:product)?.media_files?.map((image, index) => (
-                <div key={image.file_url}>
-                  {image.file_type === 'image'? 
+                <div key={image?.file_url}>
+                  {image?.file_type === 'image'? 
                     <img
-                      src={image.thumbnail_url}
+                      src={image?.thumbnail_url}
                       alt={`Product Image ${index + 1}`}
                       className="w-20 h-20 object-cover rounded-lg cursor-pointer p-1 border-2 border-gray-300 hover:border-blue-500 transition"
                       onClick={() => handleImageClick(image)}
                     />
                     : 
                     <video
-                      src={image.file_url}
+                      src={image?.file_url}
                       className="w-20 h-20 object-cover rounded-sm"
                       onClick={() => handleImageClick(image)}
                     />
@@ -325,11 +303,11 @@ useEffect(() => {
               ))}
             </div>
             <div className="relative group w-full h-full">
-            {mainImage.file_type === 'image'? 
+            {mainImage?.file_type === 'image'? 
               <Zoom>
                 <img
-                  src={mainImage.file_url}
-                  alt={product.name}
+                  src={mainImage?.file_url}
+                  alt={product?.name}
                   loading='lazy'
                   className={`w-full h-96 object-contain object-center rounded-md mb-4 transition-opacity duration-500 shadow-md ${
                     isImageLoaded ? 'opacity-100' : 'opacity-0'
@@ -340,7 +318,7 @@ useEffect(() => {
                 {/* Blurred Placeholder */}
                 {!isImageLoaded && (
                   <img
-                    src={product.thumbnail}
+                    src={product?.thumbnail}
                     alt="Loading"
                     className="absolute inset-0 w-full h-96 bg-gray-200 rounded-md mb-4 animate-pulse object-contain shadow-md"
                   />
@@ -348,7 +326,7 @@ useEffect(() => {
               </Zoom>
               :
                 <video
-                  src={mainImage.file_url}
+                  src={mainImage?.file_url}
                   muted
                   controls
                   preload='true'
@@ -360,40 +338,40 @@ useEffect(() => {
 
           {/* Product Information */}
           <div>
-            <h1 className="text-3xl font-bold mb-1">{product.name}</h1>
+            <h1 className="text-3xl font-bold mb-1">{product?.name}</h1>
 
             {/* Product Price */}
             {selectedSize? 
               <>
-              {product.has_discount ? (
+              {product?.has_discount ? (
                 <div className="mb-1 flex flex-row space-x-1">
                   <p className=" text-gray-500 line-through">
-                    {selectedSize.base_price}
+                    {selectedSize?.base_price}
                   </p>
                   <p className="text-2x text-green-600 font-semibold">
-                  {selectedSize.discount_price} <span className="text-red-500">({product.discount_value}{product.discount_type == 'percentage'?'%':'৳'} OFF)</span>
+                  {selectedSize?.discount_price} <span className="text-red-500">({product?.discount_value}{product?.discount_type == 'percentage'?'%':'৳'} OFF)</span>
                   </p>
                 </div>
               ) : (
                 <p className="text-2xl text-green-600 font-semibold mb-1">
-                  {selectedSize.base_price}
+                  {selectedSize?.base_price}
                 </p>
               )}
               </>
             :
               <>
-                {product.has_discount ? (
+                {product?.has_discount ? (
                   <div className="mb-1 flex flex-row space-x-1">
                     <p className=" text-gray-500 line-through">
-                      {product.base_price}
+                      {product?.base_price}
                     </p>
                     <p className="text-2x text-green-600 font-semibold">
-                    {product.discount_price} <span className="text-red-500">({product.discount_value}{product.discount_type == 'percentage'?'%':'৳'} OFF)</span>
+                    {product?.discount_price} <span className="text-red-500">({product?.discount_value}{product?.discount_type == 'percentage'?'%':'৳'} OFF)</span>
                     </p>
                   </div>
                 ) : (
                   <p className="text-2xl text-green-600 font-semibold mb-1">
-                    {product.base_price}
+                    {product?.base_price}
                   </p>
                 )}
               </>
@@ -413,12 +391,12 @@ useEffect(() => {
                       key={index}
                       onClick={() => handleSelectColor(color)}
                       className={`w-8 h-8 rounded-full border shadow-md transform transition-transform duration-200 relative ${
-                        selectedColor.name === color.name
+                        selectedColor?.name === color?.name
                           ? 'ring-2 ring-blue-500 scale-110 border-blue-500'
                           : 'border-gray-300 hover:scale-105'
                       }`}
-                      style={{ backgroundColor: color.hex_code }}
-                      title={color.name}
+                      style={{ backgroundColor: color?.hex_code }}
+                      title={color?.name}
                     >
                       {/* Tooltip */}
                       <span
@@ -426,7 +404,7 @@ useEffect(() => {
                           selectedColor === color ? 'opacity-100' : 'group-hover:opacity-100'
                         }`}
                       >
-                        {color.name}
+                        {color?.name}
                       </span>
                     </button>
                   ))}
@@ -446,13 +424,13 @@ useEffect(() => {
                       key={index}
                       onClick={() => handleSelectSize(variant)}
                       className={`px-2 py-1 text-sm font-medium rounded-lg border shadow-sm transition-transform duration-200 hover:scale-105 ${
-                        selectedSize.name === variant.name
+                        selectedSize?.name === variant?.name
                           ? ' text-blue-500 border-blue-500'
                           : ' text-gray-700 hover:bg-blue-100 border-gray-300'
                       }`}
-                      title={`${variant.name}`}
+                      title={`${variant?.name}`}
                     >
-                      {variant.name}
+                      {variant?.name}
                     </button>
                   ))}
                 </div>
@@ -467,13 +445,13 @@ useEffect(() => {
                       key={index}
                       onClick={() => handleSelectSize(variant)}
                       className={`px-2 py-1 text-sm font-medium rounded-lg border shadow-sm transition-transform duration-200 hover:scale-105 ${
-                        selectedSize.name === variant.name
+                        selectedSize.name === variant?.name
                           ? ' text-blue-500 border-blue-500'
                           : ' text-gray-700 hover:bg-blue-100 border-gray-300'
                       }`}
-                      title={`${variant.name}`}
+                      title={`${variant?.name}`}
                     >
-                      {variant.name}
+                      {variant?.name}
                     </button>
                   ))}
                 </div>
@@ -531,12 +509,12 @@ useEffect(() => {
                     </svg>
                   ))}
               </div>
-                <span className="font-bold">{product.avg_rating} / 5</span>
+                <span className="font-bold">{product?.avg_rating} / 5</span>
                 <FaChevronDown className="ml-2" />
               </button>
               <div className='space-x-3 font-bold'>
-                <span>{product.total_reviews} reviews</span>
-                <span>{product.total_orders} orders</span>
+                <span>{product?.total_reviews} reviews</span>
+                <span>{product?.total_orders} orders</span>
               </div>
               
               {/* Enhanced Dropdown menu */}
@@ -544,7 +522,7 @@ useEffect(() => {
                 <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-300 shadow-md rounded-lg p-4 z-20">
                   <div className="flex items-center mb-2">
                   <div className="flex">
-                    {Array(Math.ceil(product.avg_rating))
+                    {Array(Math.ceil(product?.avg_rating))
                       .fill(0)
                       .map((_, i) => (
                         <svg
@@ -557,7 +535,7 @@ useEffect(() => {
                         </svg>
                       ))}
                   </div>
-                    <span className="font-bold text-lg">{product.avg_rating} out of 5</span>
+                    <span className="font-bold text-lg">{product?.avg_rating} out of 5</span>
                   </div>
                   {Object.keys(ratingBreakdown).reverse().map(star => (
                     <div
@@ -699,7 +677,7 @@ useEffect(() => {
                       <a
                         href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
                           window.location.href
-                        )}&text=${encodeURIComponent(product.title)}`}
+                        )}&text=${encodeURIComponent(product?.title)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 px-4 py-2 w-full text-left hover:bg-gray-100 transition"
@@ -711,7 +689,7 @@ useEffect(() => {
                     <li>
                       <a
                         href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-                          `Check out this product: ${product.title} ${window.location.href}`
+                          `Check out this product: ${product?.title} ${window.location.href}`
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -739,16 +717,16 @@ useEffect(() => {
                   <FaTag className="text-blue-500 mr-2" />
                   <span className="font-semibold mr-1">Category:</span> 
                   {product?.categories?.map((category, index) =>(
-                    <Link key={index} to={`/products/?category=${category.slug}`}  className={`text-blue-500 hover:text-blue-600 underline transition-all mr-1`} target='_blank'>
-                      {category.name} 
+                    <Link key={index} to={`/products/?category=${category?.slug}`}  className={`text-blue-500 hover:text-blue-600 underline transition-all mr-1`} target='_blank'>
+                      {category?.name} 
                     </Link>
                   ))}
                 </li>
                 <li className="flex items-center">
                   <FaTag className="text-blue-500 mr-2" />
                   <span className="font-semibold mr-1">Brand:</span>
-                  <Link to={`/products/?brands=${product.brand.name}`}  className={`text-blue-500 hover:text-blue-600 underline transition-all mr-1`} target='_blank'>
-                    {product.brand.name} 
+                  <Link to={`/products/?brands=${product?.brand?.name}`}  className={`text-blue-500 hover:text-blue-600 underline transition-all mr-1`} target='_blank'>
+                    {product?.brand?.name} 
                   </Link>
                    
                 </li>
@@ -756,33 +734,33 @@ useEffect(() => {
                   <FaTag className="text-blue-500 mr-2" />
                   <span className="font-semibold mr-1">Tags:</span> 
                   {product?.tags?.map((tag, index) =>(
-                    <Link key={index} to={`/products/?tags=${tag.name}`}  className={`text-blue-500 hover:text-blue-600 underline transition-all mr-1`} target='_blank'>
-                      {tag.name} 
+                    <Link key={index} to={`/products/?tags=${tag?.name}`}  className={`text-blue-500 hover:text-blue-600 underline transition-all mr-1`} target='_blank'>
+                      {tag?.name} 
                     </Link>
                   ))}
                 </li>
                 <li className="flex items-center">
                   <FaBox className="text-green-500 mr-2" />
-                  <span className="font-semibold mr-1">Model:</span> {product.model || 'N/A'}
+                  <span className="font-semibold mr-1">Model:</span> {product?.model || 'N/A'}
                 </li>
                 <li className="flex items-center">
                   <FaWeightHanging className="text-red-500 mr-2" />
-                  <span className="font-semibold mr-1">Weight:</span> {product.weight || 'N/A'}
+                  <span className="font-semibold mr-1">Weight:</span> {product?.weight || 'N/A'}
                 </li>
                 <li className="flex items-center">
                   <FaRulerCombined className="text-purple-500 mr-2" />
                   <span className="font-semibold mr-1">Dimensions:</span> 
-                  {product.dimension
-                    ? `${product.dimension.width || 'N/A'} x ${product.dimension.height || 'N/A'} x ${product.dimension.depth || 'N/A'} cm`
+                  {product?.dimension
+                    ? `${product?.dimension?.width || 'N/A'} x ${product?.dimension.height || 'N/A'} x ${product?.dimension?.depth || 'N/A'} cm`
                     : 'N/A'}
                 </li>
                 <li className="flex items-center">
                   <FaCubes className="text-yellow-500 mr-2" />
-                  <span className="font-semibold mr-1">Materials:</span> {product.material || 'N/A'}
+                  <span className="font-semibold mr-1">Materials:</span> {product?.material || 'N/A'}
                 </li>
                 <li className="flex items-center">
                   <FaTools className="text-gray-500 mr-2" />
-                  <span className="font-semibold mr-1">Other Features:</span> {product.features || 'N/A'}
+                  <span className="font-semibold mr-1">Other Features:</span> {product?.features || 'N/A'}
                 </li>
               </ul>
             </div>
@@ -796,22 +774,22 @@ useEffect(() => {
                     <ul className="text-sm text-gray-700 space-y-3 ml-3">
                       <li className="flex items-center">
                         <FaTag className="text-blue-500 mr-2" />
-                        <span className="font-semibold mr-1">Warranty:</span> {product.warranty_information || 'N/A'}
+                        <span className="font-semibold mr-1">Warranty:</span> {product?.warranty_information || 'N/A'}
                       </li>
                       <li className="flex items-center">
                         <FaBox className="text-green-500 mr-2" />
-                        <span className="font-semibold mr-1">Shipping:</span> {product.shipping_information || 'N/A'}
+                        <span className="font-semibold mr-1">Shipping:</span> {product?.shipping_information || 'N/A'}
                       </li>
                       <li className="flex items-center">
                         <FaWeightHanging className="text-red-500 mr-2" />
-                        <span className="font-semibold mr-1">Return Policy:</span> {product.return_policy || 'N/A'}
+                        <span className="font-semibold mr-1">Return Policy:</span> {product?.return_policy || 'N/A'}
                       </li>
                     
                     </ul>
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-gray-800">Scan with mobile</h3>
-                    <img src={product.qrcode_image_url} className='w-44 h-44' />
+                    <img src={product?.qrcode_image_url} className='w-44 h-44' />
                   </div>
               </div>
               
@@ -819,7 +797,7 @@ useEffect(() => {
           </section>
           
           <section>
-            <RichTextToHTML content={product.long_description} />
+            <RichTextToHTML content={product?.long_description} />
           </section>
         </div>
 
@@ -839,7 +817,7 @@ useEffect(() => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {products?.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product?.id} product={product} />
           ))}
         </div>
         }

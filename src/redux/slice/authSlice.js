@@ -73,7 +73,7 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
     
     return response?.data; // { accessToken, refreshToken, user }
   } catch (error) {
-    return rejectWithValue(error.response.data);
+    return rejectWithValue(error?.response?.data);
   }
 });
 

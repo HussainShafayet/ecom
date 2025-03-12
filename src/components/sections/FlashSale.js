@@ -30,13 +30,13 @@ const FlashSale = ({forRoute}) => {
     }
 
     const getLink = (item)=>{
-      switch (item.type) {
+      switch (item?.type) {
           case 'product':
-              return `/products/detail/${item.link}`
+              return `/products/detail/${item?.link}`
           case 'category':
-              return `/products/?category=${item.link}`
+              return `/products/?category=${item?.link}`
           default:
-             return item.external_link;
+             return item?.external_link;
       }
     }
 
@@ -85,7 +85,7 @@ const FlashSale = ({forRoute}) => {
             }
             {right_banner?.media_type === 'video' && 
               <div className='relative h-full'>
-                <Link to={getLink(right_banner)} target='_blank' className='absolute right-2 top-2 z-10 text-blue-500 hover:underline text:2x'>{right_banner.caption?right_banner.caption :'Click'}</Link>
+                <Link to={getLink(right_banner)} target='_blank' className='absolute right-2 top-2 z-10 text-blue-500 hover:underline text:2x'>{right_banner?.caption?right_banner?.caption :'Click'}</Link>
                 {/* Video */}
                 <video
                   src={right_banner?.media}
@@ -122,7 +122,7 @@ const FlashSale = ({forRoute}) => {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {products?.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product?.id} product={product} />
               ))}
             </div>
           </div>
@@ -150,7 +150,7 @@ const FlashSale = ({forRoute}) => {
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 {products?.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product?.id} product={product} />
                 ))}
               </div>
             </div>
