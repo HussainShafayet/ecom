@@ -19,7 +19,7 @@ publicApi.interceptors.response.use(
       
       if (!error?.response) {
         // Network-level error: Treat as global
-        store.dispatch(setGlobalError("Network error: Unable to connect to the server"));
+        //store.dispatch(setGlobalError("Network error: Unable to connect to the server"));
       } else {
         const errorMessage = getErrorMessage(error?.response?.status);
         if (section) {
@@ -27,7 +27,7 @@ publicApi.interceptors.response.use(
           store.dispatch(setSectionError({ section, error: errorMessage }));
         } else {
           // No section specified: Treat as global
-          store.dispatch(setGlobalError(errorMessage));
+          //store.dispatch(setGlobalError(errorMessage));
         }
       }
     });
