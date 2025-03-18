@@ -66,9 +66,9 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-white mb-4">Stay Connected</h3>
             <div className="flex gap-4 text-gray-400 mb-4">
               <a href="https://www.facebook.com/share/1Dvz2bd5J8/" className="hover:text-gray-100 transition"><FaFacebook size={20} /></a>
-              <a href="#" className="hover:text-gray-100 transition"><FaTwitter size={20} /></a>
-              <a href="#" className="hover:text-gray-100 transition"><FaInstagram size={20} /></a>
-              <a href="#" className="hover:text-gray-100 transition"><FaLinkedin size={20} /></a>
+              {/*<a href="#" className="hover:text-gray-100 transition"><FaTwitter size={20} /></a>*/}
+              <a href="https://www.instagram.com/gocartbd/" className="hover:text-gray-100 transition"><FaInstagram size={20} /></a>
+              {/*<a href="#" className="hover:text-gray-100 transition"><FaLinkedin size={20} /></a>*/}
             </div>
             {/*<p className="text-gray-200 mb-2">Download Our App</p>
             <div className="flex gap-3">
