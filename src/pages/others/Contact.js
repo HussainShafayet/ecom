@@ -75,10 +75,8 @@ const Contact = () => {
           <div className="mt-6 lg:mt-10">
             <h3 className="text-lg font-semibold mb-2 md:mb-4">Follow Us</h3>
             <div className="flex space-x-4 md:space-x-6 text-gray-500">
-              <a href="#" className="hover:text-blue-500 transition-colors"><FaFacebook size={22} /></a>
-              <a href="#" className="hover:text-blue-500 transition-colors"><FaTwitter size={22} /></a>
-              <a href="#" className="hover:text-blue-500 transition-colors"><FaInstagram size={22} /></a>
-              <a href="#" className="hover:text-blue-500 transition-colors"><FaLinkedin size={22} /></a>
+              <a href="https://www.facebook.com/share/1Dvz2bd5J8/" className="hover:text-blue-500 transition-colors"><FaFacebook size={22} /></a>
+              <a href="https://www.instagram.com/gocartbd/" className="hover:text-blue-500 transition-colors"><FaInstagram size={22} /></a>
             </div>
           </div>
         </div>
