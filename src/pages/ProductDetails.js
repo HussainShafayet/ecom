@@ -400,7 +400,7 @@ useEffect(() => {
                     >
                       {/* Tooltip */}
                       <span
-                        className={`absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs rounded-lg px-2 py-1 opacity-0 transition-opacity duration-200 ${
+                        className={`absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs rounded-lg px-2 py-1 opacity-0 transition-opacity duration-200 text-nowrap ${
                           selectedColor === color ? 'opacity-100' : 'group-hover:opacity-100'
                         }`}
                       >
