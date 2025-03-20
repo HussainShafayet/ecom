@@ -9,6 +9,7 @@ import {addToCart, addToCartAndRemoveFromWishlist, handleAddtoCart, handleCloned
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 import {ProductDetailsSkeleton} from '../components/common/skeleton';
+import defaultImage from '../assets/images/default_product_image.jpg';
 
 const ProductDetails = () => {
   const { slug } = useParams();
@@ -325,6 +326,7 @@ useEffect(() => {
                 )}
               </Zoom>
               :
+              mainImage?.file_type === 'video' ?
                 <video
                   src={mainImage?.file_url}
                   muted
@@ -332,6 +334,13 @@ useEffect(() => {
                   preload='true'
                   className={`w-full h-96 object-contain object-center rounded-md mb-4 transition-opacity duration-500 shadow-md`}
                 />
+              :
+              <img
+                src={defaultImage}
+                alt='default image'
+                loading="lazy"
+                className={`w-full h-96 object-contain object-center rounded-md mb-4 transition-opacity duration-500 shadow-md}`}
+              />
               }
             </div>
           </div>
