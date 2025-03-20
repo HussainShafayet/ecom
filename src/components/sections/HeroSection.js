@@ -6,6 +6,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {Link} from 'react-router-dom';
 import blurImage from '../../assets/images/blur.jpg';
 import {HeroSectionSkeleton} from '../common/skeleton';
+import defaultImage from '../../assets/images/default_product_image.jpg';
 
 const HeroSection = () => {
   
@@ -109,7 +110,7 @@ const HeroSection = () => {
               <Link to={`/products/detail/${left_banner?.link}`} className="block h-full">
                 {/* Main Product Image */}
                 <img
-                  src={left_banner?.media}
+                  src={left_banner?.media || defaultImage}
                   alt={left_banner?.caption}
                   loading="lazy"
                   className={`w-full h-full object-contain rounded-md transition-opacity duration-500 ${
@@ -133,7 +134,7 @@ const HeroSection = () => {
               <Link to={`/products/detail/${right_banner?.link}`} className="block h-full">
                 {/* Main Product Image */}
                 <img
-                  src={right_banner?.media}
+                  src={right_banner?.media || defaultImage}
                   alt={right_banner?.caption}
                   loading="lazy"
                   className={`w-full h-full object-contain rounded-md transition-opacity duration-500 ${
