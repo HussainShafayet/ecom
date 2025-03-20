@@ -290,7 +290,7 @@ useEffect(() => {
                     <img
                       src={image?.thumbnail_url}
                       alt={`Product Image ${index + 1}`}
-                      className="w-20 h-20 object-cover rounded-lg cursor-pointer p-1 border-2 border-gray-300 hover:border-blue-500 transition"
+                      className={`w-20 h-20 object-cover rounded-lg cursor-pointer p-1 border-2  hover:border-blue-500 transition ${mainImage?.file_url == image?.file_url ? 'border-blue-500' : 'border-gray-300'}`}
                       onClick={() => handleImageClick(image)}
                     />
                     : 
