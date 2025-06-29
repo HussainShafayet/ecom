@@ -4,6 +4,8 @@ import storage from "redux-persist/lib/storage"; // Local storage
 
 // Import reducers
 import productReducer from "./slice/productSlice";
+import newArrivalReducer from "./slice/product/newArrivalSlice";
+
 import categoryReducer from "./slice/categorySlice";
 import authReducer from "./slice/authSlice";  // Authentication slice
 import checkoutReducer from './slice/checkoutSlice';
@@ -31,6 +33,7 @@ const persistConfig = {
 // Combine reducers with auth having its own persist reducer
 const rootReducer = combineReducers({
   product: productReducer,      // Not persisted
+  new_arrival: newArrivalReducer,
   category: categoryReducer,    // Not persisted
   auth: persistReducer(authPersistConfig, authReducer), // ✅ Only persist isAuthenticated
   checkout: checkoutReducer,    // Not persisted

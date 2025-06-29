@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {Loader, ProductCard, Slider} from '../common'; // Assuming you have a ProductCard component
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchNewArrivalProducts} from '../../redux/slice/productSlice';
 import {Link} from 'react-router-dom';
 import {fetchNewArrivalContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 import {SectionSkeleton} from '../common/skeleton';
+import {fetchNewArrivalProducts} from '../../redux/slice/product/newArrivalSlice';
 
 const NewArrival = ({forRoute}) => {
-  const {new_arrival_Loading, new_arrival:products, new_arrival_error} = useSelector((state)=> state.product);
+  const {new_arrival_Loading, new_arrival, new_arrival_error} = useSelector((state)=> state.new_arrival);
   const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
   const sectionError = useSelector((state) => state.globalError.sectionErrors["new-arrival"])
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
@@ -103,7 +103,7 @@ const NewArrival = ({forRoute}) => {
         </div>
         }
 
-        {products?.length != 0  &&
+        {new_arrival?.length != 0  &&
         <div className='my-5'>
           <h2 className="text-3xl font-bold">New Arrival</h2>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -125,7 +125,7 @@ const NewArrival = ({forRoute}) => {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {products?.map((product) => (
+            {new_arrival?.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -134,7 +134,7 @@ const NewArrival = ({forRoute}) => {
         }
 
 
-        {products?.length != 0 &&
+        {new_arrival?.length != 0 &&
           <>
           {forRoute && 
             <div className='my-5'>
@@ -153,12 +153,12 @@ const NewArrival = ({forRoute}) => {
                 </Link>
                 }
               </div>
-              {products.length === 0  ? <div className='text-center'>
+              {new_arrival.length === 0  ? <div className='text-center'>
                 <span>Not found</span>
               </div>:
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                {products.map((product) => (
+                {new_arrival.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
