@@ -1,5 +1,4 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {updateAddressFormData} from "./profileSlice";
 
 const initialState = {
     reviewLoading: false,

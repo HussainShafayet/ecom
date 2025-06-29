@@ -1,8 +1,6 @@
 // src/redux/slice/checkoutSlice.js
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
 import {clearCart, handleFetchCart} from './cartSlice';
-import {handleGetProfile, setAddress} from './profileSlice';
 import publicApi from '../../api/publicApi';
 
 const initialState = {
@@ -168,7 +166,6 @@ const checkoutSlice = createSlice({
 
 export const initializeCheckout = () => async (dispatch, getState) => {
   const {isAuthenticated} = getState().auth;
-  const {addresses} = getState().profile;
   //const profile = getState().profile.profile;
   
   //if (!profile && isAuthenticated) {

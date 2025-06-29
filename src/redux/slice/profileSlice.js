@@ -319,7 +319,7 @@ const profileSlice = createSlice({
             
             const delete_id = action.payload;
 
-            state.addresses = state.addresses.filter((item)=> item.id != delete_id);
+            state.addresses = state.addresses.filter((item)=> item.id !== delete_id);
             
         })
         .addCase(handleAddressDelete.rejected, (state, action)=>{

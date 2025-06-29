@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {ErrorDisplay, Loader, SuccessMessage} from "../../components/common";
 import {useDispatch, useSelector} from "react-redux";
-import {clearSignupState, clearVerifyOtpState, resendOtp, verifyOtp} from "../../redux/slice/authSlice";
+import {clearVerifyOtpState, resendOtp, verifyOtp} from "../../redux/slice/authSlice";
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 
 const VerifyOtp = () => {

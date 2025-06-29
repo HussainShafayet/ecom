@@ -7,8 +7,8 @@ import productReducer from "./slice/productSlice";
 import categoryReducer from "./slice/categorySlice";
 import authReducer from "./slice/authSlice";  // Authentication slice
 import checkoutReducer from './slice/checkoutSlice';
-import cartReducer, { cartMiddleware } from './slice/cartSlice';
-import wishListReducer, { wishlistMiddleware } from './slice/wishlistSlice';
+import cartReducer from './slice/cartSlice';
+import wishListReducer from './slice/wishlistSlice';
 import contentReducer from './slice/contentSlice';
 import profileReducer from './slice/profileSlice';
 import reviewReducer from './slice/reviewSlice';

@@ -1,6 +1,5 @@
 // src/redux/slice/cartSlice.js
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { removeFromWishlist } from './wishlistSlice';
 
 // Load initial cart items from localStorage, or default to an empty array
 //const loadCartFromLocalStorage = () => {

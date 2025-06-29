@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
-import {clearCart} from './cartSlice';
 import axios from 'axios';
 import publicApi from '../../api/publicApi';
 

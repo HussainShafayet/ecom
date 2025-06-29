@@ -1,4 +1,3 @@
-import axios from 'axios';
 import publicApi from '../api/publicApi';
 
 // Fetch all categories from the API
