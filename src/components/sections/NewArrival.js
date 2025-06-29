@@ -8,7 +8,10 @@ import {SectionSkeleton} from '../common/skeleton';
 import {fetchNewArrivalProducts} from '../../redux/slice/product/newArrivalSlice';
 
 const NewArrival = ({forRoute}) => {
-  const {new_arrival_Loading, new_arrival, new_arrival_error} = useSelector((state)=> state.new_arrival);
+  const newArrivalLoading = useSelector((state) => state.new_arrival.new_arrival_Loading);
+  const newArrival = useSelector((state) => state.new_arrival.new_arrival);
+  const newArrivalError = useSelector((state) => state.new_arrival.new_arrival_error);
+
   const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
   const sectionError = useSelector((state) => state.globalError.sectionErrors["new-arrival"])
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
@@ -42,10 +45,10 @@ const NewArrival = ({forRoute}) => {
   return (
 
     <>
-    {new_arrival_Loading ? <SectionSkeleton forRoute={forRoute} /> :
-      new_arrival_error ? (
+    {newArrivalLoading ? <SectionSkeleton forRoute={forRoute} /> :
+      newArrivalError ? (
       <div className="text-center text-red-500 font-semibold py-4">
-        {new_arrival_error} - Please try again later.
+        {newArrivalError} - Please try again later.
       </div>
     ) :
       <div className="container mx-auto">
@@ -103,7 +106,7 @@ const NewArrival = ({forRoute}) => {
         </div>
         }
 
-        {new_arrival?.length != 0  &&
+        {newArrival?.length != 0  &&
         <div className='my-5'>
           <h2 className="text-3xl font-bold">New Arrival</h2>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -112,7 +115,7 @@ const NewArrival = ({forRoute}) => {
             </span>
 
             
-            {!forRoute && !new_arrival_Loading&&
+            {!forRoute && !newArrivalLoading&&
                 <Link
                   to="/products/new-arrival"
                   className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
@@ -125,7 +128,7 @@ const NewArrival = ({forRoute}) => {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {new_arrival?.map((product) => (
+            {newArrival?.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -134,7 +137,7 @@ const NewArrival = ({forRoute}) => {
         }
 
 
-        {new_arrival?.length != 0 &&
+        {newArrival?.length != 0 &&
           <>
           {forRoute && 
             <div className='my-5'>
@@ -153,12 +156,12 @@ const NewArrival = ({forRoute}) => {
                 </Link>
                 }
               </div>
-              {new_arrival.length === 0  ? <div className='text-center'>
+              {newArrival.length === 0  ? <div className='text-center'>
                 <span>Not found</span>
               </div>:
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                {new_arrival.map((product) => (
+                {newArrival.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
