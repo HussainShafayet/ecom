@@ -284,4 +284,4 @@ const ProductCard = ({ product, cardForTrending }) => {
   );
 };
 
-export default ProductCard;
+export default React.memo(ProductCard);

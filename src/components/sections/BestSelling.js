@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {Loader, ProductCard, Slider} from '../common'; // Assuming you have a ProductCard component
 import {useDispatch, useSelector} from 'react-redux';
 import {Link} from 'react-router-dom';
@@ -8,20 +8,41 @@ import {SectionSkeleton} from '../common/skeleton';
 import {fetchBestSellingProducts} from '../../redux/slice/product/bestSellingSlice';
 
 const BestSelling = ({forRoute}) => {
-  const {best_selling_Loading, best_selling, best_selling_error} = useSelector((state)=> state.best_selling);
-   const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
+  const bestSellingLoading = useSelector((state) => state.best_selling.best_selling_Loading);
+  const bestSelling = useSelector((state) => state.best_selling.best_selling);
+  const bestSellingError = useSelector((state) => state.best_selling.best_selling_error);
+
+
+  const imageSliders = useSelector((state) => state.content.image_sliders);
+  const videoSliders = useSelector((state) => state.content.video_sliders);
+  const leftBanner = useSelector((state) => state.content.left_banner);
+  const rightBanner = useSelector((state) => state.content.right_banner);
+
    const sectionError = useSelector((state) => state.globalError.sectionErrors["best-sale"]);
 
-  const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
+  const [isImageLoaded, setLoadedImages] = useState(false); // Track if the image has loaded
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (forRoute) {
-      dispatch(fetchBestSellingContent());
+    if (forRoute) dispatch(fetchBestSellingContent());
+    dispatch(fetchBestSellingProducts({ page_size: 12 }));
+  }, [dispatch, forRoute]);
+
+  const getLink = useCallback((item) => {
+    switch (item?.type) {
+      case "product":
+        return `/products/detail/${item?.link}`;
+      case "category":
+        return `/products/?category=${item?.link}`;
+      default:
+        return item?.external_link;
     }
-   dispatch(fetchBestSellingProducts({page_size:12}));
-  }, [dispatch]);
+  }, []);
+
+  const handleImageLoad = (id) => {
+    setLoadedImages((prev) => ({ ...prev, [id]: true }));
+  };
 
   if (sectionError) {
     return <div className="text-center text-red-500 font-semibold py-4">
@@ -29,23 +50,13 @@ const BestSelling = ({forRoute}) => {
     </div>;
   }
 
-  const getLink = (item)=>{
-    switch (item?.type) {
-        case 'product':
-            return `/products/detail/${item?.link}`
-        case 'category':
-            return `/products/?category=${item?.link}`
-        default:
-           return item?.external_link;
-    }
-  }
 
   return (
     <>
-    {best_selling_Loading ? <SectionSkeleton forRoute={forRoute} /> :
-      best_selling_error ? (
+    {bestSellingLoading ? <SectionSkeleton forRoute={forRoute} /> :
+      bestSellingError ? (
       <div className="text-center text-red-500 font-semibold py-4">
-        {best_selling_error} - Please try again later.
+        {bestSellingError} - Please try again later.
       </div>
     ) :
       <div className="container mx-auto ">
@@ -53,23 +64,23 @@ const BestSelling = ({forRoute}) => {
         <div className="flex flex-col lg:flex-row gap-4 min-h-[30vh] lg:max-h-[40vh]">
           {/*image slider*/}
           <div className="lg:w-4/6 w-full flex">
-              <Slider image_sliders={image_sliders} />
+              <Slider image_sliders={imageSliders} />
           </div>
     
           <div className="lg:w-2/6 gap-4 w-full  flex flex-col">
-            {right_banner?.media_type === 'image' &&
+            {rightBanner?.media_type === 'image' &&
               <>
                 {/* Product Image */}
-                <Link to={getLink(right_banner)} target='_blank' className="block h-full">
+                <Link to={getLink(rightBanner)} target='_blank' className="block h-full">
                   {/* Main Product Image */}
                   <img
-                    src={right_banner?.media}
-                    alt={right_banner?.caption}
+                    src={rightBanner?.media}
+                    alt={rightBanner?.caption}
                     loading="lazy"
                     className={`w-full h-full object-contain rounded-md transition-opacity duration-500 ${
                       isImageLoaded ? 'opacity-100' : 'opacity-0'
                     }`}
-                    onLoad={() => setIsImageLoaded(true)} // Set image loaded state
+                    onLoad={() => handleImageLoad('rightBanner')} // Set image loaded state
                   />
 
                   {/* Blurred Placeholder */}
@@ -83,12 +94,12 @@ const BestSelling = ({forRoute}) => {
                 </Link>
               </>
             }
-            {right_banner?.media_type === 'video' && 
+            {rightBanner?.media_type === 'video' && 
               <div className='relative h-full'>
-                <Link to={getLink(right_banner)} target='_blank' className='absolute right-2 top-2 z-10 cursor-pointer text-blue-500 hover:underline'>{right_banner?.caption?right_banner?.caption :'Click'}</Link>
+                <Link to={getLink(rightBanner)} target='_blank' className='absolute right-2 top-2 z-10 cursor-pointer text-blue-500 hover:underline'>{rightBanner?.caption?rightBanner?.caption :'Click'}</Link>
                 {/* Video */}
                 <video
-                  src={right_banner?.media}
+                  src={rightBanner?.media}
                   controls
                   autoPlay
                   muted
@@ -103,14 +114,14 @@ const BestSelling = ({forRoute}) => {
         }
 
 
-        {best_selling?.length != 0  &&
+        {bestSelling?.length != 0  &&
         <div className='my-5'>
           <h2 className="text-3xl font-bold">Best Selling</h2>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
             <span className="text-sm md:text-base text-gray-600">
               Discover the latest trends with our Best Selling Products.
             </span>
-            {!forRoute && !best_selling_Loading&&
+            {!forRoute && !bestSellingLoading&&
                 <Link
                   to="/products/best-selling"
                   className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
@@ -121,14 +132,14 @@ const BestSelling = ({forRoute}) => {
               }
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {best_selling?.map((product) => (
+            {bestSelling?.map((product) => (
               <ProductCard key={product?.id} product={product} />
             ))}
           </div>
         </div>
         }
 
-        {best_selling?.length != 0 &&
+        {bestSelling?.length != 0 &&
         <>
           {forRoute && 
             <div className='my-5'>
@@ -147,7 +158,7 @@ const BestSelling = ({forRoute}) => {
                 }
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                {best_selling?.map((product) => (
+                {bestSelling?.map((product) => (
                   <ProductCard key={product?.id} product={product} />
                 ))}
               </div>
