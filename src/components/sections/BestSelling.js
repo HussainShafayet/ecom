@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {Loader, ProductCard, Slider} from '../common'; // Assuming you have a ProductCard component
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchBestSellingProducts} from '../../redux/slice/productSlice';
 import {Link} from 'react-router-dom';
 import {fetchBestSellingContent, fetchFeaturedContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 import {SectionSkeleton} from '../common/skeleton';
+import {fetchBestSellingProducts} from '../../redux/slice/product/bestSellingSlice';
 
 const BestSelling = ({forRoute}) => {
-  const {best_selling_Loading, best_selling:products, best_selling_error} = useSelector((state)=> state.product);
+  const {best_selling_Loading, best_selling, best_selling_error} = useSelector((state)=> state.best_selling);
    const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
    const sectionError = useSelector((state) => state.globalError.sectionErrors["best-sale"]);
 
@@ -103,7 +103,7 @@ const BestSelling = ({forRoute}) => {
         }
 
 
-        {products?.length != 0  &&
+        {best_selling?.length != 0  &&
         <div className='my-5'>
           <h2 className="text-3xl font-bold">Best Selling</h2>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -121,14 +121,14 @@ const BestSelling = ({forRoute}) => {
               }
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {products?.map((product) => (
+            {best_selling?.map((product) => (
               <ProductCard key={product?.id} product={product} />
             ))}
           </div>
         </div>
         }
 
-        {products?.length != 0 &&
+        {best_selling?.length != 0 &&
         <>
           {forRoute && 
             <div className='my-5'>
@@ -147,7 +147,7 @@ const BestSelling = ({forRoute}) => {
                 }
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                {products?.map((product) => (
+                {best_selling?.map((product) => (
                   <ProductCard key={product?.id} product={product} />
                 ))}
               </div>
