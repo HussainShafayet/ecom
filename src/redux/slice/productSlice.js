@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {getAllProducts, getBestSellingProducts, getFeaturedProducts, getFlashSaleProducts, getProductById} from "../../services/productService";
+import {getAllProducts, getFeaturedProducts, getProductById} from "../../services/productService";
 import publicApi from "../../api/publicApi";
 const initialState = {
     isLoading: false,
@@ -31,15 +31,6 @@ export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", asy
 
     let response = await getAllProducts(page_size, ordering, page, category, brands,tags, min_price, max_price, sizes, colors,discount_type, discount_value,search);
     console.log('get all product res', response);
-    
-    return {data: response?.data?.data?.results || [], error: response.message};
-});
-
-
-//get flash sale products
-export const fetchFlashSaleProducts = createAsyncThunk("product/fetchFlashSaleProducts", async ({page=1, page_size=null})=>{
-    let response = await getFlashSaleProducts(page, page_size);
-    console.log('get flash sale product res', response);
     
     return {data: response?.data?.data?.results || [], error: response.message};
 });
@@ -139,31 +130,6 @@ const productSlice = createSlice({
             state.isLoading = false;
             //state.products = [];
             state.error = action?.error?.message || 'Something went wrong';
-        });
-
-
-        //get flash sale products
-        builder.addCase(fetchFlashSaleProducts.pending, (state)=>{
-            state.relatedProductsLoading = true;
-            state.flash_sale_Loading = true;
-        });
-        builder.addCase(fetchFlashSaleProducts.fulfilled,(state, action)=>{
-            
-            state.relatedProductsLoading = false;
-            state.flash_sale_Loading = false;
-            state.flash_sale_error = null;
-            state.flash_sale = action.meta.arg.page > 1 
-            ? [...state.flash_sale, ...action?.payload?.data] 
-            : action?.payload?.data;
-            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
-            
-            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
-        });
-        builder.addCase(fetchFlashSaleProducts.rejected,(state, action)=>{
-            state.relatedProductsLoading = false;
-            state.flash_sale_Loading = false;
-            //state.products = [];
-            state.flash_sale_error = action?.error?.message || 'Something went wrong';
         });
 
 

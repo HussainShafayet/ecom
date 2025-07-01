@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchFlashSaleProducts} from '../../redux/slice/productSlice';
 import {Loader, ProductCard, Slider} from '../common';
 import {Link} from 'react-router-dom';
 import {fetchFlashSaleContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 import {SectionSkeleton} from '../common/skeleton';
+import {fetchFlashSaleProducts} from '../../redux/slice/product/flashSaleSlice';
 
 const FlashSale = ({forRoute}) => {
-    const {flash_sale_Loading, flash_sale:products, flash_sale_error} = useSelector((state)=> state.product);
+    const {flash_sale_Loading, flash_sale:products, flash_sale_error} = useSelector((state)=> state.flash_sale);
     const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
     const sectionError = useSelector((state) => state.globalError.sectionErrors["flash-sale"]);
 
