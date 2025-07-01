@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {Loader, ProductCard, Slider} from '../common';
+import React, {useCallback, useEffect, useState} from 'react';
+import {shallowEqual, useDispatch, useSelector} from 'react-redux';
+import {ProductCard, Slider} from '../common';
 import {Link} from 'react-router-dom';
 import {fetchFlashSaleContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
@@ -8,37 +8,51 @@ import {SectionSkeleton} from '../common/skeleton';
 import {fetchFlashSaleProducts} from '../../redux/slice/product/flashSaleSlice';
 
 const FlashSale = ({forRoute}) => {
-    const {flash_sale_Loading, flash_sale:products, flash_sale_error} = useSelector((state)=> state.flash_sale);
-    const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
-    const sectionError = useSelector((state) => state.globalError.sectionErrors["flash-sale"]);
+  const dispatch = useDispatch();
+  const {
+    flash_sale_Loading,
+    flash_sale: products,
+    flash_sale_error,
+  } = useSelector((state) => state.flash_sale, shallowEqual);
 
-    const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
+  const {
+    image_sliders,
+    right_banner,
+  } = useSelector((state) => state.content, shallowEqual);
 
-    const dispatch = useDispatch();
+  const sectionError = useSelector(
+    (state) => state.globalError.sectionErrors["flash-sale"]
+  );
 
-    useEffect(() => {
-      if (forRoute) {
-        dispatch(fetchFlashSaleContent());
-      }
-      dispatch(fetchFlashSaleProducts({page_size: 12}));
-    }, [dispatch]);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
-    if (sectionError) {
-      return <div className="text-center text-red-500 font-semibold py-4">
+  // ✅ Prevent function recreation
+  const getLink = useCallback((item) => {
+    switch (item?.type) {
+      case "product":
+        return `/products/detail/${item?.link}`;
+      case "category":
+        return `/products/?category=${item?.link}`;
+      default:
+        return item?.external_link;
+    }
+  }, []);
+
+  // ✅ useEffect dependency fix
+  useEffect(() => {
+    if (forRoute) {
+      dispatch(fetchFlashSaleContent());
+    }
+    dispatch(fetchFlashSaleProducts({ page_size: 12 }));
+  }, [dispatch, forRoute]);
+
+  if (sectionError) {
+    return (
+      <div className="text-center text-red-500 font-semibold py-4">
         {sectionError} - Please try again later.
-      </div>;
-    }
-
-    const getLink = (item)=>{
-      switch (item?.type) {
-          case 'product':
-              return `/products/detail/${item?.link}`
-          case 'category':
-              return `/products/?category=${item?.link}`
-          default:
-             return item?.external_link;
-      }
-    }
+      </div>
+    );
+  }
 
   return (
     <>
@@ -103,7 +117,7 @@ const FlashSale = ({forRoute}) => {
         }
        
          
-          {products?.length != 0 &&
+          {products?.length !== 0 &&
           <div className='my-5'>
             <h2 className="text-3xl font-bold">Flash Sale</h2>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -130,7 +144,7 @@ const FlashSale = ({forRoute}) => {
         
         {forRoute && 
           <>
-          {products?.length != 0  &&
+          {products?.length !== 0  &&
             <div className='my-5'>
               <h2 className="text-3xl font-bold">Recomendent Products</h2>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
