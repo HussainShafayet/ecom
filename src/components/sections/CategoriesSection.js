@@ -46,7 +46,7 @@ const CategoriesSection = () => {
       </div>
     ) :
       <>
-      {categories?.length != 0  &&
+      {categories?.length !== 0  &&
       <div className="container mx-auto my-8">
         <h2 className="text-3xl font-bold">Shop by Category</h2>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -81,7 +81,7 @@ const CategoriesSection = () => {
                 {/* Discount Badge */}
                 {category?.has_discount && (
                   <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                    {category?.discount_amount}{category?.discount_type == 'percentage'?'%':'৳'} OFF
+                    {category?.discount_amount}{category?.discount_type === 'percentage'?'%':'৳'} OFF
                   </span>
                 )}
                 <Link to={`/products/?category=${category?.slug}`} target='_blank'>

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {ProductCard, Slider} from '../common'; // Assuming you have a ProductCard component
 import {useDispatch, useSelector} from 'react-redux';
 import {Link} from 'react-router-dom';
-import {fetchBestSellingContent, fetchFeaturedContent} from '../../redux/slice/contentSlice';
+import {fetchBestSellingContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 import {SectionSkeleton} from '../common/skeleton';
 import {fetchBestSellingProducts} from '../../redux/slice/product/bestSellingSlice';
@@ -14,8 +14,6 @@ const BestSelling = ({forRoute}) => {
 
 
   const imageSliders = useSelector((state) => state.content.image_sliders);
-  const videoSliders = useSelector((state) => state.content.video_sliders);
-  const leftBanner = useSelector((state) => state.content.left_banner);
   const rightBanner = useSelector((state) => state.content.right_banner);
 
    const sectionError = useSelector((state) => state.globalError.sectionErrors["best-sale"]);
@@ -114,7 +112,7 @@ const BestSelling = ({forRoute}) => {
         }
 
 
-        {bestSelling?.length != 0  &&
+        {bestSelling?.length !== 0  &&
         <div className='my-5'>
           <h2 className="text-3xl font-bold">Best Selling</h2>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -139,7 +137,7 @@ const BestSelling = ({forRoute}) => {
         </div>
         }
 
-        {bestSelling?.length != 0 &&
+        {bestSelling?.length !== 0 &&
         <>
           {forRoute && 
             <div className='my-5'>

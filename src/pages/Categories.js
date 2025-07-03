@@ -1,7 +1,6 @@
-import React, {useEffect, useRef, useState} from 'react'
-import {FaChevronLeft, FaChevronRight} from 'react-icons/fa';
+import {useEffect, useState} from 'react'
 import {useDispatch, useSelector} from 'react-redux';
-import {Loader, Slider} from '../components/common';
+import {Slider} from '../components/common';
 import {Link} from 'react-router-dom';
 import {fetchFlashSaleCategories, fetchNewArrivalCategories, fetchBestSellingCategories, fetchFeaturedCategories} from '../redux/slice/categorySlice';
 import {fetchCategoriesContent} from '../redux/slice/contentSlice';
@@ -10,9 +9,8 @@ import {HeroSectionSkeleton, SectionSkeleton} from '../components/common/skeleto
 
 const Categories = () => {
     const { flash_sale_loading,new_arrival_loading,best_selling_loading,featured_loading,flash_sale, new_arrival, best_selling,featured, flash_sale_error,new_arrival_error,best_selling_error,featured_error } = useSelector((state) => state.category);
-    const {isLoading, image_sliders, video_sliders, left_banner, right_banner, error} = useSelector((state)=> state.content);
+    const {isLoading, image_sliders, right_banner, error} = useSelector((state)=> state.content);
     const dispatch = useDispatch();
-    const scrollRef = useRef(null);
     const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
   
     useEffect(() => {
@@ -134,7 +132,7 @@ const Categories = () => {
                         {/* Discount Badge */}
                         {category?.has_discount && (
                         <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                            {category?.discount_amount}{category?.discount_type == 'percentage'?'%':'৳'} OFF
+                            {category?.discount_amount}{category?.discount_type === 'percentage'?'%':'৳'} OFF
                         </span>
                         )}
                         <Link to={`/products/?category=${category?.slug}`} key={category?.id} target='_blank'>
@@ -187,7 +185,7 @@ const Categories = () => {
                     {/* Discount Badge */}
                     {category?.has_discount && (
                     <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                        {category?.discount_amount}{category?.discount_type == 'percentage'?'%':'৳'} OFF
+                        {category?.discount_amount}{category?.discount_type === 'percentage'?'%':'৳'} OFF
                     </span>
                     )}
                     <Link to={`/products/?category=${category?.slug}`} key={category?.id} target='_blank'>
@@ -240,7 +238,7 @@ const Categories = () => {
                     {/* Discount Badge */}
                     {category?.has_discount && (
                     <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                        {category?.discount_amount}{category?.discount_type == 'percentage'?'%':'৳'} OFF
+                        {category?.discount_amount}{category?.discount_type === 'percentage'?'%':'৳'} OFF
                     </span>
                     )}
                     <Link to={`/products/?category=${category?.slug}`} key={category?.id} target='_blank'>
@@ -293,7 +291,7 @@ const Categories = () => {
                         {/* Discount Badge */}
                         {category?.has_discount && (
                         <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                            {category?.discount_amount}{category?.discount_type == 'percentage'?'%':'৳'} OFF
+                            {category?.discount_amount}{category?.discount_type === 'percentage'?'%':'৳'} OFF
                         </span>
                         )}
                         <Link to={`/products/?category=${category?.slug}`} target='_blank'>

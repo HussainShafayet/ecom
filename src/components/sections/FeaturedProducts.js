@@ -9,7 +9,7 @@ import {SectionSkeleton} from '../common/skeleton';
 
 const FeaturedProducts = ({forRoute}) => {
   const {featured_Loading, featured:products, featured_error} = useSelector((state)=> state.product);
-  const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
+  const {image_sliders, right_banner} = useSelector((state)=> state.content);
   const sectionError = useSelector((state) => state.globalError.sectionErrors["featured"]);
 
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
@@ -22,7 +22,7 @@ const FeaturedProducts = ({forRoute}) => {
       dispatch(fetchFeaturedContent());
     }
    dispatch(fetchFeaturedProducts({page_size:12}));
-  }, [dispatch]);
+  }, [dispatch, forRoute]);
 
   if (sectionError) {
     return <div className="text-center text-red-500 font-semibold py-4">
@@ -104,7 +104,7 @@ const FeaturedProducts = ({forRoute}) => {
         </div>
         }
 
-        {products.length != 0  &&
+        {products.length !== 0  &&
         <div className='my-5'>
           <h2 className="text-3xl font-bold">Featured Products</h2>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -129,7 +129,7 @@ const FeaturedProducts = ({forRoute}) => {
         </div>
         }
 
-        {products.length != 0  &&
+        {products.length !== 0  &&
         <>
         {forRoute && 
           <div className='my-5'>
