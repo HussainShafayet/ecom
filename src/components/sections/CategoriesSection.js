@@ -1,9 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchAllCategories } from '../../redux/slice/categorySlice';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import {Loader} from '../common';
 import CategorySectionSkeleton from '../common/skeleton/CategorySectionSkeleton';
 
 const CategoriesSection = () => {

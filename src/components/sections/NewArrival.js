@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import {Loader, ProductCard, Slider} from '../common'; // Assuming you have a ProductCard component
+import { useEffect, useState } from 'react';
+import {ProductCard, Slider} from '../common'; // Assuming you have a ProductCard component
 import {useDispatch, useSelector} from 'react-redux';
 import {Link} from 'react-router-dom';
 import {fetchNewArrivalContent} from '../../redux/slice/contentSlice';
@@ -12,7 +12,7 @@ const NewArrival = ({forRoute}) => {
   const newArrival = useSelector((state) => state.new_arrival.new_arrival);
   const newArrivalError = useSelector((state) => state.new_arrival.new_arrival_error);
 
-  const {image_sliders, video_sliders, left_banner, right_banner} = useSelector((state)=> state.content);
+  const {image_sliders, right_banner} = useSelector((state)=> state.content);
   const sectionError = useSelector((state) => state.globalError.sectionErrors["new-arrival"])
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
 
@@ -23,7 +23,7 @@ const NewArrival = ({forRoute}) => {
      dispatch(fetchNewArrivalContent());
    }
    dispatch(fetchNewArrivalProducts({page_size:12}));
-  }, [dispatch]);
+  }, [dispatch,forRoute]);
 
   if (sectionError) {
     return <div className="text-center text-red-500 font-semibold py-4">
@@ -106,7 +106,7 @@ const NewArrival = ({forRoute}) => {
         </div>
         }
 
-        {newArrival?.length != 0  &&
+        {newArrival?.length !== 0  &&
         <div className='my-5'>
           <h2 className="text-3xl font-bold">New Arrival</h2>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
@@ -137,7 +137,7 @@ const NewArrival = ({forRoute}) => {
         }
 
 
-        {newArrival?.length != 0 &&
+        {newArrival?.length !== 0 &&
           <>
           {forRoute && 
             <div className='my-5'>

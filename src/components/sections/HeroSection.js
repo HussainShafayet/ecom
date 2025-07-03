@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaChevronRight, FaChevronLeft } from 'react-icons/fa6';
-import {Loader, Slider} from '../common';
+import {Slider} from '../common';
 import {fetchHomeContent} from '../../redux/slice/contentSlice';
 import {useDispatch, useSelector} from 'react-redux';
 import {Link} from 'react-router-dom';

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import {useEffect } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts} from '../../redux/slice/productSlice';
-import {Loader, ProductCard} from '../common';
+import {ProductCard} from '../common';
 import {Link} from 'react-router-dom';
 import {SectionSkeleton} from '../common/skeleton';
 
