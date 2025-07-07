@@ -1,4 +1,3 @@
-import ProductCardSkeleton from "./ProductCardSkeleton";
 
 const CartSkeleton = () => {
     return (
