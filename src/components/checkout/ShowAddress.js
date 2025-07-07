@@ -6,7 +6,7 @@ import { districtsData, divisionsData, upazilasData } from '../../data/location'
 
 const ShowAddress = () => {
   const dispatch = useDispatch();
-  const { isLoading, selectedAddressId, addresses } = useSelector((state) => state.checkout);
+  const {selectedAddressId, addresses } = useSelector((state) => state.checkout);
 
   const handleAddressSelection = (id) => {
     dispatch(setSelectedAddressId(id));
