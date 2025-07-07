@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Accordion, SelectFilter, Loader} from '../../common';
-import { FaTags, FaDollarSign, FaIndustry, FaStar, FaCheck, FaFilter, FaTshirt, FaPalette, FaChevronDown, FaChevronRight } from 'react-icons/fa';
+import { FaTags, FaDollarSign, FaIndustry, FaFilter, FaTshirt, FaPalette, FaChevronDown, FaChevronRight } from 'react-icons/fa';
 import {useDispatch, useSelector} from "react-redux";
 import {fetchShopContent} from "../../../redux/slice/contentSlice";
 import {useSearchParams} from "react-router-dom";
@@ -221,7 +221,7 @@ const Sidebar = ({ onClose }) => {
                 <input
                   type="radio"
                   name="discount"
-                  checked={selectedDiscount == discount.value}
+                  checked={selectedDiscount === discount.value}
                   onChange={() => handleDiscountChange(discount)}
                   className="form-radio text-red-500 rounded-sm mr-2"
                 />

@@ -1,17 +1,14 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToCart, handleAddtoCart, handleClonedProduct } from '../../../redux/slice/cartSlice';
 import { FaHeart, FaEye, FaShoppingCart, FaRegHeart } from 'react-icons/fa';
 import {addToWishlist, handleAddtoWishlist, handleRemovetoWishlist, removeFromWishlist} from '../../../redux/slice/wishlistSlice';
-import {addToCartAndRemoveFromWishlist} from '../../../redux/slice/cartSlice';
-import blurImage from '../../../assets/images/blur.jpg';
 
 const ProductCard = ({ product, cardForTrending }) => {
   const {isAuthenticated} = useSelector((state)=> state.auth);
-  const {cartLoading, cartError, cartAddedSuccessfull} = useSelector((state)=> state.cart);
-  const addcartError = useSelector((state) => state.globalError.sectionErrors["add-cart"]);
-  const {items:wishlist, favouriteIds, removeFavouriteItem} = useSelector ((state) => state.wishList);
+  const {cartLoading} = useSelector((state)=> state.cart);
+  const {favouriteIds} = useSelector ((state) => state.wishList);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
@@ -79,16 +76,15 @@ const ProductCard = ({ product, cardForTrending }) => {
   
   
   // Check if the product is already in the wishlist
-  const isInWishlist = wishlist.some(item => item.id === product.id);
+  //const isInWishlist = wishlist.some(item => item.id === product.id);
 
-  const handleWishlistToggle = () => {
-    if (isInWishlist) {
-      dispatch(removeFromWishlist(product.id));
-    } else {
-      dispatch(handleAddtoWishlist({product_id: product.id}));
-      //dispatch(addToWishlist(product));
-    }
-  };
+  //const handleWishlistToggle = () => {
+  //  if (isInWishlist) {
+  //    dispatch(removeFromWishlist(product.id));
+  //  } else {
+  //    dispatch(handleAddtoWishlist({product_id: product.id}));
+  //  }
+  //};
 
   const handleAddToWishlist = () =>{
     if (isAuthenticated) {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaEdit, FaStar, FaUserCircle } from "react-icons/fa";
 import {useDispatch, useSelector} from "react-redux";
 import {useLocation, useNavigate} from "react-router-dom";
@@ -8,21 +8,21 @@ import Loader from "../Loader";
 const RatingAndReview = ({ product }) => {
   const [hoverRating, setHoverRating] = useState(0);
   const [can_edited, setCanEdited] = useState(null);
-  const {isAuthenticated, user} = useSelector((state)=>state.auth);
+  const {isAuthenticated} = useSelector((state)=>state.auth);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const {reviewLoading, reviews, reviewError, can_review, reviewFormData, addReviewCompleted, updateReviewCompleted} = useSelector((state)=> state.review);
+  const {reviewLoading, reviews, can_review, reviewFormData, addReviewCompleted, updateReviewCompleted} = useSelector((state)=> state.review);
   const dispatch = useDispatch();
 
   useEffect(() => {
     product.id && dispatch(fetchReviews(product.id));
-    product && dispatch(updateReviewFormData({ ['product_id']: product.id }))
-  }, [product]);
+    product && dispatch(updateReviewFormData({ product_id: product.id }))
+  }, [product, dispatch]);
 
   useEffect(() => {
     addReviewCompleted && dispatch(resetReviewFormData());
-  }, [addReviewCompleted]);
+  }, [addReviewCompleted, dispatch]);
 
   useEffect(() => {
     updateReviewCompleted && setCanEdited(null);
@@ -79,11 +79,10 @@ const RatingAndReview = ({ product }) => {
 
   const handleCanEdited = (review) => {
     setCanEdited(review.id);
-    
-    dispatch(dispatch(updateReviewFormData({ ['product_id']: review.product_id})));
-    dispatch(dispatch(updateReviewFormData({ ['rating']: review.rating})));
-    dispatch(dispatch(updateReviewFormData({ ['comment']: review.comment})));
-    dispatch(dispatch(updateReviewFormData({ ['media']: review.media_urls})));
+   dispatch(dispatch(updateReviewFormData({ product_id: review.product_id })));
+  dispatch(dispatch(updateReviewFormData({ rating: review.rating })));
+  dispatch(dispatch(updateReviewFormData({ comment: review.comment })));
+  dispatch(dispatch(updateReviewFormData({ media: review.media_urls })));
     
   }
   return (
@@ -190,7 +189,7 @@ const RatingAndReview = ({ product }) => {
                         ? "text-yellow-500"
                         : "text-gray-300"
                     }`}
-                    onClick={() => dispatch(updateReviewFormData({ ['rating']: i+1}))}
+                    onClick={() => dispatch(updateReviewFormData({ 'rating': i+1}))}
                     onMouseEnter={() => setHoverRating(i + 1)}
                     onMouseLeave={() => setHoverRating(0)}
                   />
@@ -201,7 +200,7 @@ const RatingAndReview = ({ product }) => {
             <textarea
               placeholder="Share your experience..."
               value={reviewFormData.comment}
-              onChange={(e) => dispatch(updateReviewFormData({ ['comment']: e.target.value }))}
+              onChange={(e) => dispatch(updateReviewFormData({ 'comment': e.target.value }))}
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
               rows="4"
             ></textarea>
