@@ -79,7 +79,7 @@ const SearchDropdown = () => {
       />
       {isDropdownOpen && (
         <ul className="absolute left-0 w-full mt-1 bg-white border border-gray-300 shadow-lg rounded-md max-h-[80vh] overflow-y-auto">
-        {suggestionsLoading && suggestions.length == 0 ?
+        {suggestionsLoading && suggestions.length === 0 ?
         <div className="animate-pulse p-3">
             {Array.from({ length: 10 }).map((_, index) => (
             <li
