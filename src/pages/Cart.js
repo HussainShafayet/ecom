@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTrash, FaArrowRight } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {removeFromCart, updateQuantity, selectCartItems, selectTotalPrice, handleFetchCart, handleRemovetoCart, handleAddtoCart, clearCart} from '../redux/slice/cartSlice';
+import {removeFromCart, updateQuantity, selectTotalPrice, handleFetchCart, handleRemovetoCart, handleAddtoCart, clearCart} from '../redux/slice/cartSlice';
 import {fetchAllProducts} from '../redux/slice/productSlice';
 import {Loader, ProductCard} from '../components/common';
 import debounce from 'lodash.debounce'; // Import lodash debounce
@@ -13,7 +13,7 @@ const Cart = () => {
   const totalPrice = useSelector(selectTotalPrice);
   const [confirmDelete, setConfirmDelete] = useState({});
   const [confirmAllDelete, setConfirmAllDelete] = useState(false);
-  const {cartItems, cartFetchLoading, cartFetchError, cartRemoveLoading, cartRemoveError} = useSelector((state)=> state.cart);
+  const {cartItems, cartFetchLoading, cartFetchError, cartRemoveError} = useSelector((state)=> state.cart);
 
   const {isLoading, items:products, error} = useSelector((state)=> state.product);
   const {isAuthenticated} = useSelector((state)=> state.auth);
@@ -170,7 +170,7 @@ const Cart = () => {
                             <p className="text-gray-500 line-through">{item?.base_price}</p>
                             <p className="text-green-600 font-semibold">
                               {item?.discount_price}{' '}
-                              <span className="text-red-500">({item?.discount_value}{item?.discount_type == 'percentage' ? '%' : '৳'} OFF)</span>
+                              <span className="text-red-500">({item?.discount_value}{item?.discount_type === 'percentage' ? '%' : '৳'} OFF)</span>
                             </p>
                           </div>
                         ) : (
