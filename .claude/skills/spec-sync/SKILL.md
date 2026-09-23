@@ -23,12 +23,14 @@ The point of keeping both updated is to avoid re-deriving the same understanding
 
 If the change spans a genuinely new area none of these four cover (e.g. the app grows a payments module, a test suite, a second app shell), don't force it into an existing file — propose a new `docs/spec/0N-<name>.md` to the user, following the same structure (prose sections + a trailing "Flagged issues" list) and add it to `docs/spec/README.md`'s index.
 
-## Step 2: Decide whether this needs subagents
+## Step 2: Decide whether this needs subagents — and ask before launching any
 
 This is the main judgment call, and it should track the actual size of the task, not the phrasing of the request:
 
-- **Broad task** — "give me a full overview", "audit the codebase", a multi-module refactor, or the first time spec-sync runs on a repo that has no `docs/spec/` yet: dispatch one `Explore` (or `general-purpose`) subagent **per affected module, in parallel, in a single message**. Give each subagent a self-contained prompt: which files to read, what to report (state shape / props / endpoints as applicable to that module), and to end with a "flagged issues" list of anything odd, broken, or inconsistent it notices — not just a description of what the code does. Use the existing `docs/spec/*.md` files as the reference for the level of detail and tone expected back.
-- **Targeted task** — one feature, one slice, one page, one component touched: just read the changed files yourself and patch the relevant section(s) directly. Spawning agents for a small diff wastes tokens and time for no benefit — the whole point of keeping the spec current incrementally is to make the expensive full-audit path rare.
+- **Broad task** — "give me a full overview", "audit the codebase", a multi-module refactor, or the first time spec-sync runs on a repo that has no `docs/spec/` yet: this is a candidate for parallel subagents, one `Explore` (or `general-purpose`) agent per affected module.
+- **Targeted task** — one feature, one slice, one page, one component touched: just read the changed files yourself and patch the relevant section(s) directly, no subagents. Spawning agents for a small diff wastes tokens and time for no benefit — the whole point of keeping the spec current incrementally is to make the expensive full-audit path rare.
+
+For a broad task, **don't dispatch subagents automatically** — say which modules you'd cover and how many agents that means, and wait for the user to confirm before launching them. The user would rather approve the expensive step than have it fire on its own. Only once they confirm, dispatch one subagent per affected module in parallel, in a single message. Give each subagent a self-contained prompt: which files to read, what to report (state shape / props / endpoints as applicable to that module), and to end with a "flagged issues" list of anything odd, broken, or inconsistent it notices — not just a description of what the code does. Use the existing `docs/spec/*.md` files as the reference for the level of detail and tone expected back.
 
 ## Step 3: Update the spec files — in place, only what changed
 
