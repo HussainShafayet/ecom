@@ -7,7 +7,7 @@ import { Logout } from "../redux/slice/authActions";
 import { setGlobalError, setSectionError } from "../redux/slice/globalErrorSlice";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_BASE_URL,
+  baseURL: import.meta.env.VITE_BASE_URL,
 });
 
 api.interceptors.request.use((config) => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { HeroSection, FeaturedProducts, CategoriesSection, DealsAndDiscounts, NewArrival, BestSelling, FlashSale, AllProducts } from '../components/sections';
+import { HeroSection, FeaturedProducts, CategoriesSection, NewArrival, BestSelling, FlashSale, AllProducts } from '../components/sections';
 import Testimonials from '../components/sections/Testomonials';
 
 const Home = () => {

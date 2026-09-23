@@ -6,23 +6,24 @@ For full detail beyond what's summarized here (every Redux slice, every route, t
 
 ## Project overview
 
-GoCart is a **frontend-only** e-commerce single-page app built with Create React App (React 18), Redux Toolkit, and Tailwind CSS. There is no backend code in this repo — every API call goes to an external REST service reachable at `REACT_APP_BASE_URL`, using a Django-REST-Framework-style response envelope (`{ data: {...}, message, errors }`).
+GoCart is a **frontend-only** e-commerce single-page app built with React 19, Vite, Redux Toolkit, and Tailwind CSS. There is no backend code in this repo — every API call goes to an external REST service reachable at `VITE_BASE_URL`, using a Django-REST-Framework-style response envelope (`{ data: {...}, message, errors }`).
 
 ## Commands
 
 ```bash
-npm install       # install dependencies
-npm start          # dev server (react-scripts start), http://localhost:3000
-npm run build       # production build
-npm test            # react-scripts test (Jest + React Testing Library) — no test files exist yet despite the deps being installed
-npm run eject         # one-way eject from CRA — do not run unless explicitly asked
+npm install        # install dependencies
+npm run dev         # Vite dev server, http://localhost:3000
+npm run build        # production build (outputs to build/)
+npm run preview       # locally preview the production build
+npm test              # vitest run — no test files exist yet despite the testing-library deps being installed
+npm run lint            # eslint .
 ```
 
-There is no separate lint script; linting runs via CRA's built-in `eslint-config-react-app` (`eslintConfig` in package.json) as part of `npm start`/`npm run build`.
+JSX-containing files in this repo use a `.js` extension, not `.jsx` — `vite.config.js` configures esbuild to parse `.js` under `src/` as JSX rather than requiring a rename. Keep new files consistent with that (`.js`, not `.jsx`) unless asked otherwise.
 
 ### Required environment variable
 
-`REACT_APP_BASE_URL` must be set (e.g. in a local, gitignored `.env`) or every API call fails with a network error. There is no `.env.example` in the repo — this is undocumented anywhere else, so ask the user for the correct backend URL if it's not already configured locally.
+`VITE_BASE_URL` must be set (e.g. in a local, gitignored `.env`, see `.env.example`) or every API call fails with a network error.
 
 ## Architecture
 

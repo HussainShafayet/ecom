@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { FaUserEdit, FaBoxOpen, FaMapMarkerAlt, FaCreditCard, FaLock, FaPlus, FaHeart, FaBell, FaHistory, FaCamera, FaPlusCircle, FaSpinner } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {getUser} from '../../redux/slice/authSlice';
 import {useNavigate} from 'react-router-dom';
 import {handleAddressCreate, handleGetAddress, handleGetProfile, handleProfileUpdate, handleSendOtp, handleSubmitOtp, resetAddressForm, setDistricts, setErrors, setImage, setInfoEditing, setIsAddAddress, setOtp, setUpazilas, statusUpdateVerified, statusUpdateVerifyPopup, updateAddressFormData, updatePreviousValue, updateTouched} from '../../redux/slice/profileSlice';
 import {ErrorDisplay, Loader, SuccessMessage} from '../../components/common';

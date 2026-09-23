@@ -81,7 +81,7 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
 export const refreshToken = createAsyncThunk('auth/refreshToken', async (credentials , { rejectWithValue, getState }) => {
   try {
     const { accessToken } = getState().auth;
-    const baseUrl = process.env.REACT_APP_BASE_URL;
+    const baseUrl = import.meta.env.VITE_BASE_URL;
     const response = await axios.post(`${baseUrl}accounts/token/refresh/`,credentials, {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -117,7 +117,7 @@ export const logoutUser = createAsyncThunk('auth/logoutUser', async (credential,
       access: accessToken,
       refresh: refresh_token,
     }
-    const baseUrl = process.env.REACT_APP_BASE_URL;
+    const baseUrl = import.meta.env.VITE_BASE_URL;
     const response = await axios.post(`${baseUrl}accounts/logout/`,logout_body, {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
