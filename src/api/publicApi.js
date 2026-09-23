@@ -1,7 +1,7 @@
 import axios from "axios";
 import {setGlobalError, setSectionError} from "../redux/slice/globalErrorSlice";
 
-const BASE_URL = process.env.REACT_APP_BASE_URL;
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const publicApi = axios.create({
   baseURL: BASE_URL,

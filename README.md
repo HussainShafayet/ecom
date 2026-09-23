@@ -18,7 +18,7 @@ It demonstrates best practices in React architecture, state management, and scal
 
 ## 🚀 Features
 
-- 🔥 **React 18** with Functional Components & Hooks  
+- 🔥 **React 19** with Functional Components & Hooks  
 - 🗂 **Redux Toolkit** for state management  
 - 🛡️ **Redux Persist** for persistent state (Cart, Wishlist)  
 - 🔄 **Redux Thunk** for async actions  
@@ -62,9 +62,15 @@ cd ecom
 ```bash
 npm install
 ```
-### 2. Start the Development Server
+### 2. Configure environment variables
 ```bash
-npm start
+cp .env.example .env
+# then fill in VITE_BASE_URL with the backend API URL
+```
+
+### 3. Start the Development Server
+```bash
+npm run dev
 ```
 ## 🏗️ Build
 ```bash

@@ -2,7 +2,7 @@
 
 ## Axios setup
 
-**`axiosSetup.js`** — the authenticated client. `baseURL: process.env.REACT_APP_BASE_URL`. Request interceptor reads `accessToken` from the Redux `auth` slice and sets `Authorization: Bearer <token>`. Response interceptor:
+**`axiosSetup.js`** — the authenticated client. `baseURL: import.meta.env.VITE_BASE_URL`. Request interceptor reads `accessToken` from the Redux `auth` slice and sets `Authorization: Bearer <token>`. Response interceptor:
 - No `error.response` → dispatches `setGlobalError("Network error...")`.
 - `401` + not already retried → reads the `refresh_token` cookie, dispatches the `refreshToken` thunk, retries the original request with the new token; on failure dispatches `Logout()` + `setGlobalError("Session expired...")`.
 - Other statuses → mapped via `getErrorMessage(status)` (400/403/404/429/5xx + default) and dispatched as `setSectionError({section, error})` if `config.section` is set, else `setGlobalError`.
@@ -80,7 +80,7 @@ Pure static data — Bangladesh administrative geography: `divisionsData` (8 div
 
 ## Environment / config
 
-CRA app (`react-scripts` 5.0.1), Redux Toolkit + redux-persist + redux-thunk, axios 1.7.7, js-cookie 3.0.5, Tailwind 3.4 + PostCSS/autoprefixer (standard CRA-Tailwind config, nothing unusual). `REACT_APP_BASE_URL` is required for every API call and is documented in `.env.example` at the repo root (added alongside this spec) — copy it to `.env` and fill in a real backend URL to run the app locally.
+Vite + `@vitejs/plugin-react` (migrated off Create React App), Redux Toolkit + redux-persist + redux-thunk, axios 1.7.7, js-cookie 3.0.5, Tailwind 3.4 + PostCSS/autoprefixer (standard Vite-Tailwind config, nothing unusual). `VITE_BASE_URL` is required for every API call and is documented in `.env.example` at the repo root — copy it to `.env` and fill in a real backend URL to run the app locally. Accessed in source via `import.meta.env.VITE_BASE_URL`, not `process.env`.
 
 ## Flagged issues
 
@@ -92,4 +92,4 @@ CRA app (`react-scripts` 5.0.1), Redux Toolkit + redux-persist + redux-thunk, ax
 - A few endpoint strings are missing the leading slash (profileSlice's OTP endpoints, all of reviewSlice's endpoints) — works only because axios baseURL concatenation happens to tolerate it, but inconsistent with the rest of the codebase.
 - Leftover `console.log(section)` / other debug logging left in both interceptors and most thunks.
 - `location.js` has the corrupted upazila name noted above.
-- Confirmed frontend-only repo — no backend/server code anywhere in the tree; every endpoint above is assumed to be served by an external API reachable at `REACT_APP_BASE_URL`.
+- Confirmed frontend-only repo — no backend/server code anywhere in the tree; every endpoint above is assumed to be served by an external API reachable at `VITE_BASE_URL`.

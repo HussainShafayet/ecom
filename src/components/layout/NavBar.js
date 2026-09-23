@@ -59,7 +59,7 @@ const Navbar = () => {
         <div className="flex items-center space-x-3 md:space-x-4">
           <Link to='/'>
             <img
-              src={`${process.env.PUBLIC_URL}/static image/gocart-logo.svg`}
+              src="/static image/gocart-logo.svg"
               alt="Website Logo"
               className="w-12 h-12 md:w-16 md:h-16 transition-shadow duration-300"
             />

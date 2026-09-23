@@ -5,7 +5,7 @@ import { ErrorDisplay, InputField, Loader, ProductCard, RatingAndReview, RichTex
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts, setSelectedColor, setSelectedSize} from '../redux/slice/productSlice';
 //import {addToCart} from '../redux/slice/cartSlice';
-import {addToCart, addToCartAndRemoveFromWishlist, handleAddtoCart, handleClonedProduct} from '../redux/slice/cartSlice';
+import {addToCart, handleAddtoCart, handleClonedProduct} from '../redux/slice/cartSlice';
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 import {ProductDetailsSkeleton} from '../components/common/skeleton';
