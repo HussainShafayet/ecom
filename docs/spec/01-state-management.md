@@ -6,7 +6,7 @@
 
 The `auth` reducer gets its **own, separate** nested `persistReducer` (`key: "auth"`, `whitelist: ["isAuthenticated"]`) before being combined into the root — so auth is persisted independently of, and in addition to, the root whitelist (which doesn't list `"auth"` itself). Easy to miss; worth remembering when debugging why auth state does or doesn't survive a refresh.
 
-All other slices (`product`, `new_arrival`, `best_selling`, `flash_sale`, `category`, `checkout`, `content`, `profile`, `review`, `globalError`) are **not** persisted.
+All other slices (`product`, `new_arrival`, `best_selling`, `flash_sale`, `category`, `checkout`, `content`, `profile`, `review`, `order`, `globalError`) are **not** persisted.
 
 Middleware: default RTK middleware with `serializableCheck: false`. Two custom middlewares (`cartMiddleware`, `wishlistMiddleware`) exist in commented-out/dead form. `persistor` is exported via `persistStore(store)` and wired in `src/index.js` with `<Provider>` + `<PersistGate loading={null}>`.
 
@@ -47,13 +47,21 @@ Pure read state for 5 category groupings (all, flash-sale, new-arrival, best-sel
 
 ## `slice/checkoutSlice.js`
 
-Large form-state slice: `formData` (shipping/payment fields), `errors`, `touched`, `districts`/`upazilas`, `addresses`, `delivery_charges`, `user_info`, `order_id`, `isCheckoutFulfilled`.
+Large form-state slice: `formData` (shipping/payment fields), `errors`, `touched`, `districts`/`upazilas`, `addresses`, `delivery_charges`, `user_info`, `order_id`, `order` (the `POST /orders/` answer `{order_id, status, created_at, subtotal, delivery_charge, total}`, handed to the confirmation page; cleared by `resetForm`), `isCheckoutFulfilled`.
 
 Thunks:
 - `handleCheckout` → `POST /orders/` (branches authenticated client vs `publicApi`; dispatches `clearCart()` on success)
 - `handleGetCheckoutContent` → `GET /content/checkout/` (same auth branching; populates `formData.name/phone/email` from `user_info`)
 
 Plain thunk `initializeCheckout()` dispatches `handleGetCheckoutContent` and, if authenticated, `handleFetchCart()` — cross-slice orchestration living outside any single slice file. A large commented-out block references a nonexistent `handleGetProfile`/`setAddress` flow (dead code / abandoned direction). Not persisted, so a page refresh mid-checkout loses form progress.
+
+## `slice/orderSlice.js`
+
+A customer's orders. Calls go through `services/orderService.js` (not inlined). Not persisted; **reset to its initial state on `logoutUser.fulfilled`/`rejected`**, so nothing of one customer's orders is left for the next person on the browser. Errors are stored as the backend's `errors` sentences (an array, for `ErrorDisplay`).
+
+State: `orders`/`ordersCount`/`ordersNext`/`ordersPrevious`/`ordersLoading`/`ordersError` (the list page), `order`/`orderLoading`/`orderError` (detail and confirmation), `cancelLoading`/`cancelError`, `tracking`/`trackingLoading`/`trackingError` (the guest lookup).
+
+Thunks: `fetchOrders({page, page_size})` → `GET /orders/`; `fetchOrder(orderId)` → `GET /orders/{id}/`; `cancelOrder(orderId)` → `POST /orders/{id}/cancel/` (replaces `order` with the answer and updates the row in `orders`); `trackOrder({order_id, phone_number})` → `GET /orders/track/` (public client). Sync reducers: `clearOrder`, `clearTracking`.
 
 ## `slice/contentSlice.js`
 
@@ -86,7 +94,7 @@ Not persisted — the full profile/address list is refetched every session.
 
 ## `slice/reviewSlice.js`
 
-State: `reviews`, `can_review`, `reviewFormData` (product_id/rating/comment/media), add/update loading+completed flags.
+State: `reviews`, `can_review`, `review_status` + `review_order_id` (the backend's answer to *why* the signed-in customer may not review: `can_review` | `reviewed` | `waiting_for_delivery` (with the number of the order they are waiting for) | `not_purchased` | `guest`), `reviewFormData` (product_id/rating/comment/media), add/update loading+completed flags. `createReview.fulfilled` sets `can_review=false` and `review_status='reviewed'` (one review per product, so the form closes). Reset to the initial state on `logoutUser.fulfilled`/`rejected` (which reviews the customer may edit, and whether they may review, are theirs).
 
 Thunks via the authenticated client: `fetchReviews` (`GET products/reviews/?product_id=`), `createReview` (`POST products/reviews/`), `updateReview` (`PUT products/reviews/:id/`). Cosmetic typo in a thunk type string: `'review/fetchRevies'` (doesn't affect behavior). Not persisted.
 

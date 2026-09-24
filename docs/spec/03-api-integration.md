@@ -56,6 +56,10 @@ Both files derive `errorMessage` from HTTP status only — the backend error bod
 | GET | `/accounts/cart/` | inlined | cartSlice (fetch) |
 | PUT | `/accounts/cart/` | inlined | cartSlice (remove — `PUT`, not `DELETE`) |
 | POST | `/orders/` | inlined | checkoutSlice (authenticated client if logged in, `publicApi` otherwise) |
+| GET | `/orders/?page=&page_size=` | `getOrders` (orderService) | `fetchOrders` (orderSlice) |
+| GET | `/orders/{orderId}/` | `getOrder` | `fetchOrder` (orderSlice; also the confirmation page) |
+| POST | `/orders/{orderId}/cancel/` | `cancelOrder` | `cancelOrder` (orderSlice) |
+| GET | `/orders/track/?order_id=&phone_number=` | `trackOrder` (uses `publicApi`) | `trackOrder` (orderSlice) |
 | GET | `/content/checkout/` | inlined | checkoutSlice |
 | GET | `products/reviews/?product_id=` (no leading `/`) | inlined | reviewSlice |
 | POST | `products/reviews/` (no leading `/`) | inlined | reviewSlice |
@@ -63,7 +67,7 @@ Both files derive `errorMessage` from HTTP status only — the backend error bod
 
 Response shape convention: a DRF-style envelope `{ data: { results, count, ... } | data: {...}, message, errors }` — thunks read `response.data.data.results` or `response.data.data`, and rejection paths return `error.response?.data` (typically containing `.errors`).
 
-Only `categoryService.js`, `contentService.js`, and `productService.js` exist under `src/services/` — auth, profile, cart, wishlist, checkout, and review calls are all inlined directly in their slices rather than routed through a service module (3 of 9 domains have a service layer, the rest don't). `productService.js` also lazy-imports `axiosSetup` per-call (`await import(...)`) to dodge the same circular-dependency issue many slices work around inline.
+Only `categoryService.js`, `contentService.js`, `productService.js` and `orderService.js` exist under `src/services/` — auth, profile, cart, wishlist, checkout, and review calls are all inlined directly in their slices rather than routed through a service module (3 of 9 domains have a service layer, the rest don't). `productService.js` also lazy-imports `axiosSetup` per-call (`await import(...)`) to dodge the same circular-dependency issue many slices work around inline.
 
 ## Error-handling pipeline
 

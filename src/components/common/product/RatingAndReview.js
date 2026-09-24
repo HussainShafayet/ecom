@@ -1,9 +1,27 @@
 import { useEffect, useState } from "react";
 import { FaEdit, FaStar, FaUserCircle } from "react-icons/fa";
 import {useDispatch, useSelector} from "react-redux";
-import {useLocation, useNavigate} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import {createReview, fetchReviews, resetReviewFormData, setMediaFiles, updateReview, updateReviewFormData} from "../../../redux/slice/reviewSlice";
 import Loader from "../Loader";
+
+// Why the signed-in customer can not write a review (yet). `status` is the backend's review_status; `orderId` is the
+// order they are waiting for when it is 'waiting_for_delivery'. Anything else (an older backend sends no status) gets
+// the general rule.
+const ReviewEligibility = ({ status, orderId }) => {
+  if (status === 'reviewed') {
+    return <p className="text-gray-600">You have already reviewed this product. Use the edit icon on your review to change it.</p>;
+  }
+  if (status === 'waiting_for_delivery') {
+    return (
+      <p className="text-gray-600">
+        You can review this product once your order has been delivered.{' '}
+        {orderId && <Link to={`/orders/${orderId}`} className="text-blue-500 underline">View my order</Link>}
+      </p>
+    );
+  }
+  return <p className="text-gray-600">You can review a product once you have bought it and your order has been delivered.</p>;
+};
 
 const RatingAndReview = ({ product }) => {
   const [hoverRating, setHoverRating] = useState(0);
@@ -12,7 +30,7 @@ const RatingAndReview = ({ product }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const {reviewLoading, reviews, can_review, reviewFormData, addReviewCompleted, updateReviewCompleted} = useSelector((state)=> state.review);
+  const {reviewLoading, reviews, can_review, review_status, review_order_id, reviewFormData, addReviewCompleted, updateReviewCompleted} = useSelector((state)=> state.review);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -298,9 +316,7 @@ const RatingAndReview = ({ product }) => {
             </div>
           </form>
         : 
-        <p className="text-gray-600">
-          You have to buy this product for eligable to add a review.
-        </p>
+        <ReviewEligibility status={review_status} orderId={review_order_id} />
         }
 
         </div>
