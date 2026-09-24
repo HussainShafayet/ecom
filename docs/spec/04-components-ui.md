@@ -57,7 +57,8 @@ Consistent pattern: plain functional components using Tailwind's `animate-pulse`
 ## `checkout/`
 
 - **ShowAddress.js** — selectable grid of saved shipping addresses; updates the Redux `checkout` slice's form data and cascades division→district→upazila lookups from the static `data/location` datasets.
-- **checkout/index.js** — barrel exporting `ShowAddress` only.
+- **CheckoutErrors.js** — why the shop refused the order: the backend's sentences (`checkoutSlice.responseError`, an array) in an `ErrorDisplay`, "Nothing was ordered" and a link back to `/cart`; scrolls itself into view; renders nothing without errors. Placed right above the *Place Order* button in `Checkout.js`.
+- **checkout/index.js** — barrel exporting `ShowAddress` and `CheckoutErrors`.
 
 ## `orders/`
 

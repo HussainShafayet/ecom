@@ -37,7 +37,7 @@ Thunks (dynamic `import('../../api/axiosSetup')`, authenticated client):
 - `handleFetchCart` → `GET /accounts/cart/`
 - `handleRemovetoCart` → `PUT /accounts/cart/` (not `DELETE` — matches the backend contract)
 
-Sync reducers `addToCart`, `removeFromCart`, `updateQuantity`, `clearCart` operate purely on local `cartItems` (no API call), matched on `id` + optional `variant_id`. Selectors: `selectCartItems`, `selectCartCount`, `selectTotalPrice` (uses `discount_price` if `has_discount` else `base_price`). Helper `handleClonedProduct(...)` builds a cart-item DTO from a product/variant.
+Sync reducers `addToCart`, `removeFromCart`, `updateQuantity`, `clearCart` operate purely on local `cartItems` (no API call), matched on `id` + optional `variant_id`. Selectors: `selectCartItems`, `selectCartCount`, `selectTotalPrice` (uses `discount_price` if `has_discount` else `base_price`). Helper `handleClonedProduct(...)` builds a cart-item DTO from a product/variant (it keeps `minimum_order_quantity`, which the cart and the product cards use: `src/utils/minimumOrder.js` has `minimumOf`, `belowMinimum` and `minimumOrderProblems`, worded like the backend's checkout refusal).
 
 Persisted via the root whitelist (`"cart"`). Dead code: commented-out `loadCartFromLocalStorage`/`saveCartToLocalStorage`, and the commented-out `cartMiddleware`.
 
@@ -47,7 +47,7 @@ Pure read state for 5 category groupings (all, flash-sale, new-arrival, best-sel
 
 ## `slice/checkoutSlice.js`
 
-Large form-state slice: `formData` (shipping/payment fields), `errors`, `touched`, `districts`/`upazilas`, `addresses`, `delivery_charges`, `user_info`, `order_id`, `order` (the `POST /orders/` answer `{order_id, status, created_at, subtotal, delivery_charge, total}`, handed to the confirmation page; cleared by `resetForm`), `isCheckoutFulfilled`.
+Large form-state slice: `formData` (shipping/payment fields), `errors`, `touched`, `districts`/`upazilas`, `addresses`, `delivery_charges`, `user_info`, `order_id`, `order` (the `POST /orders/` answer `{order_id, status, created_at, subtotal, delivery_charge, total}`, handed to the confirmation page; cleared by `resetForm`), `responseError` (**always an array of sentences** or null: the backend's `errors` when it refused the order, else one general sentence; shown by `CheckoutErrors`; cleared by a new attempt (`handleCheckout.pending`), by `clearResponseError` and by `resetForm`), `isCheckoutFulfilled`.
 
 Thunks:
 - `handleCheckout` → `POST /orders/` (branches authenticated client vs `publicApi`; dispatches `clearCart()` on success)

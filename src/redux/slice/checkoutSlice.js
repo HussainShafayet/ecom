@@ -103,6 +103,9 @@ const checkoutSlice = createSlice({
     setSelectedAddressId: (state, action) => {
       state.selectedAddressId = action.payload;
     },
+    clearResponseError: (state) => {
+      state.responseError = null;
+    },
     resetForm: (state) => {
       state.formData = initialState.formData;
       state.errors = {};
@@ -124,6 +127,7 @@ const checkoutSlice = createSlice({
       //checkout process
       .addCase(handleCheckout.pending, (state)=>{
           state.isLoading = true;
+          state.responseError = null; // a new attempt: the last refusal no longer applies
       })
       .addCase(handleCheckout.fulfilled, (state, action)=>{
           state.isLoading = false;
@@ -134,7 +138,11 @@ const checkoutSlice = createSlice({
       })
       .addCase(handleCheckout.rejected, (state, action)=>{
           state.isLoading = false;
-          state.responseError = action?.payload?.errors  || 'Something went wrong!';
+          // the backend's sentences ({errors: [...]}); anything else (no answer, a 5xx) gets one general sentence
+          const errors = action?.payload?.errors;
+          state.responseError = Array.isArray(errors) && errors.length > 0
+            ? errors
+            : [action?.payload?.error || 'Something went wrong. Please try again.'];
           
       })
 
@@ -191,6 +199,7 @@ export const {
   setErrors,
   setDistricts,
   setUpazilas,
+  clearResponseError,
   resetForm,
   setSelectedAddressId
 } = checkoutSlice.actions;
