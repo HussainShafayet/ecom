@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaUser, FaBars, FaTimes, FaSearch, FaHeart, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaBars, FaTimes, FaSearch, FaHeart, FaSignInAlt, FaUserPlus, FaBoxOpen } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
 import {logoutUser} from '../../redux/slice/authSlice';
 import { selectCartCount } from '../../redux/slice/cartSlice';
@@ -145,6 +145,13 @@ const Navbar = () => {
                       onClick={() => setProfileMenuOpen(false)}
                     >
                       <FaUser className="mr-2 text-blue-500" /> Profile
+                    </Link>
+                    <Link
+                      to="/orders"
+                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"
+                      onClick={() => setProfileMenuOpen(false)}
+                    >
+                      <FaBoxOpen className="mr-2 text-green-500" /> My Orders
                     </Link>
                     <Link
                       to="/wishlist"

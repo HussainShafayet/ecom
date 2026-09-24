@@ -1,170 +1,118 @@
-//import React from 'react';
-//import { FaCheckCircle, FaTruck, FaBoxOpen, FaHome, FaHeadset } from 'react-icons/fa';
+import React, {useEffect, useState} from 'react';
+import {useSearchParams} from 'react-router-dom';
+import {useDispatch, useSelector} from 'react-redux';
+import {clearTracking, trackOrder} from '../../redux/slice/orderSlice';
+import {ErrorDisplay, Loader} from '../../components/common';
+import {OrderItems, OrderStatusBadge, OrderTimeline, formatDate, formatMoney} from '../../components/orders';
 
-//const OrderTracking = () => {
-//  const orderStatus = [
-//    { status: 'Order Placed', date: 'Jan 15, 2023', icon: <FaCheckCircle />, completed: true },
-//    { status: 'Processing', date: 'Jan 16, 2023', icon: <FaBoxOpen />, completed: true },
-//    { status: 'Shipped', date: 'Jan 18, 2023', icon: <FaTruck />, completed: true },
-//    { status: 'Out for Delivery', date: 'Jan 20, 2023', icon: <FaHome />, completed: false },
-//    { status: 'Delivered', date: 'Expected Jan 21, 2023', icon: <FaHome />, completed: false },
-//  ];
+// "01712345678", "1712345678" and "+8801712345678" are all the same number; the backend wants "+880" + 10 digits.
+const toPhoneNumber = (value) => {
+  let digits = value.replace(/\D/g, '');
+  if (digits.startsWith('880')) digits = digits.slice(3);
+  if (digits.startsWith('0')) digits = digits.slice(1);
+  return /^\d{10}$/.test(digits) ? `+880${digits}` : null;
+};
 
-//  return (
-//    <div className="container mx-auto p-4 md:p-6 lg:p-8 space-y-12">
-//      {/* Order Details Section */}
-//      <section className="bg-gray-50 rounded-lg p-6 md:p-8 text-center shadow-md">
-//        <h2 className="text-3xl font-bold text-gray-800 mb-4">Order Tracking</h2>
-//        <p className="text-gray-600 mb-2">Order ID: <span className="font-semibold">123456789</span></p>
-//        <p className="text-gray-600 mb-2">Placed on: <span className="font-semibold">Jan 15, 2023</span></p>
-//        <p className="text-blue-600 font-semibold">Status: Out for Delivery</p>
-//      </section>
-
-//      {/* Tracking Steps */}
-//      <section className="space-y-6">
-//        <h3 className="text-2xl font-semibold text-gray-800 mb-4 text-center">Order Status</h3>
-//        <div className="flex flex-col lg:flex-row justify-between space-y-4 lg:space-y-0 lg:space-x-4">
-//          {orderStatus.map((step, index) => (
-//            <div
-//              key={index}
-//              className={`flex flex-col items-center p-4 rounded-lg shadow-lg ${
-//                step.completed ? 'bg-blue-100' : 'bg-gray-100'
-//              }`}
-//            >
-//              <div className={`text-3xl ${step.completed ? 'text-blue-500' : 'text-gray-400'}`}>
-//                {step.icon}
-//              </div>
-//              <p className="text-lg font-semibold mt-2 text-gray-800">{step.status}</p>
-//              <p className="text-sm text-gray-600">{step.date}</p>
-//              {index < orderStatus.length - 1 && (
-//                <div className={`h-8 w-1 bg-${step.completed ? 'blue' : 'gray'}-300 lg:h-1 lg:w-8 mt-4 lg:mt-0`}></div>
-//              )}
-//            </div>
-//          ))}
-//        </div>
-//      </section>
-
-//      {/* Estimated Delivery Section */}
-//      <section className="bg-white shadow-lg rounded-lg p-6 text-center">
-//        <h3 className="text-xl font-semibold text-gray-800 mb-2">Estimated Delivery</h3>
-//        <p className="text-gray-600">Expected by <span className="font-bold text-gray-800">Jan 21, 2023</span></p>
-//      </section>
-
-//      {/* Order Items */}
-//      <section className="space-y-4">
-//        <h3 className="text-2xl font-semibold text-gray-800 mb-4">Items in Your Order</h3>
-//        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//          {[1, 2, 3].map((item) => (
-//            <div key={item} className="bg-white rounded-lg shadow-lg p-4 flex items-center space-x-4">
-//              <img
-//                src="https://via.placeholder.com/100"
-//                alt="Product"
-//                className="w-20 h-20 object-cover rounded-lg"
-//              />
-//              <div>
-//                <h4 className="text-lg font-semibold text-gray-800">Product Name</h4>
-//                <p className="text-gray-600">Quantity: 1</p>
-//                <p className="text-gray-600">Price: $49.99</p>
-//              </div>
-//            </div>
-//          ))}
-//        </div>
-//      </section>
-
-//      {/* Contact and Support Section */}
-//      <section className="bg-blue-600 rounded-lg p-6 md:p-8 text-center text-white space-y-4">
-//        <h3 className="text-2xl font-bold">Need Help?</h3>
-//        <p className="text-lg">If you have any questions about your order, feel free to reach out to our support team.</p>
-//        <a href="/contact" className="bg-white text-blue-600 font-semibold py-2 px-6 rounded-lg inline-block hover:bg-gray-100 transition-colors">
-//          <FaHeadset className="inline-block mr-2" /> Contact Support
-//        </a>
-//      </section>
-//    </div>
-//  );
-//};
-
-//export default OrderTracking;
-
-import React from 'react';
-import { FaCheckCircle, FaTruck, FaBoxOpen, FaHome, FaHeadset } from 'react-icons/fa';
-
+// Follow an order with its number and the phone number it was placed with (guests have no account to look it up in).
 const OrderTracking = () => {
-  const orderStatus = [
-    { status: 'Order Placed', date: 'Jan 15, 2023', icon: <FaCheckCircle />, completed: true },
-    { status: 'Processing', date: 'Jan 16, 2023', icon: <FaBoxOpen />, completed: true },
-    { status: 'Shipped', date: 'Jan 18, 2023', icon: <FaTruck />, completed: true },
-    { status: 'Out for Delivery', date: 'Jan 20, 2023', icon: <FaHome />, completed: false },
-    { status: 'Delivered', date: 'Expected Jan 21, 2023', icon: <FaHome />, completed: false },
-  ];
+  const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+  const {tracking, trackingLoading, trackingError} = useSelector((state) => state.order);
+  const [orderId, setOrderId] = useState(searchParams.get('order_id') || '');
+  const [phone, setPhone] = useState('');
+  const [formError, setFormError] = useState(null);
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearTracking());
+    };
+  }, [dispatch]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const phone_number = toPhoneNumber(phone);
+    if (!orderId.trim()) {
+      setFormError(['Enter your order ID.']);
+    } else if (!phone_number) {
+      setFormError(['Enter the 10 digit phone number you ordered with.']);
+    } else {
+      setFormError(null);
+      dispatch(trackOrder({order_id: orderId.trim(), phone_number}));
+    }
+  };
 
   return (
-    <div className="container mx-auto p-4 md:p-6 lg:p-8 space-y-12">
-
-      {/* Order Summary Card */}
-      <section className="bg-gray-50 rounded-lg p-6 md:p-8 shadow-md text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Order Tracking</h2>
-        <p className="text-gray-600 mb-1">Order ID: <span className="font-semibold">123456789</span></p>
-        <p className="text-gray-600 mb-1">Placed on: <span className="font-semibold">Jan 15, 2023</span></p>
-        <p className="text-blue-600 font-semibold text-lg">Status: Out for Delivery</p>
+    <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-4xl space-y-8">
+      <section className="bg-gray-50 rounded-lg p-6 md:p-8 shadow-md">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">Track Your Order</h1>
+        <p className="text-gray-600 mb-6 text-center">Enter your order ID and the phone number you ordered with.</p>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          <div>
+            <label htmlFor="order_id" className="block text-gray-700 font-medium mb-1">Order ID</label>
+            <input
+              id="order_id"
+              value={orderId}
+              onChange={(e) => setOrderId(e.target.value)}
+              placeholder="GC-20260923-0001"
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">Phone number</label>
+            <div className="flex">
+              <span className="px-3 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md text-gray-600">+880</span>
+              <input
+                id="phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="1712345678"
+                inputMode="numeric"
+                className="w-full p-2 border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={trackingLoading}
+            className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+          >
+            {trackingLoading ? 'Looking up...' : 'Track order'}
+          </button>
+        </form>
       </section>
 
-      {/* Order Tracking Progress Bar */}
-      <section>
-        <h3 className="text-2xl font-semibold text-gray-800 mb-4 text-center">Order Status</h3>
-        <div className="flex items-center space-x-4 overflow-x-auto md:justify-center">
-          {orderStatus?.map((step, index) => (
-            <div key={index} className="flex flex-col items-center">
-              <div className={`w-12 h-12 flex items-center justify-center rounded-full ${step.completed ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-500'}`}>
-                {step.icon}
-              </div>
-              <p className="text-sm font-medium mt-2 text-gray-800">{step.status}</p>
-              <p className="text-xs text-gray-600">{step.date}</p>
-              {index < orderStatus.length - 1 && (
-                <div className={`h-1 w-12 bg-${step.completed ? 'blue-500' : 'gray-300'}`} />
+      <ErrorDisplay errors={formError || trackingError} />
+      {trackingLoading && <Loader message="Looking up your order" />}
+
+      {tracking && (
+        <>
+          <section className="bg-white rounded-lg shadow-md p-6 text-center">
+            <p className="text-gray-600">Order ID: <span className="font-semibold">{tracking.order_id}</span></p>
+            <p className="text-gray-600 mb-3">Placed on: <span className="font-semibold">{formatDate(tracking.created_at)}</span></p>
+            <OrderStatusBadge status={tracking.status} label={tracking.status_display} />
+          </section>
+
+          <section className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">Order Status</h2>
+            <OrderTimeline history={tracking.history} />
+          </section>
+
+          <section className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Items in your order</h2>
+            <OrderItems items={tracking.items} />
+            <div className="mt-4 space-y-1 text-gray-700">
+              <div className="flex justify-between"><span>Subtotal</span><span>{formatMoney(tracking.subtotal)}</span></div>
+              <div className="flex justify-between"><span>Delivery</span><span>{formatMoney(tracking.delivery_charge)}</span></div>
+              <div className="flex justify-between font-bold text-gray-900 border-t pt-2"><span>Total</span><span>{formatMoney(tracking.total)}</span></div>
+              {tracking.payment && (
+                <p className="text-sm text-gray-500 pt-2">{tracking.payment.method_display}: {tracking.payment.status_display}</p>
               )}
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Estimated Delivery Section */}
-      <section className="bg-blue-600 rounded-lg p-6 md:p-8 text-center text-white shadow-lg">
-        <h3 className="text-2xl font-semibold mb-2">Estimated Delivery</h3>
-        <p className="text-lg">Expected by <span className="font-bold">Jan 21, 2023</span></p>
-      </section>
-
-      {/* Order Items */}
-      <section className="space-y-4">
-        <h3 className="text-2xl font-semibold text-gray-800 mb-4">Items in Your Order</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((item) => (
-            <div key={item} className="bg-white rounded-lg shadow-lg p-4 flex items-center space-x-4">
-              <img
-                src="https://via.placeholder.com/100"
-                alt="Product"
-                className="w-24 h-24 object-cover rounded-lg"
-              />
-              <div className="flex-1">
-                <h4 className="text-lg font-semibold text-gray-800">Product Name</h4>
-                <p className="text-gray-500">Quantity: 1</p>
-                <p className="text-gray-800 font-semibold">$49.99</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Contact and Support Section */}
-      <section className="bg-gray-100 rounded-lg p-6 md:p-8 text-center shadow-md space-y-4">
-        <h3 className="text-2xl font-bold text-gray-800">Need Help?</h3>
-        <p className="text-gray-600 text-lg">If you have any questions about your order, please reach out to our support team.</p>
-        <a href="/contact" className="bg-blue-500 text-white font-semibold py-2 px-6 rounded-lg inline-flex items-center space-x-2 hover:bg-blue-600 transition-colors">
-          <FaHeadset /> <span>Contact Support</span>
-        </a>
-      </section>
+          </section>
+        </>
+      )}
     </div>
   );
 };
 
 export default OrderTracking;
-

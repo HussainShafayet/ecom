@@ -30,6 +30,7 @@ const initialState = {
   responseError: null,
   isCheckoutFulfilled: false,
   order_id: null,
+  order: null, // what POST /orders/ answered: { order_id, status, created_at, subtotal, delivery_charge, total }
   selectedAddressId: null,
   delivery_charges: {},
   addresses: [],
@@ -111,6 +112,7 @@ const checkoutSlice = createSlice({
       state.responseError = null;
       state.isCheckoutFulfilled = false;
       state.order_id = null;
+      state.order = null;
       state.selectedAddressId = null;
       state.delivery_charges = {};
       state.addresses = [];
@@ -128,6 +130,7 @@ const checkoutSlice = createSlice({
           state.responseError = null;
           state.isCheckoutFulfilled = true;
           state.order_id = action?.payload?.order_id;
+          state.order = action?.payload || null;
       })
       .addCase(handleCheckout.rejected, (state, action)=>{
           state.isLoading = false;

@@ -26,7 +26,7 @@
 
 - **Breadcrum.js** — auto-generated breadcrumb from `location.pathname`. Filename is misspelled `Breadcrum.js` but the component (and its default export, imported as `Breadcrum`) is named `Breadcrumb` — a file/component naming inconsistency.
 - **`ProductCard .js`** — filename genuinely contains a trailing space before the extension (verified with `ls -la`), and `common/index.js` imports it as `'./product/ProductCard '` (the literal space is in the import path too). Component: full product tile (image, badges, price/discount, rating, add-to-cart/buy-now/wishlist), wrapped in `React.memo`; props `product`, `cardForTrending`.
-- **RatingAndReview.js** — product-detail reviews list + review submission form (rating, comment, file/video upload); prop `product`. Minor bug: `dispatch(dispatch(updateReviewFormData(...)))` — a double-dispatch nesting around lines ~82–85, likely a copy-paste error.
+- **RatingAndReview.js** — product-detail reviews list + review submission form (rating, comment, file/video upload); prop `product`. When the signed-in customer can not review, a file-local `ReviewEligibility` says why from `review_status`: `reviewed` ("use the edit icon"), `waiting_for_delivery` ("once your order has been delivered" + a *View my order* link to `/orders/{review_order_id}`), anything else the general rule. Minor bug: `dispatch(dispatch(updateReviewFormData(...)))` — a double-dispatch nesting around lines ~82–85, likely a copy-paste error.
 - **SelectFilter.js** — generic checkbox filter list synced to URL search params; props `items`, `type` (special-cased rendering for `type === 'colors'`).
 - **Sidebar.js** — shop filter sidebar (categories tree, brand/tag/color/size checkboxes via `SelectFilter`, price range, discount radio), wrapped in `Accordion`s; prop `onClose` (mobile close button).
 
@@ -50,7 +50,7 @@ Consistent pattern: plain functional components using Tailwind's `animate-pulse`
 ## `layout/`
 
 - **Layout.js** — page shell: `NavBar` + `main` + `BottomNav` + `Footer` + `BackToTop`; prop `scrollContainerRef`.
-- **NavBar.js** — desktop nav (logo, `SearchDropdown`, cart/wishlist icons, auth/profile dropdowns); internal component named `Navbar` (casing differs from the filename `NavBar.js`).
+- **NavBar.js** — desktop nav (logo, `SearchDropdown`, cart/wishlist icons, auth/profile dropdowns; the profile menu has Profile, My Orders, Wishlist, Logout); internal component named `Navbar` (casing differs from the filename `NavBar.js`).
 - **Footer.js** — site footer with company/customer-service/account links and social icons; several sections commented out (newsletter signup, app download links).
 - **layout/index.js** — barrel exporting `Layout`, `Footer`, `NavBar`.
 
@@ -58,6 +58,16 @@ Consistent pattern: plain functional components using Tailwind's `animate-pulse`
 
 - **ShowAddress.js** — selectable grid of saved shipping addresses; updates the Redux `checkout` slice's form data and cascades division→district→upazila lookups from the static `data/location` datasets.
 - **checkout/index.js** — barrel exporting `ShowAddress` only.
+
+## `orders/`
+
+Shared by `Orders`, `OrderDetail`, `OrderConfirmation` and `OrderTracking`.
+
+- **OrderStatusBadge.js** — coloured pill for a status (`status` picks the colour, `label` is the backend's `status_display`).
+- **OrderTimeline.js** — progress from the backend's `history` (`[{status, status_display, created_at}]`): placed → (paid, only if it happened) → shipped → delivered, unreached steps grey ("Not yet"); a cancelled or refunded order ends in a red step and drops the steps that never happened.
+- **OrderItems.js** — the order's lines (picture, name linking to the product when its slug is known, variant, quantity × unit price, line total).
+- **format.js** — `formatMoney` (`৳1060.00`), `formatDate`, `formatDateTime`, `addressLines(order)`.
+- **orders/index.js** — barrel exporting all of the above.
 
 ## `profile/`
 

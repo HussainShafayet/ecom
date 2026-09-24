@@ -1,10 +1,15 @@
-import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice, isAnyOf} from "@reduxjs/toolkit";
+import {logoutUser} from "./authSlice";
 
 const initialState = {
     reviewLoading: false,
     reviews: [],
     reviewError: null,
     can_review: false,
+    // Why the signed-in customer may not review yet: 'can_review' | 'reviewed' | 'waiting_for_delivery' |
+    // 'not_purchased' | 'guest'. With 'waiting_for_delivery', review_order_id is the order they are waiting for.
+    review_status: null,
+    review_order_id: null,
 
     reviewFormData: {
         product_id: '',
@@ -87,6 +92,8 @@ const reviewSlice = createSlice({
             state.reviewError = false;
             state.reviews = action.payload?.results || [];
             state.can_review = action.payload?.can_review || false;
+            state.review_status = action.payload?.review_status || null;
+            state.review_order_id = action.payload?.order_id || null;
         })
         .addCase(fetchReviews.rejected, (state, action)=>{
             state.reviewLoading = false;
@@ -104,6 +111,10 @@ const reviewSlice = createSlice({
             state.addReviewCompleted = false;
             state.reviews = [...state.reviews, action.payload];
             state.addReviewCompleted = true;
+            // one review per product: the form must not stay open for a second one
+            state.can_review = false;
+            state.review_status = 'reviewed';
+            state.review_order_id = null;
         })
         .addCase(createReview.rejected, (state, action)=>{
             state.addReviewLoading = false;
@@ -131,6 +142,8 @@ const reviewSlice = createSlice({
             state.addReviewLoading = false;
             state.addReviewError = action?.payload?.error || 'Something went wrong!';
         })
+        //nothing of one customer's reviews (which ones they may edit, whether they may review) stays for the next
+        .addMatcher(isAnyOf(logoutUser.fulfilled, logoutUser.rejected), () => initialState)
     }),
 });
 

@@ -30,7 +30,7 @@ const Checkout = () => {
   const {cartLoading, cartItems, cartError} = useSelector((state)=>state.cart);
   const navigate = useNavigate();
  
-  const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, delivery_charges, responseError, checkoutContentLoading, checkoutContentError} = useSelector(
+  const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, order, delivery_charges, responseError, checkoutContentLoading, checkoutContentError} = useSelector(
     (state) => state.checkout
   );
   
@@ -51,14 +51,14 @@ const Checkout = () => {
   // Step 2: Handle checkout success (redirect + clear cart + reset form)
   useEffect(() => {
     if (isCheckoutFulfilled) {
-      order_id && navigate(`/order-confirmation/${order_id}`);
+      order_id && navigate(`/order-confirmation/${order_id}`, { state: { order } }); // the page shows it without another call
       setTimeout(() => {
         dispatch(clearCart());
         dispatch(resetForm());
       }, 500);
       
     }
-  }, [isCheckoutFulfilled, dispatch, navigate, order_id]);
+  }, [isCheckoutFulfilled, dispatch, navigate, order_id, order]);
 
   // Step 3: If cart is empty after loading, redirect to products page
   useEffect(() => {

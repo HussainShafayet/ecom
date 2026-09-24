@@ -51,11 +51,14 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-white mb-4">My Account</h3>
             <ul className="space-y-2">
               {isAuthenticated? 
-                <li><Link to="/profile" className="hover:text-gray-100 transition">Profile</Link></li>
+                <>
+                  <li><Link to="/profile" className="hover:text-gray-100 transition">Profile</Link></li>
+                  <li><Link to="/orders" className="hover:text-gray-100 transition">My Orders</Link></li>
+                </>
               :
               <li><Link to="/signin" className="hover:text-gray-100 transition">Sign In</Link></li>
               }
-              {/*<li><Link to="/order-tracking" className="hover:text-gray-100 transition">Order Tracking</Link></li>*/}
+              <li><Link to="/order-tracking" className="hover:text-gray-100 transition">Order Tracking</Link></li>
               <li><Link to="/wishlist" className="hover:text-gray-100 transition">Wishlist</Link></li>
               <li><Link to="/cart" className="hover:text-gray-100 transition">Shopping Cart</Link></li>
             </ul>

@@ -1,17 +1,34 @@
 import React, {useEffect} from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { FaCheckCircle } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
 import {resetForm} from '../redux/slice/checkoutSlice';
+import {clearOrder, fetchOrder} from '../redux/slice/orderSlice';
+import {OrderItems, addressLines, formatDate, formatMoney} from '../components/orders';
 
 const OrderConfirmation = () => {
   const { orderId } = useParams();
-  const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { order: detail } = useSelector((state) => state.order);
+  const placed = location.state?.order; // what POST /orders/ answered (Checkout hands it over)
 
   useEffect(() => {
     dispatch(resetForm());
   }, [dispatch])
+
+  // A signed-in customer's order can be read back (also after a refresh); a guest only has what checkout handed over.
+  useEffect(() => {
+    isAuthenticated && dispatch(fetchOrder(orderId));
+    return () => {
+      dispatch(clearOrder());
+    };
+  }, [dispatch, isAuthenticated, orderId])
+
+  const full = detail?.order_id === orderId ? detail : null;
+  const summary = full || (placed?.order_id === orderId ? placed : null);
+  const viewLink = isAuthenticated ? `/orders/${orderId}` : `/order-tracking?order_id=${orderId}`;
 
   return (
     <div className="container mx-auto my-12 p-6 max-w-3xl bg-gray-50 rounded-lg shadow-md">
@@ -36,23 +53,31 @@ const OrderConfirmation = () => {
             <p className="text-gray-700">
               <strong>Order ID:</strong> {orderId}
             </p>
-            <p className="text-gray-700">
-              <strong>Date:</strong> {new Date().toLocaleDateString()}
-            </p>
-            <p className="text-gray-700">
-              <strong>Total Amount:</strong> $223.07 {/* Replace with actual amount */}
-            </p>
+            {summary && (
+              <>
+                <p className="text-gray-700">
+                  <strong>Date:</strong> {formatDate(summary.created_at)}
+                </p>
+                <p className="text-gray-700">
+                  <strong>Total Amount:</strong> {formatMoney(summary.total)}
+                </p>
+              </>
+            )}
+            {!isAuthenticated && (
+              <p className="text-gray-500 text-sm mt-2">Keep this order ID: with the phone number you ordered with, it lets you follow your order.</p>
+            )}
           </div>
-          <div>
-            <p className="text-gray-700">
-              <strong>Shipping Address:</strong>
-            </p>
-            <p className="text-gray-600">John Doe</p>
-            <p className="text-gray-600">123 Main Street</p>
-            <p className="text-gray-600">City, State, ZIP</p>
-            <p className="text-gray-600">Country</p>
-          </div>
+          {full && (
+            <div>
+              <p className="text-gray-700">
+                <strong>Shipping Address:</strong>
+              </p>
+              <p className="text-gray-600">{full.name}</p>
+              {addressLines(full).map((line) => <p key={line} className="text-gray-600">{line}</p>)}
+            </div>
+          )}
         </div>
+        {full && <div className="mt-4"><OrderItems items={full.items} /></div>}
       </div>
 
       {/* Next Steps */}
@@ -61,7 +86,7 @@ const OrderConfirmation = () => {
           Next Steps
         </h2>
         <ul className="space-y-2 text-gray-700 text-sm sm:text-base">
-          <li>🔍 You can track your order in the <Link to="/orders" className="text-blue-500 underline">Orders</Link> section.</li>
+          <li>🔍 You can follow your order {isAuthenticated ? <>in the <Link to="/orders" className="text-blue-500 underline">Orders</Link> section</> : <>on the <Link to={viewLink} className="text-blue-500 underline">Order Tracking</Link> page</>}.</li>
           <li>📦 Your order is being prepared for shipping and will arrive soon.</li>
           <li>💬 For any inquiries, feel free to <Link to="/contact" className="text-blue-500 underline">contact us</Link>.</li>
         </ul>
@@ -76,10 +101,10 @@ const OrderConfirmation = () => {
           Continue Shopping
         </Link>
         <Link
-          to="/orders"
+          to={viewLink}
           className="w-full sm:w-auto text-center bg-gray-100 text-gray-800 py-2 px-6 rounded-lg shadow hover:bg-gray-200 transition-colors"
         >
-          View Orders
+          {isAuthenticated ? 'View Order' : 'Track Order'}
         </Link>
       </div>
     </div>
