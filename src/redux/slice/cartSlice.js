@@ -239,6 +239,7 @@ export const handleClonedProduct = (product, selectedSize, selectedColor, quanti
   dummyProduct['availability_status'] = product.availability_status;
   dummyProduct['has_variants'] = product?.sizes?.length > 0 || product?.colors?.length > 0 ? true : false;
   dummyProduct['quantity'] = quantity;
+  dummyProduct['minimum_order_quantity'] = product.minimum_order_quantity || 1;
   dummyProduct['color_name'] = selectedColor?.name;
   dummyProduct['color_hex_code'] = selectedColor?.hex_code;
   dummyProduct['size_name'] = selectedSize?.name;

@@ -12,12 +12,13 @@ import {
   handleCheckout,
   resetForm,
   initializeCheckout,
+  clearResponseError,
   setSelectedAddressId,
 } from '../redux/slice/checkoutSlice';
 import {clearCart, handleAddtoCart, handleFetchCart, handleRemovetoCart, removeFromCart, selectCartItems, selectTotalPrice, updateQuantity} from '../redux/slice/cartSlice';
 import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
 import {handleGetAddress} from '../redux/slice/profileSlice';
-import {ShowAddress} from '../components/checkout';
+import {CheckoutErrors, ShowAddress} from '../components/checkout';
 import debounce from 'lodash.debounce'; // Import lodash debounce
 import {CheckoutSkeleton} from '../components/common/skeleton';
 import {Loader} from '../components/common';
@@ -47,6 +48,11 @@ const Checkout = () => {
     !isCheckoutFulfilled && dispatch(initializeCheckout());
     
   }, [isCheckoutFulfilled, dispatch]);
+
+  // A refusal from an earlier visit (the customer went to the cart to fix it) is not shown again on arrival
+  useEffect(() => {
+    dispatch(clearResponseError());
+  }, [dispatch]);
 
   // Step 2: Handle checkout success (redirect + clear cart + reset form)
   useEffect(() => {
@@ -702,6 +708,9 @@ const Checkout = () => {
               </div>
             </div>
           </div>
+
+          {/* Why the shop refused the order (minimum order, stock, ...): shown right above the button just pressed */}
+          <CheckoutErrors errors={responseError} />
 
           <button type="submit" className={`bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors w-full transform duration-200 cursor-pointer ${
               isLoading ? 'cursor-wait' : 'hover:scale-105'

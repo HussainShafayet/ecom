@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { addToCart, handleAddtoCart, handleClonedProduct } from '../../../redux/slice/cartSlice';
 import { FaHeart, FaEye, FaShoppingCart, FaRegHeart } from 'react-icons/fa';
 import {addToWishlist, handleAddtoWishlist, handleRemovetoWishlist, removeFromWishlist} from '../../../redux/slice/wishlistSlice';
+import {minimumOf} from '../../../utils/minimumOrder';
 
 const ProductCard = ({ product, cardForTrending }) => {
   const {isAuthenticated} = useSelector((state)=> state.auth);
@@ -13,6 +14,8 @@ const ProductCard = ({ product, cardForTrending }) => {
   const navigate = useNavigate();
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
   const [productFavourite, setProductFavourite] = useState(product?.is_favourite || false);
+  const [cartMessage, setCartMessage] = useState(null); // why the shop did not take it (stock, ...)
+  const startQuantity = minimumOf(product); // a product with a minimum order goes into the cart with that many
 
 
   const handleAddToCart = async () => {
@@ -21,21 +24,23 @@ const ProductCard = ({ product, cardForTrending }) => {
       if (isAuthenticated) {
         const cartBody = {
           product_id: product.id,
-          quantity: 1,
+          quantity: startQuantity,
           variant_id: product.variant_id,
           action: 'increase'
         };
         const response = await dispatch(handleAddtoCart(cartBody)).unwrap();
         if (response.success) {
-          clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
+          clonedProduct = dispatch(handleClonedProduct(product, null, null, startQuantity));
         }
       }else{
-        clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
+        clonedProduct = dispatch(handleClonedProduct(product, null, null, startQuantity));
       }
 
       clonedProduct && dispatch(addToCart(clonedProduct));
+      setCartMessage(null);
     } catch (error) {
       console.log('handle add to cart error: ', error)
+      setCartMessage(error?.errors?.[0] || error?.error || 'Could not add this item. Please try again.');
     }
   };
 
@@ -48,17 +53,17 @@ const ProductCard = ({ product, cardForTrending }) => {
         if (isAuthenticated) {
           const cartBody = {
             product_id: product.id,
-            quantity: 1,
+            quantity: startQuantity,
             variant_id: product.variant_id,
             action: 'increase'
           };
           const response = await dispatch(handleAddtoCart(cartBody)).unwrap();
           if (response.success) {
-            clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
+            clonedProduct = dispatch(handleClonedProduct(product, null, null, startQuantity));
           }
           
         }else{
-          clonedProduct = dispatch(handleClonedProduct(product, null, null, 1));
+          clonedProduct = dispatch(handleClonedProduct(product, null, null, startQuantity));
         }
 
         if (clonedProduct) {
@@ -70,6 +75,7 @@ const ProductCard = ({ product, cardForTrending }) => {
       }
      } catch (error) {
       console.log('handle buy now error: ', error);
+      setCartMessage(error?.errors?.[0] || error?.error || 'Could not order this item. Please try again.');
     }
   };
 
@@ -266,11 +272,15 @@ const ProductCard = ({ product, cardForTrending }) => {
       {/* Stock & Action Buttons */}
       <div className="mt-1">
         {product.availability_status ? (
+          <>
           <ActionButtons 
             hasVariants={product.has_variants} 
             handleAddToCart={handleAddToCart} 
             handleBuyNow={handleBuyNow} 
           />
+          {cartMessage && <p role="alert" className="text-red-500 text-xs mt-1">{cartMessage}</p>}
+          {startQuantity > 1 && !cartMessage && <p className="text-gray-500 text-xs mt-1">Minimum order: {startQuantity}</p>}
+          </>
         ) : (
           <OutOfStock />
         )}

@@ -4,7 +4,8 @@ import { FaTrash, FaArrowRight } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
 import {removeFromCart, updateQuantity, selectTotalPrice, handleFetchCart, handleRemovetoCart, handleAddtoCart, clearCart} from '../redux/slice/cartSlice';
 import {fetchAllProducts} from '../redux/slice/productSlice';
-import {Loader, ProductCard} from '../components/common';
+import {ErrorDisplay, Loader, ProductCard} from '../components/common';
+import {minimumOf, minimumOrderProblems} from '../utils/minimumOrder';
 import debounce from 'lodash.debounce'; // Import lodash debounce
 import {CartSkeleton, SectionSkeleton} from '../components/common/skeleton';
 
@@ -13,11 +14,13 @@ const Cart = () => {
   const totalPrice = useSelector(selectTotalPrice);
   const [confirmDelete, setConfirmDelete] = useState({});
   const [confirmAllDelete, setConfirmAllDelete] = useState(false);
+  const [quantityError, setQuantityError] = useState(null); // why the shop refused the last quantity change (stock)
   const {cartItems, cartFetchLoading, cartFetchError, cartRemoveError} = useSelector((state)=> state.cart);
 
   const {isLoading, items:products, error} = useSelector((state)=> state.product);
   const {isAuthenticated} = useSelector((state)=> state.auth);
   const fetchCartError = useSelector((state) => state.globalError.sectionErrors["fetch-cart"]);
+  const minimumProblems = minimumOrderProblems(cartItems); // lines below their product's minimum order
   const dispatch = useDispatch();
   const [originalQuantities, setOriginalQuantities] = useState({}); // Store original quantities
 
@@ -31,7 +34,7 @@ const Cart = () => {
    // Debounced API call
    const debouncedUpdateQuantity = useCallback(
     
-    debounce((product, difference) => {
+    debounce(async (product, difference) => {
       if (difference !== 0) {
       const cartBody = {};
       cartBody.product_id = product?.id;
@@ -39,11 +42,18 @@ const Cart = () => {
       cartBody.variant_id = product?.variant_id;
       cartBody.action = difference < 0 ? 'decrease' : 'increase';
 
-      dispatch(handleAddtoCart(cartBody));
+      const result = await dispatch(handleAddtoCart(cartBody));
       setOriginalQuantities((prev) => ({
         ...prev,
         [product?.id]: null,
       }));
+      if (handleAddtoCart.rejected.match(result)) {
+        // e.g. "Only 3 of Mug left in stock.": say so, and show the quantity the server really holds
+        setQuantityError(result.payload?.errors || ['The quantity could not be changed. Please try again.']);
+        dispatch(handleFetchCart());
+      } else {
+        setQuantityError(null);
+      }
       
       }
     }, 1000),
@@ -82,6 +92,7 @@ const Cart = () => {
       }));
       prevQuantity = item?.quantity;
     }
+    newQuantity = Math.max(newQuantity, minimumOf(item)); // a quantity below the product's minimum order is refused at checkout
     const difference = newQuantity - prevQuantity; // Calculate actual difference
     
     // Update UI immediately
@@ -106,6 +117,7 @@ const Cart = () => {
         </div>
       ) :
       <>
+          <ErrorDisplay errors={quantityError} />
           {cartRemoveError &&
             <div className="text-center text-red-500 font-semibold py-4">
               {cartRemoveError} - Please try again later.
@@ -182,7 +194,7 @@ const Cart = () => {
                           <button
                             onClick={() => handleUpdateQuantity(item?.id, item?.quantity - 1, item)}
                             className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-l"
-                            disabled={item?.quantity === 1}
+                            disabled={item?.quantity <= minimumOf(item)}
                           >
                             -
                           </button>
@@ -194,7 +206,7 @@ const Cart = () => {
                               handleUpdateQuantity(item?.id, newValue, item);
                             }}
                             className="w-12 text-center border-l border-r"
-                            min="1"
+                            min={minimumOf(item)}
                           />
                           <button
                             onClick={() => handleUpdateQuantity(item?.id, item?.quantity + 1, item)}
@@ -203,6 +215,11 @@ const Cart = () => {
                             +
                           </button>
                         </div>
+                        {minimumOf(item) > 1 && (
+                          <p className={`text-xs mt-1 ${item?.quantity < minimumOf(item) ? 'text-red-500 font-semibold' : 'text-gray-500'}`}>
+                            Minimum order: {minimumOf(item)}
+                          </p>
+                        )}
                       </div>
 
                       {/* Remove Button */}
@@ -284,12 +301,22 @@ const Cart = () => {
                   <span>Total</span>
                   <span>{totalPrice.toFixed(2)}</span>
                 </div>
+                {minimumProblems.length > 0 && <div className="mt-4"><ErrorDisplay errors={[...minimumProblems, 'Increase the quantity to continue.']} /></div>}
+                {minimumProblems.length > 0 ? (
+                  <span
+                    aria-disabled="true"
+                    className="mt-4 block bg-gray-300 text-gray-500 text-center font-bold py-2 rounded-lg cursor-not-allowed"
+                  >
+                    Proceed to Checkout
+                  </span>
+                ) : (
                 <Link
                   to="/checkout"
                   className="mt-4 block bg-blue-500 text-white text-center font-bold py-2 rounded-lg hover:bg-blue-600 transition-colors"
                 >
                   Proceed to Checkout
                 </Link>
+                )}
               </div>
 
               {/* Sticky Checkout Button for Mobile */}
@@ -298,12 +325,18 @@ const Cart = () => {
                   <div>
                     <p className="font-bold text-lg">Total: {totalPrice}</p>
                   </div>
+                  {minimumProblems.length > 0 ? (
+                    <span aria-disabled="true" className="bg-gray-300 text-gray-500 font-bold py-2 px-6 rounded-lg flex items-center cursor-not-allowed">
+                      Checkout <FaArrowRight className="ml-2" />
+                    </span>
+                  ) : (
                   <Link
                     to="/checkout"
                     className="bg-blue-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors flex items-center"
                   >
                     Checkout <FaArrowRight className="ml-2" />
                   </Link>
+                  )}
                 </div>
               </div>
             </div>
