@@ -15,7 +15,7 @@ import Orders from '../pages/Orders';
 import OrderDetail from '../pages/OrderDetail';
 import OrderConfirmation from '../pages/OrderConfirmation';
 import OrderTracking from '../pages/others/OrderTracking';
-import {OrderTimeline} from '../components/orders';
+import {OrderStatusBadge, OrderTimeline} from '../components/orders';
 
 vi.mock('../services/orderService', () => ({
   getOrders: vi.fn(),
@@ -150,8 +150,8 @@ describe('One order', () => {
     expect(await screen.findByText(/Only a pending order can be cancelled/)).toBeTruthy();
   });
 
-  it('has no cancel button once the order is being handled', async () => {
-    getOrder.mockResolvedValue({data: {data: {...DETAIL, status: 'shipped', status_display: 'Shipped', can_cancel: false}}});
+  it.each([['shipped', 'Shipped'], ['confirmed', 'Confirmed'], ['returned', 'Returned']])('has no cancel button once the order is %s', async (status, label) => {
+    getOrder.mockResolvedValue({data: {data: {...DETAIL, status, status_display: label, can_cancel: false}}});
     renderAt(`/orders/${NUMBER}`, routes);
     await screen.findByText('Red Mug');
     expect(screen.queryByText('Cancel order')).toBeNull();
@@ -257,11 +257,61 @@ describe('The status timeline', () => {
     expect(screen.queryByText('Delivered')).toBeNull();
   });
 
+  it('shows the confirmed step only when staff confirmed the order, between placed and shipped', () => {
+    const {container} = render(<OrderTimeline history={[step('pending', 'Pending', 23), step('confirmed', 'Confirmed', 24)]} />);
+    expect(screen.getByText('Confirmed')).toBeTruthy();
+    const labels = Array.from(container.querySelectorAll('p.font-semibold')).map((node) => node.textContent);
+    expect(labels).toEqual(['Order Placed', 'Confirmed', 'Shipped', 'Delivered']);
+    cleanup();
+    const plain = render(<OrderTimeline history={[step('pending', 'Pending', 23)]} />);
+    expect(plain.container.textContent).not.toContain('Confirmed');
+  });
+
+  it('puts confirmed before paid when both happened', () => {
+    const {container} = render(
+      <OrderTimeline history={[step('pending', 'Pending', 23), step('confirmed', 'Confirmed', 24), step('paid', 'Paid', 25), step('shipped', 'Shipped', 26)]} />
+    );
+    const labels = Array.from(container.querySelectorAll('p.font-semibold')).map((node) => node.textContent);
+    expect(labels).toEqual(['Order Placed', 'Confirmed', 'Paid', 'Shipped', 'Delivered']);
+  });
+
+  it('ends a parcel that came back in Returned, without Delivered', () => {
+    const {container} = render(
+      <OrderTimeline history={[step('pending', 'Pending', 23), step('confirmed', 'Confirmed', 24), step('shipped', 'Shipped', 25), step('returned', 'Returned', 27)]} />
+    );
+    const labels = Array.from(container.querySelectorAll('p.font-semibold')).map((node) => node.textContent);
+    expect(labels).toEqual(['Order Placed', 'Confirmed', 'Shipped', 'Returned']);
+    expect(container.textContent).not.toContain('Delivered');
+    expect(container.querySelector('.bg-red-50')).toBeTruthy(); // the ending is the red step
+  });
+
+  it('shows a refund after a delivery as the last step, with Delivered still in place', () => {
+    const {container} = render(
+      <OrderTimeline history={[step('pending', 'Pending', 23), step('shipped', 'Shipped', 24), step('delivered', 'Delivered', 25), step('refunded', 'Refunded', 26)]} />
+    );
+    const labels = Array.from(container.querySelectorAll('p.font-semibold')).map((node) => node.textContent);
+    expect(labels).toEqual(['Order Placed', 'Shipped', 'Delivered', 'Refunded']);
+  });
+
   it('shows the paid step only when it happened', () => {
     render(<OrderTimeline history={[step('pending', 'Pending', 23), step('paid', 'Paid', 24), step('shipped', 'Shipped', 25)]} />);
     expect(screen.getByText('Paid')).toBeTruthy();
     const {container} = render(<OrderTimeline history={[step('pending', 'Pending', 23)]} />);
     expect(container.textContent).not.toContain('Paid');
+  });
+});
+
+describe('The status badge', () => {
+  it.each([['confirmed', 'Confirmed', 'bg-cyan-100'], ['returned', 'Returned', 'bg-orange-100'], ['pending', 'Pending', 'bg-yellow-100'], ['cancelled', 'Cancelled', 'bg-red-100']])(
+    'shows %s with its own colour', (status, label, colour) => {
+      render(<OrderStatusBadge status={status} label={label} />);
+      expect(screen.getByText(label).className).toContain(colour);
+    }
+  );
+
+  it('still shows a status it has never heard of, in grey, instead of nothing', () => {
+    render(<OrderStatusBadge status="on_hold" label="On hold" />);
+    expect(screen.getByText('On hold').className).toContain('bg-gray-100');
   });
 });
 

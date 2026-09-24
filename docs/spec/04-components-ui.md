@@ -63,8 +63,8 @@ Consistent pattern: plain functional components using Tailwind's `animate-pulse`
 
 Shared by `Orders`, `OrderDetail`, `OrderConfirmation` and `OrderTracking`.
 
-- **OrderStatusBadge.js** — coloured pill for a status (`status` picks the colour, `label` is the backend's `status_display`).
-- **OrderTimeline.js** — progress from the backend's `history` (`[{status, status_display, created_at}]`): placed → (paid, only if it happened) → shipped → delivered, unreached steps grey ("Not yet"); a cancelled or refunded order ends in a red step and drops the steps that never happened.
+- **OrderStatusBadge.js** — coloured pill for a status (`status` picks the colour, `label` is the backend's `status_display`; an unknown status is grey). The backend's statuses: `pending, confirmed, paid, shipped, delivered, returned, cancelled, refunded`.
+- **OrderTimeline.js** — progress from the backend's `history` (`[{status, status_display, created_at}]`): placed → (confirmed, only if staff confirmed) → (paid, only if it happened) → shipped → delivered, unreached steps grey ("Not yet"); an order that ended without delivery (cancelled, a parcel that came back = returned, or refunded) ends in a red step and drops the steps that never happened.
 - **OrderItems.js** — the order's lines (picture, name linking to the product when its slug is known, variant, quantity × unit price, line total).
 - **format.js** — `formatMoney` (`৳1060.00`), `formatDate`, `formatDateTime`, `addressLines(order)`.
 - **orders/index.js** — barrel exporting all of the above.
