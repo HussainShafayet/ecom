@@ -1,27 +1,33 @@
 import React from 'react';
-import { FaBoxOpen, FaCheckCircle, FaHome, FaMoneyBillWave, FaTimesCircle, FaTruck } from 'react-icons/fa';
+import { FaBoxOpen, FaCheckCircle, FaClipboardCheck, FaHome, FaMoneyBillWave, FaTimesCircle, FaTruck, FaUndo } from 'react-icons/fa';
 import { formatDateTime } from './format';
 
 const STEPS = {
   pending: { label: 'Order Placed', icon: <FaCheckCircle /> },
+  confirmed: { label: 'Confirmed', icon: <FaClipboardCheck /> },
   paid: { label: 'Paid', icon: <FaMoneyBillWave /> },
   shipped: { label: 'Shipped', icon: <FaTruck /> },
   delivered: { label: 'Delivered', icon: <FaHome /> },
+  returned: { label: 'Returned', icon: <FaUndo /> },
   cancelled: { label: 'Cancelled', icon: <FaTimesCircle /> },
   refunded: { label: 'Refunded', icon: <FaBoxOpen /> },
 };
 
-// The usual way an order goes; "paid" is shown only when it happened (cash on delivery is paid at the door).
-const FLOW = ['pending', 'shipped', 'delivered'];
+// The usual way an order goes: placed, shipped, delivered. "Confirmed" (staff checked the order) and "paid" are shown
+// only when they happened (cash on delivery is paid at the door, and a shop need not phone its customers).
+const STEP_ORDER = ['pending', 'confirmed', 'paid', 'shipped', 'delivered'];
+const ALWAYS = ['pending', 'shipped', 'delivered'];
+// An order that did not reach the customer ends in one of these (a red step): cancelled, a parcel that came back, a refund.
+const ENDINGS = ['cancelled', 'returned', 'refunded'];
 
 // `history` is the backend's [{status, status_display, created_at}], oldest first. What has happened is filled in with
-// its date, what is still to come is grey; a cancelled or refunded order ends with its own red step.
+// its date, what is still to come is grey; an order that ended without delivery drops the steps that never happened.
 const OrderTimeline = ({ history = [] }) => {
   const reached = (status) => history.find((step) => step.status === status);
-  const ended = history.find((step) => step.status === 'cancelled' || step.status === 'refunded');
+  const ended = history.find((step) => ENDINGS.includes(step.status));
 
-  const flow = FLOW.flatMap((status) => (status === 'shipped' && reached('paid') ? ['paid', 'shipped'] : [status]));
-  const steps = flow
+  const steps = STEP_ORDER
+    .filter((status) => ALWAYS.includes(status) || reached(status))
     .filter((status) => !ended || reached(status))
     .map((status) => ({ status, done: Boolean(reached(status)), at: reached(status)?.created_at }));
   if (ended) {
