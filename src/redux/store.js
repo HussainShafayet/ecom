@@ -18,6 +18,7 @@ import profileReducer from './slice/profileSlice';
 import reviewReducer from './slice/reviewSlice';
 import orderReducer from './slice/orderSlice';
 import globalErrorReducer from './slice/globalErrorSlice';
+import siteReducer from './slice/siteSlice';
 
 // ✅ Persist Only `isAuthenticated` (Not Full auth Slice)
 const authPersistConfig = {
@@ -49,6 +50,7 @@ const rootReducer = combineReducers({
   profile: profileReducer,       // Not persisted
   review: reviewReducer,        // not persisted
   order: orderReducer,          // not persisted (my orders, one order, the guest lookup)
+  site: siteReducer,            // not persisted (the shop's name, logo, contact details, footer pages)
   globalError: globalErrorReducer, //not persisted
 });
 

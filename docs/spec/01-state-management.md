@@ -63,6 +63,12 @@ State: `orders`/`ordersCount`/`ordersNext`/`ordersPrevious`/`ordersLoading`/`ord
 
 Thunks: `fetchOrders({page, page_size})` → `GET /orders/`; `fetchOrder(orderId)` → `GET /orders/{id}/`; `cancelOrder(orderId)` → `POST /orders/{id}/cancel/` (replaces `order` with the answer and updates the row in `orders`); `trackOrder({order_id, phone_number})` → `GET /orders/track/` (public client). Sync reducers: `clearOrder`, `clearTracking`.
 
+## `slice/siteSlice.js`
+
+The shop's own identity, written by the admin (Django admin > Site) and read once by `Layout` (`handleFetchSite` → `services/siteService.getSite` → `GET /site/`). Not persisted. State: `site` (`name`, `tagline`, `logo`, `announcement`, `contact`, `social_links`, `footer_pages`), `isLoaded`, `isLoading`, `error`. `EMPTY_SITE` is the value before the answer arrives and when it never does: an empty name draws no copyright line, no announcement draws no bar, no social link draws no icon, so nothing is invented for what the shop has not said. A partial answer is merged over `EMPTY_SITE`. Read with `useSelector(selectSite)`. `Layout` also sets `document.title` to `name | tagline` once the name is known.
+
+The contact form, the newsletter box, a static page and the FAQ keep their state in the component (they belong to one page each) and call `siteService` directly; the sentences to show for a failed request come from `utils/errorMessages.js`.
+
 ## `slice/contentSlice.js`
 
 CMS-style content per page (home/new-arrival/flash-sale/best-selling/featured/shop/categories): `image_sliders`, `video_sliders`, banners, plus shop-only fields (`tags`, `brands`, `colors`, `sizes`, `price_range`, `discounts`). 7 near-identical thunks hitting `services/contentService`. A single shared `isLoading`/`error` covers all 7 async flows — concurrent fetches can clobber each other's loading state (unlike `categorySlice`, which has per-section flags). Not persisted.

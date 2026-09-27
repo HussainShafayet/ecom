@@ -27,3 +27,4 @@ export {default as GlobalErrorHandler} from './GlobalErrorHandler';
 
 
 
+export {default as SocialLinks} from './SocialLinks';

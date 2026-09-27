@@ -15,7 +15,7 @@ npm install        # install dependencies
 npm run dev         # Vite dev server, http://localhost:3000
 npm run build        # production build (outputs to build/)
 npm run preview       # locally preview the production build
-npm test              # vitest run — src/__tests__/orders.test.js covers the order pages (real slice, mocked orderService)
+npm test              # vitest run — src/__tests__: the order pages, reviews, checkout/cart error handling, the site (footer, contact, static pages, FAQ); real slices, mocked services
 npm run lint            # eslint .
 ```
 
@@ -31,7 +31,7 @@ JSX-containing files in this repo use a `.js` extension, not `.jsx` — `vite.co
 `BrowserRouter` → `GlobalErrorHandler` → `ScrollToTop` → `Layout` (NavBar + page + BottomNav + Footer + BackToTop) wraps **every** route — there is no separate auth-only layout. Only `/profile`, `/orders` and `/orders/:orderId` are wrapped in `ProtectedRoute` (redirects to `/signin` if `state.auth.isAuthenticated` is false); `/cart`, `/checkout`, `/wishlist`, `/order-confirmation/:orderId` and `/order-tracking` are reachable while logged out and each page internally branches on auth state instead.
 
 ### State management (`src/redux/`)
-Redux Toolkit store (`store.js`) with `redux-persist` (localStorage). Only `cart` and `wishList` are persisted via the root `persistConfig.whitelist`; `auth` is **separately, independently** persisted with its own nested `persistReducer` whitelisting only `isAuthenticated` (tokens live in cookies via `js-cookie`, not redux-persist). All other slices (`product`, `category`, `checkout`, `content`, `profile`, `review`, `order`, `new_arrival`, `best_selling`, `flash_sale`, `globalError`) are not persisted.
+Redux Toolkit store (`store.js`) with `redux-persist` (localStorage). Only `cart` and `wishList` are persisted via the root `persistConfig.whitelist`; `auth` is **separately, independently** persisted with its own nested `persistReducer` whitelisting only `isAuthenticated` (tokens live in cookies via `js-cookie`, not redux-persist). All other slices (`product`, `category`, `checkout`, `content`, `profile`, `review`, `order`, `site`, `new_arrival`, `best_selling`, `flash_sale`, `globalError`) are not persisted.
 
 One slice per domain under `src/redux/slice/` (plus `slice/product/` for `bestSellingSlice`, `flashSaleSlice`, `newArrivalSlice`). Most async thunks dynamically `import('../../api/axiosSetup')` inside the thunk body to avoid a circular dependency with the store — follow this pattern when adding new thunks that need the authenticated client. `checkoutSlice`/`productSlice.searchSuggestions` branch between the authenticated client and `publicApi` based on `isAuthenticated`; most other domains (cart, wishlist, profile, review) assume the user is authenticated.
 
@@ -44,7 +44,7 @@ Two axios instances:
 
 Both interceptors map HTTP status → a generic message and dispatch it to `globalErrorSlice`, either as a page-wide `setGlobalError` or, if the request config sets a `section` string (`{ section: 'add-cart' }` etc.), a scoped `setSectionError` that individual components read via `state.globalError.sectionErrors[section]`. Follow this `section` convention for new calls that should show inline (not full-page) errors.
 
-Only `categoryService.js`, `contentService.js`, `productService.js` and `orderService.js` exist under `src/services/` — auth, cart, wishlist, profile, checkout, and review calls are inlined directly inside their slices rather than going through a service module. When adding new endpoints, prefer creating/extending a `services/*.js` wrapper for consistency going forward rather than inlining further, even though most of the existing codebase inlines.
+Only `categoryService.js`, `contentService.js`, `productService.js`, `orderService.js` and `siteService.js` exist under `src/services/` — auth, cart, wishlist, profile, checkout, and review calls are inlined directly inside their slices rather than going through a service module. When adding new endpoints, prefer creating/extending a `services/*.js` wrapper for consistency going forward rather than inlining further, even though most of the existing codebase inlines.
 
 There are two independent error-reporting paths in the UI: the interceptor-driven `globalErrorSlice`/`GlobalErrorHandler` full-page overlay described above, and separate per-thunk `rejectWithValue(error.response?.data)` payloads stored on each slice (e.g. `signinError`) and rendered via the generic `ErrorDisplay` component. They don't share state — a new feature that calls the API should decide up front which of the two error surfaces it wants to use.
 
@@ -79,4 +79,5 @@ These are pre-existing bugs and inconsistencies worth knowing before touching re
 - **New piece of global state**: add a slice under `src/redux/slice/`, register its reducer in the `combineReducers` call in `src/redux/store.js`, and only add it to `persistConfig.whitelist` if it genuinely needs to survive a refresh (most slices intentionally don't).
 - **New API call**: add it to (or create) a `src/services/*.js` module rather than inlining it in the slice; use `axiosSetup`'s client for authenticated calls and `publicApi` for public ones, and pass a `section` in the request config if the error should be shown inline near the relevant UI instead of as a full-page overlay.
 - **A customer action the shop may refuse** (placing an order, a cart quantity, add to cart): show the backend's `errors` sentences where the customer acted (`CheckoutErrors` above *Place Order*, the Cart's quantity message, the product card's message) and put the state back to what the server holds; never leave it at a `console.log`. `minimum_order_quantity` on a card/cart line is the product's smallest order (`src/utils/minimumOrder.js`).
+- **Anything the shop owner should be able to change** (the shop's name, logo, contact details, social links, the announcement bar, the text of About / Privacy / Terms, the FAQ) comes from the backend, never from the code: `state.site` (`selectSite`, read once by `Layout` from `GET /site/`) and `/pages/:slug` (`GET /site/pages/{slug}/`). Draw nothing for what the admin left empty. The static pages are written in Django admin > Site > Static pages, not in a component.
 - **New UI component**: follow the existing `common/` vs `sections/` vs domain-folder (`checkout/`, `profile/`) split, export it through that folder's `index.js` barrel, and style with inline Tailwind utility classes matching neighboring components (no shared design tokens exist to reference yet).

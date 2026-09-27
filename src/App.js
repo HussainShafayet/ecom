@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import { Layout } from './components/layout';
 import { Profile, SignIn, SignUp, VerifyOtp, WishList } from './pages/user';
@@ -7,7 +7,7 @@ import {useDispatch} from 'react-redux';
 import {loadUserFromStorage} from './redux/slice/authSlice';
 import {useEffect, useRef} from 'react';
 import {GlobalErrorHandler, ProtectedRoute, ScrollToTop} from './components/common';
-import {AboutUs, Contact, FAQPage, OrderTracking, PrivacyPolicy} from './pages/others';
+import {Contact, FAQPage, OrderTracking, StaticPage} from './pages/others';
 import {BestSelling, FeaturedProducts, FlashSale, NewArrival} from './components/sections';
 
 function App() {
@@ -59,10 +59,13 @@ function App() {
 
               {/* Others Pages */}
               <Route path="/contact" element={<Contact />} />
-              <Route path="/aboutus" element={<AboutUs />} />
               <Route path="/order-tracking" element={<OrderTracking />} />
               <Route path="/faq" element={<FAQPage />} />
-              <Route path='privacy-policy' element={<PrivacyPolicy />} />
+              {/* Pages the admin writes (About us, Privacy policy, ...): Site > Static pages */}
+              <Route path="/pages/:slug" element={<StaticPage />} />
+              {/* The old addresses keep working */}
+              <Route path="/aboutus" element={<Navigate to="/pages/about-us" replace />} />
+              <Route path="/privacy-policy" element={<Navigate to="/pages/privacy-policy" replace />} />
 
 
               {/* Catch-all Not Found Route */}

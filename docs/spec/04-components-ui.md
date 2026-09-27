@@ -22,6 +22,8 @@
 - **SuccessMessage.js** — green bordered box for a `message` prop; mirrors `ErrorDisplay`'s styling pattern.
 - **common/index.js** — barrel file re-exporting all of the above plus the `product/` subfolder components.
 
+Also in `common/`: **SocialLinks.js** (icon links for `site.social_links`, for the platforms `facebook, instagram, x, youtube, linkedin, tiktok, whatsapp, telegram`; an unknown platform or a non-`http(s)` address is not drawn).
+
 ## `common/product/`
 
 - **Breadcrum.js** — auto-generated breadcrumb from `location.pathname`. Filename is misspelled `Breadcrum.js` but the component (and its default export, imported as `Breadcrum`) is named `Breadcrumb` — a file/component naming inconsistency.
@@ -51,8 +53,10 @@ Consistent pattern: plain functional components using Tailwind's `animate-pulse`
 
 - **Layout.js** — page shell: `NavBar` + `main` + `BottomNav` + `Footer` + `BackToTop`; prop `scrollContainerRef`.
 - **NavBar.js** — desktop nav (logo, `SearchDropdown`, cart/wishlist icons, auth/profile dropdowns; the profile menu has Profile, My Orders, Wishlist, Logout); internal component named `Navbar` (casing differs from the filename `NavBar.js`).
-- **Footer.js** — site footer with company/customer-service/account links and social icons; several sections commented out (newsletter signup, app download links).
-- **layout/index.js** — barrel exporting `Layout`, `Footer`, `NavBar`.
+- **Footer.js** — site footer: the newsletter box, the pages the admin put in the Company / Customer service groups (`site.footer_pages`, linked to `/pages/:slug`) next to the fixed Contact / FAQ / account links, the social icons the admin listed, the tagline, `© year name` (only once the name is known) and the legal pages in the bottom row.
+- **AnnouncementBar.js** — the bar above the header from `site.announcement`: a `<Link>` for a shop path, an `<a target=_blank rel=noopener>` for an `http(s)` address, plain text for none (anything else is text too); nothing without text.
+- **NewsletterForm.js** — the footer's e-mail box → `subscribeToNewsletter`; shows the backend's sentence (the same for a new and an already listed address) or why it was refused; one send at a time.
+- **layout/index.js** — barrel exporting `Layout`, `Footer`, `NavBar`, `AnnouncementBar`, `NewsletterForm`. `Layout` loads the site (`handleFetchSite`) and sets the browser tab title; `NavBar` shows the admin's logo (`site.logo`) or the bundled `static image/gocart-logo.svg` when there is none.
 
 ## `checkout/`
 
