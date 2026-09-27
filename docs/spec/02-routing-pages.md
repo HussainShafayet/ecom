@@ -25,7 +25,10 @@
 | `/orders/:orderId` | `OrderDetail` | **yes**, via `ProtectedRoute` | One order: progress (`OrderTimeline`), items, totals, address, payment, and a Cancel button while `can_cancel` (`cancelOrder` → `POST /orders/{id}/cancel/`, after `window.confirm`). |
 | `/verify-otp/:token` | `VerifyOtp` | none (must be reachable pre-auth) | Submits local cart+wishlist snapshot alongside the OTP so guest cart/wishlist merges into the account on verify. |
 | `/order-tracking` | `OrderTracking` (`pages/others`) | none | A guest (or anyone) follows an order with its number + phone (`+880` and 10 digits; `01712345678` is accepted and normalised): `trackOrder` → `GET /orders/track/`. Shows progress + items, never a name/address. Prefilled from `?order_id=`. |
-| `/contact`, `/aboutus`, `/faq`, `privacy-policy` | static pages | none | `privacy-policy` is missing its leading slash (inconsistent with every other route). |
+| `/contact` | `Contact` (`pages/others`) | none | The shop's own details (address, phone, e-mail, opening hours, social links, an OpenStreetMap/Google map iframe) come from `state.site`; a detail the admin left empty is not drawn. The form (name, e-mail, optional phone and subject, message) → `sendContactMessage` → `POST /site/contact/`: the backend's sentences are shown when it refuses, a connection failure says so, the form empties on success, and it cannot be sent twice while a send is on its way. |
+| `/faq` | `FAQPage` (`pages/others`) | none | The admin's questions (`GET /site/faq/`) grouped by category in the admin's order, one answer open at a time, searched by question and answer; empty and failed states are said. |
+| `/pages/:slug` | `StaticPage` (`pages/others`) | none | A page the admin wrote (About us, Privacy policy, Terms, ...): `GET /site/pages/{slug}/`, title + the backend's already-cleaned HTML (rendered with `RichTextToHTML`, styled by arbitrary-variant classes on the wrapper). A 404 says the page does not exist; any other failure says it could not be loaded. Reloads when the slug changes. |
+| `/aboutus`, `/privacy-policy` | `<Navigate replace>` | none | The old addresses redirect to `/pages/about-us` and `/pages/privacy-policy` (the two pages the storefront used to hardcode). |
 | `*` | `NotFound` | none | Generic 404. |
 
 `ProtectedRoute` (`src/components/common/ProtectedRoute.js`) reads `state.auth.isAuthenticated`; if false, `<Navigate to="/signin" replace state={{from: location}} />`, else renders `<Outlet/>`. **Only `/profile`, `/orders` and `/orders/:orderId` use it** — `/wishlist`, `/cart`, `/checkout` are reachable while logged out and each page internally special-cases `isAuthenticated` instead.
@@ -52,7 +55,6 @@
 ## Flagged issues
 
 - **`/products/category/:category` route is dead** — nothing navigates to it; all internal links use the `/products/?category=slug` query-string form.
-- **`privacy-policy` route has no leading slash**, inconsistent with every other route. The Footer links to it via a raw `<a href="/privacy-policy">` rather than `<Link>`, causing a full page reload unlike other footer links.
 - **`user/WishList.js`** also has ~130 lines of an old commented-out implementation left above the live one.
 - **`user/Profile.js`** imports `set` from `lodash` but never uses it — dead import.
 - **Guest-vs-auth inconsistency**: `/wishlist`, `/cart`, `/checkout` aren't wrapped in `ProtectedRoute`, yet their internal logic silently no-ops for guests (e.g. wishlist never redirects to sign-in — that redirect is commented out — so guests just see a permanently empty wishlist).

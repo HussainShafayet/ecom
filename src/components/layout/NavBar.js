@@ -6,6 +6,8 @@ import {logoutUser} from '../../redux/slice/authSlice';
 import { selectCartCount } from '../../redux/slice/cartSlice';
 import {Logout} from '../../redux/slice/authActions';
 import SearchDropdown from '../common/SearchDropdown';
+import AnnouncementBar from './AnnouncementBar';
+import { selectSite } from '../../redux/slice/siteSlice';
 
 const Navbar = () => {
   const [authMenuOpen, setAuthMenuOpen] = useState(false);
@@ -16,6 +18,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const cartCount = useSelector(selectCartCount);
+  const { name, logo } = useSelector(selectSite);
   const authRef = useRef(null);
   const profileRef = useRef(null);
 
@@ -49,18 +52,16 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-md sticky top-0 w-full z-50">
-      {/* Top Promo Bar */}
-      <div className="bg-blue-600 text-white text-center py-2 text-sm">
-        <Link to="/deals">Flash Sale! Up to 50% Off Selected Items</Link>
-      </div>
+      {/* Top Promo Bar: the admin's announcement (Site settings) */}
+      <AnnouncementBar />
 
       <div className="container mx-auto px-4 py-1 flex justify-between items-center gap-2">
         {/* Logo Section */}
         <div className="flex items-center space-x-3 md:space-x-4">
           <Link to='/'>
             <img
-              src="/static image/gocart-logo.svg"
-              alt="Website Logo"
+              src={logo || '/static image/gocart-logo.svg'}
+              alt={name ? `${name} logo` : 'Website Logo'}
               className="w-12 h-12 md:w-16 md:h-16 transition-shadow duration-300"
             />
           </Link>
