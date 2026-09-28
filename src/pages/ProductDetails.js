@@ -39,7 +39,7 @@ const ProductDetails = () => {
 
   useEffect(() => {
     if (product?.category) {
-      dispatch(fetchAllProducts({category: product?.category, limit:30}))
+      dispatch(fetchAllProducts({category: product?.category, page_size:30}))
     }
   }, [dispatch, product]);
 // Handle clicks outside each dropdown
