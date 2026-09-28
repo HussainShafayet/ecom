@@ -29,7 +29,7 @@ const Cart = () => {
     if (cartItems.length > 0) {
       dispatch(fetchAllProducts({page_size:12}));
     }
-   }, [dispatch]);
+   }, [dispatch, isAuthenticated, cartItems.length]);
 
    // Debounced API call
    const debouncedUpdateQuantity = useCallback(
