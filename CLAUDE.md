@@ -25,10 +25,22 @@ JSX-containing files in this repo use a `.js` extension, not `.jsx` — `vite.co
 
 `VITE_BASE_URL` must be set (e.g. in a local, gitignored `.env`, see `.env.example`) or every API call fails with a network error.
 
+### Optional environment variable
+
+`VITE_SENTRY_DSN` turns on Sentry error tracking (`src/index.js`). Empty (the default) = off, so local dev, tests
+and CI stay silent. A Sentry alert rule (Sentry dashboard, not this repo) opens a GitHub issue on this repo
+automatically when a new error shows up.
+
 ## Architecture
 
 ### App shell & routing (`src/App.js`)
 `BrowserRouter` → `GlobalErrorHandler` → `ScrollToTop` → `Layout` (NavBar + page + BottomNav + Footer + BackToTop) wraps **every** route — there is no separate auth-only layout. Only `/profile`, `/orders` and `/orders/:orderId` are wrapped in `ProtectedRoute` (redirects to `/signin` if `state.auth.isAuthenticated` is false); `/cart`, `/checkout`, `/wishlist`, `/order-confirmation/:orderId` and `/order-tracking` are reachable while logged out and each page internally branches on auth state instead.
+
+`src/index.js` wraps the whole tree (outside the Redux `Provider`) in a `Sentry.ErrorBoundary`, which is a
+different mechanism from `GlobalErrorHandler` above: it catches uncaught **render** exceptions (a component
+throwing while rendering), where `GlobalErrorHandler` only reacts to `globalErrorSlice` state set by the API
+interceptors. Both show a similar full-page message; only the Sentry one reports to Sentry (if
+`VITE_SENTRY_DSN` is set) and offers just a reload, no retry.
 
 ### State management (`src/redux/`)
 Redux Toolkit store (`store.js`) with `redux-persist` (localStorage). Only `cart` and `wishList` are persisted via the root `persistConfig.whitelist`; `auth` is **separately, independently** persisted with its own nested `persistReducer` whitelisting only `isAuthenticated` (tokens live in cookies via `js-cookie`, not redux-persist). All other slices (`product`, `category`, `checkout`, `content`, `profile`, `review`, `order`, `site`, `new_arrival`, `best_selling`, `flash_sale`, `globalError`) are not persisted.
@@ -42,7 +54,7 @@ Two axios instances:
 - `axiosSetup.js` — authenticated client. Attaches `Authorization: Bearer <accessToken>` from Redux state; on 401 auto-refreshes via the `refresh_token` cookie and retries once, logging the user out on failure.
 - `publicApi.js` — unauthenticated client, same base URL, no auth header.
 
-Both interceptors map HTTP status → a generic message and dispatch it to `globalErrorSlice`, either as a page-wide `setGlobalError` or, if the request config sets a `section` string (`{ section: 'add-cart' }` etc.), a scoped `setSectionError` that individual components read via `state.globalError.sectionErrors[section]`. Follow this `section` convention for new calls that should show inline (not full-page) errors.
+Both interceptors map HTTP status → a generic message and dispatch it to `globalErrorSlice`, either as a page-wide `setGlobalError` or, if the request config sets a `section` string (`{ section: 'add-cart' }` etc.), a scoped `setSectionError` that individual components read via `state.globalError.sectionErrors[section]`. Follow this `section` convention for new calls that should show inline (not full-page) errors. Both interceptors also call `Sentry.captureException` on a network error or a 5xx response (a bug, not something the customer did) — 4xx responses are expected/validation errors and are not reported.
 
 Only `categoryService.js`, `contentService.js`, `productService.js`, `orderService.js`, `siteService.js` and `couponService.js` exist under `src/services/` — auth, cart, wishlist, profile, checkout, and review calls are inlined directly inside their slices rather than going through a service module. When adding new endpoints, prefer creating/extending a `services/*.js` wrapper for consistency going forward rather than inlining further, even though most of the existing codebase inlines.
 

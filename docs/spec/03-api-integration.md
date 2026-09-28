@@ -84,6 +84,8 @@ Two parallel, not-quite-connected mechanisms:
 
 These two systems overlap in intent but don't share state or components — the same failed request can surface differently depending on which slice handled it, and a component can end up needing to read from both `sectionErrors` and a local slice error field.
 
+A third, separate mechanism reports to Sentry (not the UI): both axios interceptors call `Sentry.captureException` on a network error or a 5xx response only (4xx is expected/validation, not reported), and `src/index.js` wraps `<App>` in a `Sentry.ErrorBoundary` that catches uncaught render exceptions the two systems above never see. Off unless `VITE_SENTRY_DSN` is set.
+
 ## `src/data/location.js`
 
 Pure static data — Bangladesh administrative geography: `divisionsData` (8 divisions), `districtsData` (64 districts, each with `division_id`, lat/long), `upazilasData` (hundreds of upazilas, each with `district_id`). No API involved; used for address/location dropdowns in checkout/profile (cascading division → district → upazila selects). Includes Bengali (`bn_name`) and English names. One data oddity: an upazila entry (`id: "100"`) has a corrupted `name` field (`"{{198}}''{{199}}"`), likely a bad find/replace during data import.

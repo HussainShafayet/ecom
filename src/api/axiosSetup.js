@@ -1,5 +1,6 @@
 // src/api/axiosSetup.js
 import axios from "axios";
+import * as Sentry from "@sentry/react";
 import { refreshToken } from "../redux/slice/authSlice";
 import store from "../redux/store";
 import Cookies from "js-cookie";
@@ -27,11 +28,16 @@ api.interceptors.response.use(
     
     if (!error.response) {
       // Network Error: Treat as global
+      Sentry.captureException(error);
       store.dispatch(setGlobalError("Network error: Unable to connect to the server"));
       return Promise.reject(error);
     }
 
     const status = error.response.status;
+    if (status >= 500) {
+      // A bug on the server side, not something the customer did: worth a Sentry issue.
+      Sentry.captureException(error);
+    }
 
     // Handle 401 (Unauthorized) with token refresh
     if (status === 401 && !originalRequest._retry) {
