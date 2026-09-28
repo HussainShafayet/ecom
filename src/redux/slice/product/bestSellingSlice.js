@@ -5,14 +5,16 @@ const initialState = {
     best_selling_Loading: false,
     best_selling: [],
     best_selling_error: null,
+    hasMore: true,
+    relatedProductsLoading: false,
 }
 
 //get Best Selling products
 export const fetchBestSellingProducts = createAsyncThunk("product/fetchBestSellingProducts", async ({page=1, page_size=null})=>{
     let response = await getBestSellingProducts(page, page_size);
     console.log('get best selling product res', response);
-    
-    return {data: response?.data?.data?.results, error: response?.message};
+
+    return {data: response?.data?.data?.results, next: response?.data?.data?.next || null, error: response?.message};
 });
 
 const bestSellingSlice = createSlice({
@@ -30,12 +32,10 @@ const bestSellingSlice = createSlice({
             state.relatedProductsLoading = false;
             state.best_selling_Loading = false;
             state.best_selling_error = null;
-            state.best_selling = action.meta.arg.page > 1 
-            ? [...state.best_selling, ...action?.payload?.data] 
+            state.best_selling = action.meta.arg.page > 1
+            ? [...state.best_selling, ...action?.payload?.data]
             : action?.payload?.data;
-            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
-            
-            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
+            state.hasMore = Boolean(action?.payload?.next); // the backend says whether another page exists
         });
         builder.addCase(fetchBestSellingProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;

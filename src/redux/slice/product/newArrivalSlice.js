@@ -6,14 +6,16 @@ const initialState = {
     new_arrival_Loading: false,
     new_arrival: [],
     new_arrival_error: null,
+    hasMore: true,
+    relatedProductsLoading: false,
 }
 
 //get new arrival products
 export const fetchNewArrivalProducts = createAsyncThunk("product/fetchNewArrivalProducts", async ({page=1, page_size=null})=>{
     let response = await getNewArrivalProducts(page, page_size);
     console.log('get new arrival product res', response);
-    
-    return {data: response?.data?.data?.results || [], error: response?.message};
+
+    return {data: response?.data?.data?.results || [], next: response?.data?.data?.next || null, error: response?.message};
 });
 
 const newArrivalSlice = createSlice({
@@ -32,12 +34,10 @@ const newArrivalSlice = createSlice({
             state.relatedProductsLoading = false;
             state.new_arrival_Loading = false;
             state.new_arrival_error = null;
-            state.new_arrival = action.meta.arg.page > 1 
-            ? [...state.new_arrival, ...action?.payload?.data] 
+            state.new_arrival = action.meta.arg.page > 1
+            ? [...state.new_arrival, ...action?.payload?.data]
             : action?.payload?.data;
-            state.hasMore = action.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
-            
-            state.hasMore = action.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
+            state.hasMore = Boolean(action?.payload?.next); // the backend says whether another page exists
         });
         builder.addCase(fetchNewArrivalProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
