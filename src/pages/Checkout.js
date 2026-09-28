@@ -14,6 +14,8 @@ import {
   initializeCheckout,
   clearResponseError,
   setSelectedAddressId,
+  handleApplyCoupon,
+  clearCoupon,
 } from '../redux/slice/checkoutSlice';
 import {clearCart, handleAddtoCart, handleFetchCart, handleRemovetoCart, removeFromCart, selectCartItems, selectTotalPrice, updateQuantity} from '../redux/slice/cartSlice';
 import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
@@ -31,16 +33,17 @@ const Checkout = () => {
   const {cartLoading, cartItems, cartError} = useSelector((state)=>state.cart);
   const navigate = useNavigate();
  
-  const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, order, delivery_charges, responseError, checkoutContentLoading, checkoutContentError} = useSelector(
+  const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, order, delivery_charges, responseError, checkoutContentLoading, checkoutContentError, couponStatus, couponError, discountAmount, appliedCouponCode} = useSelector(
     (state) => state.checkout
   );
-  
+
   const { isAuthenticated } = useSelector(
     (state) => state.auth
   );
    const contentError = useSelector((state) => state.globalError.sectionErrors["checkout-content"]);
    const [confirmDelete, setConfirmDelete] = useState({});
    const [originalQuantities, setOriginalQuantities] = useState({}); // Store original quantities
+   const [couponInput, setCouponInput] = useState('');
 
  
   // Step 1: Initialize checkout on page load if not fulfilled
@@ -202,6 +205,7 @@ const Checkout = () => {
         "shipping_thana": upazila,
         "shipping_address": address,
         payment_type,
+        "coupon_code": couponStatus === 'applied' ? appliedCouponCode : '',
         "items" : [],
         "sub_total_price": totalPrice.toFixed(2),
         "delivery_charge": shippingCost,
@@ -255,10 +259,31 @@ const Checkout = () => {
   }
 
   const totalPrice = useSelector(selectTotalPrice);
-  
+
   const shippingCost = formData?.shipping_type && delivery_charges[formData.shipping_type] ? delivery_charges[formData.shipping_type] : 0;
-  
-  const grandTotal = totalPrice + shippingCost;
+
+  const grandTotal = totalPrice + shippingCost - (couponStatus === 'applied' ? discountAmount : 0);
+
+  // The cart changed since a coupon was applied: its preview no longer matches, so it is cleared (placing the
+  // order always re-validates a coupon_code against the real subtotal anyway; this just keeps the summary honest).
+  useEffect(() => {
+    if (couponStatus === 'applied') {
+      dispatch(clearCoupon());
+      setCouponInput('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalPrice]);
+
+  const onApplyCoupon = () => {
+    const code = couponInput.trim();
+    if (!code || couponStatus === 'validating') return;
+    dispatch(handleApplyCoupon({ code, subtotal: totalPrice.toFixed(2), phone_number: formData.phone_code + formData.phone_number }));
+  };
+
+  const onRemoveCoupon = () => {
+    dispatch(clearCoupon());
+    setCouponInput('');
+  };
 
  const handleUpdateQuantity = (id, newQuantity, item) => {
      let prevQuantity = 0;
@@ -460,10 +485,51 @@ const Checkout = () => {
 
             <div className="p-4 sm:p-2">
               <hr className="my-3" />
+
+              {/* Promo code */}
+              <div className="mb-3">
+                {couponStatus === 'applied' ? (
+                  <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                    <span className="text-green-700 text-sm font-medium">
+                      Coupon <strong>{appliedCouponCode}</strong> applied
+                    </span>
+                    <button type="button" onClick={onRemoveCoupon} className="text-red-500 text-sm hover:text-red-600">
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Promo code"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      disabled={couponStatus === 'validating'}
+                      className="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={onApplyCoupon}
+                      disabled={couponStatus === 'validating' || !couponInput.trim()}
+                      className="bg-gray-800 text-white px-4 rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {couponStatus === 'validating' ? '...' : 'Apply'}
+                    </button>
+                  </div>
+                )}
+                {couponStatus === 'failed' && <p className="text-red-500 text-xs mt-1">{couponError}</p>}
+              </div>
+
               <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span>{totalPrice.toFixed(2)}</span>
               </div>
+              {couponStatus === 'applied' && (
+                <div className="flex justify-between text-green-600">
+                  <span>Discount</span>
+                  <span>-{discountAmount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span>Shipping</span>
                 <span>{shippingCost.toFixed(2)}</span>
