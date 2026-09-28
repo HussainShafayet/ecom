@@ -78,7 +78,6 @@ const RatingAndReview = ({ product }) => {
       return;
     }
 
-    //console.log(reviewFormData);
     // Initialize FormData
     const formData = new FormData();
     formData.append("product_id", reviewFormData.product_id);

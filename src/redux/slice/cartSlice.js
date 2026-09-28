@@ -1,17 +1,6 @@
 // src/redux/slice/cartSlice.js
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
-// Load initial cart items from localStorage, or default to an empty array
-//const loadCartFromLocalStorage = () => {
-//  try {
-//    const serializedCart = localStorage.getItem('cartItems');
-//    return serializedCart ? JSON.parse(serializedCart) : [];
-//  } catch (e) {
-//    console.warn("Could not load cart items from localStorage:", e);
-//    return [];
-//  }
-//};
-
 const initialState = {
   cartLoading: false,
   cartItems: [],
@@ -166,37 +155,6 @@ export const selectCartCount = (state) =>
   state.cart.cartItems.reduce((total, item) => total + item.quantity, 0);
 export const selectTotalPrice = (state) =>
   state.cart.cartItems.reduce((total, item) => total + (item.has_discount? item.discount_price : item.base_price) * item.quantity, 0);
-
-// Save cart to localStorage whenever cart items change
-export const saveCartToLocalStorage = (cartItems) => {
-  try {
-    const serializedCart = JSON.stringify(cartItems);
-    localStorage.setItem('cartItems', serializedCart);
-  } catch (e) {
-    console.warn("Could not save cart items to localStorage:", e);
-  }
-};
-
-// Middleware to sync cart with localStorage
-//export const cartMiddleware = (store) => (next) => (action) => {
-//  const result = next(action);
-//  if (
-//    addToCart.match(action) ||
-//    removeFromCart.match(action) ||
-//    updateQuantity.match(action) ||
-//    clearCart.match(action)
-//  ) {
-//    saveCartToLocalStorage(store.getState().cart.cartItems);
-//  }
-//  return result;
-//};
-
-
-// Thunk to handle adding to cart and removing from wishlist
-//export const addToCartAndRemoveFromWishlist = (item) => (dispatch) => {
-//  dispatch(addToCart(item));
-//  dispatch(removeFromWishlist(item.id)); // Remove from wishlist after adding to cart
-//};
 
 export const handleClonedProduct = (product, selectedSize, selectedColor, quantity)=>(dispatch)=>{
   const dummyProduct = {}

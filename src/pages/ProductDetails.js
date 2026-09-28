@@ -4,7 +4,6 @@ import { FaStar, FaChevronDown, FaShareAlt, FaTag, FaBox, FaWeightHanging, FaRul
 import { ErrorDisplay, InputField, Loader, ProductCard, RatingAndReview, RichTextToHTML } from '../components/common/'; // Star and dropdown icons
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts, setSelectedColor, setSelectedSize} from '../redux/slice/productSlice';
-//import {addToCart} from '../redux/slice/cartSlice';
 import {addToCart, handleAddtoCart, handleClonedProduct} from '../redux/slice/cartSlice';
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
@@ -179,8 +178,6 @@ useEffect(() => {
   const handleSeeCustomerReviews = () => {
     if (reviewsRef.current) {
       reviewsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start'});
-      //const offset = -600; // Adjust this value to your header height
-      //window.scrollBy({ top: offset, behavior: 'smooth' });
       setIsRatingDropdownOpen(false); // Close dropdown after selecting
     }
   };
@@ -198,21 +195,6 @@ useEffect(() => {
   }
 
  
-  const shareProduct = () => {
-    if (navigator.share) {
-      navigator
-        .share({
-          title: product?.title,
-          text: `Check out this product: ${product?.title}`,
-          url: window.location.href,
-        })
-        .then(() => console.log("Product shared successfully!"))
-        .catch((error) => console.error("Error sharing product:", error));
-    } else {
-      alert("Web Share API is not supported in your browser.");
-    }
-  }
-
   const copyLinkToClipboard = () => {
     const link = window.location.href;
   
@@ -488,10 +470,8 @@ useEffect(() => {
               </div>
             </div>
 
-            {/*<p className="text-gray-700 mb-2">*/}
-              <RichTextToHTML content={product.short_description} />
-            {/*</p>*/}
-            
+            <RichTextToHTML content={product.short_description} />
+
 
             {/* Ratings Dropdown Button */}
             <div
@@ -639,24 +619,12 @@ useEffect(() => {
                 className="text-blue-500 hover:text-blue-600 transition"
               >
                 <FaShareAlt />
-                {/*<span>Share</span>*/}
               </button>
 
               {/* Dropdown Menu */}
               {isShareDropdownOpen && (
                 <div className="absolute left-0 mt-2 w-56 bg-white border border-gray-300 rounded-lg shadow-md z-10">
                   <ul className="py-2">
-                    {/* Web Share API */}
-                    {/*<li>
-                      <button
-                        onClick={shareProduct}
-                        className="flex items-center gap-2 px-4 py-2 w-full text-left hover:bg-gray-100 transition"
-                      >
-                        <FaShareAlt className="text-blue-500" />
-                        Share via App
-                      </button>
-                    </li>*/}
-
                     {/* Copy Link */}
                     <li>
                       <button

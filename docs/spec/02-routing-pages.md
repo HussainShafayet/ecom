@@ -10,11 +10,10 @@
 |---|---|---|---|
 | `/` | `Home` | none | Composes `HeroSection`, `FlashSale`, `NewArrival`, `CategoriesSection`, `BestSelling`, `FeaturedProducts`, `AllProducts`; `Testimonials` is commented out. |
 | `/products` | `Products` | none | Reads/writes query params (`category`, `brands`, `tags`, `min_price`, `max_price`, `sizes`, `colors`, `page`, `page_size`, `ordering`, `search`); infinite scroll via `react-infinite-scroll-component`. |
-| `/products/category/:category` | `Products` | none | Dead/unused route — every internal link uses `/products/?category=slug` query-string style instead (e.g. `Categories.js`, `ProductDetails.js`); nothing navigates to the `:category` param form. |
 | `/products/detail/:slug` | `ProductDetails` | none | Add-to-cart/buy-now branches on `isAuthenticated` (server cart vs local cart clone); works for guests too. |
 | `/cart` | `Cart` | none (not `ProtectedRoute`-wrapped) | Fetches server cart only `if (isAuthenticated)`. |
 | `/checkout` | `Checkout` | none | Works for guest checkout; redirects to `/products` if cart is empty. |
-| `/wishlist` | `WishList` | not enforced | Only fetches if authenticated; guest sees a permanently empty list (the redirect-to-signin path is commented out). |
+| `/wishlist` | `WishList` | not enforced, by design | Guests see their locally persisted wishlist (`state.wishList.items`, redux-persist); only fetches the server copy `if (isAuthenticated)`. |
 | `/products/flash-sale`, `/products/new-arrival`, `/products/best-selling`, `/products/featured` | the matching homepage section component, rendered with `forRoute={true}` | none | Home-page section components reused directly as full pages. |
 | `/categories` | `Categories` (`forRoute={true}`) | none | Fetches flash-sale/new-arrival/best-selling/featured categories + slider/banner content. |
 | `/order-confirmation/:orderId` | `OrderConfirmation` | none | Shows the order id from the URL; the total/date come from `location.state.order` (what `POST /orders/` answered, handed over by `Checkout`); a signed-in customer's order is also read back (`fetchOrder`, so it survives a refresh) and shows items + address. Guests get a link to `/order-tracking?order_id=…`. |
@@ -40,7 +39,7 @@
 3. A `useEffect` on each page watches for that message and navigates to `/verify-otp/:token`.
 4. `VerifyOtp` reads `token` from the URL param, collects the current local `cartItems` (`state.cart`) and wishlist `items` (`state.wishList`) into `formData.cart`/`formData.favorite`, and submits `{token, otp, cart, favorite}` via the `verifyOtp` thunk — verification also merges the guest's local cart/wishlist into the newly authenticated account server-side. Has a "Resend OTP" link (`resendOtp` thunk).
 5. On `verifyOtp.fulfilled`, `state.auth.isAuthenticated = true`; a `useEffect` then navigates to `location.state?.from` (defaults to `/`) and clears verify state.
-6. **Bug**: `SignIn`'s captured `from` location (`location.state?.from?.pathname`) is never passed into the `/verify-otp/:token` navigate call (`navigate(`/verify-otp/${token}`)` — no `state` argument), so `VerifyOtp`'s fallback to `/` fires in practice every time. "Return to intended page after login" is broken/incomplete.
+6. `SignIn` captures `from` (`location.state?.from?.pathname`, set by `ProtectedRoute`'s redirect) and passes it through the `/verify-otp/:token` navigate call as `state: { from }`, so `VerifyOtp`'s `location.state?.from` picks it up and step 5's navigate sends the customer back to the page they were on before signing in, not always `/`.
 
 ## Checkout / order flow
 
@@ -54,11 +53,7 @@
 
 ## Flagged issues
 
-- **`/products/category/:category` route is dead** — nothing navigates to it; all internal links use the `/products/?category=slug` query-string form.
-- **`user/WishList.js`** also has ~130 lines of an old commented-out implementation left above the live one.
-- **`user/Profile.js`** imports `set` from `lodash` but never uses it — dead import.
-- **Guest-vs-auth inconsistency**: `/wishlist`, `/cart`, `/checkout` aren't wrapped in `ProtectedRoute`, yet their internal logic silently no-ops for guests (e.g. wishlist never redirects to sign-in — that redirect is commented out — so guests just see a permanently empty wishlist).
-- **Post-login redirect is broken** (see step 6 of the auth flow above).
+- **Guest-vs-auth inconsistency**: `/wishlist`, `/cart`, `/checkout` aren't wrapped in `ProtectedRoute`; each branches on `isAuthenticated` internally instead (by design — see the route table above for `/wishlist`'s guest behavior).
 - **No password field anywhere** in SignIn/SignUp — this is OTP/phone-based auth by design, confirm with the user before treating it as an oversight.
-- Only Cash-on-Delivery is implemented in Checkout despite credit-card iconography suggesting more was planned.
+- Only Cash-on-Delivery is implemented in Checkout despite credit-card iconography suggesting more was planned; the Facebook/Google buttons on SignIn are decorative (no `onClick`) — both are known gaps, not yet decided how to resolve.
 - Several commented-out sections throughout (Footer newsletter block, Testimonials on Home, social icons) indicate features that were built but disabled, not necessarily bugs.

@@ -1,22 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { FaUserEdit, FaBoxOpen, FaMapMarkerAlt, FaCreditCard, FaLock, FaPlus, FaHeart, FaBell, FaHistory, FaCamera, FaPlusCircle, FaSpinner } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {useNavigate} from 'react-router-dom';
 import {handleAddressCreate, handleGetAddress, handleGetProfile, handleProfileUpdate, handleSendOtp, handleSubmitOtp, resetAddressForm, setDistricts, setErrors, setImage, setInfoEditing, setIsAddAddress, setOtp, setUpazilas, statusUpdateVerified, statusUpdateVerifyPopup, updateAddressFormData, updatePreviousValue, updateTouched} from '../../redux/slice/profileSlice';
 import {ErrorDisplay, Loader, SuccessMessage} from '../../components/common';
 import {AddressItem} from '../../components/profile';
 import { WishList } from '../user';
 import {dhakaCityData, districtsData, divisionsData, upazilasData} from '../../data/location';
 import {ProfileSkeleton} from '../../components/common/skeleton';
-import {debounce, set} from 'lodash';
+import {debounce} from 'lodash';
 
 const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const dispatch = useDispatch();
   const {isAuthenticated,user} = useSelector((state)=>state.auth);
   const {isLoading, profile, error, adrressLoading,addresses, addressError, isAddAddress, addressFormData, touched, errors, districts,upazilas, updateLoading, updateError, loading, otpToken, message, verifyError, verifyPopup, verified, otpSubmitLoading, otpSubmitError, otp, infoEditing, previousValue, image} = useSelector((state)=> state.profile);
-
-  const navigate = useNavigate();
   
 
   const [formData, setFormData] = useState({}); // State to store form data
@@ -25,11 +22,8 @@ const Profile = () => {
  
   
   useEffect(()=>{
-    if (!isAuthenticated) {
-      //navigate('/signin');
-    }
     isAuthenticated && dispatch(handleGetProfile());
-  }, [dispatch, isAuthenticated, navigate]);
+  }, [dispatch, isAuthenticated]);
 
   useEffect(()=>{
     dispatch(setImage(profile?.profile_picture));
@@ -239,16 +233,6 @@ const Profile = () => {
       
     }
   }
-
-
-
-  //if (isLoading) {
-  //  return <div className='container h-screen flex justify-center'><Loader message='Loading Profile' /></div>
-  //}
-
-  //if (error) {
-  //  return <div className="text-center text-red-500">{error}</div>;
-  //}
 
   return (
     <>
@@ -794,8 +778,6 @@ const Profile = () => {
 
             {selectedTab === 'wishlist' && (
               <div>
-                {/*<h2 className="text-xl font-semibold mb-4">My Wishlist</h2>
-                <p className="text-gray-500">You haven’t added any items to your wishlist yet.</p>*/}
                 <WishList />
               </div>
             )}

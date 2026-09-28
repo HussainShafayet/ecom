@@ -79,19 +79,6 @@ const ProductCard = ({ product, cardForTrending }) => {
     }
   };
 
-  
-  
-  // Check if the product is already in the wishlist
-  //const isInWishlist = wishlist.some(item => item.id === product.id);
-
-  //const handleWishlistToggle = () => {
-  //  if (isInWishlist) {
-  //    dispatch(removeFromWishlist(product.id));
-  //  } else {
-  //    dispatch(handleAddtoWishlist({product_id: product.id}));
-  //  }
-  //};
-
   const handleAddToWishlist = () =>{
     if (isAuthenticated) {
        dispatch(handleAddtoWishlist({product_id: product.id}));

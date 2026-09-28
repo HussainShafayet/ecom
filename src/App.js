@@ -28,7 +28,6 @@ function App() {
               {/* Pages */}
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products scrollContainerRef={scrollContainerRef} />} />
-              <Route path='/products/category/:category' element={<Products scrollContainerRef={scrollContainerRef} />} />
               <Route path="/products/detail/:slug" element={<ProductDetails />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />

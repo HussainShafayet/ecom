@@ -104,5 +104,3 @@ export const getProductById = async (slug) => {
   return await api.get(`/products/detail/${slug}`, { section: "product-details"});
 };
 
-//export default productService;
-

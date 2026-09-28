@@ -8,7 +8,7 @@ The `auth` reducer gets its **own, separate** nested `persistReducer` (`key: "au
 
 All other slices (`product`, `new_arrival`, `best_selling`, `flash_sale`, `category`, `checkout`, `content`, `profile`, `review`, `order`, `globalError`) are **not** persisted.
 
-Middleware: default RTK middleware with `serializableCheck: false`. Two custom middlewares (`cartMiddleware`, `wishlistMiddleware`) exist in commented-out/dead form. `persistor` is exported via `persistStore(store)` and wired in `src/index.js` with `<Provider>` + `<PersistGate loading={null}>`.
+Middleware: default RTK middleware with `serializableCheck: false`. `persistor` is exported via `persistStore(store)` and wired in `src/index.js` with `<Provider>` + `<PersistGate loading={null}>`.
 
 ## `slice/authSlice.js`
 
@@ -39,7 +39,7 @@ Thunks (dynamic `import('../../api/axiosSetup')`, authenticated client):
 
 Sync reducers `addToCart`, `removeFromCart`, `updateQuantity`, `clearCart` operate purely on local `cartItems` (no API call), matched on `id` + optional `variant_id`. Selectors: `selectCartItems`, `selectCartCount`, `selectTotalPrice` (uses `discount_price` if `has_discount` else `base_price`). Helper `handleClonedProduct(...)` builds a cart-item DTO from a product/variant (it keeps `minimum_order_quantity`, which the cart and the product cards use: `src/utils/minimumOrder.js` has `minimumOf`, `belowMinimum` and `minimumOrderProblems`, worded like the backend's checkout refusal).
 
-Persisted via the root whitelist (`"cart"`). Dead code: commented-out `loadCartFromLocalStorage`/`saveCartToLocalStorage`, and the commented-out `cartMiddleware`.
+Persisted via the root whitelist (`"cart"`).
 
 ## `slice/categorySlice.js`
 
@@ -54,7 +54,7 @@ Thunks:
 - `handleGetCheckoutContent` → `GET /content/checkout/` (same auth branching; populates `formData.name/phone/email` from `user_info`)
 - `handleApplyCoupon` → `POST /coupons/validate/` (`services/couponService.js`, public) — previews a coupon's discount against the cart's current subtotal; does not place the order, and the actual redemption at `handleCheckout` time always re-validates against the server's own subtotal.
 
-Plain thunk `initializeCheckout()` dispatches `handleGetCheckoutContent` and, if authenticated, `handleFetchCart()` — cross-slice orchestration living outside any single slice file. A large commented-out block references a nonexistent `handleGetProfile`/`setAddress` flow (dead code / abandoned direction). Not persisted, so a page refresh mid-checkout loses form progress.
+Plain thunk `initializeCheckout()` dispatches `handleGetCheckoutContent` and, if authenticated, `handleFetchCart()` — cross-slice orchestration living outside any single slice file. Profile name/phone/email and saved addresses both come from `handleGetCheckoutContent` (`GET /content/checkout/` returns `user_info` + `shipping_addresses` together); a selected saved address then fills the rest of the form via `ShowAddress.js` (`checkout/`, see [04-components-ui.md](04-components-ui.md)). Not persisted, so a page refresh mid-checkout loses form progress.
 
 ## `slice/orderSlice.js`
 
@@ -113,7 +113,7 @@ Thunks via the authenticated client: `handleAddtoWishlist` (`POST /accounts/favo
 
 **Bug**: all three thunk type strings are prefixed `'cart/...'` (e.g. `'cart/handleAddtoWishlist'`) instead of `'wishList/...'` — a copy-paste leftover from `cartSlice`. Doesn't break functionality (the type strings are still unique) but pollutes the `cart/*` namespace in Redux DevTools/action logs and is misleading when debugging.
 
-Sync reducers `addToWishlist`/`removeFromWishlist`/`clearWishlist` mirror `cartSlice`'s local-mutation pattern. Persisted via the root whitelist (`"wishList"`). Dead code: commented-out `saveWishlistToLocalStorage`, `wishlistMiddleware`.
+Sync reducers `addToWishlist`/`removeFromWishlist`/`clearWishlist` mirror `cartSlice`'s local-mutation pattern. Persisted via the root whitelist (`"wishList"`) — this is what lets a guest build a wishlist locally (via `addToWishlist` on a product card) with no auth needed; `WishList.js` only additionally fetches the server copy when signed in.
 
 ## `slice/product/bestSellingSlice.js`, `flashSaleSlice.js`, `newArrivalSlice.js`
 
@@ -123,17 +123,10 @@ None of `FlashSale.js`/`BestSelling.js`/`NewArrival.js`/`FeaturedProducts.js` ac
 
 These three overlap conceptually with `categorySlice`'s flash-sale/new-arrival/best-selling fields, and with `contentSlice`'s per-page fetches — three different slices independently model "flash sale" (as products, as categories, and as page content), which is a lot of duplicated boilerplate for closely related concepts. Worth consolidating if this area is touched for a feature, not just a bug fix.
 
-## `src/context/CartContext.js` vs `cartSlice.js`
-
-`CartContext.js` defines a fully independent `useState`-based cart (`CartProvider`, `useCart` hook) with its own `addToCart`/`removeFromCart`/`updateQuantity`/`clearCart`/`cartCount` — functionally overlapping with `cartSlice.js` almost 1:1, but with no backend integration, no persistence, and no cross-tab/reload durability.
-
-**This file is dead code.** No other file in `src` imports `CartContext`, `CartProvider`, or `useCart`; `App`/`index.js` only wrap the tree in Redux's `<Provider>`/`<PersistGate>`, never `<CartProvider>`. It's an orphaned earlier implementation superseded by `cartSlice.js` + redux-persist. Safe to delete if the codebase is being cleaned up; do not build new features on it.
-
 ## Flagged issues
 
 - **Auth persistence split**: `auth` is nested-persisted independently of the root `persistConfig.whitelist` — easy to overlook.
 - **Inconsistent async client usage**: most slices lazy `import()` `api/axiosSetup` per-thunk to dodge circular deps; `authSlice`'s `refreshToken`/`logoutUser` use raw `axios` with manually attached headers instead — duplicated auth-header logic, and these two calls skip the shared interceptor error handling entirely.
 - **Inconsistent auth-branching pattern**: `checkoutSlice` and `productSlice.searchSuggestions` branch client-by-auth-state; cart/wishlist/profile/review assume the user is always authenticated.
 - **`wishlistSlice` action-type namespace bug** (`'cart/...'` prefix — see above).
-- Multiple large commented-out dead-code blocks (localStorage cart/wishlist helpers, both custom middlewares, `checkoutSlice`'s old profile-prefill flow) should eventually be deleted rather than left commented.
 - Excessive `console.log` of API responses left in nearly every thunk.

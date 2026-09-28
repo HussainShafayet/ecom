@@ -10,7 +10,6 @@ import debounce from 'lodash.debounce'; // Import lodash debounce
 import {CartSkeleton, SectionSkeleton} from '../components/common/skeleton';
 
 const Cart = () => {
-  //const cartItems = useSelector(selectCartItems);
   const totalPrice = useSelector(selectTotalPrice);
   const [confirmDelete, setConfirmDelete] = useState({});
   const [confirmAllDelete, setConfirmAllDelete] = useState(false);
@@ -369,7 +368,6 @@ const Cart = () => {
           </>
         }
       </div>
-    {/*}*/}
     </>
   );
 };
