@@ -77,7 +77,6 @@ Tailwind CSS, utility-first, with **no theme customization** — no semantic col
 
 These are pre-existing bugs and inconsistencies worth knowing before touching related code, so they aren't mistaken for intentional behavior or accidentally reintroduced elsewhere:
 
-- **Pagination `hasMore` is effectively broken**: `productSlice`, `bestSellingSlice`, `flashSaleSlice`, `newArrivalSlice` all compute `hasMore` from `action.meta.arg.limit`, but the thunk argument is actually named `page_size` — so `hasMore` never reflects reality. Fix (or work around) all four if touching "load more" logic.
 - **`wishlistSlice` action types are prefixed `'cart/...'`** (copy-paste leftover from `cartSlice`) instead of `'wishList/...'` — cosmetic (types are still unique) but shows up wrong in Redux DevTools.
 - **Cart/wishlist "remove" endpoints use `PUT`, not `DELETE`** (`/accounts/cart/`, `/accounts/favourite/`) — intentional per the backend contract, not a bug to "fix" without checking the backend.
 - **`ProductCard .js`** (under `src/components/common/product/`) has a literal trailing space in the filename, and `common/index.js` imports it with that space — copy the exact filename if touching this component.

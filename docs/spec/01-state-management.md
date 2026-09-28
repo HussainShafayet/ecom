@@ -84,7 +84,7 @@ State: product list (`items`), single `product` detail, variant selection (`sele
 
 Thunks: `fetchAllProducts`/`fetchFeaturedProducts` (via `services/productService`, support pagination-append), `fetchProductById` (sets initial variant/image/qty from the response), `searchSuggestions` (branches authenticated client vs `publicApi` on auth state).
 
-**Bug**: `hasMore` is computed as `payload.data.length === action.meta.arg.limit`, but the thunk argument is actually named `page_size`, not `limit` — `action.meta.arg.limit` is always `undefined`, so this comparison is effectively always false. Pagination's "load more" signal is broken as written. The `fulfilled` handlers for both `fetchAllProducts` and `fetchFeaturedProducts` also assign `state.hasMore` twice (redundant duplicate line). Not persisted.
+`hasMore` is set from the backend's own `next` field (`Boolean(action.payload.next)`, both `fetchAllProducts` and `fetchFeaturedProducts`) — the thunks now pass `next` through from the paginated response instead of only `results`. Not persisted.
 
 ## `slice/profileSlice.js`
 
@@ -117,9 +117,9 @@ Sync reducers `addToWishlist`/`removeFromWishlist`/`clearWishlist` mirror `cartS
 
 ## `slice/product/bestSellingSlice.js`, `flashSaleSlice.js`, `newArrivalSlice.js`
 
-Three near-identical slices, each with one loading flag, one data array, one error, and one thunk (`fetchBestSellingProducts`/`fetchFlashSaleProducts`/`fetchNewArrivalProducts`) calling the matching `services/productService` function, with pagination-append logic copy-pasted from `productSlice.js` — including the same `hasMore`/`action.meta.arg.limit` bug and the same duplicated `state.hasMore = ...` line, in all three files.
+Three near-identical slices, each with one loading flag, one data array, one error, and one thunk (`fetchBestSellingProducts`/`fetchFlashSaleProducts`/`fetchNewArrivalProducts`) calling the matching `services/productService` function, with pagination-append logic copy-pasted from `productSlice.js` — including the same `hasMore` fix (from the backend's `next` field). None are persisted.
 
-`flashSaleSlice.js` and `newArrivalSlice.js`'s `initialState` lacks `hasMore`/`relatedProductsLoading` keys, yet the reducer writes to them anyway (RTK/Immer tolerates adding new keys at runtime — harmless but inconsistent with the declared shape). None are persisted.
+None of `FlashSale.js`/`BestSelling.js`/`NewArrival.js`/`FeaturedProducts.js` actually read `hasMore` (no load-more/infinite-scroll UI exists for these — each just renders a fixed `page_size:12`), so it's correct but currently unused outside `productSlice.items` (consumed by `Products.js`'s `InfiniteScroll`).
 
 These three overlap conceptually with `categorySlice`'s flash-sale/new-arrival/best-selling fields, and with `contentSlice`'s per-page fetches — three different slices independently model "flash sale" (as products, as categories, and as page content), which is a lot of duplicated boilerplate for closely related concepts. Worth consolidating if this area is touched for a feature, not just a bug fix.
 
@@ -131,7 +131,6 @@ These three overlap conceptually with `categorySlice`'s flash-sale/new-arrival/b
 
 ## Flagged issues
 
-- **`hasMore` pagination bug**: `productSlice`, `bestSellingSlice`, `flashSaleSlice`, `newArrivalSlice` all compare against `action.meta.arg.limit`, which no thunk actually receives (the param is `page_size`) — "load more" logic is effectively non-functional as written, duplicated across four files.
 - **Auth persistence split**: `auth` is nested-persisted independently of the root `persistConfig.whitelist` — easy to overlook.
 - **Inconsistent async client usage**: most slices lazy `import()` `api/axiosSetup` per-thunk to dodge circular deps; `authSlice`'s `refreshToken`/`logoutUser` use raw `axios` with manually attached headers instead — duplicated auth-header logic, and these two calls skip the shared interceptor error handling entirely.
 - **Inconsistent auth-branching pattern**: `checkoutSlice` and `productSlice.searchSuggestions` branch client-by-auth-state; cart/wishlist/profile/review assume the user is always authenticated.
