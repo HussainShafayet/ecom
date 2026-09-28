@@ -31,16 +31,16 @@ export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", asy
 
     let response = await getAllProducts(page_size, ordering, page, category, brands,tags, min_price, max_price, sizes, colors,discount_type, discount_value,search);
     console.log('get all product res', response);
-    
-    return {data: response?.data?.data?.results || [], error: response.message};
+
+    return {data: response?.data?.data?.results || [], next: response?.data?.data?.next || null, error: response.message};
 });
 
 //get featured products
 export const fetchFeaturedProducts = createAsyncThunk("product/fetchFeaturedProducts", async ({page=1, page_size=null})=>{
     let response = await getFeaturedProducts(page, page_size);
     console.log('get fetured products res', response);
-    
-    return {data: response?.data?.data?.results || [], error: response.message};
+
+    return {data: response?.data?.data?.results || [], next: response?.data?.data?.next || null, error: response.message};
 });
 
 // Fetch a single product by its slug
@@ -118,12 +118,10 @@ const productSlice = createSlice({
             state.relatedProductsLoading = false;
             state.isLoading = false;
             state.error = null;
-            state.items = action.meta.arg.page > 1 
-            ? [...state.items, ...action?.payload?.data] 
+            state.items = action.meta.arg.page > 1
+            ? [...state.items, ...action?.payload?.data]
             : action?.payload?.data;
-        state.hasMore = action?.payload?.data.length === action.meta.arg.limit; // Check if more pages are available
-            
-            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
+            state.hasMore = Boolean(action?.payload?.next); // the backend says whether another page exists
         });
         builder.addCase(fetchAllProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
@@ -143,12 +141,10 @@ const productSlice = createSlice({
             state.relatedProductsLoading = false;
             state.featured_Loading = false;
             state.featured_error = null;
-            state.featured = action.meta.arg.page > 1 
-            ? [...state.featured, ...action?.payload?.data] 
+            state.featured = action.meta.arg.page > 1
+            ? [...state.featured, ...action?.payload?.data]
             : action?.payload?.data;
-            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
-            
-            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
+            state.hasMore = Boolean(action?.payload?.next); // the backend says whether another page exists
         });
         builder.addCase(fetchFeaturedProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;

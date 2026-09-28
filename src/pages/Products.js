@@ -6,7 +6,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts, setIsSidebarOpen, setSortType} from '../redux/slice/productSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {FaArrowDown, FaArrowUp, FaFilter, FaFlag} from 'react-icons/fa';
-import {ProductsPageSkeleton} from '../components/common/skeleton';
+import {ProductCardSkeleton, ProductsPageSkeleton} from '../components/common/skeleton';
 
 const Products = ({scrollContainerRef}) => {
   //
@@ -245,8 +245,14 @@ const Products = ({scrollContainerRef}) => {
               dataLength={products?.length}
               next={fetchMoreProducts}
               hasMore={hasMore}
-              loader={<div className="text-center">Loading more products...</div>}
-              endMessage={<div className="text-center my-4">No more products</div>}
+              loader={
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mt-3">
+                  {[...Array(5)].map((_, index) => (
+                    <ProductCardSkeleton key={index} />
+                  ))}
+                </div>
+              }
+              endMessage={<div className="text-center my-4 text-gray-500">You've seen every product here.</div>}
               scrollableTarget={scrollContainerRef.current} // Set the scrollable target
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">

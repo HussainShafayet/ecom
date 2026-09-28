@@ -5,13 +5,15 @@ const initialState = {
     flash_sale_Loading: false,
     flash_sale_error: null,
     flash_sale: [],
+    hasMore: true,
+    relatedProductsLoading: false,
 }
 //get flash sale products
 export const fetchFlashSaleProducts = createAsyncThunk("product/fetchFlashSaleProducts", async ({page=1, page_size=null})=>{
     let response = await getFlashSaleProducts(page, page_size);
     console.log('get flash sale product res', response);
-    
-    return {data: response?.data?.data?.results || [], error: response.message};
+
+    return {data: response?.data?.data?.results || [], next: response?.data?.data?.next || null, error: response.message};
 });
 
 const flashSaleSlice = createSlice({
@@ -28,12 +30,10 @@ const flashSaleSlice = createSlice({
             state.relatedProductsLoading = false;
             state.flash_sale_Loading = false;
             state.flash_sale_error = null;
-            state.flash_sale = action.meta.arg.page > 1 
-            ? [...state.flash_sale, ...action?.payload?.data] 
+            state.flash_sale = action.meta.arg.page > 1
+            ? [...state.flash_sale, ...action?.payload?.data]
             : action?.payload?.data;
-            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
-            
-            state.hasMore = action?.payload?.data?.length === action.meta.arg.limit; // Check if more pages are available
+            state.hasMore = Boolean(action?.payload?.next); // the backend says whether another page exists
         });
         builder.addCase(fetchFlashSaleProducts.rejected,(state, action)=>{
             state.relatedProductsLoading = false;
