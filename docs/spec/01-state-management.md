@@ -47,11 +47,12 @@ Pure read state for 5 category groupings (all, flash-sale, new-arrival, best-sel
 
 ## `slice/checkoutSlice.js`
 
-Large form-state slice: `formData` (shipping/payment fields), `errors`, `touched`, `districts`/`upazilas`, `addresses`, `delivery_charges`, `user_info`, `order_id`, `order` (the `POST /orders/` answer `{order_id, status, created_at, subtotal, delivery_charge, total}`, handed to the confirmation page; cleared by `resetForm`), `responseError` (**always an array of sentences** or null: the backend's `errors` when it refused the order, else one general sentence; shown by `CheckoutErrors`; cleared by a new attempt (`handleCheckout.pending`), by `clearResponseError` and by `resetForm`), `isCheckoutFulfilled`.
+Large form-state slice: `formData` (shipping/payment fields), `errors`, `touched`, `districts`/`upazilas`, `addresses`, `delivery_charges`, `user_info`, `order_id`, `order` (the `POST /orders/` answer `{order_id, status, created_at, subtotal, delivery_charge, discount_amount, coupon_code, total}`, handed to the confirmation page; cleared by `resetForm`), `responseError` (**always an array of sentences** or null: the backend's `errors` when it refused the order, else one general sentence; shown by `CheckoutErrors`; cleared by a new attempt (`handleCheckout.pending`), by `clearResponseError` and by `resetForm`), `isCheckoutFulfilled`; plus a promo-code preview: `couponStatus` (`idle | validating | applied | failed`), `couponError`, `discountAmount`, `appliedCouponCode` (stored upper case, matching the backend), all cleared by `clearCoupon` and by `resetForm`.
 
 Thunks:
-- `handleCheckout` → `POST /orders/` (branches authenticated client vs `publicApi`; dispatches `clearCart()` on success)
+- `handleCheckout` → `POST /orders/` (branches authenticated client vs `publicApi`; dispatches `clearCart()` on success; sends `coupon_code` when one is applied)
 - `handleGetCheckoutContent` → `GET /content/checkout/` (same auth branching; populates `formData.name/phone/email` from `user_info`)
+- `handleApplyCoupon` → `POST /coupons/validate/` (`services/couponService.js`, public) — previews a coupon's discount against the cart's current subtotal; does not place the order, and the actual redemption at `handleCheckout` time always re-validates against the server's own subtotal.
 
 Plain thunk `initializeCheckout()` dispatches `handleGetCheckoutContent` and, if authenticated, `handleFetchCart()` — cross-slice orchestration living outside any single slice file. A large commented-out block references a nonexistent `handleGetProfile`/`setAddress` flow (dead code / abandoned direction). Not persisted, so a page refresh mid-checkout loses form progress.
 

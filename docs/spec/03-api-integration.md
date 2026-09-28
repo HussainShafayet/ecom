@@ -61,6 +61,7 @@ Both files derive `errorMessage` from HTTP status only — the backend error bod
 | POST | `/orders/{orderId}/cancel/` | `cancelOrder` | `cancelOrder` (orderSlice) |
 | GET | `/orders/track/?order_id=&phone_number=` | `trackOrder` (uses `publicApi`) | `trackOrder` (orderSlice) |
 | GET | `/content/checkout/` | inlined | checkoutSlice |
+| POST | `/coupons/validate/` | `validateCoupon` (couponService, `publicApi`) | `handleApplyCoupon` (checkoutSlice) |
 | GET | `/site/` | `getSite` (siteService, `publicApi`) | `handleFetchSite` (siteSlice, dispatched once by `Layout`) |
 | GET | `/site/pages/{slug}/` | `getSitePage` | none: `StaticPage` reads it into local state |
 | GET | `/site/faq/` | `getFaqs` | none: `FAQPage` reads it into local state |
@@ -72,7 +73,7 @@ Both files derive `errorMessage` from HTTP status only — the backend error bod
 
 Response shape convention: a DRF-style envelope `{ data: { results, count, ... } | data: {...}, message, errors }` — thunks read `response.data.data.results` or `response.data.data`, and rejection paths return `error.response?.data` (typically containing `.errors`).
 
-Only `categoryService.js`, `contentService.js`, `productService.js`, `orderService.js` and `siteService.js` exist under `src/services/` — auth, profile, cart, wishlist, checkout, and review calls are all inlined directly in their slices rather than routed through a service module (3 of 9 domains have a service layer, the rest don't). `productService.js` also lazy-imports `axiosSetup` per-call (`await import(...)`) to dodge the same circular-dependency issue many slices work around inline.
+Only `categoryService.js`, `contentService.js`, `productService.js`, `orderService.js`, `siteService.js` and `couponService.js` exist under `src/services/` — auth, profile, cart, wishlist, checkout (except the coupon preview), and review calls are all inlined directly in their slices rather than routed through a service module. `productService.js`/`couponService.js` also lazy-import `axiosSetup`/`publicApi` per-call (`await import(...)`) to dodge the same circular-dependency issue many slices work around inline.
 
 ## Error-handling pipeline
 

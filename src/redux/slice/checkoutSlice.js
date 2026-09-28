@@ -2,6 +2,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {clearCart, handleFetchCart} from './cartSlice';
 import publicApi from '../../api/publicApi';
+import {validateCoupon} from '../../services/couponService';
 
 const initialState = {
   isLoading: false,
@@ -37,6 +38,10 @@ const initialState = {
   user_info: null,
   checkoutContentLoading: false,
   checkoutContentError: null,
+  couponStatus: 'idle', // idle | validating | applied | failed
+  couponError: null,
+  discountAmount: 0,
+  appliedCouponCode: '',
 };
 
 // checkout process
@@ -81,6 +86,16 @@ export const handleGetCheckoutContent = createAsyncThunk('profile/handleGetCheck
   }
 });
 
+// preview a coupon's discount before the order is placed
+export const handleApplyCoupon = createAsyncThunk('checkout/handleApplyCoupon', async ({ code, subtotal, phone_number }, { rejectWithValue }) => {
+  try {
+    const response = await validateCoupon({ code, subtotal, phone_number });
+    return response?.data?.data;
+  } catch (error) {
+    return rejectWithValue(error?.response?.data);
+  }
+});
+
 const checkoutSlice = createSlice({
   name: 'checkout',
   initialState,
@@ -103,6 +118,12 @@ const checkoutSlice = createSlice({
     setSelectedAddressId: (state, action) => {
       state.selectedAddressId = action.payload;
     },
+    clearCoupon: (state) => {
+      state.couponStatus = 'idle';
+      state.couponError = null;
+      state.discountAmount = 0;
+      state.appliedCouponCode = '';
+    },
     clearResponseError: (state) => {
       state.responseError = null;
     },
@@ -120,6 +141,10 @@ const checkoutSlice = createSlice({
       state.delivery_charges = {};
       state.addresses = [];
       state.user_info = null;
+      state.couponStatus = 'idle';
+      state.couponError = null;
+      state.discountAmount = 0;
+      state.appliedCouponCode = '';
     },
   },
   extraReducers: (builder) =>{
@@ -167,11 +192,30 @@ const checkoutSlice = createSlice({
       .addCase(handleGetCheckoutContent.rejected, (state, action)=>{
           state.checkoutContentLoading = false;
           state.checkoutContentError = action.payload?.errors || 'Something went wrong';
-          
+
       })
 
-     
-      
+      // apply a coupon
+      .addCase(handleApplyCoupon.pending, (state) => {
+          state.couponStatus = 'validating';
+          state.couponError = null;
+      })
+      .addCase(handleApplyCoupon.fulfilled, (state, action) => {
+          state.couponStatus = 'applied';
+          state.couponError = null;
+          state.discountAmount = action.payload?.discount_amount || 0;
+          state.appliedCouponCode = action.meta.arg.code.trim().toUpperCase(); // matches the backend's stored form
+      })
+      .addCase(handleApplyCoupon.rejected, (state, action) => {
+          state.couponStatus = 'failed';
+          state.discountAmount = 0;
+          state.appliedCouponCode = '';
+          const errors = action?.payload?.errors;
+          state.couponError = Array.isArray(errors) && errors.length > 0
+            ? errors[0]
+            : (action?.payload?.error || 'This coupon could not be applied.');
+      })
+
   }
 });
 
@@ -201,7 +245,8 @@ export const {
   setUpazilas,
   clearResponseError,
   resetForm,
-  setSelectedAddressId
+  setSelectedAddressId,
+  clearCoupon,
 } = checkoutSlice.actions;
 
 export default checkoutSlice.reducer;
