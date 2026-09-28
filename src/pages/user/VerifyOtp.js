@@ -38,10 +38,9 @@ const VerifyOtp = () => {
   const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        //isAuthenticated && navigate(location, { replace: true })
         if (isAuthenticated) {
-          //navigate(from, { replace: true }); // Redirect to previous page if already authenticated
           dispatch(clearVerifyOtpState());
+          // Send the user back where they were before sign-in (see SignIn.js), or home.
           navigate(location, { replace: true });
         }
       }, [verifyOtpMessage, isAuthenticated]);
@@ -70,8 +69,6 @@ const VerifyOtp = () => {
     }
 
     setErrors({});
-    // Simulate an API call
-    //console.log("Form submitted:", formData);
     dispatch(verifyOtp(formData));
    
   };
@@ -79,7 +76,6 @@ const VerifyOtp = () => {
   //handle resend otp
   const handleResendOtp = (e) =>{
     e.preventDefault();
-    //console.log(formData.token);
     dispatch(resendOtp({token:formData.token}));
   }
 

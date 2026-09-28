@@ -47,8 +47,6 @@ Redux Toolkit store (`store.js`) with `redux-persist` (localStorage). Only `cart
 
 One slice per domain under `src/redux/slice/` (plus `slice/product/` for `bestSellingSlice`, `flashSaleSlice`, `newArrivalSlice`). Most async thunks dynamically `import('../../api/axiosSetup')` inside the thunk body to avoid a circular dependency with the store — follow this pattern when adding new thunks that need the authenticated client. `checkoutSlice`/`productSlice.searchSuggestions` branch between the authenticated client and `publicApi` based on `isAuthenticated`; most other domains (cart, wishlist, profile, review) assume the user is authenticated.
 
-`src/context/CartContext.js` is a leftover, unused standalone cart implementation (`useState`-based, not wired into the app anywhere) — the real cart lives in `cartSlice.js`. Do not build on `CartContext`; treat it as dead code unless asked to remove it.
-
 ### API layer (`src/api/`, `src/services/`)
 Two axios instances:
 - `axiosSetup.js` — authenticated client. Attaches `Authorization: Bearer <accessToken>` from Redux state; on 401 auto-refreshes via the `refresh_token` cookie and retries once, logging the user out on failure.
@@ -81,9 +79,8 @@ These are pre-existing bugs and inconsistencies worth knowing before touching re
 - **`wishlistSlice` action types are prefixed `'cart/...'`** (copy-paste leftover from `cartSlice`) instead of `'wishList/...'` — cosmetic (types are still unique) but shows up wrong in Redux DevTools.
 - **Cart/wishlist "remove" endpoints use `PUT`, not `DELETE`** (`/accounts/cart/`, `/accounts/favourite/`) — intentional per the backend contract, not a bug to "fix" without checking the backend.
 - **`ProductCard .js`** (under `src/components/common/product/`) has a literal trailing space in the filename, and `common/index.js` imports it with that space — copy the exact filename if touching this component.
-- **Post-login redirect-to-previous-page is broken**: `SignIn` computes a `from` location but never passes it through the `/verify-otp/:token` navigation, so users always land on `/` after verifying OTP regardless of where they started.
 - **`refreshToken`/`logoutUser` in `authSlice.js`** bypass both axios clients and call raw `axios` directly — they don't get the shared interceptor error handling.
-- A large amount of commented-out dead code exists throughout (an old `WishList` implementation, cart/wishlist localStorage helpers, disabled middlewares) — don't assume commented code is a TODO to finish; confirm with the user before reviving it.
+- **SignIn's Facebook/Google buttons are decorative** — no `onClick`, clicking does nothing. Not yet decided whether to wire them up or remove them.
 
 ## Extending the app
 

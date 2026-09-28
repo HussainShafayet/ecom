@@ -222,7 +222,6 @@ const Checkout = () => {
 
       console.log(checkoutBody, 'body');
       dispatch(handleCheckout(checkoutBody));
-      //alert('Order placed successfully!');
     } else {
       dispatch(setErrors(formErrors));
     }
@@ -231,10 +230,8 @@ const Checkout = () => {
   const validateForm = () => {
     const formErrors = {};
     if (!formData.name) formErrors.name = 'Name is required';
-    //if (!formData.email) formErrors.email = 'Email is required';
     if (!formData.phone_number) formErrors.phone_number = 'Phone Number is required';
 
-    //if (!formData.title) formErrors.title = 'Shipping Title is required';
     if (!formData.shipping_type) formErrors.shipping_type = 'Shipping Type is required';
     if (formData.shipping_type == 'inside_dhaka') {
        if (!formData.shipping_area) formErrors.shipping_area = 'shipping_area is required';
@@ -582,7 +579,6 @@ const Checkout = () => {
               </div>
               <div>
                <div className={`flex items-center border ${touched.phone_number && errors?.phone_number ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70`}>
-                {/*<FaPhone className="text-gray-400 m-3" title="Phone" />*/}
                 <select
                   id="country-code"
                   className="bg-gray-100 text-gray-700 font-medium p-2 border-r border-gray-300 focus:outline-none rounded-l-md"

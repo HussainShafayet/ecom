@@ -19,9 +19,6 @@ const initialState = {
     division: '',
     district: '',
     upazila: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
     payment_type: 'cash',
   },
   errors: {},
@@ -221,18 +218,9 @@ const checkoutSlice = createSlice({
 
 export const initializeCheckout = () => async (dispatch, getState) => {
   const {isAuthenticated} = getState().auth;
-  //const profile = getState().profile.profile;
-  
-  //if (!profile && isAuthenticated) {
-  //  const fetchedProfile = await dispatch(handleGetProfile()).unwrap();
-  //  const {name, phone_number, email, addresses} = fetchedProfile;
-  //  dispatch(updateFormData({ name, phone_number, email}));
-  //  dispatch(setAddress(addresses));
-  //} else if(profile) {
-  //  const {name, phone_number, email,addresses} = profile;
-  //  dispatch(updateFormData({ name, phone_number, email}));
-  //  dispatch(setAddress(addresses));
-  //}
+  // Profile name/phone/email and saved addresses both come from handleGetCheckoutContent below
+  // (GET /content/checkout/ returns user_info + shipping_addresses together); see ShowAddress.js
+  // for how a selected saved address fills the rest of the form.
   dispatch(handleGetCheckoutContent());
   isAuthenticated && await dispatch(handleFetchCart()).unwrap();
 }

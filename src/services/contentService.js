@@ -2,13 +2,6 @@ import publicApi from '../api/publicApi';
 
 // Fetch all categories from the API
 export const getHomeContent = async () => {
-//  let query = '';
-//  if (page) {
-//    query += `page=${page}&`; // Add page for pagination
-//  }
-//  if (page_size) {
-//    query += `page_size=${page_size}&`; // Add limit
-//  }
   return await publicApi.get(`/content/pages/home`, { section: "home-content"});
 };
 

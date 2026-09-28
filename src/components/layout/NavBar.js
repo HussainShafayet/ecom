@@ -12,7 +12,6 @@ import { selectSite } from '../../redux/slice/siteSlice';
 const Navbar = () => {
   const [authMenuOpen, setAuthMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  //const isAuthenticated = false; // Replace with actual authentication status
   const {isAuthenticated, accessToken, refreshToken} = useSelector((state)=>state.auth)
   const dispatch = useDispatch();
   const navigate = useNavigate();

@@ -3,16 +3,16 @@ import { useLocation, useParams, useSearchParams } from 'react-router-dom';
 import {Breadcrum, Loader, ProductCard, Sidebar} from '../components/common';  // Reusable ProductCard component
 
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchAllProducts, setIsSidebarOpen, setSortType} from '../redux/slice/productSlice';
+import {fetchAllProducts, setIsSidebarOpen} from '../redux/slice/productSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import {FaArrowDown, FaArrowUp, FaFilter, FaFlag} from 'react-icons/fa';
+import {FaFilter, FaFlag} from 'react-icons/fa';
 import {ProductsPageSkeleton} from '../components/common/skeleton';
 
 const Products = ({scrollContainerRef}) => {
   //
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
-  const { items: products, isLoading, error, hasMore, isSidebarOpen, sortType } = useSelector((state) => state.product);
+  const { items: products, isLoading, error, hasMore, isSidebarOpen } = useSelector((state) => state.product);
   
   //get lastpath
   const location = useLocation();
@@ -20,9 +20,6 @@ const Products = ({scrollContainerRef}) => {
   const pathParts = location.pathname.split('/').filter(part => part);
   // Get the last part of the path
   const lastPathSegment = pathParts[pathParts.length - 1] || 'Products'; //end last path
-
-
-  const sortOptions = ['', 'price', '-price', 'discount_price', '-discount_price', 'rating', '-rating']; // Define sort option
 
   // Initialize page and limit from searchParams
   const [page, setPage] = useState(parseInt(searchParams.get('page') || 1));
@@ -65,26 +62,13 @@ const Products = ({scrollContainerRef}) => {
   
   const fetchMoreProducts = () => {
     const nextPage = page + 1;
-    //const nextSkip = skip + limit;
     setPage(nextPage);
-    //setSkip(nextSkip);
     // Update searchParams to include the new page, keeping existing params
     setSearchParams({
       ...Object.fromEntries(searchParams),
       page: nextPage,
       page_size, // Ensure limit stays the same
-      //skip: nextSkip,
     });
-  };
-
- 
-  const toggleSortType = () => {
-    // Cycle through sort options on each button click
-    const currentIndex = sortOptions.indexOf(sortType);
-    const nextIndex = (currentIndex + 1) % sortOptions.length;
-    const nextSortType = sortOptions[nextIndex];
-    dispatch(setSortType(nextSortType));
-    handleSortChange({ target: { value: nextSortType } });
   };
 
   const handleSortChange = (e) => {
@@ -169,12 +153,6 @@ const Products = ({scrollContainerRef}) => {
           {/* Sort and Show Items Options Above Product List */}
           <div className="flex flex-wrap justify-between items-center mb-4">
             {/* Mobile Toggle Button for Sidebar */}
-            {/*<button
-                onClick={() => handleSidebarOpen(true)}
-                className="block lg:hidden bg-blue-500 text-white py-1 px-2 rounded-lg z-10 relative"
-              >
-              Show Filters
-            </button>*/}
             <FaFilter className="block lg:hidden ml-2  z-10 relative" onClick={() => handleSidebarOpen(true)}/>
 
             <div> 
@@ -196,26 +174,6 @@ const Products = ({scrollContainerRef}) => {
                   <option value={120}>120</option>
                 </select>
               </div>
-              {/* Sort Type Toggle for Mobile and Default Dropdown for Desktop */}
-              {/*<div className="sm:hidden">
-                <button
-                  onClick={toggleSortType}
-                  className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500"
-                >
-                  {sortType === '' ? 'Default' : sortType === 'asc' ?
-                  <div className='flex flex-nowrap items-center'>
-                    <span>Price</span>
-                    <FaArrowDown className="text-blue-500 ml-1" /> 
-                  </div>
-                  : 
-                  <div className='flex flex-nowrap items-center'>
-                    <span>Price</span>
-                    <FaArrowUp className="text-blue-500 ml-1" /> 
-                  </div>
-                  }
-                </button>
-              </div>*/}
-
               {/* Sort by Amount Dropdown */}
               <div className="sm:flex items-center">
                 <span className="hidden sm:block text-gray-600 font-medium mr-2 text-nowrap">Sort by:</span>

@@ -170,7 +170,6 @@ const authSlice = createSlice({
         state.signinLoading = true;
       })
       .addCase(signInUser.fulfilled, (state, action) => {
-        //console.log(action.payload);
         state.signinLoading = false;
         state.signinMessage = action?.payload?.message;
         state.signinError = null;
@@ -187,7 +186,6 @@ const authSlice = createSlice({
 
 
       .addCase(refreshToken.fulfilled, (state, action) => {
-        //console.log(action);
         state.accessToken = action?.payload?.data?.access; // Update the access token
         state.isAuthenticated = true;
         Cookies.set('access_token', action?.payload?.data?.access, {
@@ -242,8 +240,6 @@ const authSlice = createSlice({
         state.verifyOtpLoading = false;
         state.verifyOtpMessage = action?.payload?.message;
         state.verifyOtpError = null;
-        
-        //state.user = action.payload.profile.username;
         state.accessToken = action?.payload?.tokens?.access;
         state.refreshToken = action?.payload?.tokens?.refresh;
         state.isAuthenticated = true;
@@ -256,10 +252,6 @@ const authSlice = createSlice({
           secure: true, // Ensures cookies are sent only over HTTPS
           sameSite: 'Strict', // Prevents CSRF attacks
         });
-
-        //localStorage.removeItem('cartItems');
-        //localStorage.removeItem('wishList');
-
       })
       .addCase(verifyOtp.rejected, (state, action) =>{
         console.log(action.payload);

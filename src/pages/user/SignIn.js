@@ -26,8 +26,9 @@ const SignIn = () => {
     isAuthenticated && navigate('/');
 
     if (signinMessage) {
-      // Redirect to the sign-in page after a successful signup
-      navigate(`/verify-otp/${token}`);
+      // Redirect to the OTP page, carrying the page the user was on before sign-in so VerifyOtp can send them
+      // back there once verified (see VerifyOtp.js).
+      navigate(`/verify-otp/${token}`, { state: { from } });
       // Optionally clear the signup state
       dispatch(clearSigninState());
     }
@@ -93,8 +94,6 @@ const SignIn = () => {
       }
       
       dispatch(signInUser(credential));
-      //navigate(from, { replace: true });
-      
     } else {
       setErrors(validationErrors);
     }

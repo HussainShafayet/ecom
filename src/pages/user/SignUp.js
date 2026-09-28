@@ -105,11 +105,6 @@ const SignUp = () => {
         "name":  formData.name,
       }
       dispatch(signUpUser(regFormData));
-      //console.log(loading, error);
-      //setTimeout(() => {
-      //  navigate(`/verify-otp`);
-      //}, 3000);
-      
     } else {
       setErrors(validationErrors);
     }
@@ -117,13 +112,6 @@ const SignUp = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen  p-6 relative overflow-hidden">
-      {/* Background Animated Pattern */}
-      {/*<div className="absolute inset-0 opacity-30 animate-pulse"></div>*/}
-
-      {/* Decorative Circles */}
-      {/*<div className="absolute top-0 left-1/2 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl -translate-x-1/2"></div>
-      <div className="absolute bottom-0 right-1/3 w-72 h-72 bg-pink-300 opacity-20 rounded-full blur-3xl"></div>*/}
-
       <div className="relative w-full max-w-lg p-8 bg-white bg-opacity-80 rounded-2xl shadow-lg backdrop-blur-lg">
         <div className="flex flex-wrap justify-between items-center mb-6">
           <h2 className="text-3xl font-bold text-center text-blue-700">
@@ -167,7 +155,6 @@ const SignUp = () => {
               Phone Number
             </label>
             <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-              {/*<FaPhone className="text-gray-400 m-3" title="Phone" />*/}
               <select
                 id="country-code"
                 className="bg-gray-100 text-gray-700 font-medium px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
