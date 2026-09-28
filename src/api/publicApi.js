@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as Sentry from "@sentry/react";
 import {setGlobalError, setSectionError} from "../redux/slice/globalErrorSlice";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -19,8 +20,13 @@ publicApi.interceptors.response.use(
       
       if (!error?.response) {
         // Network-level error: Treat as global
+        Sentry.captureException(error);
         store.dispatch(setGlobalError("Network error: Unable to connect to the server"));
       } else {
+        if (error.response.status >= 500) {
+          // A bug on the server side, not something the visitor did: worth a Sentry issue.
+          Sentry.captureException(error);
+        }
         const errorMessage = getErrorMessage(error?.response?.status);
         if (section) {
           // Section-specific error
