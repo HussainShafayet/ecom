@@ -10,7 +10,7 @@
 |---|---|---|---|
 | `/` | `Home` | none | Composes, in this order, `HeroSection`, `CategoryStrip`, `FlashSale`, `BestSelling`, `NewArrival`, `FeaturedProducts`, `RecentlyViewed`, `AllProducts`; `Testimonials` is commented out. |
 | `/products` | `Products` | none | Reads/writes query params (`category`, `brands`, `tags`, `min_price`, `max_price`, `sizes`, `colors`, `page`, `page_size`, `ordering`, `search`); infinite scroll via `react-infinite-scroll-component`. |
-| `/products/detail/:slug` | `ProductDetails` | none | Add-to-cart/buy-now branches on `isAuthenticated` (server cart vs local cart clone); works for guests too. |
+| `/products/detail/:slug` | `ProductDetails` | none | Mobile-first product page (gallery, options, quantity, buy bar, folding sections, related; see 04). Add-to-cart/buy-now branch on `isAuthenticated` (server cart vs local cart clone); works for guests too. Buy Now adds and goes to `/checkout`. |
 | `/cart` | `Cart` | none (not `ProtectedRoute`-wrapped) | Fetches server cart only `if (isAuthenticated)`. |
 | `/checkout` | `Checkout` | none | Works for guest checkout; redirects to `/products` if cart is empty. |
 | `/wishlist` | `WishList` | not enforced, by design | Guests see their locally persisted wishlist (`state.wishList.items`, redux-persist); only fetches the server copy `if (isAuthenticated)`. |

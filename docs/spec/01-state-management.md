@@ -83,7 +83,7 @@ Short messages over the page: `items` `[{id, message, type}]` (`type` `error`|`s
 
 ## `slice/productSlice.js`
 
-State: product list (`items`), single `product` detail, variant selection (`selectedColor`/`selectedSize`/`mainImage`/`quantity`), search (`suggestions`), sidebar/sort UI flags, `hasMore` (pagination flag).
+State: product list (`items`), single `product` detail, variant selection (`selectedColor`/`selectedSize`/`mainImage`/`quantity`/`minimum_quantity`; loading a product picks its first colour and size and sets `quantity` to its minimum order, 1 when it has none; `setQuantity` clamps a wanted number between `minimum_quantity` and the exported `MAX_QUANTITY` = 10000, the backend cart's limit, and replaced `incrementQuantity`/`decrementQuantity`), search (`suggestions`), sidebar/sort UI flags, `hasMore` (pagination flag).
 
 Thunks: `fetchAllProducts`/`fetchFeaturedProducts` (via `services/productService`, support pagination-append), `fetchProductById` (sets initial variant/image/qty from the response), `searchSuggestions` (branches authenticated client vs `publicApi` on auth state).
 

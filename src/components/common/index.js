@@ -1,5 +1,12 @@
 export {default as ProductCard} from './product/ProductCard ';
 export {default as ProductSection} from './ProductSection';
+export {default as RatingStars} from './product/RatingStars';
+export {default as ProductGallery} from './product/ProductGallery';
+export {default as ProductOptions} from './product/ProductOptions';
+export {default as QuantitySelector} from './product/QuantitySelector';
+export {default as PurchaseBar} from './product/PurchaseBar';
+export {default as CollapsibleSection} from './product/CollapsibleSection';
+export {default as ShareMenu} from './product/ShareMenu';
 export {default as SectionHeader} from './SectionHeader';
 export {default as InputField} from './InputField';
 export {default as Sidebar} from './product/Sidebar';
