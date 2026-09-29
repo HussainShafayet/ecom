@@ -91,16 +91,18 @@ Thunks: `fetchAllProducts`/`fetchFeaturedProducts` (via `services/productService
 
 ## `slice/profileSlice.js`
 
-The largest slice: `profile`, `addresses` (+ CRUD loading/error), address form state, and a parallel phone/email OTP-verification sub-state (`loading`, `otpToken`, `message`, `verifyPopup`, `verified`, `verifyError`, `otpSubmitLoading/Error`, `previousValue`) keyed by `field` (`'phone'|'email'`).
+The largest slice: `profile`, `addresses` (+ CRUD loading/error), address form state, and a parallel phone/email OTP-verification sub-state (`loading`, `otpToken`, `message`, `verifyPopup`, `verified`, `verifyError`, `otpSubmitLoading/Error`, `otpTiming`) keyed by `field` (`'phone'|'email'`). `otpTiming[field]` is what the backend said about the code it just sent (`{resend_after, expires_in, length}`; the sheet counts and draws from it, 60 s / 6 digits when absent). `updateFieldErrors` holds the backend's `field_errors` of a refused save, drawn under their fields. `infoEditing` is the edit form being open; `setInfoEditing` (true or false) starts it clean (nothing verified, no old refusal, no sheet). Gone with the redesign: `otp`, `previousValue`, `image` (they are local to the components now).
 
 7 thunks via the authenticated client:
 - `handleGetProfile` → `GET /accounts/profile/`
-- `handleProfileUpdate` → `PUT /accounts/profile/`
+- `handleProfileUpdate` → `PUT /accounts/profile/`. A plain object goes as JSON (only what changed; `""` clears an e-mail or user name, `null` a birthday, which a multipart form cannot say), a `FormData` is the picture. A saved form ends editing and spends the verifications; a picture does not touch the form.
 - `handleGetAddress` / `handleAddressCreate` / `handleAddressUpdate` / `handleAddressDelete` → `/accounts/addresses/`
 - `handleSendOtp` → `POST accounts/request-otp/`
 - `handleSubmitOtp` → `POST accounts/verify-otp-for-profile/`
 
-Not persisted — the full profile/address list is refetched every session.
+`handleSendOtp` adds `retry_after` to a refusal (a 429 is said in words: "You have asked for too many codes. Please try again in 25 minutes.") and both OTP thunks survive a network error with no response. A failed profile load stores a sentence, never an object (React cannot draw one).
+
+Not persisted — the full profile/address list is refetched every session. **Reset to its initial state on `logoutUser.fulfilled`/`rejected` and `sessionEnded`**, so nothing of one customer's profile or addresses is left for the next person on the browser.
 
 ## `slice/reviewSlice.js`
 

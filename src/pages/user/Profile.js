@@ -1,101 +1,45 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { FaUserEdit, FaBoxOpen, FaMapMarkerAlt, FaCreditCard, FaLock, FaPlus, FaHeart, FaBell, FaHistory, FaCamera, FaPlusCircle, FaSpinner } from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FaUserEdit, FaMapMarkerAlt, FaPlusCircle, FaHeart, FaChevronRight, FaBoxOpen } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {handleAddressCreate, handleGetAddress, handleGetProfile, handleProfileUpdate, handleSendOtp, handleSubmitOtp, resetAddressForm, setDistricts, setErrors, setImage, setInfoEditing, setIsAddAddress, setOtp, setUpazilas, statusUpdateVerified, statusUpdateVerifyPopup, updateAddressFormData, updatePreviousValue, updateTouched} from '../../redux/slice/profileSlice';
-import {ErrorDisplay, Loader, SuccessMessage} from '../../components/common';
-import {AddressItem} from '../../components/profile';
+import {handleAddressCreate, handleGetAddress, handleGetProfile, resetAddressForm, setDistricts, setErrors, setIsAddAddress, setUpazilas, updateAddressFormData, updateTouched} from '../../redux/slice/profileSlice';
+import {clearSectionError} from '../../redux/slice/globalErrorSlice';
+import {Loader, SectionError} from '../../components/common';
+import {AddressItem, PersonalInfo, ProfileHeader} from '../../components/profile';
 import { WishList } from '../user';
 import {dhakaCityData, districtsData, divisionsData, upazilasData} from '../../data/location';
 import {ProfileSkeleton} from '../../components/common/skeleton';
-import {debounce} from 'lodash';
-import {SectionError} from '../../components/common';
 
+const TABS = [
+  { label: 'Profile', icon: <FaUserEdit aria-hidden="true" />, id: 'overview' },
+  { label: 'Addresses', icon: <FaMapMarkerAlt aria-hidden="true" />, id: 'address' },
+  { label: 'Wishlist', icon: <FaHeart aria-hidden="true" />, id: 'wishlist' },
+];
+
+// The account page, phone first: who they are (picture, name, phone) at the top, a way to their orders, three tabs with their
+// names always written out (the icons alone said nothing), and the tab. It sits straight on the page (the old one was a grey
+// gradient page > white card > grey card > white card, which left a 360 px phone about 250 px for the form).
 const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const dispatch = useDispatch();
-  const {isAuthenticated,user} = useSelector((state)=>state.auth);
-  const {isLoading, profile, error, adrressLoading,addresses, addressError, isAddAddress, addressFormData, touched, errors, districts,upazilas, updateLoading, updateError, loading, otpToken, message, verifyError, verifyPopup, verified, otpSubmitLoading, otpSubmitError, otp, infoEditing, previousValue, image} = useSelector((state)=> state.profile);
-  
+  const {isAuthenticated} = useSelector((state)=>state.auth);
+  const {isLoading, profile, error, adrressLoading,addresses, addressError, isAddAddress, addressFormData, touched, errors, districts,upazilas} = useSelector((state)=> state.profile);
 
-  const [formData, setFormData] = useState({}); // State to store form data
-
-
- 
-  
   useEffect(()=>{
     isAuthenticated && dispatch(handleGetProfile());
   }, [dispatch, isAuthenticated]);
-
-  useEffect(()=>{
-    dispatch(setImage(profile?.profile_picture));
-  }, [profile?.profile_picture]);
-
-  // Debounced API call
-  const debouncedAfterFileInput = useCallback(
-    debounce((file) => {
-      const formData = new FormData();
-      formData.append("profile_picture", file);
-      dispatch(handleProfileUpdate(formData));
-    }, 1000),
-    [dispatch] // Add dispatch as a dependency
-  );
 
   const handleTabChange = (tab)=>{
     setSelectedTab(tab.id);
     if (tab.id === 'address') {
       dispatch(handleGetAddress());
     }
-    
   }
 
-  const handleShowInfoEdit = ()=>{
-    dispatch(setInfoEditing(true));
-    setFormData({...profile});
-    dispatch(updatePreviousValue({field: 'phone', value: profile?.phone_number || ''}));
-    dispatch(updatePreviousValue({field: 'email', value: profile?.email || ''}));
-  }
-
-
-   // Handle form input changes
-   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const retryProfile = () => {
+    dispatch(clearSectionError('get-profile'));
+    dispatch(handleGetProfile());
   };
-
-  // Handle form submissiontrue
-  const handleSubmit = (e) => {
-    try {
-      e.preventDefault();
-      // Create a new FormData instance
-      const formDataObj = new FormData();
-    
-      // Append only changed fields
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== profile[key] && value !== '') { // Only add if changed and not empty
-          formDataObj.append(key, value);
-        }
-      });
-    
-      // Only dispatch if there are changes
-      if (formDataObj.entries().next().done) {
-        console.log('No changes detected.');
-        return;
-      }else if(previousValue.email !== formData.email && !verified.email){
-        alert('Verify your email.');
-        return
-      }else if(previousValue.phone !== formData.phone_number && !verified.phone){
-        alert('Verify your phone number.');
-        return
-      }
-      
-      dispatch(handleProfileUpdate(formDataObj));
-      
-    } catch (error) {
-      console.log('handleSubmit errror: ', error);
-      
-    }
-  };
-
 
   //for address
    // Handle input changes
@@ -185,399 +129,45 @@ const Profile = () => {
     dispatch(setIsAddAddress(false));
   }
 
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        dispatch(setImage(reader.result)); // Preview image before upload
-      };
-      reader.readAsDataURL(file);
-      debouncedAfterFileInput(file);
-    }
-  };
-
-  const handleVerifyClick = (type)=> {
-    try {
-      if (type === 'phone') {
-        const phoneNumber = formData.phone_number;
-        if (!phoneNumber || phoneNumber.replace('+880', '').length < 10) {
-          alert('Please enter a valid phone number.');
-          return;
-        }
-         dispatch(handleSendOtp({ formData: {phone_number: phoneNumber}, field: type}));
-         
-      } else if (type == 'email') {
-        const email = formData.email;
-        if (!email) {
-          alert('Please enter a valid Email.');
-          return;
-        }
-        dispatch(handleSendOtp({ formData: {email: email}, field: type }));
-      }
-      
-   } catch (error) {
-      console.log('handle send otp error: ', error);
-      
-    }
-  }
-
-  const handleVerify = (type) => {
-    try {
-      
-      dispatch(handleSubmitOtp({formData: {token: otpToken[type], otp}, field: type}));
-      
-    } catch (error) {
-      console.log('handle verify otp error', error);
-      
-    }
-  }
+  // (a refresh shows what is already there instead of a skeleton over it)
+  if (isLoading && !profile) return <div className="container mx-auto max-w-3xl px-3 py-4 sm:px-4 sm:py-8"><ProfileSkeleton /></div>;
+  if (error && !profile) return <SectionError message={error} onRetry={retryProfile} />;
 
   return (
-    <>
-    {isLoading ? <ProfileSkeleton /> :
-      error ? (
-      <SectionError message={error} />
-    ) :
-      <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-4 md:p-8">
-        <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-          
-          {/* Header Section */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
-            <h1 className="text-4xl font-bold mb-2">My Profile</h1>
-            <p className="text-sm opacity-80">Manage your personal information, orders, and account settings.</p>
-          </div>
+    <div className="container mx-auto max-w-3xl space-y-3 px-3 py-4 sm:space-y-4 sm:px-4 sm:py-8">
+      <ProfileHeader profile={profile} />
 
-          {/* Tabs for Profile Sections */}
-          <div className="flex flex-wrap justify-around md:justify-start bg-white border-b text-gray-700 overflow-x-auto">
-            {[
-              { label: 'Account Overview', icon: <FaUserEdit />, id: 'overview' },
-              { label: 'Shipping Addresses', icon: <FaMapMarkerAlt />, id: 'address' },
-              { label: 'Wishlist', icon: <FaHeart />, id: 'wishlist' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab)}
-                className={`flex-1 md:flex-none px-6 py-4 font-medium hover:text-blue-600 transition-colors ${
-                  selectedTab === tab.id ? 'border-b-4 border-blue-600 text-blue-600 font-semibold' : 'border-b-2 border-transparent'
-                }`}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  {tab.icon}
-                  <span className="hidden sm:inline">{tab.label}</span>
-                </div>
-              </button>
-            ))}
-          </div>
+      <Link to="/orders" className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm transition-shadow hover:shadow-md">
+        <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-lg text-indigo-600"><FaBoxOpen /></span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold text-gray-900">My Orders</span>
+          <span className="block truncate text-xs text-gray-500">Track, cancel or look back at what you ordered</span>
+        </span>
+        <FaChevronRight className="shrink-0 text-gray-400" aria-hidden="true" />
+      </Link>
 
-          {/* Content Section */}
-          <div className="p-6">
-          {selectedTab === 'overview' && 
-              <div className="rounded-lg bg-gray-100 p-6 shadow-md flex flex-col md:flex-row gap-6">
-                {/* Profile Image Section */}
-                <div className="flex-shrink-0 relative w-32 h-32 mx-auto md:mx-0 rounded-full overflow-hidden bg-gray-200 shadow-md">
-                  {/* Loader Overlay */}
-                  {isLoading && 
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
-                      <FaSpinner className="animate-spin text-white text-3xl" />
-                    </div>
-                  }
-                  <img
-                    src={image || "https://img.freepik.com/premium-photo/stylish-man-flat-vector-profile-picture-ai-generated_606187-310.jpg"}
-                    alt="Profile"
-                    className={`w-full h-full object-cover ${isLoading ? "opacity-50" : ""}`}
-                  />
-                  
-                  {/* Hidden file input */}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    id="fileInput"
-                    onChange={handleFileChange}
-                  />
-                  
-                  {/* Camera Button */}
-                  <label htmlFor="fileInput" className="absolute bottom-0 right-12 p-1 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors cursor-pointer">
-                    <FaCamera />
-                  </label>
-                </div>
+      <div role="tablist" aria-label="Account" className="grid grid-cols-3 gap-1 rounded-2xl bg-gray-100 p-1 text-gray-700">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            id={`tab-${tab.id}`}
+            aria-selected={selectedTab === tab.id}
+            aria-controls="profile-panel"
+            onClick={() => handleTabChange(tab)}
+            className={`flex h-12 items-center justify-center gap-2 rounded-xl text-sm font-medium transition-colors sm:text-base ${
+              selectedTab === tab.id ? 'bg-gradient-to-r from-blue-600 to-purple-600 font-semibold text-white shadow' : 'hover:bg-white/70'
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-                {/* Personal Information Card */}
-                <div className="flex-1 bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                  <h3 className="font-semibold text-lg mb-4">Personal Information</h3>
-                  
-                  {!infoEditing ? (
-                    <>
-                      {profile?.name && <p className="mb-2"><strong>Name:</strong> {profile.name}</p>}
-                      {profile?.username && <p className="mb-2"><strong>User Name:</strong> {profile?.username}</p>}
-                      {profile?.email && <p className="mb-2"><strong>Email:</strong> {profile.email}</p>}
-                      {profile?.phone_number && <p className="mb-2"><strong>Phone:</strong> {profile.phone_number}</p>}
-                      {profile?.date_of_birth && <p className="mb-2"><strong>Date of Birth:</strong> {profile?.date_of_birth}</p>}
-                      {profile?.gender && <p className="mb-2"><strong>Gender:</strong> {profile.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : ''}</p>}
-
-                      <button
-                        onClick={handleShowInfoEdit}
-                        className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                      >
-                        Edit Information
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                    <ErrorDisplay errors={updateError} />
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      {/* Editable Name Field */}
-                      <div>
-                        <label htmlFor="name" className="block text-gray-700 font-medium mb-1">
-                          Name
-                        </label>
-                        <input
-                          type="text"
-                          id="name"
-                          name="name"
-                          value={formData.name || ''}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
-                      </div>
-
-                      {/* Editable Username Field */}
-                      <div>
-                        <label htmlFor="username" className="block text-gray-700 font-medium mb-1">
-                          User Name
-                        </label>
-                        <input
-                          type="text"
-                          id="username"
-                          name="username"
-                          value={formData.username || ''}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
-                      </div>
-
-                      {/* Editable Email Field */}
-                      <div>
-                        <label htmlFor="email" className="block text-gray-700 font-medium mb-1">
-                          Email
-                        </label>
-                        <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-
-                          {/* Phone Number Input */}
-                          <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email || ''}
-                            onChange={(e) => {
-                              handleChange({target:{name: 'email', value: e.target.value}});
-                              dispatch(statusUpdateVerified({field: 'email'}))
-                            }}
-                            className="w-full px-3 py-2 border-none focus:outline-none"
-                          />
-
-                          {/* Verify Button */}
-                          {previousValue.email !== formData.email && 
-                            <button
-                              type="button"
-                              onClick={()=>handleVerifyClick('email')}
-                              disabled={loading.email || verified.email}
-                              className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 disabled:opacity-50"
-                            >
-                              {loading.email ? 'Sending...' : 
-                              
-                              verified.email ? 'Verified': 
-                              'Verify'}
-                            </button>
-                          }
-                        </div>
-                      </div>
-
-                      {/* Editable Phone Number Field */}
-                      <div>
-                        <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">
-                          Phone Number
-                        </label>
-                        <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-                          {/* Country Code */}
-                          <select
-                            id="country-code"
-                            className="bg-gray-100 text-gray-700 font-medium px-2 sm:px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
-                            value="+880"
-                            disabled
-                          >
-                            <option value="+880">+880</option>
-                          </select>
-
-                          {/* Phone Number Input */}
-                          <input
-                            type="tel"
-                            id="phone"
-                            name="phone_number"
-                            placeholder="Phone Number"
-                            maxLength={10}
-                            value={formData.phone_number.replace('+880', '')} // Remove country code for display
-                            onChange={(e) => {
-                              const phoneNumber = e.target.value;
-                              const fullPhoneNumber = `+880${phoneNumber}`;
-                              handleChange({ target: { name: 'phone_number', value: fullPhoneNumber } });
-                              dispatch(statusUpdateVerified({field: 'phone'}))
-                            }}
-                            className="w-full px-3 py-2 border-none focus:outline-none"
-                            required
-                          />
-
-                          {/* Verify Button */}
-                          {previousValue.phone !== formData.phone_number &&
-                            <button
-                              type="button"
-                              onClick={()=>handleVerifyClick('phone')}
-                              disabled={loading.phone || verified.phone}
-                              className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 disabled:opacity-50"
-                            >
-                              {loading.phone ? 'Sending...' : 
-                              
-                              verified.phone ? 'Verified': 
-                              'Verify'}
-                            </button>
-                          }
-                        </div>
-                      </div>
-
-
-                      {/* Editable Date of Birth Field */}
-                      <div>
-                        <label htmlFor="date_of_birth" className="block text-gray-700 font-medium mb-1">
-                          Date of Birth
-                        </label>
-                        <input
-                          type="date"
-                          id="date_of_birth"
-                          name="date_of_birth"
-                          value={formData.date_of_birth || ''}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
-                      </div>
-
-                      {/* Editable Gender Field */}
-                      <div>
-                        <label htmlFor="gender" className="block text-gray-700 font-medium mb-1">
-                          Gender
-                        </label>
-                        <select
-                          id="gender"
-                          name="gender"
-                          value={formData.gender || ''}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        >
-                          <option value="">Select Gender</option>
-                          <option value="male">Male</option>
-                          <option value="female">Female</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
-
-                      {/* Save and Cancel Buttons */}
-                      <div className="flex justify-end space-x-2">
-                        <button
-                          type="button"
-                          onClick={() => dispatch(setInfoEditing(false))}
-                          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                        <button type="submit" className={`px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors transform duration-200 cursor-pointer ${
-                            updateLoading ? 'cursor-wait' : 'hover:scale-105'
-                          }`}
-                          disabled={updateLoading}
-                        
-                        >
-                        {updateLoading ? (
-                            <Loader message="Progreccing" />
-                          ) : (
-                            "Save Changes"
-                          )}
-                      </button>
-                      </div>
-                    </form>
-                    {/*number verify*/}
-                    {(verifyPopup.email || verifyPopup.phone) && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-10">
-                          <div className="bg-white p-3 rounded-lg shadow-lg">
-                              <h3 className="text-lg font-semibold">
-                              Verify {verifyPopup.email? 'Email': 'Number'}
-                              
-                              </h3>
-                              {/* Success Message */}
-                              <span className='text-green-500 text-sm'>{message.email || message.phone}</span>
-                                { Array.isArray((verifyError.email || verifyError.phone) || (otpSubmitError.email || otpSubmitError.phone)) ? 
-                                  <ErrorDisplay errors={(verifyError.email || verifyError.phone) || (otpSubmitError.email || otpSubmitError.phone)} /> :
-                                <>
-                                {(verifyError.email || verifyError.phone) || (otpSubmitError.email || otpSubmitError.phone) && <div className="text-center text-red-500 font-semibold py-4">
-                                  {(verifyError.email || verifyError.phone) || (otpSubmitError.email || otpSubmitError.phone)}.
-                                </div>}
-                                </>
-                                }
-                              <form onSubmit={(e)=>{
-                                e.preventDefault();
-                                handleVerify(verifyPopup.email ? 'email' : 'phone')
-                              } 
-                                
-                              }>
-                                <div>
-                                  <label htmlFor="otp" className="block text-gray-700 font-medium mb-1">
-                                    OTP
-                                  </label>
-                                  <input
-                                    type="number"
-                                    id="otp"
-                                    name="otp"
-                                    value={otp}
-                                    onChange={(e)=> dispatch(setOtp(e.target.value))}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                    required
-                                  />
-                                </div>
-                              
-                              <div className="mt-4 flex justify-end space-x-2">
-                                  <button
-                                      onClick={() => {
-                                        dispatch(statusUpdateVerifyPopup({field: verifyPopup.email? 'email' : 'phone'}))
-                                        setOtp(''); 
-                                      }}
-                                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                                  >
-                                      Cancel
-                                  </button>
-                                  <button type="submit" className={`px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors transform duration-200 cursor-pointer ${
-                                        otpSubmitLoading.email || otpSubmitLoading.phone ? 'cursor-wait' : 'hover:scale-105'
-                                      }`}
-                                      disabled={otpSubmitLoading.email || otpSubmitLoading.phone}
-                                    
-                                    >
-                                    {otpSubmitLoading.email || otpSubmitLoading.phone ? (
-                                        <Loader message="Progreccing" />
-                                      ) : (
-                                        "Submit"
-                                      )}
-                                  </button>
-                              </div>
-                              </form>
-                          </div>
-                      </div>
-                    )}
-                    </>
-                  )}
-                </div>
-              </div>
-            }
-
-          
+      <div role="tabpanel" id="profile-panel" aria-labelledby={`tab-${selectedTab}`}>
+        {selectedTab === 'overview' && <PersonalInfo profile={profile} />}
 
             {selectedTab === 'address' && (
             
@@ -773,20 +363,14 @@ const Profile = () => {
 
             )}
 
-            {selectedTab === 'wishlist' && (
-              <div>
-                <WishList />
-              </div>
-            )}
+        {selectedTab === 'wishlist' && (
+          <div>
+            <WishList />
           </div>
-        </div>
+        )}
       </div>
-    }
-    </>
+    </div>
   );
 };
 
 export default Profile;
-
-
-

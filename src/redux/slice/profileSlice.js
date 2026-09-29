@@ -1,4 +1,6 @@
-import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice, isAnyOf} from "@reduxjs/toolkit";
+import {logoutUser, sessionEnded} from "./authSlice";
+import {formatWait, retryAfterSeconds} from "../../api/errors";
 
 const initialState = {
     isLoading: false,
@@ -6,6 +8,7 @@ const initialState = {
     error: null,
     updateLoading:false,
     updateError: null,
+    updateFieldErrors: {}, // the backend's `field_errors` of a refused save ({username: ["..."]}), drawn under their fields
     adrressLoading: false,
     addresses: [],
     addressError: null,
@@ -32,6 +35,11 @@ const initialState = {
         phone: '',
         email: '',
     },
+    // what the backend said about the code it just sent ({resend_after, expires_in, length}), per field; null until one was sent
+    otpTiming: {
+        phone: null,
+        email: null,
+    },
     message: {
         phone: '',
         email: '',
@@ -56,14 +64,18 @@ const initialState = {
         email: null,
         phone: null,
     },
-    previousValue: {
-        email: '',
-        phone: '',
-    },
-    otp: '',
     infoEditing: false,
-    image: '',
 };
+
+// The sentence for a failed page load: the backend's own, else a general one (never an object, React cannot draw one)
+const errorText = (payload) => payload?.error || payload?.errors?.[0] || (typeof payload === 'string' ? payload : 'Something went wrong!');
+
+// A refused "send a code": the wait of a 429 said in words, else the backend's sentences
+const codeRefusal = (payload) => (
+    payload?.retry_after
+        ? [`You have asked for too many codes. Please try again in ${formatWait(payload.retry_after)}.`]
+        : (payload?.errors || (payload?.error ? [payload.error] : ['Failed to send the code.']))
+);
 
 //get profile
 export const handleGetProfile = createAsyncThunk('profile/handleGetProfile', async (_, { rejectWithValue }) => {
@@ -71,25 +83,21 @@ export const handleGetProfile = createAsyncThunk('profile/handleGetProfile', asy
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.get('/accounts/profile/', { section: "get-profile"});
-      console.log('get profile response',response);
       return response?.data?.data;
     } catch (error) {
-        console.log('get profile error: ', error);
-        
       return rejectWithValue(error?.response?.data || error?.message || error);
     }
 });
 
-// profile update
+// profile update: a plain object goes as JSON (so "" clears an e-mail, which multipart cannot say), a FormData is the picture
 export const handleProfileUpdate = createAsyncThunk('profile/handleProfileUpdate', async (formData, { rejectWithValue }) => {
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.put('/accounts/profile/', formData, { section: "profile-update"});
-      console.log('profile update response',response);
       return response?.data?.data;
     } catch (error) {
-      return rejectWithValue(error?.response?.data);
+      return rejectWithValue(error?.response?.data || {errors: ['Could not save. Please try again.']});
     }
 });
 
@@ -151,10 +159,9 @@ export const handleSendOtp = createAsyncThunk('profile/handleSendOtp', async ({ 
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.post(`accounts/request-otp/`,formData, { section: "send-otp-verify"});
-      console.log('send otp for verify response', response);
       return { data: response?.data, field };
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue({...error.response?.data, retry_after: retryAfterSeconds(error)});
     }
 });
 
@@ -163,10 +170,9 @@ export const handleSubmitOtp = createAsyncThunk('profile/handleSubmitOtp', async
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.post(`accounts/verify-otp-for-profile/`,formData, { section: "submit-otp"});
-      console.log('submit otp response', response);
       return { data: response?.data, field };
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
 });
 
@@ -211,18 +217,14 @@ const profileSlice = createSlice({
             const {field} = action.payload;
             state.verified[field] = false;
         },
-        setOtp: (state, action) => {
-            state.otp = action.payload;
-        },
+        // Opening or leaving the edit form starts it clean: nothing verified, no old refusal
         setInfoEditing: (state, action) => {
             state.infoEditing = action.payload;
-        },
-        updatePreviousValue: (state, action) => {
-            const {field, value} = action.payload;
-            state.previousValue[field] = value;
-        },
-        setImage: (state, action) => {
-            state.image = action.payload;
+            state.updateError = null;
+            state.updateFieldErrors = {};
+            state.verified = {email: false, phone: false};
+            state.verifyError = {phone: null, email: null};
+            state.verifyPopup = {phone: false, email: false};
         },
     },
     extraReducers: (builder) =>{
@@ -238,23 +240,28 @@ const profileSlice = createSlice({
         })
         .addCase(handleGetProfile.rejected, (state, action)=>{
             state.isLoading = false;
-            
-            state.error = action?.payload?.error || action?.payload  || 'Something went wrong!';
+            state.error = errorText(action?.payload);
         })
 
         //profile update
          .addCase(handleProfileUpdate.pending, (state)=>{
             state.updateLoading = true;
+            state.updateFieldErrors = {};
         })
         .addCase(handleProfileUpdate.fulfilled, (state, action)=>{
             state.updateLoading = false;
             state.updateError = null;
             state.profile = action?.payload;
-            state.infoEditing = false;
+            // a new picture (multipart) leaves the edit form as it is; a saved form is done, and its verifications are spent
+            if (!(action.meta.arg instanceof FormData)) {
+                state.infoEditing = false;
+                state.verified = {email: false, phone: false};
+            }
         })
         .addCase(handleProfileUpdate.rejected, (state, action)=>{
             state.updateLoading = false;
-            state.updateError = action?.payload?.error || action?.payload?.errors || 'Something went wrong';
+            state.updateError = action?.payload?.errors || (action?.payload?.error ? [action.payload.error] : ['Something went wrong.']);
+            state.updateFieldErrors = action?.payload?.field_errors || {};
         })
 
 
@@ -341,15 +348,15 @@ const profileSlice = createSlice({
             state.loading[field] = false;
             state.message[field] = action.payload?.data?.message;
             state.otpToken[field] = action.payload?.data?.data?.token;
+            const {resend_after, expires_in, length} = action.payload?.data?.data || {};
+            state.otpTiming[field] = resend_after || expires_in || length ? {resend_after, expires_in, length} : null;
             state.verifyPopup[field] = true;
             
         })
         .addCase(handleSendOtp.rejected, (state, action)=>{
             const field = action.meta.arg.field;
-            const {errors, error } = action.payload;
-            
             state.loading[field] = false;
-            state.verifyError[field] = errors || error?.message || 'Failed to send OTP';
+            state.verifyError[field] = codeRefusal(action.payload);
         })
 
         //submit otp
@@ -368,16 +375,15 @@ const profileSlice = createSlice({
 
             //clear
             state.message[field] = ''
-            state.otp = '';
         })
         .addCase(handleSubmitOtp.rejected, (state, action)=>{
             const field = action.meta.arg.field;
-            const {errors, error } = action.payload;
-            
             state.otpSubmitLoading[field] = false;
-            state.otpSubmitError[field] = errors || error?.message || 'Failed to submit OTP';
+            state.otpSubmitError[field] = action.payload?.errors || (action.payload?.error ? [action.payload.error] : ['That code did not work. Please try again.']);
         })
-        
+
+        //nothing of one customer's profile or addresses stays behind for the next person on this browser
+        .addMatcher(isAnyOf(logoutUser.fulfilled, logoutUser.rejected, sessionEnded), () => initialState);
     }
 });
 export const {setAddress, setIsAddAddress, updateAddressFormData,
@@ -388,10 +394,7 @@ setErrors,
   resetAddressForm,
   statusUpdateVerifyPopup,
   statusUpdateVerified, 
-  setOtp,
   setInfoEditing,
-  updatePreviousValue,
-  setImage,
 } = profileSlice.actions;
 
 export default profileSlice.reducer;
