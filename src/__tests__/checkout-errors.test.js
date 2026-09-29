@@ -137,7 +137,7 @@ describe('The cart and the minimum order', () => {
     const link = (await screen.findByText('Proceed to Checkout')).closest('a');
     expect(link.getAttribute('href')).toBe('/checkout');
     expect(screen.queryByText('Increase the quantity to continue.')).toBeNull();
-    expect(screen.getByText('-').disabled).toBe(true); // 3 is the minimum: no smaller
+    expect(screen.getByLabelText(/^Decrease quantity/).disabled).toBe(true); // 3 is the minimum: no smaller
     expect(screen.getByText('Minimum order: 3').className).toContain('text-gray-500');
   });
 
@@ -148,7 +148,7 @@ describe('The cart and the minimum order', () => {
     api.post.mockRejectedValue(failure(['Only 3 of Lite Chef Knife Set left in stock.']));
     renderWith(<Cart />, {signedIn: true, cartItems: [{...KNIFE, quantity: 3}]});
 
-    fireEvent.click(await screen.findByText('+'));
+    fireEvent.click(await screen.findByLabelText(/^Increase quantity/));
     expect(screen.getByDisplayValue('4')).toBeTruthy(); // the page answers at once ...
 
     expect(await screen.findByText('Only 3 of Lite Chef Knife Set left in stock.', {}, {timeout: 4000})).toBeTruthy();

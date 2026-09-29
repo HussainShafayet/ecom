@@ -1,21 +1,31 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaTrash, FaArrowRight } from 'react-icons/fa';
+import { FaShoppingCart } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {removeFromCart, updateQuantity, selectTotalPrice, handleFetchCart, handleRemovetoCart, handleAddtoCart, clearCart} from '../redux/slice/cartSlice';
-import {fetchAllProducts} from '../redux/slice/productSlice';
-import {ErrorDisplay, Loader, ProductCard} from '../components/common';
+import {addToCart, removeFromCart, updateQuantity, selectTotalPrice, handleFetchCart, handleRemovetoCart, handleAddtoCart, clearCart} from '../redux/slice/cartSlice';
+import {fetchAllProducts, MAX_QUANTITY} from '../redux/slice/productSlice';
+import {clearSectionError} from '../redux/slice/globalErrorSlice';
+import {ErrorDisplay, ProductSection, SectionError} from '../components/common';
+import {CartCheckoutBar, CartItem, UndoSnackbar} from '../components/cart';
+import {RecentlyViewed} from '../components/sections';
 import {minimumOf, minimumOrderProblems} from '../utils/minimumOrder';
 import debounce from 'lodash.debounce'; // Import lodash debounce
 import {CartSkeleton, SectionSkeleton} from '../components/common/skeleton';
-import {SectionError} from '../components/common';
-import {discountLabel, formatPrice} from '../utils/formatPrice';
 
+const SUGGESTION_COUNT = 12;
+const UNDO_SECONDS = 6;
+
+// One cart line: the same product in another colour/size is another line
+const lineKey = (item) => `${item?.id}-${item?.variant_id ?? 0}`;
+
+// Mobile first: the lines in one column with the page's own scroll (no scroll box inside the page), the total and Checkout in
+// a bar fixed above the bottom navigation, a removal that is undone with one tap instead of asked about first. From `lg`:
+// the lines beside a sticky order summary that has the Checkout button.
 const Cart = () => {
   const totalPrice = useSelector(selectTotalPrice);
-  const [confirmDelete, setConfirmDelete] = useState({});
   const [confirmAllDelete, setConfirmAllDelete] = useState(false);
-  const [quantityError, setQuantityError] = useState(null); // why the shop refused the last quantity change (stock)
+  const [quantityErrors, setQuantityErrors] = useState({}); // per line: why the shop refused the last quantity change (stock)
+  const [undo, setUndo] = useState(null); // what was just removed { items, message }
   const {cartItems, cartFetchLoading, cartFetchError, cartRemoveError} = useSelector((state)=> state.cart);
 
   const {isLoading, items:products, error} = useSelector((state)=> state.product);
@@ -24,17 +34,26 @@ const Cart = () => {
   const minimumProblems = minimumOrderProblems(cartItems); // lines below their product's minimum order
   const dispatch = useDispatch();
   const [originalQuantities, setOriginalQuantities] = useState({}); // Store original quantities
+  const hasItems = cartItems.length > 0;
 
   useEffect(() => {
     isAuthenticated && dispatch(handleFetchCart());
-    if (cartItems.length > 0) {
-      dispatch(fetchAllProducts({page_size:12}));
-    }
-   }, [dispatch, isAuthenticated, cartItems.length]);
+  }, [dispatch, isAuthenticated]);
+
+  useEffect(() => {
+    if (hasItems) dispatch(fetchAllProducts({page_size: SUGGESTION_COUNT * 2})); // more than it shows: some are already in the cart
+  }, [dispatch, hasItems]);
+
+  // The undo offer goes away by itself
+  useEffect(() => {
+    if (!undo) return undefined;
+    const timer = setTimeout(() => setUndo(null), UNDO_SECONDS * 1000);
+    return () => clearTimeout(timer);
+  }, [undo]);
 
    // Debounced API call
    const debouncedUpdateQuantity = useCallback(
-    
+
     debounce(async (product, difference) => {
       if (difference !== 0) {
       const cartBody = {};
@@ -44,58 +63,96 @@ const Cart = () => {
       cartBody.action = difference < 0 ? 'decrease' : 'increase';
 
       const result = await dispatch(handleAddtoCart(cartBody));
+      const key = lineKey(product);
       setOriginalQuantities((prev) => ({
         ...prev,
-        [product?.id]: null,
+        [key]: null,
       }));
       if (handleAddtoCart.rejected.match(result)) {
-        // e.g. "Only 3 of Mug left in stock.": say so, and show the quantity the server really holds
-        setQuantityError(result.payload?.errors || ['The quantity could not be changed. Please try again.']);
+        // e.g. "Only 3 of Mug left in stock.": say so under that line, and show the quantity the server really holds
+        const sentences = result.payload?.errors || ['The quantity could not be changed. Please try again.'];
+        setQuantityErrors((prev) => ({...prev, [key]: sentences.join(' ')}));
         dispatch(handleFetchCart());
       } else {
-        setQuantityError(null);
+        setQuantityErrors((prev) => {
+          const next = {...prev};
+          delete next[key];
+          return next;
+        });
       }
-      
+
       }
     }, 1000),
     []
   );
- 
- 
+
   if (fetchCartError) {
-    return <SectionError message={fetchCartError} />;
+    return (
+      <SectionError
+        message={fetchCartError}
+        onRetry={() => {
+          dispatch(clearSectionError('fetch-cart'));
+          dispatch(handleFetchCart());
+        }}
+      />
+    );
   }
+
+  // The server's copy of a removal that failed is what the cart really holds: show that
+  const removeOnServer = async (payload) => {
+    const result = await dispatch(handleRemovetoCart(payload));
+    if (handleRemovetoCart.rejected.match(result)) dispatch(handleFetchCart());
+  };
+
   const handleRemoveItem = (item) =>{
-    isAuthenticated && dispatch(handleRemovetoCart({product_id: item?.id, variant_id: item?.variant_id}));
+    isAuthenticated && removeOnServer({product_id: item?.id, variant_id: item?.variant_id});
     dispatch(removeFromCart(item));
+    setUndo({items: [item], message: `Removed “${item?.name}”`});
   }
 
   const handleRemoveAllItem = () => {
-    const removeList = cartItems?.map(element => 
-      element?.variant_id 
-        ? { product_id: element?.id, variant_id: element?.variant_id } 
+    const removeList = cartItems?.map(element =>
+      element?.variant_id
+        ? { product_id: element?.id, variant_id: element?.variant_id }
         : { product_id: element?.id }
     ) || [];
-    isAuthenticated && dispatch(handleRemovetoCart(removeList));
+    isAuthenticated && removeOnServer(removeList);
+    setUndo({items: cartItems, message: 'Cart cleared'});
     dispatch(clearCart());
+    setConfirmAllDelete(false);
   };
 
-  const handleUpdateQuantity = (id, newQuantity, item) => {
+  // Puts back what was removed, with the quantities it had (the server too, for a signed-in customer)
+  const handleUndo = async () => {
+    const restored = undo?.items || [];
+    setUndo(null);
+    restored.forEach((item) => dispatch(addToCart(item)));
+    if (isAuthenticated) {
+      await Promise.all(restored.map((item) => dispatch(handleAddtoCart({
+        product_id: item.id, quantity: item.quantity, variant_id: item.variant_id, action: 'increase',
+      }))));
+      dispatch(handleFetchCart()); // whatever the shop could not put back (stock) is not shown as if it had
+    }
+  };
+
+  const handleUpdateQuantity = (item, wanted) => {
+    const key = lineKey(item);
     let prevQuantity = 0;
-    if (originalQuantities[id]) {
-      prevQuantity = originalQuantities[id];
+    if (originalQuantities[key]) {
+      prevQuantity = originalQuantities[key];
     } else {
        setOriginalQuantities((prev) => ({
         ...prev,
-        [id]: item?.quantity,
+        [key]: item?.quantity,
       }));
       prevQuantity = item?.quantity;
     }
-    newQuantity = Math.max(newQuantity, minimumOf(item)); // a quantity below the product's minimum order is refused at checkout
+    // never below the product's minimum order (refused at checkout), never above what one line may hold
+    const newQuantity = Math.min(MAX_QUANTITY, Math.max(wanted, minimumOf(item)));
     const difference = newQuantity - prevQuantity; // Calculate actual difference
-    
+
     // Update UI immediately
-    dispatch(updateQuantity({ id, quantity: newQuantity, variant_id: item?.variant_id }));
+    dispatch(updateQuantity({ id: item?.id, quantity: newQuantity, variant_id: item?.variant_id }));
 
     // Only send API request if the quantity actually changed
     if (isAuthenticated && difference !== 0) {
@@ -103,269 +160,118 @@ const Cart = () => {
     }
 };
 
-   
+  const inCart = new Set(cartItems.map((item) => item?.id));
+  const suggestions = (products || []).filter((product) => !inCart.has(product?.id)).slice(0, SUGGESTION_COUNT);
 
   return (
     <>
-   
-      <div className="mx-auto">
+      {/* phone: room for the fixed checkout bar (68 px) above the bottom nav (56 px); tablet: for the bar alone */}
+      <div className="mx-auto pb-44 md:pb-28 lg:pb-0">
       {cartFetchLoading ? <CartSkeleton /> :
         cartFetchError ? (
         <SectionError message={cartFetchError} />
       ) :
       <>
-          <ErrorDisplay errors={quantityError} />
           {cartRemoveError &&
             <p role="alert" className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700">{cartRemoveError}</p>
           }
-          {cartItems?.length === 0 ? (
-            <div className="text-center">
-              <h3 className="text-2xl mb-4">Your cart is empty</h3>
-              <Link to="/products" className="text-blue-500 hover:text-blue-600 text-lg">
-                Browse Products
-              </Link>
-            </div>
-          ) : 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            
-              {/* Scrollable Cart Items Section */}
-              <div className="lg:col-span-2 relative">
-                <div className='flex justify-between items-center'>
-                  <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
-                  {cartItems?.length > 0 && 
-                    <span className='text-blue-500 cursor-pointer hover:underline transition-colors' onClick={() => setConfirmAllDelete(true)}>Clear Cart</span>
-                  }
+          {!hasItems ? (
+            <>
+              <div className="py-10 text-center">
+                <FaShoppingCart aria-hidden="true" className="mx-auto mb-4 text-5xl text-gray-300" />
+                <h1 className="text-xl font-bold text-gray-900">Your cart is empty</h1>
+                <p className="mt-1 text-sm text-gray-500">Add something you like and it will wait for you here.</p>
+                <Link to="/products" className="mt-5 inline-flex h-11 items-center rounded-lg bg-blue-600 px-6 font-semibold text-white hover:bg-blue-700">
+                  Start shopping
+                </Link>
+              </div>
+              <RecentlyViewed />
+            </>
+          ) :
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+
+              <div className="lg:col-span-2">
+                <div className="mb-3 flex items-center justify-between">
+                  <h1 className="text-xl font-bold sm:text-2xl">
+                    Shopping Cart <span className="text-base font-normal text-gray-500">({cartItems.length})</span>
+                  </h1>
+                  <button type="button" onClick={() => setConfirmAllDelete(true)} className="min-h-10 px-2 text-sm font-medium text-red-600 hover:underline">
+                    Clear cart
+                  </button>
                 </div>
-                
 
-                <div className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto scrollbar-custom">
-                  {cartItems?.map((item, index) => (
-                    <div
-                      key={index}
-                      className="border rounded-lg shadow-sm hover:shadow-md transition-shadow p-2 bg-white flex flex-row items-center gap-3 relative w-full"
-                    >
-                      {/* Product Image */}
-                      <Link to={`/products/detail/${item?.slug}`} className="relative">
-                        <div className="w-20 h-20 sm:w-12 sm:h-12 md:w-24 md:h-24  rounded-lg">
-                          <img
-                            src={item?.image}
-                            alt={item?.name}
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                      </Link>
-                      
+                {confirmAllDelete && (
+                  <div role="group" aria-label="Clear the cart" className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-gray-800">
+                    <span>Remove all {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}?</span>
+                    <span className="flex gap-2">
+                      <button type="button" onClick={handleRemoveAllItem} className="h-10 rounded-lg bg-red-600 px-4 font-semibold text-white hover:bg-red-700">Remove all</button>
+                      <button type="button" onClick={() => setConfirmAllDelete(false)} className="h-10 rounded-lg border border-gray-300 bg-white px-4 font-semibold text-gray-700">Keep</button>
+                    </span>
+                  </div>
+                )}
 
-                      {/* Product Details */}
-                      <div className="flex-1 text-xs sm:text-sm md:text-base w-full">
-                        <h2 className="font-semibold truncate w-full" title={item?.name}>
-                          <Link to={`/products/detail/${item?.slug}`} className="hover:text-blue-500 transition-colors duration-200">
-                            {item?.name}
-                          </Link>
-                     
-                        </h2>
-                        <p className="text-gray-500 text-wrap">
-                          {item?.brand_name && <span>Brand: {item?.brand_name} • </span>}
-                          {item?.color_name && <span>Color: {item?.color_name} • </span>}
-                          {item?.size_name && <span>Size: {item?.size_name} • </span>}
-                          {item?.avg_rating && <span>Avg Rating: {item?.avg_rating}</span>}
-                        </p>
-
-                        {/* Price Section */}
-                        {item?.has_discount ? (
-                          <div className="flex flex-row space-x-1">
-                            <p className="text-gray-500 line-through">{formatPrice(item?.base_price)}</p>
-                            <p className="text-green-600 font-semibold">
-                              {formatPrice(item?.discount_price)}{' '}
-                              <span className="text-red-500">({discountLabel(item?.discount_value, item?.discount_type)})</span>
-                            </p>
-                          </div>
-                        ) : (
-                          <p className="text-green-600 font-semibold">{formatPrice(item?.base_price)}</p>
-                        )}
-
-                        {/* Quantity Selector */}
-                        <div className="flex items-center mt-2">
-                          <button
-                            onClick={() => handleUpdateQuantity(item?.id, item?.quantity - 1, item)}
-                            className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-l"
-                            disabled={item?.quantity <= minimumOf(item)}
-                          >
-                            -
-                          </button>
-                          <input
-                            type="number"
-                            value={item?.quantity}
-                            onChange={(e) => {
-                              const newValue = parseInt(e.target.value, 10) || 1;
-                              handleUpdateQuantity(item?.id, newValue, item);
-                            }}
-                            className="w-12 text-center border-l border-r"
-                            min={minimumOf(item)}
-                          />
-                          <button
-                            onClick={() => handleUpdateQuantity(item?.id, item?.quantity + 1, item)}
-                            className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-r"
-                          >
-                            +
-                          </button>
-                        </div>
-                        {minimumOf(item) > 1 && (
-                          <p className={`text-xs mt-1 ${item?.quantity < minimumOf(item) ? 'text-red-500 font-semibold' : 'text-gray-500'}`}>
-                            Minimum order: {minimumOf(item)}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Remove Button */}
-                      <button
-                        className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
-                        onClick={() => setConfirmDelete({ id: item?.id, variant_id: item?.variant_id })}
-                      >
-                        <FaTrash />
-                      </button>
-
-                      {/* Confirm Delete Warning in Card */}
-                      {confirmDelete?.id === item?.id && confirmDelete?.variant_id === item?.variant_id && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
-                          <div className="text-center">
-                            <p className="text-gray-800 mb-2">Are you sure you want to remove this item?</p>
-                            <div className="flex justify-center gap-2">
-                              <button
-                                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
-                                onClick={() => {
-                                  handleRemoveItem(item);
-                                  setConfirmDelete({});
-                                }}
-                              >
-                                Yes
-                              </button>
-                              <button
-                                className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
-                                onClick={() => setConfirmDelete({})}
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
+                <ul className="flex flex-col gap-3">
+                  {cartItems.map((item) => (
+                    <CartItem
+                      key={lineKey(item)}
+                      item={item}
+                      error={quantityErrors[lineKey(item)]}
+                      onQuantityChange={handleUpdateQuantity}
+                      onRemove={handleRemoveItem}
+                    />
                   ))}
-                </div>
-
-
-
-                 {/* Confirm All Delete Warning in Card */}
-                 {confirmAllDelete && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
-                      <div className="text-center">
-                        <p className="text-gray-800 mb-2">Are you sure you want to remove all item?</p>
-                        <div className="flex justify-center gap-2">
-                          <button
-                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
-                            onClick={() => {
-                              handleRemoveAllItem()
-                              setConfirmAllDelete(false);
-                            }}
-                          >
-                            Yes
-                          </button>
-                          <button
-                            className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
-                            onClick={() => setConfirmAllDelete(false)}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                </ul>
               </div>
 
               {/* Order Summary */}
-              <div className="sticky top-24 bg-white shadow-sm rounded-lg p-4">
-                <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
+              <div className="rounded-lg bg-white p-4 shadow-sm lg:sticky lg:top-24 lg:self-start">
+                <h2 className="mb-4 text-xl font-bold">Order Summary</h2>
                 <div className="flex justify-between mb-2">
                   <span>Subtotal</span>
                   <span>৳{totalPrice.toFixed(2)}</span>
                 </div>
+                <p className="text-xs text-gray-500">The delivery charge is added at checkout.</p>
                 <hr className="my-4" />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
                   <span>৳{totalPrice.toFixed(2)}</span>
                 </div>
                 {minimumProblems.length > 0 && <div className="mt-4"><ErrorDisplay errors={[...minimumProblems, 'Increase the quantity to continue.']} /></div>}
-                {minimumProblems.length > 0 ? (
-                  <span
-                    aria-disabled="true"
-                    className="mt-4 block bg-gray-300 text-gray-500 text-center font-bold py-2 rounded-lg cursor-not-allowed"
-                  >
-                    Proceed to Checkout
-                  </span>
-                ) : (
-                <Link
-                  to="/checkout"
-                  className="mt-4 block bg-blue-500 text-white text-center font-bold py-2 rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  Proceed to Checkout
-                </Link>
-                )}
-              </div>
-
-              {/* Sticky Checkout Button for Mobile */}
-              <div className="fixed bottom-0 left-0 w-full bg-white p-4 lg:hidden shadow-lg">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-bold text-lg">Total: ৳{totalPrice.toFixed(2)}</p>
-                  </div>
+                {/* On a phone and a tablet the bar fixed to the bottom has the button */}
+                <div className="hidden lg:block">
                   {minimumProblems.length > 0 ? (
-                    <span aria-disabled="true" className="bg-gray-300 text-gray-500 font-bold py-2 px-6 rounded-lg flex items-center cursor-not-allowed">
-                      Checkout <FaArrowRight className="ml-2" />
+                    <span
+                      aria-disabled="true"
+                      className="mt-4 block cursor-not-allowed rounded-lg bg-gray-300 py-2 text-center font-bold text-gray-500"
+                    >
+                      Proceed to Checkout
                     </span>
                   ) : (
                   <Link
                     to="/checkout"
-                    className="bg-blue-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors flex items-center"
+                    className="mt-4 block rounded-lg bg-blue-600 py-2 text-center font-bold text-white transition-colors hover:bg-blue-700"
                   >
-                    Checkout <FaArrowRight className="ml-2" />
+                    Proceed to Checkout
                   </Link>
                   )}
                 </div>
               </div>
-            </div>
-          }
-          </>
-        }
-          {/* Related Products Section */}
-          {isLoading ? <SectionSkeleton /> :
-            error ? (
-            <SectionError message={error} />
-          ) :
-          <>
-          {cartItems?.length  >0 && 
-          <div className="mx-auto my-12">
-            <h2 className="text-2xl font-bold mb-4">Related Products</h2>
-            {isLoading ? <div>
-              <Loader message='Releted Products Loading' />
-            </div>:
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              {products?.map((product) => (
-                <ProductCard key={product?.id} product={product} />
-              ))}
+              <CartCheckoutBar total={totalPrice} blocked={minimumProblems.length > 0} />
             </div>
-            }
-          </div>
           }
           </>
         }
+
+        {/* More to add: what is not in the cart yet, as a row you swipe */}
+        {hasItems && (isLoading ? <SectionSkeleton /> : !error && (
+          <ProductSection className="my-10" title="You may also like" products={suggestions} carousel />
+        ))}
       </div>
+
+      {undo && <UndoSnackbar message={undo.message} onUndo={handleUndo} />}
     </>
   );
 };
 
 export default Cart;
-
-

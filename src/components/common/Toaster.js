@@ -9,14 +9,15 @@ const STYLES = {
   info: 'border-blue-300 bg-blue-50 text-blue-800',
 };
 
-// The toasts of `toastSlice`, stacked at the bottom of the screen (above the bottom nav on a phone).
+// The toasts of `toastSlice`, stacked at the bottom of the screen: above the bottom nav AND the fixed buy/checkout bar
+// of the product and cart pages on a phone (bottom-36 = 144 px).
 const Toaster = () => {
   const dispatch = useDispatch();
   const toasts = useSelector(selectToasts);
   if (toasts.length === 0) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-20 z-[60] flex flex-col items-center gap-2 px-3 lg:bottom-6">
+    <div className="pointer-events-none fixed inset-x-0 bottom-36 z-[60] flex flex-col items-center gap-2 px-3 lg:bottom-6">
       {toasts.map(({ id, message, type }) => (
         <div
           key={id}
