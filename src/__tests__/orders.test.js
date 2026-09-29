@@ -1,8 +1,9 @@
 // The order pages, rendered with the real slice and a mocked orderService (the backend's answers are the shapes in
-// backend docs/API_CONTRACT.md section 6).
+// backend docs/API_CONTRACT.md section 6). Money reads like the rest of the shop (৳1,060), Cancel asks in the page, "Load more" adds
+// to the list, and a coupon's discount is one of the sums.
 import React from 'react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {cleanup, fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {cleanup, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import {Provider} from 'react-redux';
 import {configureStore} from '@reduxjs/toolkit';
 import {MemoryRouter, Route, Routes} from 'react-router-dom';
@@ -78,10 +79,21 @@ describe('My orders', () => {
 
     expect(await screen.findByText(NUMBER)).toBeTruthy();
     expect(screen.getByText('Pending')).toBeTruthy();
-    expect(screen.getByText('৳1060.00')).toBeTruthy();
+    expect(screen.getByText('৳1,060')).toBeTruthy();
     expect(screen.getByText(/2 items/)).toBeTruthy();
-    expect(screen.getByText('View details').getAttribute('href')).toBe(`/orders/${NUMBER}`);
+    expect(screen.getByRole('link', {name: NUMBER}).getAttribute('href')).toBe(`/orders/${NUMBER}`);
     expect(getOrders).toHaveBeenCalledWith(1, 10);
+  });
+
+  it('makes the whole card the link (the number is stretched over it), and shows how many more pictures there are', async () => {
+    const many = {...SUMMARY, items: Array.from({length: 5}, (_, index) => ({...ITEM, sku: `MUG-${index}`}))};
+    getOrders.mockResolvedValue({data: {data: {count: 1, next: null, previous: null, results: [many]}}});
+    renderAt('/orders', <Route path="/orders" element={<Orders />} />);
+
+    const link = await screen.findByRole('link', {name: NUMBER});
+    expect(link.className).toContain('after:absolute'); // covers the card: a thumb has no small button to hit
+    expect(screen.getAllByAltText('Red Mug')).toHaveLength(3);
+    expect(screen.getByText('+2')).toBeTruthy();
   });
 
   it('says so when there are no orders', async () => {
@@ -90,18 +102,47 @@ describe('My orders', () => {
     expect(await screen.findByText('You have not placed any order yet.')).toBeTruthy();
   });
 
-  it('pages through older orders', async () => {
-    getOrders.mockResolvedValue({data: {data: {count: 12, next: 'http://x/?page=2', previous: null, results: [SUMMARY]}}});
+  it('adds the next page under the orders it already shows ("Load more"), until there is no next page', async () => {
+    const second = {...SUMMARY, order_id: 'GC-20260922-0007'};
+    getOrders.mockResolvedValueOnce({data: {data: {count: 12, next: 'http://x/?page=2', previous: null, results: [SUMMARY]}}});
+    getOrders.mockResolvedValueOnce({data: {data: {count: 12, next: null, previous: 'http://x/?page=1', results: [second]}}});
     renderAt('/orders', <Route path="/orders" element={<Orders />} />);
-    fireEvent.click(await screen.findByText('Older'));
+    expect(await screen.findByText('Showing 1 of 12')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', {name: 'Load more'}));
+
     await waitFor(() => expect(getOrders).toHaveBeenLastCalledWith(2, 10));
-    expect(screen.getByText('Page 2 of 2')).toBeTruthy();
+    expect(await screen.findByText('Showing 2 of 12')).toBeTruthy();
+    expect(screen.getByRole('link', {name: NUMBER})).toBeTruthy(); // the first page is still there
+    expect(screen.getByRole('link', {name: 'GC-20260922-0007'})).toBeTruthy();
+    expect(screen.queryByRole('button', {name: 'Load more'})).toBeNull();
   });
 
-  it('shows the error the backend sent', async () => {
-    getOrders.mockRejectedValue(failure(['Something is wrong.']));
+  it('keeps the orders and offers Try again when the next page could not be loaded, then asks for that same page', async () => {
+    getOrders.mockResolvedValueOnce({data: {data: {count: 12, next: 'http://x/?page=2', previous: null, results: [SUMMARY]}}});
+    getOrders.mockRejectedValueOnce(failure(['Could not reach the shop.']));
+    renderAt('/orders', <Route path="/orders" element={<Orders />} />);
+    fireEvent.click(await screen.findByRole('button', {name: 'Load more'}));
+
+    expect(await screen.findByText(/Could not reach the shop\./)).toBeTruthy();
+    expect(screen.getByRole('link', {name: NUMBER})).toBeTruthy();
+    expect(screen.queryByRole('button', {name: 'Load more'})).toBeNull(); // Try again, not a jump to page 3
+
+    getOrders.mockResolvedValueOnce({data: {data: {count: 12, next: null, previous: null, results: [{...SUMMARY, order_id: 'GC-20260922-0007'}]}}});
+    fireEvent.click(screen.getByRole('button', {name: 'Try again'}));
+    await waitFor(() => expect(getOrders).toHaveBeenLastCalledWith(2, 10));
+    expect(await screen.findByRole('link', {name: 'GC-20260922-0007'})).toBeTruthy();
+  });
+
+  it('shows the error the backend sent in place of the list, with Try again', async () => {
+    getOrders.mockRejectedValueOnce(failure(['Something is wrong.']));
     renderAt('/orders', <Route path="/orders" element={<Orders />} />);
     expect(await screen.findByText('Something is wrong.')).toBeTruthy();
+
+    getOrders.mockResolvedValueOnce({data: {data: {count: 1, next: null, previous: null, results: [SUMMARY]}}});
+    fireEvent.click(screen.getByRole('button', {name: 'Try again'}));
+    expect(await screen.findByRole('link', {name: NUMBER})).toBeTruthy();
+    expect(screen.queryByText('Something is wrong.')).toBeNull();
   });
 });
 
@@ -117,37 +158,95 @@ describe('One order', () => {
     expect(screen.getByText('Gulshan, Dhaka')).toBeTruthy();
     expect(screen.getByText('Cash on delivery')).toBeTruthy();
     expect(screen.getByText('Order Placed')).toBeTruthy();
-    expect(screen.getAllByText('৳1060.00').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('৳1,060').length).toBeGreaterThan(0);
+    const sums = screen.getByText('Subtotal').closest('dl');
+    expect(within(sums).getByText('৳1,000')).toBeTruthy();
+    expect(within(sums).getByText('৳60')).toBeTruthy();
+    expect(within(sums).getByText('৳1,060')).toBeTruthy();
+    expect(screen.queryByText(/Discount/)).toBeNull(); // no coupon, no discount row
     expect(getOrder).toHaveBeenCalledWith(NUMBER);
   });
 
-  it('cancels a pending order after confirming, and then the button is gone', async () => {
+  it('draws the coupon\'s discount, so that the sums add up', async () => {
+    getOrder.mockResolvedValue({data: {data: {...DETAIL, discount_amount: 190, coupon_code: 'SAVE10', total: 870, payment: {...DETAIL.payment, amount: 870}}}});
+    renderAt(`/orders/${NUMBER}`, routes);
+
+    expect(await screen.findByText('SAVE10')).toBeTruthy();
+    expect(screen.getByText('−৳190')).toBeTruthy();
+    expect(screen.getAllByText('৳870').length).toBeGreaterThan(0); // 1000 + 60 - 190
+  });
+
+  it('says a free delivery is free', async () => {
+    getOrder.mockResolvedValue({data: {data: {...DETAIL, delivery_charge: 0, total: 1000}}});
+    renderAt(`/orders/${NUMBER}`, routes);
+    expect(await screen.findByText('Free')).toBeTruthy();
+  });
+
+  it('makes a whole line the link to its product, with the picture as decoration', async () => {
+    getOrder.mockResolvedValue({data: {data: DETAIL}});
+    renderAt(`/orders/${NUMBER}`, routes);
+    const line = (await screen.findByText('Red Mug')).closest('a');
+    expect(line.getAttribute('href')).toBe('/products/detail/red-mug');
+    expect(line.textContent).toContain('৳1,000'); // the price is inside the tap target
+  });
+
+  it('copies the order number', async () => {
+    const writeText = vi.fn().mockResolvedValue();
+    Object.defineProperty(navigator, 'clipboard', {value: {writeText}, configurable: true});
+    getOrder.mockResolvedValue({data: {data: DETAIL}});
+    renderAt(`/orders/${NUMBER}`, routes);
+
+    fireEvent.click(await screen.findByRole('button', {name: 'Copy order ID'}));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(NUMBER));
+  });
+
+  it('shows a skeleton, not "not found", until the order arrives', () => {
+    getOrder.mockReturnValue(new Promise(() => {}));
+    const {container} = renderAt(`/orders/${NUMBER}`, routes);
+    expect(container.querySelector('.animate-pulse')).toBeTruthy();
+    expect(screen.queryByText('Back to my orders')).toBeNull();
+  });
+
+  it('cancels a pending order after asking in the page (not in a browser dialog), and then the button is gone', async () => {
     getOrder.mockResolvedValue({data: {data: DETAIL}});
     cancelOrder.mockResolvedValue({data: {data: {...DETAIL, status: 'cancelled', status_display: 'Cancelled', can_cancel: false,
       history: [step('pending', 'Pending', 23), step('cancelled', 'Cancelled', 24)]}}});
     renderAt(`/orders/${NUMBER}`, routes);
 
-    fireEvent.click(await screen.findByText('Cancel order'));
+    fireEvent.click(await screen.findByRole('button', {name: 'Cancel order'}));
+    expect(screen.getByText('Cancel this order?')).toBeTruthy();
+    expect(cancelOrder).not.toHaveBeenCalled(); // pressing Cancel order only asks
+    fireEvent.click(screen.getByRole('button', {name: 'Yes, cancel order'}));
 
     await waitFor(() => expect(cancelOrder).toHaveBeenCalledWith(NUMBER));
-    await waitFor(() => expect(screen.queryByText('Cancel order')).toBeNull());
+    await waitFor(() => expect(screen.queryByText('Cancel this order?')).toBeNull());
+    expect(screen.queryByRole('button', {name: 'Cancel order'})).toBeNull();
     expect(screen.getAllByText('Cancelled').length).toBeGreaterThan(0);
+    expect(window.confirm).not.toHaveBeenCalled();
   });
 
-  it('does nothing when the customer changes their mind', async () => {
-    window.confirm.mockReturnValue(false);
+  it('does nothing when the customer changes their mind ("Keep order")', async () => {
     getOrder.mockResolvedValue({data: {data: DETAIL}});
     renderAt(`/orders/${NUMBER}`, routes);
-    fireEvent.click(await screen.findByText('Cancel order'));
+    fireEvent.click(await screen.findByRole('button', {name: 'Cancel order'}));
+
+    fireEvent.click(screen.getByRole('button', {name: 'Keep order'}));
+
     expect(cancelOrder).not.toHaveBeenCalled();
+    expect(screen.queryByText('Cancel this order?')).toBeNull();
+    expect(screen.getByRole('button', {name: 'Cancel order'})).toBeTruthy(); // still possible
   });
 
   it("shows the backend's sentence when the order can no longer be cancelled", async () => {
     getOrder.mockResolvedValue({data: {data: DETAIL}});
     cancelOrder.mockRejectedValue(failure(['Only a pending order can be cancelled. To change an order that is already being handled, please contact us.']));
     renderAt(`/orders/${NUMBER}`, routes);
-    fireEvent.click(await screen.findByText('Cancel order'));
+    fireEvent.click(await screen.findByRole('button', {name: 'Cancel order'}));
+    fireEvent.click(screen.getByRole('button', {name: 'Yes, cancel order'}));
     expect(await screen.findByText(/Only a pending order can be cancelled/)).toBeTruthy();
+    await waitFor(() => expect(screen.queryByText('Cancel this order?')).toBeNull()); // the question closes, the sentence stays
+    expect(screen.getByText(/Only a pending order can be cancelled/)).toBeTruthy();
   });
 
   it.each([['shipped', 'Shipped'], ['confirmed', 'Confirmed'], ['returned', 'Returned']])('has no cancel button once the order is %s', async (status, label) => {
@@ -157,11 +256,25 @@ describe('One order', () => {
     expect(screen.queryByText('Cancel order')).toBeNull();
   });
 
-  it('says the order was not found (somebody else\'s, or unknown)', async () => {
-    getOrder.mockRejectedValue(failure(['Order not found.']));
+  it('says the order was not found (somebody else\'s, or unknown) and does not offer to try again', async () => {
+    getOrder.mockRejectedValue({response: {status: 404, data: {success: false, errors: ['Order not found.']}}});
     renderAt('/orders/GC-19990101-0001', routes);
-    expect(await screen.findByText('Order not found.')).toBeTruthy();
+    expect(await screen.findByText('We couldn\'t find this order.')).toBeTruthy();
+    expect(screen.getByText('Order not found.')).toBeTruthy();
     expect(screen.getByText('Back to my orders')).toBeTruthy();
+    expect(screen.queryByRole('button', {name: 'Try again'})).toBeNull();
+  });
+
+  it('offers Try again when the order could not be loaded for any other reason', async () => {
+    getOrder.mockRejectedValueOnce({response: {status: 503, data: {success: false, errors: ['The shop is busy.']}}});
+    renderAt(`/orders/${NUMBER}`, routes);
+    expect(await screen.findByText('The shop is busy.')).toBeTruthy();
+    expect(screen.getByText('Back to my orders')).toBeTruthy();
+
+    getOrder.mockResolvedValueOnce({data: {data: DETAIL}});
+    fireEvent.click(screen.getByRole('button', {name: 'Try again'}));
+
+    expect(await screen.findByText('Red Mug')).toBeTruthy();
   });
 });
 
@@ -188,15 +301,36 @@ describe('Tracking an order as a guest', () => {
   it('asks for a proper phone number before calling the backend', () => {
     renderAt('/order-tracking', routes, {signedIn: false});
     fill(NUMBER, '123');
-    expect(screen.getByText('Enter the 10 digit phone number you ordered with.')).toBeTruthy();
+    expect(screen.getByText('Enter 10 digits after +880, for example 1712345678')).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByLabelText('Phone number')); // taken to the box that is wrong
     expect(trackOrderRequest).not.toHaveBeenCalled();
   });
 
   it('asks for the order id too', () => {
     renderAt('/order-tracking', routes, {signedIn: false});
     fill('  ', '1712345678');
-    expect(screen.getByText('Enter your order ID.')).toBeTruthy();
+    expect(screen.getByText('Enter your order ID')).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByLabelText('Order ID'));
     expect(trackOrderRequest).not.toHaveBeenCalled();
+  });
+
+  it('has the shop\'s phone box (a fixed +880, the number cleaned as it is typed) and no problem shown before the button is pressed', () => {
+    renderAt('/order-tracking', routes, {signedIn: false});
+    expect(screen.getByText('+880')).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Phone number'), {target: {value: '+880 1712-345678'}});
+    expect(screen.getByLabelText('Phone number').value).toBe('1712345678');
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('draws the discount of the tracked order and its total', async () => {
+    trackOrderRequest.mockResolvedValue({data: {data: {...TRACKING, discount_amount: 190, coupon_code: 'SAVE10', total: 870}}});
+    renderAt('/order-tracking', routes, {signedIn: false});
+
+    fill(NUMBER, '1712345678');
+
+    expect(await screen.findByText('SAVE10')).toBeTruthy();
+    expect(screen.getByText('−৳190')).toBeTruthy();
+    expect(screen.getByText('৳870')).toBeTruthy();
   });
 
   it('shows the same message for a wrong number and a wrong phone', async () => {
@@ -220,9 +354,20 @@ describe('The confirmation page', () => {
     renderAt(`/order-confirmation/${NUMBER}`, routes, {signedIn: false, state: {order: placed}});
 
     expect(screen.getByText(NUMBER)).toBeTruthy();
-    expect(screen.getByText('৳1060.00')).toBeTruthy();
+    expect(screen.getByText('৳1,060')).toBeTruthy();
     expect(screen.getByText('Track Order').getAttribute('href')).toBe(`/order-tracking?order_id=${NUMBER}`);
     expect(getOrder).not.toHaveBeenCalled(); // a guest has no account to read it from
+  });
+
+  it('puts what to press next before the order summary, and the discount among the sums', () => {
+    const {container} = renderAt(`/order-confirmation/${NUMBER}`, routes, {signedIn: false, state: {order: {...placed, discount_amount: 190, coupon_code: 'SAVE10', total: 870}}});
+
+    const track = screen.getByText('Track Order');
+    const summary = screen.getByText('Order Summary');
+    expect(track.compareDocumentPosition(summary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByText('−৳190')).toBeTruthy();
+    expect(screen.getByText('৳870')).toBeTruthy();
+    expect(container.querySelectorAll('.shadow-md')).toHaveLength(0); // no grey card around white cards any more
   });
 
   it('reads a signed-in customer\'s order back, address and items included', async () => {
@@ -282,7 +427,15 @@ describe('The status timeline', () => {
     const labels = Array.from(container.querySelectorAll('p.font-semibold')).map((node) => node.textContent);
     expect(labels).toEqual(['Order Placed', 'Confirmed', 'Shipped', 'Returned']);
     expect(container.textContent).not.toContain('Delivered');
-    expect(container.querySelector('.bg-red-50')).toBeTruthy(); // the ending is the red step
+    expect(container.querySelector('.bg-red-500')).toBeTruthy(); // the ending is the red step
+  });
+
+  it('is a list of the steps, the newest one that happened marked as the current step', () => {
+    render(<OrderTimeline history={[step('pending', 'Pending', 23), step('shipped', 'Shipped', 24)]} />);
+    const list = screen.getByRole('list', {name: 'Order progress'});
+    const items = within(list).getAllByRole('listitem');
+    expect(items).toHaveLength(3);
+    expect(items.map((item) => item.getAttribute('aria-current'))).toEqual([null, 'step', null]);
   });
 
   it('shows a refund after a delivery as the last step, with Delivered still in place', () => {

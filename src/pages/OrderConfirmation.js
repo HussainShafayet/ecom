@@ -4,8 +4,10 @@ import { FaCheckCircle } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
 import {resetForm} from '../redux/slice/checkoutSlice';
 import {clearOrder, fetchOrder} from '../redux/slice/orderSlice';
-import {OrderItems, addressLines, formatDate, formatMoney} from '../components/orders';
+import {CopyOrderId, OrderItems, OrderTotals, addressLines, formatDate} from '../components/orders';
 
+// After "Place order": the good news and the order number first, what to press next (View / Track order) before anything else, then
+// what was ordered. One column of cards that fits a 360 px phone (the old page put white cards inside a grey card inside padding).
 const OrderConfirmation = () => {
   const { orderId } = useParams();
   const location = useLocation();
@@ -31,82 +33,65 @@ const OrderConfirmation = () => {
   const viewLink = isAuthenticated ? `/orders/${orderId}` : `/order-tracking?order_id=${orderId}`;
 
   return (
-    <div className="container mx-auto my-12 p-6 max-w-3xl bg-gray-50 rounded-lg shadow-md">
-      {/* Success Message */}
-      <div className="w-full flex flex-col justify-center items-center text-center">
-        <FaCheckCircle className="text-green-500 text-6xl mb-4" />
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-          Order Confirmed!
-        </h1>
-        <p className="text-gray-600 mt-2 px-4">
-          Thank you for your purchase. Your order has been placed successfully.
-        </p>
+    <div className="container mx-auto max-w-2xl space-y-4 px-3 py-6 sm:py-10">
+      <div className="text-center">
+        <FaCheckCircle className="mx-auto mb-3 text-5xl text-green-500 sm:text-6xl" aria-hidden="true" />
+        <h1 className="text-2xl font-bold text-gray-800 sm:text-3xl">Order Confirmed!</h1>
+        <p className="mt-2 text-gray-600">Thank you for your purchase. Your order has been placed successfully.</p>
       </div>
 
-      {/* Order Details */}
-      <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-          Order Summary
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <p className="text-gray-700">
-              <strong>Order ID:</strong> {orderId}
-            </p>
-            {summary && (
-              <>
-                <p className="text-gray-700">
-                  <strong>Date:</strong> {formatDate(summary.created_at)}
-                </p>
-                <p className="text-gray-700">
-                  <strong>Total Amount:</strong> {formatMoney(summary.total)}
-                </p>
-              </>
-            )}
-            {!isAuthenticated && (
-              <p className="text-gray-500 text-sm mt-2">Keep this order ID: with the phone number you ordered with, it lets you follow your order.</p>
-            )}
-          </div>
-          {full && (
-            <div>
-              <p className="text-gray-700">
-                <strong>Shipping Address:</strong>
-              </p>
-              <p className="text-gray-600">{full.name}</p>
-              {addressLines(full).map((line) => <p key={line} className="text-gray-600">{line}</p>)}
-            </div>
-          )}
+      <div className="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white p-3 pl-4 shadow-sm">
+        <div className="min-w-0">
+          <p className="text-xs uppercase tracking-wide text-gray-500">Order ID</p>
+          <p className="break-all font-semibold text-gray-900">{orderId}</p>
         </div>
-        {full && <div className="mt-4"><OrderItems items={full.items} /></div>}
+        <CopyOrderId value={orderId} />
       </div>
+      {!isAuthenticated && (
+        <p className="text-center text-sm text-gray-500">Keep this order ID: with the phone number you ordered with, it lets you follow your order.</p>
+      )}
 
-      {/* Next Steps */}
-      <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-          Next Steps
-        </h2>
-        <ul className="space-y-2 text-gray-700 text-sm sm:text-base">
-          <li>🔍 You can follow your order {isAuthenticated ? <>in the <Link to="/orders" className="text-blue-500 underline">Orders</Link> section</> : <>on the <Link to={viewLink} className="text-blue-500 underline">Order Tracking</Link> page</>}.</li>
-          <li>📦 Your order is being prepared for shipping and will arrive soon.</li>
-          <li>💬 For any inquiries, feel free to <Link to="/contact" className="text-blue-500 underline">contact us</Link>.</li>
-        </ul>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="mt-8 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
-        <Link
-          to="/products"
-          className="w-full sm:w-auto text-center bg-blue-500 text-white py-2 px-6 rounded-lg shadow hover:bg-blue-600 transition-colors"
-        >
-          Continue Shopping
-        </Link>
+      <div className="flex flex-col gap-3 sm:flex-row-reverse">
         <Link
           to={viewLink}
-          className="w-full sm:w-auto text-center bg-gray-100 text-gray-800 py-2 px-6 rounded-lg shadow hover:bg-gray-200 transition-colors"
+          className="flex h-12 items-center justify-center rounded-lg bg-blue-600 px-6 font-semibold text-white shadow hover:bg-blue-700 sm:flex-1"
         >
           {isAuthenticated ? 'View Order' : 'Track Order'}
         </Link>
+        <Link
+          to="/products"
+          className="flex h-12 items-center justify-center rounded-lg border border-gray-300 bg-white px-6 font-semibold text-gray-800 hover:bg-gray-50 sm:flex-1"
+        >
+          Continue Shopping
+        </Link>
       </div>
+
+      {summary && (
+        <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+          <h2 className="mb-3 text-base font-semibold text-gray-800 sm:text-lg">Order Summary</h2>
+          <p className="mb-3 text-sm text-gray-600">Placed on {formatDate(summary.created_at)}</p>
+          {full && <div className="mb-3"><OrderItems items={full.items} /></div>}
+          <div className={full ? 'border-t border-gray-200 pt-3' : ''}>
+            <OrderTotals order={summary} />
+          </div>
+          {full && (
+            <div className="mt-4 border-t border-gray-200 pt-3 text-sm text-gray-600 sm:text-base">
+              <p className="font-semibold text-gray-800">Shipping Address</p>
+              <p>{full.name}</p>
+              {addressLines(full).map((line) => <p key={line}>{line}</p>)}
+            </div>
+          )}
+        </section>
+      )}
+
+      <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+        <h2 className="mb-3 text-base font-semibold text-gray-800 sm:text-lg">Next Steps</h2>
+        <ul className="space-y-2 text-sm text-gray-700 sm:text-base">
+          <li>🔍 You can follow your order {isAuthenticated ? <>in the <Link to="/orders" className="text-blue-700 underline">Orders</Link> section</> : <>on the <Link to={viewLink} className="text-blue-700 underline">Order Tracking</Link> page</>}.</li>
+          <li>📦 Your order is being prepared for shipping and will arrive soon.</li>
+          <li>💬 For any inquiries, feel free to <Link to="/contact" className="text-blue-700 underline">contact us</Link>.</li>
+        </ul>
+      </section>
     </div>
   );
 };

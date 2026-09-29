@@ -59,7 +59,7 @@ Plain thunk `initializeCheckout()` dispatches `handleGetCheckoutContent` and, if
 
 A customer's orders. Calls go through `services/orderService.js` (not inlined). Not persisted; **reset to its initial state on `logoutUser.fulfilled`/`rejected`**, so nothing of one customer's orders is left for the next person on the browser. Errors are stored as the backend's `errors` sentences (an array, for `ErrorDisplay`).
 
-State: `orders`/`ordersCount`/`ordersNext`/`ordersPrevious`/`ordersLoading`/`ordersError` (the list page), `order`/`orderLoading`/`orderError` (detail and confirmation), `cancelLoading`/`cancelError`, `tracking`/`trackingLoading`/`trackingError` (the guest lookup).
+State: `orders`/`ordersCount`/`ordersNext`/`ordersPrevious`/`ordersLoading`/`ordersError` (the list page: page 1 replaces `orders`, a later page — "Load more" — is appended under it, an order id already there is not added twice, and a page that fails leaves what was loaded), `order`/`orderLoading`/`orderError`/`orderNotFound` (detail and confirmation; `orderNotFound` is true when the backend answered 404, which trying again will not change — `fetchOrder` passes the status on in its rejection), `cancelLoading`/`cancelError`, `tracking`/`trackingLoading`/`trackingError` (the guest lookup).
 
 Thunks: `fetchOrders({page, page_size})` → `GET /orders/`; `fetchOrder(orderId)` → `GET /orders/{id}/`; `cancelOrder(orderId)` → `POST /orders/{id}/cancel/` (replaces `order` with the answer and updates the row in `orders`); `trackOrder({order_id, phone_number})` → `GET /orders/track/` (public client). Sync reducers: `clearOrder`, `clearTracking`.
 

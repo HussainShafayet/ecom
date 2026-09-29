@@ -11,10 +11,12 @@ const initialState = {
     ordersLoading: false,
     ordersError: null,
 
-    // one of my orders (detail and confirmation pages)
+    // one of my orders (detail and confirmation pages); `orderNotFound`: the backend answered 404 (somebody else's or unknown), which
+    // is not something trying again will change
     order: null,
     orderLoading: false,
     orderError: null,
+    orderNotFound: false,
 
     // cancelling it
     cancelLoading: false,
@@ -45,7 +47,7 @@ export const fetchOrder = createAsyncThunk('order/fetchOrder', async (orderId, {
         const response = await getOrder(orderId);
         return response.data.data;
     } catch (error) {
-        return rejectWithValue(error.response?.data);
+        return rejectWithValue({...error.response?.data, status: error.response?.status});
     }
 });
 
@@ -76,6 +78,7 @@ const orderSlice = createSlice({
         clearOrder: (state) => {
             state.order = null;
             state.orderError = null;
+            state.orderNotFound = false;
             state.cancelError = null;
         },
         clearTracking: (state) => {
@@ -92,7 +95,10 @@ const orderSlice = createSlice({
         })
         .addCase(fetchOrders.fulfilled, (state, action) => {
             state.ordersLoading = false;
-            state.orders = action.payload?.results || [];
+            // page 1 starts the list again; a later page ("Load more") goes under what is already there
+            const results = action.payload?.results || [];
+            const loaded = new Set(state.orders.map((order) => order.order_id));
+            state.orders = (action.meta.arg?.page || 1) > 1 ? [...state.orders, ...results.filter((order) => !loaded.has(order.order_id))] : results;
             state.ordersCount = action.payload?.count || 0;
             state.ordersNext = action.payload?.next || null;
             state.ordersPrevious = action.payload?.previous || null;
@@ -106,6 +112,7 @@ const orderSlice = createSlice({
         .addCase(fetchOrder.pending, (state) => {
             state.orderLoading = true;
             state.orderError = null;
+            state.orderNotFound = false;
         })
         .addCase(fetchOrder.fulfilled, (state, action) => {
             state.orderLoading = false;
@@ -114,6 +121,7 @@ const orderSlice = createSlice({
         .addCase(fetchOrder.rejected, (state, action) => {
             state.orderLoading = false;
             state.orderError = errorsOf(action);
+            state.orderNotFound = action.payload?.status === 404;
         })
 
         //cancel
