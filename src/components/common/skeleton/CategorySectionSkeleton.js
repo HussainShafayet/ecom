@@ -12,24 +12,13 @@ const CategorySectionSkeleton = () => {
         <div className="h-4 bg-gray-200 w-20 rounded hidden md:block"></div>
       </div>
 
-      <div className="relative">
-        {/* Left Arrow Skeleton */}
-        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-300 p-3 h-20 w-8 rounded-sm shadow-lg"></div>
-
-        {/* Categories Container Skeleton */}
-        <div className="flex overflow-x-auto space-x-4 py-2 scrollbar-hidden">
-          {Array(9)
-            .fill(0)
-            .map((_, index) => (
-              <div key={index} className="relative group cursor-pointer min-w-[150px]">
-                <div className="w-full h-36 bg-gray-200 rounded-lg"></div>
-                <div className="absolute inset-0 bg-gray-300 opacity-50"></div>
-              </div>
-            ))}
-        </div>
-
-        {/* Right Arrow Skeleton */}
-        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-300 p-3 h-20 w-8 rounded-sm shadow-lg"></div>
+      {/* Banner Grid Skeleton */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {Array(8)
+          .fill(0)
+          .map((_, index) => (
+            <div key={index} className="aspect-[4/3] bg-gray-200 rounded-xl"></div>
+          ))}
       </div>
     </div>
   );

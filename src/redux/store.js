@@ -13,6 +13,7 @@ import authReducer from "./slice/authSlice";  // Authentication slice
 import checkoutReducer from './slice/checkoutSlice';
 import cartReducer from './slice/cartSlice';
 import wishListReducer from './slice/wishlistSlice';
+import recentlyViewedReducer from './slice/recentlyViewedSlice';
 import contentReducer from './slice/contentSlice';
 import profileReducer from './slice/profileSlice';
 import reviewReducer from './slice/reviewSlice';
@@ -31,7 +32,7 @@ const authPersistConfig = {
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["cart", "wishList"], // ✅ Persist cart and wishlist as before
+  whitelist: ["cart", "wishList", "recentlyViewed"], // ✅ Persist cart, wishlist and recently viewed
 };
 
 // Combine reducers with auth having its own persist reducer
@@ -46,6 +47,7 @@ const rootReducer = combineReducers({
   checkout: checkoutReducer,    // Not persisted
   cart: cartReducer,            // ✅ Persisted
   wishList: wishListReducer,    // ✅ Persisted
+  recentlyViewed: recentlyViewedReducer, // ✅ Persisted
   content: contentReducer,      // Not persisted
   profile: profileReducer,       // Not persisted
   review: reviewReducer,        // not persisted

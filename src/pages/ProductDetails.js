@@ -5,6 +5,7 @@ import { ErrorDisplay, InputField, Loader, ProductCard, RatingAndReview, RichTex
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, incrementQuantity, decrementQuantity, fetchProductById,fetchAllProducts, setSelectedColor, setSelectedSize} from '../redux/slice/productSlice';
 import {addToCart, handleAddtoCart, handleClonedProduct} from '../redux/slice/cartSlice';
+import {recordViewed} from '../redux/slice/recentlyViewedSlice';
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 import {ProductDetailsSkeleton} from '../components/common/skeleton';
@@ -42,6 +43,13 @@ const ProductDetails = () => {
       dispatch(fetchAllProducts({category: product?.category, page_size:30}))
     }
   }, [dispatch, product]);
+
+  useEffect(() => {
+    if (product?.id) {
+      const snapshot = dispatch(handleClonedProduct(product, null, null, 1));
+      dispatch(recordViewed(snapshot));
+    }
+  }, [dispatch, product?.id]);
 // Handle clicks outside each dropdown
 useEffect(() => {
   const handleClickOutside = (event) => {
