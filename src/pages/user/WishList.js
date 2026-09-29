@@ -5,6 +5,7 @@ import {Link} from 'react-router-dom';
 import {clearWishlist, fetchtoWishlist, handleRemovetoWishlist} from '../../redux/slice/wishlistSlice';
 import {ProductCardSkeleton} from '../../components/common/skeleton';
 import {SectionError} from '../../components/common';
+import {pushToast} from '../../redux/slice/toastSlice';
 
 const WishList = () => {
   const {isLoading, items, error} = useSelector((state)=> state.wishList);
@@ -17,11 +18,17 @@ const WishList = () => {
     isAuthenticated && dispatch(fetchtoWishlist());
    }, [dispatch, isAuthenticated]);
 
-   const handleRemoveAllItem = () => {
+   // The list empties at once; if the shop could not do it for a signed-in customer, say so and show what is still on the server
+   const handleRemoveAllItem = async () => {
     const removeList = items?.map(element => ({ product_id: element.id })) || [];
 
-    isAuthenticated && dispatch(handleRemovetoWishlist(removeList));
     dispatch(clearWishlist());
+    if (!isAuthenticated) return;
+    const result = await dispatch(handleRemovetoWishlist(removeList));
+    if (handleRemovetoWishlist.rejected.match(result)) {
+      dispatch(pushToast('Could not clear your wishlist. Please try again.', 'error'));
+      dispatch(fetchtoWishlist());
+    }
   };
 
   return (
@@ -48,7 +55,7 @@ const WishList = () => {
         <div className='flex justify-between items-center'>
           <h2 className="text-2xl font-bold mb-4">Your Wishlist</h2>
           {items.length > 0 &&
-          <span className='text-blue-500 cursor-pointer hover:underline transition-colors' onClick={() => setConfirmAllDelete(true)}>Clear Wishlist</span>
+          <button type="button" className='min-h-10 px-2 text-blue-500 hover:underline transition-colors' onClick={() => setConfirmAllDelete(true)}>Clear Wishlist</button>
           }
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
