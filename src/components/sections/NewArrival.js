@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import {ProductSection, Slider} from '../common';
+import {ContentLink, ProductSection, Slider} from '../common';
 import {useDispatch, useSelector} from 'react-redux';
-import {Link} from 'react-router-dom';
 import {fetchNewArrivalContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 import {SectionSkeleton} from '../common/skeleton';
@@ -38,17 +37,6 @@ const NewArrival = ({forRoute}) => {
     return <SectionError message={sectionError} onRetry={retry} />;
   }
 
-  const getLink = (item)=>{
-    switch (item?.type) {
-        case 'product':
-            return `/products/detail/${item?.link}`
-        case 'category':
-            return `/products/?category=${item?.link}`
-        default:
-           return item?.external_link;
-    }
-  }
-
   return (
 
     <>
@@ -69,7 +57,7 @@ const NewArrival = ({forRoute}) => {
             {right_banner?.media_type === 'image' &&
               <>
                 {/* Product Image */}
-                <Link to={getLink(right_banner)} target='_blank' className="block h-full">
+                <ContentLink item={right_banner} className="block h-full">
                   {/* Main Product Image */}
                   <img
                     src={right_banner?.media}
@@ -89,12 +77,12 @@ const NewArrival = ({forRoute}) => {
                       className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
                     />
                   )}
-                </Link>
+                </ContentLink>
               </>
             }
             {right_banner?.media_type === 'video' && 
               <div className='relative h-full'>
-                <Link to={getLink(right_banner)} target='_blank' className='absolute right-2 top-2 z-10 cursor-pointer text-blue-500 hover:underline'>{right_banner.caption?right_banner.caption :'Click'}</Link>
+                <ContentLink item={right_banner} className='absolute right-2 top-2 z-10 cursor-pointer text-blue-500 hover:underline'>{right_banner.caption?right_banner.caption :'Click'}</ContentLink>
                 {/* Video */}
                 <video
                   src={right_banner?.media}

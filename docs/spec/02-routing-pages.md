@@ -8,7 +8,7 @@
 
 | Path | Element | Auth | Notes |
 |---|---|---|---|
-| `/` | `Home` | none | Composes `HeroSection`, `FlashSale`, `NewArrival`, `CategoriesSection`, `BestSelling`, `FeaturedProducts`, `AllProducts`; `Testimonials` is commented out. |
+| `/` | `Home` | none | Composes, in this order, `HeroSection`, `CategoryStrip`, `FlashSale`, `BestSelling`, `NewArrival`, `FeaturedProducts`, `RecentlyViewed`, `AllProducts`; `Testimonials` is commented out. |
 | `/products` | `Products` | none | Reads/writes query params (`category`, `brands`, `tags`, `min_price`, `max_price`, `sizes`, `colors`, `page`, `page_size`, `ordering`, `search`); infinite scroll via `react-infinite-scroll-component`. |
 | `/products/detail/:slug` | `ProductDetails` | none | Add-to-cart/buy-now branches on `isAuthenticated` (server cart vs local cart clone); works for guests too. |
 | `/cart` | `Cart` | none (not `ProtectedRoute`-wrapped) | Fetches server cart only `if (isAuthenticated)`. |

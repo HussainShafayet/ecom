@@ -439,7 +439,7 @@ const Checkout = () => {
 
                   {/* Price */}
                   <div className="text-sm font-semibold text-right flex-shrink-0">
-                    {item?.has_discount
+                    ৳{item?.has_discount
                       ? (item?.discount_price * item?.quantity).toFixed(2)
                       : (item?.base_price * item?.quantity).toFixed(2)}
                   </div>
@@ -514,23 +514,23 @@ const Checkout = () => {
 
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>{totalPrice.toFixed(2)}</span>
+                <span>৳{totalPrice.toFixed(2)}</span>
               </div>
               {couponStatus === 'applied' && (
                 <div className="flex justify-between text-green-600">
                   <span>Discount</span>
-                  <span>-{discountAmount.toFixed(2)}</span>
+                  <span>-৳{discountAmount.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>{shippingCost.toFixed(2)}</span>
+                <span>৳{shippingCost.toFixed(2)}</span>
               </div>
               {errors?.delivery_charge && <p className="text-red-500 text-xs mt-1">{errors?.delivery_charge}</p>}
               <hr className="my-3" />
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span>{grandTotal.toFixed(2)}</span>
+                <span>৳{grandTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <Link to="/cart" className="mt-4 inline-block text-blue-500 hover:text-blue-600">

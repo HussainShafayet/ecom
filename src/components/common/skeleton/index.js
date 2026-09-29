@@ -7,7 +7,6 @@ export {default as SidebarSkeleton} from './SidebarSkeleton';
 export {default as ProfileSkeleton} from './ProfileSkeleton';
 export {default as CartSkeleton} from './CartSkeleton';
 export {default as CheckoutSkeleton} from './CheckoutSkeleton';
-export {default as CategorySectionSkeleton} from './CategorySectionSkeleton';
 
 
 

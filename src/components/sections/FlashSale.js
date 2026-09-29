@@ -1,7 +1,6 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {shallowEqual, useDispatch, useSelector} from 'react-redux';
-import {ProductSection, Slider} from '../common';
-import {Link} from 'react-router-dom';
+import {ContentLink, ProductSection, Slider} from '../common';
 import {fetchFlashSaleContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 import {SectionSkeleton} from '../common/skeleton';
@@ -28,17 +27,6 @@ const FlashSale = ({forRoute}) => {
 
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
-  // ✅ Prevent function recreation
-  const getLink = useCallback((item) => {
-    switch (item?.type) {
-      case "product":
-        return `/products/detail/${item?.link}`;
-      case "category":
-        return `/products/?category=${item?.link}`;
-      default:
-        return item?.external_link;
-    }
-  }, []);
 
   // ✅ useEffect dependency fix
   useEffect(() => {
@@ -79,7 +67,7 @@ const FlashSale = ({forRoute}) => {
             {right_banner?.media_type === 'image' &&
               <>
                 {/* Product Image */}
-                <Link to={getLink(right_banner)} target='_blank' className="block h-full">
+                <ContentLink item={right_banner} className="block h-full">
                   {/* Main Product Image */}
                   <img
                     src={right_banner?.media}
@@ -99,12 +87,12 @@ const FlashSale = ({forRoute}) => {
                       className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
                     />
                   )}
-                </Link>
+                </ContentLink>
               </>
             }
             {right_banner?.media_type === 'video' && 
               <div className='relative h-full'>
-                <Link to={getLink(right_banner)} target='_blank' className='absolute right-2 top-2 z-10 text-blue-500 hover:underline text:2x'>{right_banner?.caption?right_banner?.caption :'Click'}</Link>
+                <ContentLink item={right_banner} className='absolute right-2 top-2 z-10 text-blue-500 hover:underline text:2x'>{right_banner?.caption?right_banner?.caption :'Click'}</ContentLink>
                 {/* Video */}
                 <video
                   src={right_banner?.media}
