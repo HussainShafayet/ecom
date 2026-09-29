@@ -28,7 +28,7 @@ export const fetchReviews = createAsyncThunk('review/fetchRevies', async (produc
     try {
         // Import axiosSetup only when debounceneeded to avoid circular dependency issues
         const api = (await import('../../api/axiosSetup')).default;
-        const response = await api.get(`products/reviews/?product_id=${product_id}`, { section: "get-review"});
+        const response = await api.get(`products/reviews/?product_id=${product_id}`, { section: "get-review", optionalAuth: true});
        console.log('fetch reviews response', response);
        return response.data.data;
      } catch (error) {

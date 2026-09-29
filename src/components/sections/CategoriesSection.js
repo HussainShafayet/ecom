@@ -5,6 +5,8 @@ import { fetchAllCategories } from '../../redux/slice/categorySlice';
 import CategorySectionSkeleton from '../common/skeleton/CategorySectionSkeleton';
 import SectionHeader from '../common/SectionHeader';
 import defaultImage from '../../assets/images/default_product_image.jpg';
+import {SectionError} from '../common';
+import {clearSectionError} from '../../redux/slice/globalErrorSlice';
 
 const CategoriesSection = () => {
   const { isLoading, categories, error } = useSelector((state) => state.category);
@@ -15,19 +17,21 @@ const CategoriesSection = () => {
     dispatch(fetchAllCategories({page:1, page_size:8}));
   }, [dispatch]);
 
+  // "Try again" on the error card: forget the error and ask for this part again
+  const retry = () => {
+    ['categories'].forEach((section) => dispatch(clearSectionError(section)));
+    dispatch(fetchAllCategories({page:1, page_size:8}));
+  };
+
   if (sectionError) {
-    return <div className="text-center text-red-500 font-semibold py-4">
-      {sectionError} - Please try again later.
-    </div>;
+    return <SectionError message={sectionError} onRetry={retry} />;
   }
 
   return (
     <>
     {isLoading ? <CategorySectionSkeleton /> :
       error ? (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {error} - Please try again later.
-      </div>
+      <SectionError message={error} onRetry={retry} />
     ) :
       <>
       {categories?.length !== 0  &&

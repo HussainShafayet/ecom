@@ -6,6 +6,8 @@ import {fetchNewArrivalContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 import {SectionSkeleton} from '../common/skeleton';
 import {fetchNewArrivalProducts} from '../../redux/slice/product/newArrivalSlice';
+import {SectionError} from '../common';
+import {clearSectionError} from '../../redux/slice/globalErrorSlice';
 
 const NewArrival = ({forRoute}) => {
   const newArrivalLoading = useSelector((state) => state.new_arrival.new_arrival_Loading);
@@ -25,10 +27,15 @@ const NewArrival = ({forRoute}) => {
    dispatch(fetchNewArrivalProducts({page_size:12}));
   }, [dispatch,forRoute]);
 
+  // "Try again" on the error card: forget the error and ask for this part again
+  const retry = () => {
+    ['new-arrival', 'new-arrival-content'].forEach((section) => dispatch(clearSectionError(section)));
+    if (forRoute) dispatch(fetchNewArrivalContent());
+    dispatch(fetchNewArrivalProducts({page_size:12}));
+  };
+
   if (sectionError) {
-    return <div className="text-center text-red-500 font-semibold py-4">
-      {sectionError} - Please try again later.
-    </div>;
+    return <SectionError message={sectionError} onRetry={retry} />;
   }
 
   const getLink = (item)=>{
@@ -47,9 +54,7 @@ const NewArrival = ({forRoute}) => {
     <>
     {newArrivalLoading ? <SectionSkeleton forRoute={forRoute} /> :
       newArrivalError ? (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {newArrivalError} - Please try again later.
-      </div>
+      <SectionError message={newArrivalError} onRetry={retry} />
     ) :
       <div className="container mx-auto">
 

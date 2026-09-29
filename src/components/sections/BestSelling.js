@@ -6,6 +6,8 @@ import {fetchBestSellingContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 import {SectionSkeleton} from '../common/skeleton';
 import {fetchBestSellingProducts} from '../../redux/slice/product/bestSellingSlice';
+import {SectionError} from '../common';
+import {clearSectionError} from '../../redux/slice/globalErrorSlice';
 
 const BestSelling = ({forRoute}) => {
   const bestSellingLoading = useSelector((state) => state.best_selling.best_selling_Loading);
@@ -42,10 +44,15 @@ const BestSelling = ({forRoute}) => {
     setLoadedImages((prev) => ({ ...prev, [id]: true }));
   };
 
+  // "Try again" on the error card: forget the error and ask for this part again
+  const retry = () => {
+    ['best-sale', 'best-selling-content'].forEach((section) => dispatch(clearSectionError(section)));
+    if (forRoute) dispatch(fetchBestSellingContent());
+    dispatch(fetchBestSellingProducts({ page_size: 12 }));
+  };
+
   if (sectionError) {
-    return <div className="text-center text-red-500 font-semibold py-4">
-      {sectionError} - Please try again later.
-    </div>;
+    return <SectionError message={sectionError} onRetry={retry} />;
   }
 
 
@@ -53,9 +60,7 @@ const BestSelling = ({forRoute}) => {
     <>
     {bestSellingLoading ? <SectionSkeleton forRoute={forRoute} /> :
       bestSellingError ? (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {bestSellingError} - Please try again later.
-      </div>
+      <SectionError message={bestSellingError} onRetry={retry} />
     ) :
       <div className="container mx-auto ">
       {forRoute && 

@@ -6,6 +6,8 @@ import {Link} from 'react-router-dom';
 import {fetchFeaturedContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 import {SectionSkeleton} from '../common/skeleton';
+import {SectionError} from '../common';
+import {clearSectionError} from '../../redux/slice/globalErrorSlice';
 
 const FeaturedProducts = ({forRoute}) => {
   const {featured_Loading, featured:products, featured_error} = useSelector((state)=> state.product);
@@ -24,10 +26,15 @@ const FeaturedProducts = ({forRoute}) => {
    dispatch(fetchFeaturedProducts({page_size:12}));
   }, [dispatch, forRoute]);
 
+  // "Try again" on the error card: forget the error and ask for this part again
+  const retry = () => {
+    ['featured', 'featured-content'].forEach((section) => dispatch(clearSectionError(section)));
+    if (forRoute) dispatch(fetchFeaturedContent());
+    dispatch(fetchFeaturedProducts({page_size:12}));
+  };
+
   if (sectionError) {
-    return <div className="text-center text-red-500 font-semibold py-4">
-      {sectionError} - Please try again later.
-    </div>;
+    return <SectionError message={sectionError} onRetry={retry} />;
   }
 
 
@@ -46,9 +53,7 @@ const FeaturedProducts = ({forRoute}) => {
     <>
     {featured_Loading ? <SectionSkeleton forRoute={forRoute} /> :
       featured_error ? (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {featured_error} - Please try again later.
-      </div>
+      <SectionError message={featured_error} onRetry={retry} />
     ) :
       <div className="container mx-auto">
         {forRoute && 

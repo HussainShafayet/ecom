@@ -2,12 +2,14 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import publicApi from '../../api/publicApi';
+import { clearTokens, readTokens, saveTokens } from '../../api/session';
 
 
 const initialState = {
     accessToken: null,
     refreshToken: null,
     isAuthenticated: false,
+    sessionExpired: false, // the server ended this device's session (see api/session.js); shown until they sign in or dismiss it
     loading: false,
     error: null,
     message: null,
@@ -77,37 +79,6 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
 });
 
 
-// Async action to refresh access token
-export const refreshToken = createAsyncThunk('auth/refreshToken', async (credentials , { rejectWithValue, getState }) => {
-  try {
-    const { accessToken } = getState().auth;
-    const baseUrl = import.meta.env.VITE_BASE_URL;
-    const response = await axios.post(`${baseUrl}accounts/token/refresh/`,credentials, {
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-        }
-    });
-    console.log('refresh token response', response);
-    return response?.data;
-  } catch (error) {
-    console.log('refresh error', error);
-    throw error?.response?.data;
-  }
-});
-
-// Check Authentication Status
-export const checkAuth =  () => async (dispatch) => {
-  const refresh_token = Cookies.get('refresh_token');
-  if (refresh_token) {
-    try {
-      dispatch(refreshToken({expiresInMins:1,refresh: refresh_token}))
-    } catch (error) {
-      console.error('Failed to refresh token:', error);
-    }
-  }
-};
-
 // Logout action
 export const logoutUser = createAsyncThunk('auth/logoutUser', async (credential, { rejectWithValue, getState, dispatch }) => {
   try {
@@ -137,15 +108,38 @@ const authSlice = createSlice({
   initialState
   ,
   reducers: {
+    // Brings the state in line with the cookies when the app opens. `isAuthenticated` is persisted in localStorage, the
+    // tokens are cookies, and they can disagree (the cookies expired or were cleared): the refresh token is what a
+    // session stands on, a missing access token is simply renewed by the first request that needs it.
     loadUserFromStorage: (state) => {
-      const accessToken = Cookies.get('access_token');
-      const refreshToken = Cookies.get('refresh_token');
+      const { access, refresh } = readTokens();
 
-      if (accessToken && refreshToken) {
-        state.accessToken = accessToken;
-        state.refreshToken = refreshToken;
+      if (refresh) {
+        state.accessToken = access;
+        state.refreshToken = refresh;
         state.isAuthenticated = true;
+      } else {
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.isAuthenticated = false;
       }
+    },
+    // A renewal (api/session.js) gave new tokens.
+    sessionRefreshed: (state, action) => {
+      state.accessToken = action.payload.access;
+      if (action.payload.refresh) state.refreshToken = action.payload.refresh;
+      state.isAuthenticated = true;
+    },
+    // The server refused the refresh token: sign this device out. No call to the server (it would answer 401 again).
+    sessionEnded: (state) => {
+      state.accessToken = null;
+      state.refreshToken = null;
+      state.isAuthenticated = false;
+      state.sessionExpired = true;
+      clearTokens();
+    },
+    dismissSessionNotice: (state) => {
+      state.sessionExpired = false;
     },
     clearSignupState: (state) => {
       state.signupMessage = null;
@@ -185,32 +179,19 @@ const authSlice = createSlice({
 
 
 
-      .addCase(refreshToken.fulfilled, (state, action) => {
-        state.accessToken = action?.payload?.data?.access; // Update the access token
-        state.isAuthenticated = true;
-        Cookies.set('access_token', action?.payload?.data?.access, {
-          secure: true, // Ensures cookies are sent only over HTTPS
-          sameSite: 'Strict', // Prevents CSRF attacks
-        });
-        Cookies.set('refresh_token', action?.payload?.data?.refresh, {
-          secure: true, // Ensures cookies are sent only over HTTPS
-          sameSite: 'Strict', // Prevents CSRF attacks
-        });
-      })
-
       .addCase(logoutUser.fulfilled, (state) => {
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
-        Cookies.remove('access_token');
-        Cookies.remove('refresh_token');
+        state.sessionExpired = false;
+        clearTokens();
       })
       .addCase(logoutUser.rejected, (state,action) => {
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
-        Cookies.remove('access_token');
-        Cookies.remove('refresh_token');
+        state.sessionExpired = false;
+        clearTokens();
       })
 
       //signup
@@ -243,15 +224,8 @@ const authSlice = createSlice({
         state.accessToken = action?.payload?.tokens?.access;
         state.refreshToken = action?.payload?.tokens?.refresh;
         state.isAuthenticated = true;
-        
-        Cookies.set('refresh_token', action?.payload?.tokens?.refresh, {
-          secure: true, // Ensures cookies are sent only over HTTPS
-          sameSite: 'Strict', // Prevents CSRF attacks
-        });
-        Cookies.set('access_token', action?.payload?.tokens?.access, {
-          secure: true, // Ensures cookies are sent only over HTTPS
-          sameSite: 'Strict', // Prevents CSRF attacks
-        });
+        state.sessionExpired = false;
+        saveTokens(action?.payload?.tokens || {});
       })
       .addCase(verifyOtp.rejected, (state, action) =>{
         console.log(action.payload);
@@ -278,5 +252,8 @@ const authSlice = createSlice({
   },
 });
 
-export const { loadUserFromStorage, clearSignupState, clearVerifyOtpState, clearSigninState } = authSlice.actions;
+export const {
+  loadUserFromStorage, sessionRefreshed, sessionEnded, dismissSessionNotice,
+  clearSignupState, clearVerifyOtpState, clearSigninState,
+} = authSlice.actions;
 export default authSlice.reducer;

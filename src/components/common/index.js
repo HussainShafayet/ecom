@@ -18,7 +18,8 @@ export {default as ErrorDisplay} from './ErrorDisplay';
 export {default as SuccessMessage} from './SuccessMessage';
 export {default as SearchDropdown} from './SearchDropdown';
 export {default as BottomNav} from './BottomNav';
-export {default as GlobalErrorHandler} from './GlobalErrorHandler';
+export {default as SectionError} from './SectionError';
+export {default as Toaster} from './Toaster';
 
 
 

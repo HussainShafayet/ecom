@@ -4,9 +4,9 @@ import { Layout } from './components/layout';
 import { Profile, SignIn, SignUp, VerifyOtp, WishList } from './pages/user';
 import { Home, Products, ProductDetails, Cart, NotFound, Checkout, Categories, OrderConfirmation, Orders, OrderDetail } from './pages';
 import {useDispatch} from 'react-redux';
-import {loadUserFromStorage} from './redux/slice/authSlice';
+import {restoreSession} from './redux/slice/authActions';
 import {useEffect, useRef} from 'react';
-import {GlobalErrorHandler, ProtectedRoute, ScrollToTop} from './components/common';
+import {ProtectedRoute, ScrollToTop} from './components/common';
 import {Contact, FAQPage, OrderTracking, StaticPage} from './pages/others';
 import {BestSelling, FeaturedProducts, FlashSale, NewArrival} from './components/sections';
 
@@ -15,13 +15,12 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(loadUserFromStorage());
+    dispatch(restoreSession());
   }, [dispatch]);
 
   
   return (
       <Router>
-        <GlobalErrorHandler>
           <ScrollToTop scrollContainerRef={scrollContainerRef} />{/* Add ScrollToTop here */}
           <Layout scrollContainerRef={scrollContainerRef}> {/* Directly wrap Layout around Routes */}
             <Routes>
@@ -71,7 +70,6 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
-        </GlobalErrorHandler>
       </Router>
   );
 }

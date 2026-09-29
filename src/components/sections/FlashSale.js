@@ -6,6 +6,8 @@ import {fetchFlashSaleContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
 import {SectionSkeleton} from '../common/skeleton';
 import {fetchFlashSaleProducts} from '../../redux/slice/product/flashSaleSlice';
+import {SectionError} from '../common';
+import {clearSectionError} from '../../redux/slice/globalErrorSlice';
 
 const FlashSale = ({forRoute}) => {
   const dispatch = useDispatch();
@@ -46,11 +48,16 @@ const FlashSale = ({forRoute}) => {
     dispatch(fetchFlashSaleProducts({ page_size: 12 }));
   }, [dispatch, forRoute]);
 
+  // "Try again" on the error card: forget the error and ask for this part again
+  const retry = () => {
+    ['flash-sale', 'flash-sale-content'].forEach((section) => dispatch(clearSectionError(section)));
+    if (forRoute) dispatch(fetchFlashSaleContent());
+    dispatch(fetchFlashSaleProducts({ page_size: 12 }));
+  };
+
   if (sectionError) {
     return (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {sectionError} - Please try again later.
-      </div>
+      <SectionError message={sectionError} onRetry={retry} />
     );
   }
 
@@ -58,9 +65,7 @@ const FlashSale = ({forRoute}) => {
     <>
      {flash_sale_Loading ? <SectionSkeleton forRoute={forRoute} /> :
       flash_sale_error ? (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {flash_sale_error} - Please try again later.
-      </div>
+      <SectionError message={flash_sale_error} onRetry={retry} />
     ) :
       <div className="container mx-auto">
         {forRoute && 

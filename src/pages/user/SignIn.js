@@ -11,7 +11,7 @@ const SignIn = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const {signinLoading, signinMessage, signinError,token, isAuthenticated } = useSelector((state) => state.auth);
+  const {signinLoading, signinMessage, signinError,token, isAuthenticated, sessionExpired } = useSelector((state) => state.auth);
   const sectionError = useSelector((state) => state.globalError.sectionErrors["sign-in"]);
   const [formData, setFormData] = useState({ phone_number: '', country_code: '+880' });
 
@@ -115,6 +115,12 @@ const SignIn = () => {
         <div className="bg-white bg-opacity-30 backdrop-blur-lg shadow-md rounded-2xl p-6 sm:p-8 md:p-10 w-full max-w-lg">
           {/* Title */}
           <h2 className="text-2xl md:text-3xl font-bold text-center text-blue-800 mb-6 md:mb-8">Sign In</h2>
+
+          {sessionExpired && (
+            <p role="status" className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-center text-sm text-amber-900">
+              Your session expired. Please sign in again to continue.
+            </p>
+          )}
 
           {Array.isArray(signinError) ? 
           <ErrorDisplay errors={signinError} /> :

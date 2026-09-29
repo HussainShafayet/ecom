@@ -4,6 +4,7 @@ import { ProductCard } from '../../components/common';
 import {Link} from 'react-router-dom';
 import {clearWishlist, fetchtoWishlist, handleRemovetoWishlist} from '../../redux/slice/wishlistSlice';
 import {ProductCardSkeleton} from '../../components/common/skeleton';
+import {SectionError} from '../../components/common';
 
 const WishList = () => {
   const {isLoading, items, error} = useSelector((state)=> state.wishList);
@@ -41,9 +42,7 @@ const WishList = () => {
 
      :
       error ? (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {error} - Please try again later.
-      </div>
+      <SectionError message={error} />
     ) :
       <div className="container mx-auto my-6 relative">
         <div className='flex justify-between items-center'>

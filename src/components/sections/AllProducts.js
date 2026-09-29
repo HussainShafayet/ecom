@@ -3,6 +3,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import {fetchAllProducts} from '../../redux/slice/productSlice';
 import {ProductSection} from '../common';
 import {SectionSkeleton} from '../common/skeleton';
+import {SectionError} from '../common';
+import {clearSectionError} from '../../redux/slice/globalErrorSlice';
 
 const AllProducts = () => {
   const {isLoading, items:products, error} = useSelector((state)=> state.product);
@@ -16,19 +18,21 @@ const AllProducts = () => {
 
 
 
+    // "Try again" on the error card: forget the error and ask for this part again
+    const retry = () => {
+      ['products'].forEach((section) => dispatch(clearSectionError(section)));
+      dispatch(fetchAllProducts({page_size:12}));
+    };
+
     if (sectionError) {
-      return <div className="text-center text-red-500 font-semibold py-4">
-        {sectionError} - Please try again later.
-      </div>;
+      return <SectionError message={sectionError} onRetry={retry} />;
     }
 
   return (
     <>
       {isLoading ? <SectionSkeleton /> :
       error ? (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {error} - Please try again later.
-      </div>
+      <SectionError message={error} onRetry={retry} />
     ) :
       <div className="container mx-auto my-12">
         <ProductSection className="" title="All Products" subtitle="Browse everything in our store." to="/products" products={products} />

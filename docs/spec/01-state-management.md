@@ -6,23 +6,22 @@
 
 The `auth` reducer gets its **own, separate** nested `persistReducer` (`key: "auth"`, `whitelist: ["isAuthenticated"]`) before being combined into the root — so auth is persisted independently of, and in addition to, the root whitelist (which doesn't list `"auth"` itself). Easy to miss; worth remembering when debugging why auth state does or doesn't survive a refresh.
 
-All other slices (`product`, `new_arrival`, `best_selling`, `flash_sale`, `category`, `checkout`, `content`, `profile`, `review`, `order`, `globalError`) are **not** persisted.
+All other slices (`product`, `new_arrival`, `best_selling`, `flash_sale`, `category`, `checkout`, `content`, `profile`, `review`, `order`, `globalError`, `toast`) are **not** persisted.
 
 Middleware: default RTK middleware with `serializableCheck: false`. `persistor` is exported via `persistStore(store)` and wired in `src/index.js` with `<Provider>` + `<PersistGate loading={null}>`.
 
 ## `slice/authSlice.js`
 
-State: `accessToken`/`refreshToken`/`token`, `isAuthenticated`, plus three parallel loading/message/error triples — one each for signup, signin, and verifyOtp.
+State: `accessToken`/`refreshToken`/`token`, `isAuthenticated`, `sessionExpired` (the server ended this device's session; not persisted, shown by `layout/SessionExpiredBanner` and the sign-in page until they sign in or dismiss it), plus three parallel loading/message/error triples — one each for signup, signin, and verifyOtp.
 
-Thunks (all via `publicApi` except `refreshToken`/`logoutUser`, which use raw `axios` + a manually attached `Authorization` header, bypassing both shared clients):
+Thunks (all via `publicApi` except `logoutUser`, which uses raw `axios` + a manually attached `Authorization` header, bypassing both shared clients; the token **renewal** is no longer a thunk, it lives in `src/api/session.js`, see [03-api-integration.md](03-api-integration.md)):
 - `signUpUser` → `POST /accounts/register/`
 - `verifyOtp` → `POST /accounts/verify-otp/`
 - `resendOtp` → `POST /accounts/resend-otp/`
 - `signInUser` → `POST /accounts/login/`
-- `refreshToken` → `POST accounts/token/refresh/` (reads `accessToken` from state)
 - `logoutUser` → `POST accounts/logout/`
 
-Plain thunk `checkAuth()` dispatches `refreshToken` if a `refresh_token` cookie exists. Reducers: `loadUserFromStorage` (hydrates from `js-cookie`), `clearSignupState`, `clearVerifyOtpState`, `clearSigninState`. Tokens are written directly to cookies inside `extraReducers` — side effects living in reducer bodies, an unusual pattern. Only `isAuthenticated` is redux-persisted; tokens rely entirely on cookies for durability.
+Plain thunks in `authActions.js`: `Logout()` (logout call + clears cart/wishlist + purges the persisted store), `endSession()` (the server refused the refresh token: `sessionEnded` + clears the local cart and wishlist, no server call, once even if several requests find out together) and `restoreSession()` (dispatched by `App.js` on open: `loadUserFromStorage`, and if the persisted `isAuthenticated` flag turns out to have no refresh cookie behind it, quietly a guest again and the account's cart/wishlist copy is dropped). Reducers: `loadUserFromStorage` (the **refresh cookie** is what a session stands on: with it `isAuthenticated = true` even if the access cookie is gone, without it `false`), `sessionRefreshed` (new tokens from a renewal), `sessionEnded` (signs out + `sessionExpired = true`), `dismissSessionNotice`, `clearSignupState`, `clearVerifyOtpState`, `clearSigninState`. Cookies are read and written only through `api/session.js` (`readTokens`/`saveTokens`/`clearTokens`): both last **30 days** (`expires`, matching the backend's refresh token; they used to be session cookies that vanished when the browser closed) and are `Secure` only over https. The cookie writes still happen inside `extraReducers` (side effects in reducer bodies, an unusual pattern). Only `isAuthenticated` is redux-persisted; tokens rely on the cookies. Why the local cart/wishlist are dropped whenever a signed-in device stops being signed in: they are a copy of the account's, the backend ADDS a guest's cart to the account's at the next sign-in (the items would count twice) and a different customer signing in here would inherit them.
 
 ## `slice/authActions.js`
 
@@ -76,7 +75,11 @@ CMS-style content per page (home/new-arrival/flash-sale/best-selling/featured/sh
 
 ## `slice/globalErrorSlice.js`
 
-Simple UI-error bus: `globalError` (string|null) + `sectionErrors` (map). Reducers: `setGlobalError` (also wipes `sectionErrors`), `setSectionError`, `clearSectionError`, `clearAllErrors`. No thunks. Not persisted. See [03-api-integration.md](03-api-integration.md) for how this connects to the axios interceptors.
+The errors of the parts of a page, by the `section` a request was made with: `sectionErrors` (map). Reducers: `setSectionError`, `clearSectionError`, `clearAllErrors`. No thunks. Not persisted. There is no page-wide error any more (`globalError`/`setGlobalError` and the `GlobalErrorHandler` screen are gone): a part reads its own entry and draws `common/SectionError`. The interceptors set an entry when a request of that section fails and clear it when one succeeds. See [03-api-integration.md](03-api-integration.md).
+
+## `slice/toastSlice.js`
+
+Short messages over the page: `items` `[{id, message, type}]` (`type` `error`|`success`|`info`). `showToast` (an identical message+type already showing is not added twice: five failed requests with one cause are one toast), `dismissToast`, and the thunk `pushToast(message, type = 'info', ms = 6000)` which shows one and removes it after `ms`. `selectToasts` tolerates a store without this slice. Drawn by `common/Toaster` (in `Layout`). Used by the interceptors for a failed request that names no `section`, and by `OfflineBanner` ("You're back online."). Not persisted.
 
 ## `slice/productSlice.js`
 
@@ -130,7 +133,7 @@ These three overlap conceptually with `categorySlice`'s flash-sale/new-arrival/b
 ## Flagged issues
 
 - **Auth persistence split**: `auth` is nested-persisted independently of the root `persistConfig.whitelist` — easy to overlook.
-- **Inconsistent async client usage**: most slices lazy `import()` `api/axiosSetup` per-thunk to dodge circular deps; `authSlice`'s `refreshToken`/`logoutUser` use raw `axios` with manually attached headers instead — duplicated auth-header logic, and these two calls skip the shared interceptor error handling entirely.
+- **Inconsistent async client usage**: most slices lazy `import()` `api/axiosSetup` per-thunk to dodge circular deps; `authSlice`'s `logoutUser` (and the renewal in `api/session.js`, on purpose: it must not go through the interceptor it serves) use raw `axios` with manually attached headers instead — these calls skip the shared interceptor error handling.
 - **Inconsistent auth-branching pattern**: `checkoutSlice` and `productSlice.searchSuggestions` branch client-by-auth-state; cart/wishlist/profile/review assume the user is always authenticated.
 - **`wishlistSlice` action-type namespace bug** (`'cart/...'` prefix — see above).
 - Excessive `console.log` of API responses left in nearly every thunk.
