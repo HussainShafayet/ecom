@@ -107,7 +107,7 @@ describe('The layout on a phone', () => {
     const summary = screen.getByRole('button', {name: /Order summary/});
     expect(summary.getAttribute('aria-expanded')).toBe('false');
     expect(summary.textContent).toContain('1 item');
-    expect(summary.textContent).toContain('৳500.00');
+    expect(summary.textContent).toContain('৳500');
     // the summary comes before the form's first field in the page, and is only one line tall until opened
     expect(summary.compareDocumentPosition(screen.getByLabelText('Full name')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 
@@ -141,7 +141,7 @@ describe('The layout on a phone', () => {
     expect(bar.className).toContain('md:bottom-0'); // none from md
     expect(bar.className).toContain('lg:static'); // an ordinary button under the form from lg
     expect(within(bar).getByText('Total + delivery')).toBeTruthy(); // no delivery area chosen yet
-    expect(within(bar).getByText('৳500.00')).toBeTruthy();
+    expect(within(bar).getByText('৳500')).toBeTruthy();
     expect(container.firstChild.className).toContain('pb-44');
     expect(screen.getByText('Place Order').closest('button').type).toBe('submit');
   });
@@ -154,8 +154,8 @@ describe('The layout on a phone', () => {
     type('Delivery area', 'inside_dhaka');
 
     expect(within(bar).getByText('Total')).toBeTruthy();
-    expect(within(bar).getByText('৳560.00')).toBeTruthy(); // 500 + 60
-    expect(screen.getByText('৳60.00')).toBeTruthy();
+    expect(within(bar).getByText('৳560')).toBeTruthy(); // 500 + 60
+    expect(screen.getByText('৳60')).toBeTruthy();
     expect(screen.queryByText('Choose an area')).toBeNull();
   });
 });

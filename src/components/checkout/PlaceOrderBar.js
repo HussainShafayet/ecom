@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatPrice } from '../../utils/formatPrice';
 
 // The total and Place Order, fixed to the bottom of the screen where a thumb reaches them, so the order can be placed without
 // scrolling back. On a phone it sits just above the bottom navigation (56 px: `bottom-14`), from `md` at the very bottom (no
@@ -9,7 +10,7 @@ const PlaceOrderBar = ({ total, loading, deliveryKnown }) => (
     <div className="flex items-center gap-3">
       <div className="shrink-0 leading-tight lg:hidden">
         <p className="text-xs text-gray-500">Total{!deliveryKnown && ' + delivery'}</p>
-        <p className="text-lg font-bold text-gray-900">৳{total.toFixed(2)}</p>
+        <p className="text-lg font-bold text-gray-900">{formatPrice(total)}</p>
       </div>
       <button
         type="submit"

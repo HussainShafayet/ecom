@@ -9,6 +9,7 @@ import {ErrorDisplay, ProductSection, SectionError} from '../components/common';
 import {CartCheckoutBar, CartItem, UndoSnackbar} from '../components/cart';
 import {RecentlyViewed} from '../components/sections';
 import {minimumOf, minimumOrderProblems} from '../utils/minimumOrder';
+import {formatPrice} from '../utils/formatPrice';
 import debounce from 'lodash.debounce'; // Import lodash debounce
 import {CartSkeleton, SectionSkeleton} from '../components/common/skeleton';
 
@@ -228,13 +229,13 @@ const Cart = () => {
                 <h2 className="mb-4 text-xl font-bold">Order Summary</h2>
                 <div className="flex justify-between mb-2">
                   <span>Subtotal</span>
-                  <span>৳{totalPrice.toFixed(2)}</span>
+                  <span>{formatPrice(totalPrice)}</span>
                 </div>
                 <p className="text-xs text-gray-500">The delivery charge is added at checkout.</p>
                 <hr className="my-4" />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span>৳{totalPrice.toFixed(2)}</span>
+                  <span>{formatPrice(totalPrice)}</span>
                 </div>
                 {minimumProblems.length > 0 && <div className="mt-4"><ErrorDisplay errors={[...minimumProblems, 'Increase the quantity to continue.']} /></div>}
                 {/* On a phone and a tablet the bar fixed to the bottom has the button */}

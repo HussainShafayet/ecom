@@ -73,7 +73,7 @@ describe('The layout on a phone', () => {
     expect(bar.className).toContain('bottom-14'); // the bottom navigation is 56 px
     expect(bar.className).toContain('md:bottom-0'); // there is no bottom navigation from md
     expect(bar.className).toContain('lg:hidden'); // the order summary has the button from lg
-    expect(within(bar).getByText('৳1400.00')).toBeTruthy(); // 2 x 500 + 400
+    expect(within(bar).getByText('৳1,400')).toBeTruthy(); // 2 x 500 + 400
     expect(container.firstChild.className).toContain('pb-44'); // the last line is not hidden behind the two bars
   });
 
