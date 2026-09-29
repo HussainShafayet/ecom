@@ -1,11 +1,11 @@
 // src/api/axiosSetup.js
 import axios from "axios";
 import * as Sentry from "@sentry/react";
-import { refreshToken } from "../redux/slice/authSlice";
 import store from "../redux/store";
-import Cookies from "js-cookie";
-import { Logout } from "../redux/slice/authActions";
+import { endSession } from "../redux/slice/authActions";
 import { setGlobalError, setSectionError } from "../redux/slice/globalErrorSlice";
+import publicApi from "./publicApi";
+import { refreshSession, SessionError } from "./session";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
@@ -19,13 +19,26 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// A new access token for a request that just came back 401. If another request renewed it while this one was on its
+// way, use that one: every renewal retires the previous refresh token, so renewing twice would sign a valid customer out.
+const accessTokenFor = (request) => {
+  const current = store.getState().auth.accessToken;
+  if (current && request.headers?.Authorization !== `Bearer ${current}`) return current;
+  return refreshSession(); // one renewal, shared by every request waiting for it (see session.js)
+};
+
+// The same request without the customer's token, for a page the shop shows to everyone.
+const asGuest = (request) => {
+  delete request.headers.Authorization;
+  return publicApi.request(request);
+};
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
     const section = originalRequest?.section; // Get section from config
-    console.log(section);
-    
+
     if (!error.response) {
       // Network Error: Treat as global
       Sentry.captureException(error);
@@ -39,27 +52,29 @@ api.interceptors.response.use(
       Sentry.captureException(error);
     }
 
-    // Handle 401 (Unauthorized) with token refresh
-    if (status === 401 && !originalRequest._retry) {
+    if (status === 401 && originalRequest) {
+      // A token that was just renewed and is refused again: this session is not usable.
+      if (originalRequest._retry) {
+        store.dispatch(endSession());
+        return Promise.reject(error);
+      }
       originalRequest._retry = true;
 
       try {
-        console.log("Refreshing access token...");
-        const refresh_token = Cookies.get("refresh_token");
-        if (!refresh_token) {
-          throw new Error("Session is expired");
-        }
-
-        const result = await store.dispatch(refreshToken({ expiresInMins: 1, refresh: refresh_token }));
-        const newAccessToken = result.payload.data.access;
-
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return api(originalRequest); // Retry with new token
+        const accessToken = await accessTokenFor(originalRequest);
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return api(originalRequest); // Retry with the new token
       } catch (refreshError) {
-        console.log("Refresh token expired or invalid, logging out...");
-        store.dispatch(Logout());
-        store.dispatch(setGlobalError("Session expired. Please sign in again."));
-        return Promise.reject(refreshError);
+        if (refreshError instanceof SessionError && refreshError.expired) {
+          // The server refused the refresh token: signed out on this device, quietly (a banner offers to sign in again).
+          // Requests for pages everyone may see (the shop, a product) carry on as a guest instead of failing.
+          store.dispatch(endSession());
+          if (originalRequest.optionalAuth) return asGuest(originalRequest);
+        } else if (section) {
+          // The renewal itself did not get through (connection, 5xx): says nothing about the session, which stays.
+          store.dispatch(setSectionError({ section, error: "Could not reach the server. Please try again." }));
+        }
+        return Promise.reject(error);
       }
     }
 
@@ -81,6 +96,8 @@ function getErrorMessage(status) {
   switch (status) {
     case 400:
       return "Invalid request. Please check your input.";
+    case 401:
+      return "Please sign in to continue.";
     case 403:
       return "You do not have permission to access this resource.";
     case 404:

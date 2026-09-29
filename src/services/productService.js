@@ -40,7 +40,7 @@ export const getAllProducts = async (page_size = null, ordering = null, page = n
     query += `search=${search}&`; // Add search
   }
   const api = (await import('../api/axiosSetup')).default;
-  return await api.get(`/products?${query}`, { section: "products"});
+  return await api.get(`/products?${query}`, { section: "products", optionalAuth: true});
 };
 
 // new arrival products
@@ -53,7 +53,7 @@ export const getNewArrivalProducts = async (page, page_size) => {
     query += `page_size=${page_size}&`; // Add skip for pagination
   }
   const api = (await import('../api/axiosSetup')).default;
-  return await api.get(`/products/new-arrivals?${query}`, { section: "new-arrival"});
+  return await api.get(`/products/new-arrivals?${query}`, { section: "new-arrival", optionalAuth: true});
 };
 
 // best-selling products
@@ -66,7 +66,7 @@ export const getBestSellingProducts = async (page , page_size) => {
     query += `page_size=${page_size}&`; // Add skip for pagination
   }
   const api = (await import('../api/axiosSetup')).default;
-  return await api.get(`/products/best-selling?${query}`, { section: "best-sale"});
+  return await api.get(`/products/best-selling?${query}`, { section: "best-sale", optionalAuth: true});
 };
 
 
@@ -80,7 +80,7 @@ export const getFlashSaleProducts = async (page, page_size) => {
     query += `page_size=${page_size}&`; // Add skip for pagination
   }
   const api = (await import('../api/axiosSetup')).default;
-  return await api.get(`/products/flash-sale?${query}`, { section: "flash-sale"});
+  return await api.get(`/products/flash-sale?${query}`, { section: "flash-sale", optionalAuth: true});
 };
 
 
@@ -94,13 +94,13 @@ export const getFeaturedProducts = async (page, page_size) => {
     query += `page_size=${page_size}&`; // Add skip for pagination
   }
   const api = (await import('../api/axiosSetup')).default;
-  return await api.get(`/products/featured?${query}`, { section: "featured"});
+  return await api.get(`/products/featured?${query}`, { section: "featured", optionalAuth: true});
 };
 
 
 // Fetch a single product by its slug
 export const getProductById = async (slug) => {
   const api = (await import('../api/axiosSetup')).default;
-  return await api.get(`/products/detail/${slug}`, { section: "product-details"});
+  return await api.get(`/products/detail/${slug}`, { section: "product-details", optionalAuth: true});
 };
 

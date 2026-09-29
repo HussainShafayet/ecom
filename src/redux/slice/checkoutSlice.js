@@ -69,7 +69,7 @@ export const handleGetCheckoutContent = createAsyncThunk('profile/handleGetCheck
     let response = {}
     if (isAuthenticated) {
       const api = (await import('../../api/axiosSetup')).default;
-      response = await api.get('/content/checkout/', { section: "checkout-content"});
+      response = await api.get('/content/checkout/', { section: "checkout-content", optionalAuth: true});
     } else {
       response = await publicApi.get(`/content/checkout/`, { section: "checkout-content"});
     }

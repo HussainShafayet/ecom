@@ -49,7 +49,7 @@ One slice per domain under `src/redux/slice/` (plus `slice/product/` for `bestSe
 
 ### API layer (`src/api/`, `src/services/`)
 Two axios instances:
-- `axiosSetup.js` — authenticated client. Attaches `Authorization: Bearer <accessToken>` from Redux state; on 401 auto-refreshes via the `refresh_token` cookie and retries once, logging the user out on failure.
+- `axiosSetup.js` — authenticated client. Attaches `Authorization: Bearer <accessToken>` from Redux state; on 401 renews the access token (`api/session.js`, **one shared renewal** however many requests need it, because the backend's refresh token is single-use) and retries once. Only the server refusing the refresh token ends the session (quietly: `auth.sessionExpired` + `SessionExpiredBanner`, never a page-wide error); a dropped connection or a 5xx during the renewal keeps it. A request with `optionalAuth: true` (public reads) falls back to a guest request when the session is over.
 - `publicApi.js` — unauthenticated client, same base URL, no auth header.
 
 Both interceptors map HTTP status → a generic message and dispatch it to `globalErrorSlice`, either as a page-wide `setGlobalError` or, if the request config sets a `section` string (`{ section: 'add-cart' }` etc.), a scoped `setSectionError` that individual components read via `state.globalError.sectionErrors[section]`. Follow this `section` convention for new calls that should show inline (not full-page) errors. Both interceptors also call `Sentry.captureException` on a network error or a 5xx response (a bug, not something the customer did) — 4xx responses are expected/validation errors and are not reported.
@@ -78,7 +78,7 @@ These are pre-existing bugs and inconsistencies worth knowing before touching re
 - **`wishlistSlice` action types are prefixed `'cart/...'`** (copy-paste leftover from `cartSlice`) instead of `'wishList/...'` — cosmetic (types are still unique) but shows up wrong in Redux DevTools.
 - **Cart/wishlist "remove" endpoints use `PUT`, not `DELETE`** (`/accounts/cart/`, `/accounts/favourite/`) — intentional per the backend contract, not a bug to "fix" without checking the backend.
 - **`ProductCard .js`** (under `src/components/common/product/`) has a literal trailing space in the filename, and `common/index.js` imports it with that space — copy the exact filename if touching this component.
-- **`refreshToken`/`logoutUser` in `authSlice.js`** bypass both axios clients and call raw `axios` directly — they don't get the shared interceptor error handling.
+- **`logoutUser` in `authSlice.js`** (and the token renewal in `api/session.js`, deliberately) bypass both axios clients and call raw `axios` directly — no shared interceptor error handling.
 - **SignIn's Facebook/Google buttons are decorative** — no `onClick`, clicking does nothing. Not yet decided whether to wire them up or remove them.
 
 ## Extending the app

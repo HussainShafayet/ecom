@@ -4,9 +4,8 @@
 
 **`axiosSetup.js`** — the authenticated client. `baseURL: import.meta.env.VITE_BASE_URL`. Request interceptor reads `accessToken` from the Redux `auth` slice and sets `Authorization: Bearer <token>`. Response interceptor:
 - No `error.response` → dispatches `setGlobalError("Network error...")`.
-- `401` + not already retried → reads the `refresh_token` cookie, dispatches the `refreshToken` thunk, retries the original request with the new token; on failure dispatches `Logout()` + `setGlobalError("Session expired...")`.
+- `401` + not already retried → gets a new access token and retries once. The renewal (`api/session.js` `refreshSession()`, raw `axios.post` to `accounts/token/refresh/`) is **single-flight**: the backend's access token lives minutes and its refresh token is single-use (rotation + blacklist), so every request that finds the token expired waits for the same one renewal (the homepage alone sends five at once; each doing its own renewal signed valid customers out). A request whose token was already renewed by someone else while it was in flight just retries with the current one. Only the server refusing the refresh token (401) or there being none ends the session: `endSession()` (signs out, keeps no account cart, sets `auth.sessionExpired`, **no** page-wide error; `SessionExpiredBanner` offers to sign in). A dropped connection, a 5xx or a 429 during the renewal proves nothing about the session: it stays, the request fails with its 401 and (if it has a `section`) a section error. A freshly renewed token that is refused again also ends the session. A request sent with `optionalAuth: true` (every public read: the product lists, product detail, search suggestions, reviews, checkout content) is retried through `publicApi` as a guest when the session is over, instead of failing.
 - Other statuses → mapped via `getErrorMessage(status)` (400/403/404/429/5xx + default) and dispatched as `setSectionError({section, error})` if `config.section` is set, else `setGlobalError`.
-- Leaves a stray `console.log(section)` debug statement.
 
 **`publicApi.js`** — unauthenticated client, same `baseURL`, `Content-Type: application/json`. No request interceptor (no auth header ever attached, by design). The response interceptor duplicates the same status→message logic and global/section dispatch pattern, but does it via a dynamic `import("../redux/store")` (to dodge a circular import) instead of the static import `axiosSetup.js` uses — an inconsistent pattern between two files that otherwise do the same job. Same leftover `console.log(section)`.
 
@@ -39,7 +38,7 @@ Both files derive `errorMessage` from HTTP status only — the backend error bod
 | POST | `/accounts/verify-otp/` | inlined | `verifyOtp` (authSlice) |
 | POST | `/accounts/resend-otp/` | inlined | `resendOtp` (authSlice) |
 | POST | `/accounts/login/` | inlined | `signInUser` (authSlice) |
-| POST | `{baseURL}accounts/token/refresh/` (raw `axios`, bypasses both clients) | inlined | `refreshToken` (authSlice) |
+| POST | `{baseURL}accounts/token/refresh/` (raw `axios`, bypasses both clients on purpose) | `api/session.js` `refreshSession()` | the axios interceptor (single-flight) |
 | POST | `{baseURL}accounts/logout/` (raw `axios`, bypasses both clients) | inlined | `logoutUser` (authSlice) |
 | GET | `/accounts/profile/` | inlined | profileSlice |
 | PUT | `/accounts/profile/` | inlined | profileSlice |
@@ -96,7 +95,7 @@ Vite + `@vitejs/plugin-react` (migrated off Create React App), Redux Toolkit + r
 
 ## Flagged issues
 
-- **`refreshToken`/`logoutUser` in `authSlice.js`** bypass both axios clients, calling raw `axios.post(`${baseUrl}accounts/token/refresh/`...)` (no leading slash, relies on `baseUrl` ending in `/`) — inconsistent with every other call's leading-slash convention, and these calls get none of the interceptor error handling.
+- **`logoutUser` in `authSlice.js`** and the renewal in `api/session.js` bypass both axios clients, calling raw `axios.post(`${baseUrl}accounts/...`)` (no leading slash, relies on `baseUrl` ending in `/`) — inconsistent with every other call's leading-slash convention. The renewal must (it serves the interceptor); `logoutUser` gets none of the interceptor error handling.
 - **Two disconnected error systems** (see above) with no shared contract — inconsistent UX and duplicated logic.
 - **`axiosSetup.js` vs `publicApi.js` duplicate ~30 lines** of interceptor/error-mapping logic almost verbatim (a candidate for extraction), and use different import styles for the store (static vs. dynamic) to work around the same circular-dependency problem.
 - **Only 3 of 9 API-consuming domains have a `services/` wrapper** — auth/profile/cart/wishlist/checkout/review calls are inlined in slices instead, an inconsistent layering choice.
