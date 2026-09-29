@@ -8,7 +8,7 @@
 
 | Path | Element | Auth | Notes |
 |---|---|---|---|
-| `/` | `Home` | none | Composes, in this order, `HeroSection`, `CategoryStrip`, `FlashSale`, `BestSelling`, `NewArrival`, `FeaturedProducts`, `RecentlyViewed`, `AllProducts`; `Testimonials` is commented out. |
+| `/` | `Home` | none | Composes, in this order, `HeroSection`, `CategoryStrip`, `FlashSale`, `BestSelling`, `NewArrival`, `FeaturedProducts`, `RecentlyViewed`, `AllProducts`; `Testimonials` is commented out. The hero, category strip and flash sale (the first screen) load with the page; `BestSelling`, `NewArrival`, `FeaturedProducts` and `AllProducts` are wrapped in `LazySection` and only mount, and so only fetch, when scrolled near (4 requests at opening instead of 8). |
 | `/products` | `Products` | none | Reads/writes query params (`category`, `brands`, `tags`, `min_price`, `max_price`, `sizes`, `colors`, `page`, `page_size`, `ordering`, `search`); infinite scroll via `react-infinite-scroll-component`. |
 | `/products/detail/:slug` | `ProductDetails` | none | Mobile-first product page (gallery, options, quantity, buy bar, folding sections, related; see 04). Add-to-cart/buy-now branch on `isAuthenticated` (server cart vs local cart clone); works for guests too. Buy Now adds and goes to `/checkout`. |
 | `/cart` | `Cart` | none (not `ProtectedRoute`-wrapped) | Mobile-first cart (see 04, `pages/Cart.js`). Fetches the server cart once when the page opens, only `if (isAuthenticated)` (it used to refetch on every count change, replacing the optimistic state); a failed fetch is a `SectionError` with Try again. Removing is immediate with an Undo (server too for a signed-in customer); quantity changes are debounced by 1 s and a refusal is shown under its line. |

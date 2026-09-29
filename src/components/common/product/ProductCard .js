@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { addToCart, handleAddtoCart, handleClonedProduct } from '../../../redux/slice/cartSlice';
 import { FaBolt, FaHeart, FaRegHeart } from 'react-icons/fa';
 import {addToWishlist, handleAddtoWishlist, handleRemovetoWishlist, removeFromWishlist} from '../../../redux/slice/wishlistSlice';
+import {pushToast} from '../../../redux/slice/toastSlice';
 import {minimumOf} from '../../../utils/minimumOrder';
 import {discountLabel, formatPrice} from '../../../utils/formatPrice';
 import defaultImage from '../../../assets/images/default_product_image.jpg';
@@ -181,13 +182,16 @@ const ProductCard = ({ product, cardForTrending }) => {
     }
   };
 
-  const handleAddToWishlist = () =>{
-    if (isAuthenticated) {
-       dispatch(handleAddtoWishlist({product_id: product.id}));
-    } else {
+  // The heart only fills when the shop took it, so a refusal must be said: nothing else on the page shows it
+  const handleAddToWishlist = async () =>{
+    if (!isAuthenticated) {
       dispatch(addToWishlist(product));
+      return;
     }
-
+    const result = await dispatch(handleAddtoWishlist({product_id: product.id}));
+    if (handleAddtoWishlist.rejected.match(result)) {
+      dispatch(pushToast(result.payload?.errors?.[0] || result.payload?.error || 'Could not add this to your wishlist. Please try again.', 'error'));
+    }
   }
   const handleRemoveToWishlist = async () =>{
     try {
@@ -196,8 +200,8 @@ const ProductCard = ({ product, cardForTrending }) => {
           response.success && setProductFavourite(false);
       }
       dispatch(removeFromWishlist(product.id));
-    } catch (error) {
-        console.error("Error removing from wishlist:", error);
+    } catch (failure) {
+      dispatch(pushToast(failure?.errors?.[0] || failure?.error || 'Could not remove this from your wishlist. Please try again.', 'error'));
     }
   }
 
