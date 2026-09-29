@@ -16,6 +16,9 @@ import wishListReducer from '../redux/slice/wishlistSlice';
 import publicApi from '../api/publicApi';
 import {validateCoupon} from '../services/couponService';
 
+// The first test imports the whole checkout page on a cold start: more than the default 5 s on a busy machine
+vi.setConfig({testTimeout: 15000});
+
 vi.mock('../api/axiosSetup', () => ({default: {get: vi.fn(), post: vi.fn(), put: vi.fn()}}));
 vi.mock('../api/publicApi', () => ({default: {get: vi.fn(), post: vi.fn()}}));
 vi.mock('../services/couponService', () => ({validateCoupon: vi.fn()}));

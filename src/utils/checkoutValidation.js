@@ -5,16 +5,9 @@
 // The order the fields are on the page: the first one with a problem is where the customer is taken
 export const FIELD_ORDER = ['name', 'phone_number', 'shipping_type', 'shipping_area', 'division', 'district', 'upazila', 'address'];
 
-export const PHONE_DIGITS = 10;
+import { PHONE_DIGITS, normalizePhone, validatePhone } from './phone';
 
-// Whatever was typed into the phone box, as the 10 digits after +880: people type 01712345678 or 8801712345678 or paste
-// "+880 1712-345678", and the box has no room for the 0 or the 880.
-export const normalizePhone = (value) => {
-  let digits = String(value || '').replace(/\D/g, '');
-  if (digits.startsWith('880')) digits = digits.slice(3);
-  if (digits.startsWith('0')) digits = digits.slice(1);
-  return digits.slice(0, PHONE_DIGITS);
-};
+export { PHONE_DIGITS, normalizePhone };
 
 const blank = (value) => !String(value || '').trim();
 
@@ -24,8 +17,7 @@ export const validateField = (name, value, formData = {}) => {
     case 'name':
       return blank(value) ? 'Enter your full name' : '';
     case 'phone_number':
-      if (blank(value)) return 'Enter your phone number';
-      return /^\d{10}$/.test(String(value)) ? '' : 'Enter 10 digits after +880, for example 1712345678';
+      return validatePhone(value);
     case 'shipping_type':
       return blank(value) ? 'Choose your delivery area' : '';
     case 'shipping_area':

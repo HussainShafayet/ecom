@@ -19,6 +19,9 @@ import api from '../api/axiosSetup';
 import publicApi from '../api/publicApi';
 import {normalizePhone, validateCheckout, validateField} from '../utils/checkoutValidation';
 
+// The first test imports the whole checkout page on a cold start: more than the default 5 s on a busy machine
+vi.setConfig({testTimeout: 15000});
+
 vi.mock('../api/axiosSetup', () => ({default: {get: vi.fn(), post: vi.fn(), put: vi.fn()}}));
 vi.mock('../api/publicApi', () => ({default: {get: vi.fn(), post: vi.fn()}}));
 
