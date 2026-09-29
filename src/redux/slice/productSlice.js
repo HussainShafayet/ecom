@@ -1,6 +1,9 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {getAllProducts, getFeaturedProducts, getProductById} from "../../services/productService";
 import publicApi from "../../api/publicApi";
+// The most one cart line can hold (backend apps/cart/services.py MAX_QUANTITY)
+export const MAX_QUANTITY = 10000;
+
 const initialState = {
     isLoading: false,
     relatedProductsLoading: false,
@@ -85,11 +88,11 @@ const productSlice = createSlice({
         setMainImage: (state, action)=>{
             state.mainImage = action.payload
         },
-        incrementQuantity: (state, action) =>{
-            state.quantity +=  1;
-        },
-        decrementQuantity: (state, action) =>{
-            state.quantity =  Math.max(state.minimum_quantity, state.quantity - 1);
+        // The quantity on the product page: never below the product's minimum order, never above what one cart line may hold
+        // (the backend's cart MAX_QUANTITY). The +/- buttons and the typed number both go through here.
+        setQuantity: (state, action)=>{
+            const wanted = Math.floor(Number(action.payload));
+            state.quantity = Math.min(MAX_QUANTITY, Math.max(state.minimum_quantity, Number.isFinite(wanted) ? wanted : state.minimum_quantity));
         },
         setIsSidebarOpen: (state, action)=>{
             state.isSidebarOpen = action.payload;
@@ -176,9 +179,9 @@ const productSlice = createSlice({
                 }
             }
 
-            //set quantity initial
-            state.minimum_quantity = action.payload?.minimum_order_quantity;
-            state.quantity = action.payload?.minimum_order_quantity;
+            //set quantity initial: the product's minimum order (1 when it has none)
+            state.minimum_quantity = Math.max(1, Number(action.payload?.minimum_order_quantity) || 1);
+            state.quantity = state.minimum_quantity;
         });
         builder.addCase(fetchProductById.rejected,(state, action)=>{
             state.isLoading = false;
@@ -206,5 +209,5 @@ const productSlice = createSlice({
     }
 });
 
-export const {setMainImage,incrementQuantity, decrementQuantity, setIsSidebarOpen, setSortType, setSelectedColor, setSelectedSize, suggestionsInputTime} = productSlice.actions;
+export const {setMainImage, setQuantity, setIsSidebarOpen, setSortType, setSelectedColor, setSelectedSize, suggestionsInputTime} = productSlice.actions;
 export default productSlice.reducer;

@@ -2,11 +2,12 @@ import React, {useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToCart, handleAddtoCart, handleClonedProduct } from '../../../redux/slice/cartSlice';
-import { FaBolt, FaHeart, FaRegHeart, FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
+import { FaBolt, FaHeart, FaRegHeart } from 'react-icons/fa';
 import {addToWishlist, handleAddtoWishlist, handleRemovetoWishlist, removeFromWishlist} from '../../../redux/slice/wishlistSlice';
 import {minimumOf} from '../../../utils/minimumOrder';
 import {discountLabel, formatPrice} from '../../../utils/formatPrice';
 import defaultImage from '../../../assets/images/default_product_image.jpg';
+import RatingStars from './RatingStars';
 
 // These are declared here, not inside ProductCard: a component declared in a render is a new component every render,
 // so React would remount its DOM (the image would flash) each time the card updated.
@@ -59,28 +60,6 @@ const ProductImage = ({ src, alt, isImageLoaded, onLoad, inStock }) => (
     />
   </div>
 );
-
-// Five stars, rounded to the nearest half, plus the exact average and the number of reviews.
-const Rating = ({ rating, reviews }) => {
-  const rounded = Math.round(rating * 2) / 2;
-  return (
-    <div
-      role="img"
-      aria-label={`Rated ${Number(rating).toFixed(1)} out of 5 from ${reviews} reviews`}
-      className="flex items-center gap-1 text-xs text-gray-600"
-    >
-      <span className="flex text-yellow-500" aria-hidden="true">
-        {[1, 2, 3, 4, 5].map((n) =>
-          rounded >= n ? <FaStar key={n} className="h-3 w-3" />
-            : rounded >= n - 0.5 ? <FaStarHalfAlt key={n} className="h-3 w-3" />
-              : <FaRegStar key={n} className="h-3 w-3" />
-        )}
-      </span>
-      <span aria-hidden="true">{Number(rating).toFixed(1)}</span>
-      <span aria-hidden="true" className="text-gray-400">({reviews})</span>
-    </div>
-  );
-};
 
 const Price = ({ hasDiscount, discountPrice, basePrice }) => (
   hasDiscount ? (
@@ -260,7 +239,7 @@ const ProductCard = ({ product, cardForTrending }) => {
           <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-5 text-gray-900 group-hover:text-blue-600" title={product.name}>
             {product.name}
           </h3>
-          {product.avg_rating > 0 && <Rating rating={product.avg_rating} reviews={product.total_reviews} />}
+          {product.avg_rating > 0 && <RatingStars rating={product.avg_rating} reviews={product.total_reviews} />}
           <div className="mt-auto pt-1">
             <Price
               hasDiscount={product.has_discount}
