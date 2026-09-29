@@ -27,7 +27,7 @@ const CheckoutSummary = ({ items, subtotal, discount, shipping, total, coupon })
           Order summary <span className="font-normal text-gray-500">({count} {count === 1 ? 'item' : 'items'})</span>
         </span>
         <span className="flex items-center gap-2 font-bold text-gray-900">
-          ৳{total.toFixed(2)}
+          {formatPrice(total)}
           <FaChevronDown aria-hidden="true" className={`text-gray-500 transition-transform lg:hidden ${open ? 'rotate-180' : ''}`} />
         </span>
       </button>
@@ -96,22 +96,22 @@ const CheckoutSummary = ({ items, subtotal, discount, shipping, total, coupon })
         <div className="space-y-1 text-sm text-gray-700">
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span>৳{subtotal.toFixed(2)}</span>
+            <span>{formatPrice(subtotal)}</span>
           </div>
           {coupon.status === 'applied' && (
             <div className="flex justify-between text-green-600">
               <span>Discount</span>
-              <span>-৳{discount.toFixed(2)}</span>
+              <span>-{formatPrice(discount)}</span>
             </div>
           )}
           <div className="flex justify-between">
             <span>Shipping</span>
-            <span>{shipping === null ? 'Choose an area' : `৳${shipping.toFixed(2)}`}</span>
+            <span>{shipping === null ? 'Choose an area' : formatPrice(shipping)}</span>
           </div>
         </div>
         <div className="mt-2 flex justify-between border-t border-gray-100 pt-2 text-lg font-bold text-gray-900">
           <span>Total</span>
-          <span>৳{total.toFixed(2)}</span>
+          <span>{formatPrice(total)}</span>
         </div>
       </div>
     </section>

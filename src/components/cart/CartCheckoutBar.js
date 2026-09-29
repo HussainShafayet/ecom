@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaArrowRight } from 'react-icons/fa';
+import { formatPrice } from '../../utils/formatPrice';
 
 // The total and the way on, fixed to the bottom of the screen where a thumb reaches it. On a phone it sits just above the
 // bottom navigation (56 px: `bottom-14`; it used to sit under it, out of sight), from `md` the bottom navigation is gone so
@@ -12,7 +13,7 @@ const CartCheckoutBar = ({ total, blocked }) => (
     <div className="flex items-center justify-between gap-3">
       <div className="leading-tight">
         <p className="text-xs text-gray-500">Total</p>
-        <p className="text-lg font-bold text-gray-900">৳{total.toFixed(2)}</p>
+        <p className="text-lg font-bold text-gray-900">{formatPrice(total)}</p>
       </div>
       {blocked ? (
         <span aria-disabled="true" className="flex h-11 cursor-not-allowed items-center rounded-lg bg-gray-300 px-6 font-semibold text-gray-500">
