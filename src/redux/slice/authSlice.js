@@ -3,6 +3,7 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import publicApi from '../../api/publicApi';
 import { clearTokens, readTokens, saveTokens } from '../../api/session';
+import { retryAfterSeconds } from '../../api/errors';
 
 
 const initialState = {
@@ -22,8 +23,27 @@ const initialState = {
     signinError: null,
     verifyOtpMessage: null,
     verifyOtpError: null,
+    resendOtpError: null,
+    // Set when the shop said "too many" (429): { seconds, id }; the pages count it down, `id` tells one refusal from the next
+    signinWait: null,
+    signupWait: null,
+    verifyWait: null,
+    resendWait: null,
+    // What the backend said about the code it just sent ({ resend_after, expires_in, length }, seconds and digits): the code page
+    // counts and draws from it instead of numbers of its own. Null until a code was sent (or from a backend that does not say).
+    otpTiming: null,
     token: null,
   }
+
+// What a refused sign-in/sign-up/code request sends on to the reducers: the backend's answer, plus how many seconds to wait when it
+// was a 429 ("Request was throttled. Expected available in 15 seconds." is not something to show a customer).
+const refusal = (error) => ({ ...(error?.response?.data || {}), retry_after: retryAfterSeconds(error) });
+
+// The timing out of a "code sent" answer, or null when the backend did not send it (an older one): then the pages use their own defaults.
+const timingOf = (payload) => {
+  const { resend_after, expires_in, length } = payload?.data || {};
+  return resend_after || expires_in || length ? { resend_after, expires_in, length } : null;
+};
 
 // Async action for signup
 export const signUpUser = createAsyncThunk('auth/signUpUser', async (credentials, { rejectWithValue }) => {
@@ -34,7 +54,7 @@ export const signUpUser = createAsyncThunk('auth/signUpUser', async (credentials
     
     return response?.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data);
+    return rejectWithValue(refusal(error));
   }
 });
 
@@ -48,7 +68,7 @@ export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (credentials, 
     return response?.data?.data;
   } catch (error) {
     
-    return rejectWithValue(error?.response?.data);
+    return rejectWithValue(refusal(error));
   }
 });
 
@@ -61,7 +81,7 @@ export const resendOtp = createAsyncThunk('auth/resendOtp', async (credentials, 
     
     return response?.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data);
+    return rejectWithValue(refusal(error));
   }
 });
 
@@ -74,7 +94,7 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
     
     return response?.data; // { accessToken, refreshToken, user }
   } catch (error) {
-    return rejectWithValue(error?.response?.data);
+    return rejectWithValue(refusal(error));
   }
 });
 
@@ -162,19 +182,26 @@ const authSlice = createSlice({
       //sign in
       .addCase(signInUser.pending, (state, action)=>{
         state.signinLoading = true;
+        state.signinWait = null;
       })
       .addCase(signInUser.fulfilled, (state, action) => {
         state.signinLoading = false;
         state.signinMessage = action?.payload?.message;
         state.signinError = null;
         state.token = action?.payload?.data?.token;
+        state.otpTiming = timingOf(action.payload);
         //temp
         state.verifyOtpMessage = action?.payload?.message;
         
       })
       .addCase(signInUser.rejected, (state, action)=>{
         state.signinLoading = false;
-        state.signinError = action.payload?.errors || 'Something went wrong!';
+        if (action.payload?.retry_after) {
+          state.signinWait = { seconds: action.payload.retry_after, id: action.meta.requestId };
+          state.signinError = null;
+        } else {
+          state.signinError = action.payload?.errors || 'Something went wrong!';
+        }
       })
 
 
@@ -197,12 +224,14 @@ const authSlice = createSlice({
       //signup
       .addCase(signUpUser.pending, (state, action)=>{
         state.signupLoading = true;
+        state.signupWait = null;
       })
       .addCase(signUpUser.fulfilled, (state, action) =>{
         state.signupLoading = false;
         state.signupMessage = action?.payload?.message;
         state.signupError = null;
         state.token = action?.payload?.data?.token;
+        state.otpTiming = timingOf(action.payload);
 
         //temp
         state.verifyOtpMessage = action?.payload?.message;
@@ -210,12 +239,18 @@ const authSlice = createSlice({
       })
       .addCase(signUpUser.rejected, (state, action) =>{
         state.signupLoading = false;
-        state.signupError = action.payload?.errors  || 'Something went wrong!';
+        if (action.payload?.retry_after) {
+          state.signupWait = { seconds: action.payload.retry_after, id: action.meta.requestId };
+          state.signupError = null;
+        } else {
+          state.signupError = action.payload?.errors  || 'Something went wrong!';
+        }
       })
 
       //verifyOtp
       .addCase(verifyOtp.pending, (state, action)=>{
         state.verifyOtpLoading = true;
+        state.verifyWait = null;
       })
       .addCase(verifyOtp.fulfilled, (state, action) =>{
         state.verifyOtpLoading = false;
@@ -228,10 +263,13 @@ const authSlice = createSlice({
         saveTokens(action?.payload?.tokens || {});
       })
       .addCase(verifyOtp.rejected, (state, action) =>{
-        console.log(action.payload);
-        
         state.verifyOtpLoading = false;
-        state.verifyOtpError = action.payload?.errors  || 'Something went wrong!';
+        if (action.payload?.retry_after) {
+          state.verifyWait = { seconds: action.payload.retry_after, id: action.meta.requestId };
+          state.verifyOtpError = null;
+        } else {
+          state.verifyOtpError = action.payload?.errors  || 'Something went wrong!';
+        }
       })
 
 
@@ -239,15 +277,23 @@ const authSlice = createSlice({
        //resendOtp
        .addCase(resendOtp.pending, (state, action)=>{
         state.verifyOtpLoading = true;
+        state.resendWait = null;
+        state.resendOtpError = null;
       })
       .addCase(resendOtp.fulfilled, (state, action) =>{
         state.verifyOtpLoading = false;
         state.verifyOtpMessage = action?.payload?.message;
         state.verifyOtpError = null;
+        state.otpTiming = timingOf(action.payload) || state.otpTiming;
       })
       .addCase(resendOtp.rejected, (state, action) =>{
         state.verifyOtpLoading = false;
-        state.verifyOtpError = action.payload?.errors  || 'Something went wrong!';
+        // a resend that failed is about the resend, not about the code that was typed
+        if (action.payload?.retry_after) {
+          state.resendWait = { seconds: action.payload.retry_after, id: action.meta.requestId };
+        } else {
+          state.resendOtpError = action.payload?.errors  || ['Could not send a new code. Please try again.'];
+        }
       })
   },
 });

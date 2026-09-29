@@ -3,7 +3,9 @@ import {useDispatch, useSelector} from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUserPlus } from "react-icons/fa";
 import {clearSignupState, signUpUser} from "../../redux/slice/authSlice";
-import {AuthLayout, ErrorDisplay, Field, PhoneInput, SuccessMessage, controlClass, describedBy} from '../../components/common';
+import {AuthLayout, ErrorDisplay, Field, PhoneInput, SuccessMessage, WaitNotice, controlClass, describedBy} from '../../components/common';
+import useCountdown from '../../hooks/useCountdown';
+import {formatWait} from '../../api/errors';
 import {PHONE_PREFIX, validatePhone} from '../../utils/phone';
 
 // What the form asks for and what is wrong with it, one sentence each (the phone: +880 and exactly 10 digits, the backend's rule)
@@ -22,10 +24,16 @@ const ORDER = ['name', 'phone', 'email'];
 const SignUp = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const {signupLoading, signupMessage, signupError, token, isAuthenticated } = useSelector((state) => state.auth);
+  const {signupLoading, signupMessage, signupError, signupWait, token, isAuthenticated } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({ name: "", phone: "", email: "" });
   const [touched, setTouched] = useState({});
+  // The shop said too many codes were asked for: wait, counting down (see SignIn)
+  const [waitLeft, startWait] = useCountdown();
+  const waiting = waitLeft > 0;
+  useEffect(() => {
+    if (signupWait) startWait(signupWait.seconds);
+  }, [signupWait?.id, startWait]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     isAuthenticated && navigate('/');
@@ -45,6 +53,7 @@ const SignUp = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (waiting) return;
     setTouched({ name: true, phone: true, email: true });
 
     const first = ORDER.find((field) => problems[field]);
@@ -67,6 +76,7 @@ const SignUp = () => {
       step={1}
       footer={<>Already a member? <Link to="/signin" className="font-semibold text-blue-700 hover:underline">Sign in</Link></>}
     >
+      {waiting && <WaitNotice seconds={waitLeft}>You have asked for too many codes.</WaitNotice>}
       <SuccessMessage message={signupMessage} />
       <ErrorDisplay errors={signupError} />
 
@@ -117,10 +127,10 @@ const SignUp = () => {
 
         <button
           type="submit"
-          disabled={signupLoading}
+          disabled={signupLoading || waiting}
           className="flex h-12 w-full items-center justify-center rounded-lg bg-blue-600 text-base font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-wait disabled:opacity-70"
         >
-          {signupLoading ? 'Creating account…' : 'Sign Up'}
+          {waiting ? `Try again in ${formatWait(waitLeft)}` : signupLoading ? 'Creating account…' : 'Sign Up'}
         </button>
       </form>
     </AuthLayout>

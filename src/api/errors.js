@@ -9,10 +9,29 @@ const backendSentence = (error) => {
   return null;
 };
 
-// `Retry-After` is a number of seconds (the backend's throttles send it with a 429).
-const secondsToWait = (error) => {
-  const seconds = Number(error?.response?.headers?.['retry-after']);
-  return Number.isFinite(seconds) && seconds > 0 ? Math.ceil(seconds) : null;
+// How long the customer has to wait when the shop said "too many" (HTTP 429): the `Retry-After` header when the browser lets us
+// read it (a cross-origin page only sees the headers the backend exposes), else the sentence DRF writes for a throttled request
+// ("Request was throttled. Expected available in 15 seconds."). A 429 that says nothing about how long is `fallback` seconds;
+// anything that is not a 429 is null.
+export const DEFAULT_WAIT_SECONDS = 30;
+export const retryAfterSeconds = (error, fallback = DEFAULT_WAIT_SECONDS) => {
+  if (error?.response?.status !== 429) return null;
+  const header = Number(error.response.headers?.['retry-after']);
+  if (Number.isFinite(header) && header > 0) return Math.ceil(header);
+  const data = error.response.data;
+  const sentence = [...(Array.isArray(data?.errors) ? data.errors : []), data?.error, data?.message].filter(Boolean).join(' ');
+  const match = /available in (\d+) second/i.exec(sentence);
+  return match ? Number(match[1]) : fallback;
+};
+
+// A wait in words a customer reads: "15 seconds", "2 minutes", "1 hour" (a code limit per hour can be long).
+export const formatWait = (seconds) => {
+  const total = Math.max(0, Math.ceil(seconds));
+  if (total < 90) return `${total} ${total === 1 ? 'second' : 'seconds'}`;
+  const minutes = Math.ceil(total / 60);
+  if (minutes < 90) return `${minutes} minutes`;
+  const hours = Math.ceil(minutes / 60);
+  return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
 };
 
 export const apiErrorMessage = (error) => {
@@ -21,8 +40,8 @@ export const apiErrorMessage = (error) => {
   const status = error.response.status;
   if (status >= 500) return 'Something went wrong on our side. Please try again in a moment.';
   if (status === 429) {
-    const seconds = secondsToWait(error);
-    return seconds ? `Too many requests. Please try again in ${seconds} seconds.` : 'Too many requests. Please try again in a moment.';
+    const seconds = retryAfterSeconds(error, null);
+    return seconds ? `Too many requests. Please try again in ${formatWait(seconds)}.` : 'Too many requests. Please try again in a moment.';
   }
   if (status === 401) return 'Please sign in to continue.';
 

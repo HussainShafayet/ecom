@@ -30,6 +30,7 @@ export {default as Field, controlClass, describedBy} from './Field';
 export {default as PhoneInput} from './PhoneInput';
 export {default as AuthLayout} from './AuthLayout';
 export {default as OtpInput} from './OtpInput';
+export {default as WaitNotice} from './WaitNotice';
 export {default as ContentLink} from './ContentLink';
 export {default as Toaster} from './Toaster';
 
