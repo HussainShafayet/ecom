@@ -7,3 +7,4 @@ export {default as CategoriesSection} from './CategoriesSection';
 export {default as FlashSale} from './FlashSale';
 export {default as AllProducts} from './AllProducts';
 export {default as Testomonials} from './Testomonials';
+export {default as RecentlyViewed} from './RecentlyViewed';

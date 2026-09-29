@@ -111,136 +111,109 @@ const Products = ({ scrollContainerRef }) => {
             dispatch(setIsSidebarOpen(value));
         }
 
-        return ( <
-            div className = "min-h-screen" >
+        return (
+            <div className="min-h-screen">
 
+                {/* Responsive Breadcrumb Path */}
+                <Breadcrum />
 
-            { /* Responsive Breadcrumb Path */ } <
-            Breadcrum / >
+                {/* Sidebar Overlay */}
+                {isSidebarOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-10 lg:hidden"
+                        onClick={() => handleSidebarOpen(false)}>
+                    </div>
+                )}
 
+                <div className="mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    {/* Sidebar (Sliding from below the Navbar on mobile) */}
+                    <div className={`lg:col-span-1 fixed lg:sticky top-0 left-0 h-full bg-white z-20 transform ${
+                        isSidebarOpen ? 'translate-x-0 mt-[100px]' : '-translate-x-full'
+                      } transition-transform duration-300 lg:translate-x-0`}>
+                        <Sidebar onClose={() => handleSidebarOpen(false)} />
+                    </div>
 
+                    <div className='lg:col-span-4'>
 
+                        {isLoading ? <ProductsPageSkeleton /> : error ? (
+                            <div className="text-center text-red-500 font-semibold py-4">
+                                {error} - Please try again later.
+                            </div>
+                        ) :
+                            <>
+                                {/* Sort and Show Items Options Above Product List */}
+                                <div className="flex flex-wrap justify-between items-center mb-4">
+                                    {/* Mobile Toggle Button for Sidebar */}
+                                    <FaFilter className="block lg:hidden ml-2  z-10 relative"
+                                        onClick={() => handleSidebarOpen(true)}
+                                    />
 
-            { /* Sidebar Overlay */ } {
-                isSidebarOpen && ( <
-                    div className = "fixed inset-0 bg-black bg-opacity-50 z-10 lg:hidden"
-                    onClick = {
-                        () => handleSidebarOpen(false) } >
-                    < /div>
-                )
-            }
+                                    <div>
+                                        <h1 className="hidden md:block text-2xl font-bold capitalize">{lastPathSegment.replace(/-/g, ' ')}</h1>
+                                    </div>
 
-            <
-            div className = "mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8" > { /* Sidebar (Sliding from below the Navbar on mobile) */ } <
-            div className = { `lg:col-span-1 fixed lg:sticky top-0 left-0 h-full bg-white z-20 transform ${
-            isSidebarOpen ? 'translate-x-0 mt-[100px]' : '-translate-x-full'
-          } transition-transform duration-300 lg:translate-x-0` } >
-            <
-            Sidebar onClose = {
-                () => handleSidebarOpen(false) }
-            /> <
-            /div>
-
-
-            <
-            div className = 'lg:col-span-4' >
-
-
-            {
-                isLoading ? < ProductsPageSkeleton / > : error ? ( <
-                        div className = "text-center text-red-500 font-semibold py-4" > { error } - Please
-                        try again later. <
-                        /div>
-                    ) :
-                    <
-                    > { /* Sort and Show Items Options Above Product List */ } <
-                    div className = "flex flex-wrap justify-between items-center mb-4" > { /* Mobile Toggle Button for Sidebar */ } <
-                    FaFilter className = "block lg:hidden ml-2  z-10 relative"
-                onClick = {
-                    () => handleSidebarOpen(true) }
-                />
-
-                <
-                div >
-                <
-                h1 className = "hidden md:block text-2xl font-bold capitalize" > { lastPathSegment.replace(/-/g, ' ') } < /h1> <
-                /div>
-
-                <
-                div className = 'flex space-x-2' > { /* Show Items Dropdown */ } <
-                div className = "flex items-center" >
-                <
-                span className = "hidden sm:block text-gray-600 font-medium mr-2" > Show < /span> <
-                select
-                value = { page_size }
-                onChange = { handleItemsToShowChange }
-                className = "bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500" >
-                <
-                option value = { 30 } > 30 < /option> <
-                option value = { 60 } > 60 < /option> <
-                option value = { 90 } > 90 < /option> <
-                option value = { 120 } > 120 < /option> <
-                /select> <
-                /div> { /* Sort by Amount Dropdown */ } <
-                div className = "sm:flex items-center" >
-                <
-                span className = "hidden sm:block text-gray-600 font-medium mr-2 text-nowrap" > Sort by: < /span> <
-                    select
-                value = { ordering }
-                onChange = { handleSortChange }
-                className = "bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500" >
-                <
-                option value = "" > Default < /option> <
-                option value = "price" > Price: Low to High < /option> <
-                    option value = "-price" > Price: High to Low < /option> <
-                    option value = "discount_price" > Discount Price: Low to High < /option> <
-                    option value = "-discount_price" > Discount Price: High to Low < /option> <
-                    option value = "rating" > Rating: Low to High < /option> <
-                    option value = "-rating" > Rating: High to Low < /option> <
-                    /select> <
-                    /div>
-
-                    <
-                    /div> <
-                    /div>
+                                    <div className='flex space-x-2'>
+                                        {/* Show Items Dropdown */}
+                                        <div className="flex items-center">
+                                            <span className="hidden sm:block text-gray-600 font-medium mr-2">Show</span>
+                                            <select
+                                                value={page_size}
+                                                onChange={handleItemsToShowChange}
+                                                className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500">
+                                                <option value={30}>30</option>
+                                                <option value={60}>60</option>
+                                                <option value={90}>90</option>
+                                                <option value={120}>120</option>
+                                            </select>
+                                        </div>
+                                        {/* Sort by Amount Dropdown */}
+                                        <div className="sm:flex items-center">
+                                            <span className="hidden sm:block text-gray-600 font-medium mr-2 text-nowrap">Sort by: </span>
+                                            <select
+                                                value={ordering}
+                                                onChange={handleSortChange}
+                                                className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500">
+                                                <option value="">Default</option>
+                                                <option value="price">Price: Low to High</option>
+                                                <option value="-price">Price: High to Low</option>
+                                                <option value="discount_price">Discount Price: Low to High</option>
+                                                <option value="-discount_price">Discount Price: High to Low</option>
+                                                <option value="rating">Rating: Low to High</option>
+                                                <option value="-rating">Rating: High to Low</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
 
 
 
-                { /* Product List Section (Right) */ }
+                                {/* Product List Section (Right) */}
 
-                <
-                InfiniteScroll
-                dataLength = { products ? .length }
-                next = { fetchMoreProducts }
-                hasMore = { hasMore }
-                loader = { <
-                    div className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mt-3" > {
-                        [...Array(5)].map((_, index) => ( <
-                            ProductCardSkeleton key = { index }
-                            />
-                        ))
-                    } <
-                    /div>
-                }
-                endMessage = { < div className = "text-center my-4 text-gray-500" > You 've seen every product here.</div>}
-                    scrollableTarget = { scrollContainerRef.current } // Set the scrollable target
-                    >
-                    <
-                    div className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3" > {
-                        products ? .map((product) => ( <
-                            ProductCard key = { product.id }
-                            product = { product }
-                            />
-                        ))
-                    } <
-                    /div> <
-                    /InfiniteScroll> <
-                    />
-                } <
-                /div> <
-                /div> <
-                /div>
-            );
-        };
+                                <InfiniteScroll
+                                    dataLength={products?.length}
+                                    next={fetchMoreProducts}
+                                    hasMore={hasMore}
+                                    loader={
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mt-3">
+                                            {[...Array(5)].map((_, index) => (
+                                                <ProductCardSkeleton key={index} />
+                                            ))}
+                                        </div>
+                                    }
+                                    endMessage={<div className="text-center my-4 text-gray-500">You've seen every product here.</div>}
+                                    scrollableTarget={scrollContainerRef.current} // Set the scrollable target
+                                >
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+                                        {products?.map((product) => (
+                                            <ProductCard key={product.id} product={product} />
+                                        ))}
+                                    </div>
+                                </InfiniteScroll>
+                            </>
+                        }
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
-        export default Products;
+export default Products;

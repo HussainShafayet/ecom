@@ -2,7 +2,7 @@
 
 ## `store.js`
 
-`configureStore` wraps a `combineReducers` root inside a top-level `persistReducer` (`redux-persist`, localStorage). Root persist config: `key: "root"`, `whitelist: ["cart", "wishList"]`.
+`configureStore` wraps a `combineReducers` root inside a top-level `persistReducer` (`redux-persist`, localStorage). Root persist config: `key: "root"`, `whitelist: ["cart", "wishList", "recentlyViewed"]`.
 
 The `auth` reducer gets its **own, separate** nested `persistReducer` (`key: "auth"`, `whitelist: ["isAuthenticated"]`) before being combined into the root — so auth is persisted independently of, and in addition to, the root whitelist (which doesn't list `"auth"` itself). Easy to miss; worth remembering when debugging why auth state does or doesn't survive a refresh.
 
@@ -114,6 +114,10 @@ Thunks via the authenticated client: `handleAddtoWishlist` (`POST /accounts/favo
 **Bug**: all three thunk type strings are prefixed `'cart/...'` (e.g. `'cart/handleAddtoWishlist'`) instead of `'wishList/...'` — a copy-paste leftover from `cartSlice`. Doesn't break functionality (the type strings are still unique) but pollutes the `cart/*` namespace in Redux DevTools/action logs and is misleading when debugging.
 
 Sync reducers `addToWishlist`/`removeFromWishlist`/`clearWishlist` mirror `cartSlice`'s local-mutation pattern. Persisted via the root whitelist (`"wishList"`) — this is what lets a guest build a wishlist locally (via `addToWishlist` on a product card) with no auth needed; `WishList.js` only additionally fetches the server copy when signed in.
+
+## `slice/recentlyViewedSlice.js`
+
+Purely local, no thunks, no backend call. State: `items` (product snapshots, most-recently-viewed first) + `ids` (id lookup map, mirrors `wishlistSlice`'s `favouriteIds`). `recordViewed(product)` moves an already-seen id back to the front instead of duplicating it, then caps the list at `MAX_RECENTLY_VIEWED = 12`; `clearRecentlyViewed()` empties it. `ProductDetails.js` dispatches `recordViewed` in a `useEffect` keyed on `product?.id`, passing the trimmed snapshot `cartSlice`'s `handleClonedProduct(product)` builds — not the full product-detail API object — since this is what gets serialized to localStorage. Rendered by the homepage-only `sections/RecentlyViewed.js` (draws nothing when `items` is empty; no "View All" link, no skeleton — the data is local and synchronous). Persisted via the root whitelist (`"recentlyViewed"`).
 
 ## `slice/product/bestSellingSlice.js`, `flashSaleSlice.js`, `newArrivalSlice.js`
 
