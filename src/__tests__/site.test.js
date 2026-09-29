@@ -1,4 +1,4 @@
-// The shop's identity and the pages an admin writes: the site slice, the announcement bar, the footer (newsletter,
+// The shop's identity and the pages an admin writes: the site slice, the announcement bar, the trust badge strip, the footer (newsletter,
 // social links, footer pages), the contact page, a static page and the FAQ. The backend's answers are the shapes in
 // backend docs/API_CONTRACT.md section 9 (services/siteService is mocked).
 import React from 'react';
@@ -11,7 +11,7 @@ import {Link, MemoryRouter, Navigate, Route, Routes} from 'react-router-dom';
 import siteReducer, {EMPTY_SITE, handleFetchSite} from '../redux/slice/siteSlice';
 import authReducer from '../redux/slice/authSlice';
 import {getFaqs, getSite, getSitePage, sendContactMessage, subscribeToNewsletter} from '../services/siteService';
-import {AnnouncementBar, Footer, Layout} from '../components/layout';
+import {AnnouncementBar, Footer, Layout, TrustBadgeBar} from '../components/layout';
 import {SocialLinks} from '../components/common';
 import Contact from '../pages/others/Contact';
 import StaticPage from '../pages/others/StaticPage';
@@ -42,6 +42,10 @@ const SITE = {
   social_links: [
     {platform: 'facebook', url: 'https://facebook.com/gocart'},
     {platform: 'instagram', url: 'https://instagram.com/gocart'},
+  ],
+  trust_badges: [
+    {icon: 'delivery', title: 'Free delivery', subtitle: 'Orders over 1000'},
+    {icon: 'returns', title: 'Easy returns', subtitle: ''},
   ],
   footer_pages: {
     company: [{slug: 'about-us', title: 'About Us'}],
@@ -95,6 +99,7 @@ describe('the site slice', () => {
     expect(site.contact).toEqual({...EMPTY_SITE.contact, email: 'a@b.co'});
     expect(site.footer_pages).toEqual({company: [], service: [], legal: []});
     expect(site.social_links).toEqual([]);
+    expect(site.trust_badges).toEqual([]);
     expect(site.announcement).toBeNull();
   });
 
@@ -142,6 +147,37 @@ describe('the announcement bar', () => {
     expect(container.textContent).toBe('');
     unmount();
     const second = renderPage(<AnnouncementBar />, {site: {...SITE, announcement: {text: '', link: '/products/flash-sale'}}});
+    await second.ready;
+    expect(second.container.innerHTML).toBe('');
+  });
+});
+
+describe('the trust badge strip', () => {
+  it('draws each badge with its title, and its subtitle when it has one', async () => {
+    const {ready} = renderPage(<TrustBadgeBar />);
+    await ready;
+    expect(await screen.findByText('Free delivery')).toBeTruthy();
+    expect(screen.getByText('Orders over 1000')).toBeTruthy();
+    expect(screen.getByText('Easy returns')).toBeTruthy();
+    expect(screen.getAllByRole('listitem')).toHaveLength(2);
+    expect(screen.getByLabelText('Why shop with us')).toBeTruthy();
+  });
+
+  it('still shows the words of a badge whose icon it does not know', async () => {
+    const {ready, container} = renderPage(<TrustBadgeBar />, {site: {...SITE, trust_badges: [{icon: 'gift_wrap', title: 'Gift wrap', subtitle: ''}]}});
+    await ready;
+    expect(await screen.findByText('Gift wrap')).toBeTruthy();
+    expect(container.querySelector('svg')).toBeNull();
+  });
+
+  it('draws nothing without badges, or when the backend does not send the field', async () => {
+    const {ready, container, unmount} = renderPage(<TrustBadgeBar />, {site: {...SITE, trust_badges: []}});
+    await ready;
+    expect(container.innerHTML).toBe('');
+    unmount();
+    const withoutField = {...SITE};
+    delete withoutField.trust_badges;
+    const second = renderPage(<TrustBadgeBar />, {site: withoutField});
     await second.ready;
     expect(second.container.innerHTML).toBe('');
   });
@@ -235,6 +271,12 @@ describe('the shell (Layout)', () => {
     renderLayout(null);
     await waitFor(() => expect(getSite).toHaveBeenCalled());
     expect(document.title).toBe('Untouched');
+  });
+
+  it('draws the trust badge strip on every page it wraps', async () => {
+    renderLayout();
+    expect(await screen.findByText('Free delivery')).toBeTruthy();
+    expect(screen.getByText('page')).toBeTruthy();
   });
 });
 

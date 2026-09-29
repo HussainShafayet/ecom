@@ -1,7 +1,7 @@
 // src/services/siteService.js
 // The shop's own identity and pages, written by the admin (backend docs/API_CONTRACT.md section 9). All public.
 
-// { site: { name, tagline, logo, announcement, contact, social_links, footer_pages } }
+// { site: { name, tagline, logo, announcement, contact, social_links, trust_badges, footer_pages } }
 export const getSite = async () => {
   const publicApi = (await import('../api/publicApi')).default;
   return await publicApi.get('/site/', { section: "site"});
