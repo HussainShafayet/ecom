@@ -20,10 +20,10 @@ import {
 import {clearCart, selectTotalPrice} from '../redux/slice/cartSlice';
 import {clearSectionError} from '../redux/slice/globalErrorSlice';
 import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
-import {CheckoutErrors, CheckoutSummary, Field, PlaceOrderBar, ShowAddress, controlClass, describedBy} from '../components/checkout';
+import {CheckoutErrors, CheckoutSummary, PlaceOrderBar, ShowAddress} from '../components/checkout';
 import {CheckoutSkeleton} from '../components/common/skeleton';
-import {SectionError} from '../components/common';
-import {FIELD_ORDER, normalizePhone, validateCheckout, validateField} from '../utils/checkoutValidation';
+import {Field, PhoneInput, SectionError, controlClass, describedBy} from '../components/common';
+import {FIELD_ORDER, validateCheckout, validateField} from '../utils/checkoutValidation';
 
 const Step = ({ number, title }) => (
   <h2 className="mb-3 flex items-center text-base font-semibold text-gray-900">
@@ -121,8 +121,7 @@ const Checkout = () => {
   };
 
   // 01712345678, 8801712345678 or a pasted "+880 1712-345678" all become the 10 digits after +880
-  const handlePhoneChange = (e) => {
-    const phone_number = normalizePhone(e.target.value);
+  const handlePhoneChange = (phone_number) => {
     dispatch(updateFormData({ phone_number }));
     if (!validateField('phone_number', phone_number)) clearErrors('phone_number');
   };
@@ -318,16 +317,13 @@ const Checkout = () => {
               </Field>
 
               <Field id="field-phone_number" label="Phone number" error={problem('phone_number')}>
-                <div className={`flex overflow-hidden rounded-lg border bg-white focus-within:ring-2 focus-within:ring-blue-400 ${problem('phone_number') ? 'border-red-500' : 'border-gray-300'}`}>
-                  <span className="flex items-center border-r border-gray-300 bg-gray-50 px-3 text-base text-gray-700">{formData?.phone_code || '+880'}</span>
-                  <input
-                    {...control('phone_number', { type: 'tel', inputMode: 'numeric', autoComplete: 'tel-national', enterKeyHint: 'next', placeholder: '1712345678' })}
-                    value={formData?.phone_number}
-                    onChange={handlePhoneChange}
-                    onBlur={handleBlur}
-                    className="h-12 min-w-0 flex-1 border-none bg-transparent px-3 text-base text-gray-900 focus:outline-none"
-                  />
-                </div>
+                <PhoneInput
+                  id="field-phone_number"
+                  value={formData?.phone_number}
+                  onChange={handlePhoneChange}
+                  onBlur={handleBlur}
+                  error={problem('phone_number')}
+                />
               </Field>
 
               <Field id="field-email" label="Email" optional hint="For your order updates.">

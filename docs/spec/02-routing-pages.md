@@ -17,12 +17,12 @@
 | `/products/flash-sale`, `/products/new-arrival`, `/products/best-selling`, `/products/featured` | the matching homepage section component, rendered with `forRoute={true}` | none | Home-page section components reused directly as full pages. |
 | `/categories` | `Categories` (`forRoute={true}`) | none | Fetches flash-sale/new-arrival/best-selling/featured categories + slider/banner content. |
 | `/order-confirmation/:orderId` | `OrderConfirmation` | none | Shows the order id from the URL; the total/date come from `location.state.order` (what `POST /orders/` answered, handed over by `Checkout`); a signed-in customer's order is also read back (`fetchOrder`, so it survives a refresh) and shows items + address. Guests get a link to `/order-tracking?order_id=…`. |
-| `/signin` | `SignIn` | none | Phone-only login, no password field. |
-| `/signup` | `SignUp` | none | Collects name/phone/optional email, no password. |
+| `/signin` | `SignIn` | none | Phone-only login, no password field (see 04, `pages/SignIn.js`, `SignUp.js`, `VerifyOtp.js`). One field: a fixed `+880` and a box for the 10 digits (`normalizePhone`), `validatePhone`; sends `+880` + digits (the `expiresInMins` leftover is gone). Passes the page they came from **with its query string** and the number to the code page. |
+| `/signup` | `SignUp` | none | Collects name/phone/optional email, no password; same phone box and rules (it was `type=number`); the e-mail is only checked when given. |
 | `/profile` | `Profile` | **yes**, via `ProtectedRoute` | Tabs for overview/address/wishlist (embeds `WishList`). |
 | `/orders` | `Orders` | **yes**, via `ProtectedRoute` | My orders, newest first, 10 per page ("Newer"/"Older"); `fetchOrders` → `GET /orders/`. |
 | `/orders/:orderId` | `OrderDetail` | **yes**, via `ProtectedRoute` | One order: progress (`OrderTimeline`), items, totals, address, payment, and a Cancel button while `can_cancel` (`cancelOrder` → `POST /orders/{id}/cancel/`, after `window.confirm`). |
-| `/verify-otp/:token` | `VerifyOtp` | none (must be reachable pre-auth) | Submits local cart+wishlist snapshot alongside the OTP so guest cart/wishlist merges into the account on verify. |
+| `/verify-otp/:token` | `VerifyOtp` | none (must be reachable pre-auth) | Submits local cart+wishlist snapshot alongside the OTP so guest cart/wishlist merges into the account on verify. The code is six boxes over one input (`OtpInput`), the subtitle names the number it went to with its middle hidden (`maskPhone`), Resend counts down 30 s. |
 | `/order-tracking` | `OrderTracking` (`pages/others`) | none | A guest (or anyone) follows an order with its number + phone (`+880` and 10 digits; `01712345678` is accepted and normalised): `trackOrder` → `GET /orders/track/`. Shows progress + items, never a name/address. Prefilled from `?order_id=`. |
 | `/contact` | `Contact` (`pages/others`) | none | The shop's own details (address, phone, e-mail, opening hours, social links, an OpenStreetMap/Google map iframe) come from `state.site`; a detail the admin left empty is not drawn. The form (name, e-mail, optional phone and subject, message) → `sendContactMessage` → `POST /site/contact/`: the backend's sentences are shown when it refuses, a connection failure says so, the form empties on success, and it cannot be sent twice while a send is on its way. |
 | `/faq` | `FAQPage` (`pages/others`) | none | The admin's questions (`GET /site/faq/`) grouped by category in the admin's order, one answer open at a time, searched by question and answer; empty and failed states are said. |
@@ -39,7 +39,7 @@
 3. A `useEffect` on each page watches for that message and navigates to `/verify-otp/:token`.
 4. `VerifyOtp` reads `token` from the URL param, collects the current local `cartItems` (`state.cart`) and wishlist `items` (`state.wishList`) into `formData.cart`/`formData.favorite`, and submits `{token, otp, cart, favorite}` via the `verifyOtp` thunk — verification also merges the guest's local cart/wishlist into the newly authenticated account server-side. Has a "Resend OTP" link (`resendOtp` thunk).
 5. On `verifyOtp.fulfilled`, `state.auth.isAuthenticated = true`; a `useEffect` then navigates to `location.state?.from` (defaults to `/`) and clears verify state.
-6. `SignIn` captures `from` (`location.state?.from?.pathname`, set by `ProtectedRoute`'s redirect) and passes it through the `/verify-otp/:token` navigate call as `state: { from }`, so `VerifyOtp`'s `location.state?.from` picks it up and step 5's navigate sends the customer back to the page they were on before signing in, not always `/`.
+6. `SignIn` captures `from` (`location.state?.from` — `pathname` **plus `search`**, set by `ProtectedRoute`'s redirect) and passes it through the `/verify-otp/:token` navigate call as `state: { from }`, so `VerifyOtp`'s `location.state?.from` picks it up and step 5's navigate sends the customer back to the page they were on before signing in, not always `/`.
 
 ## Checkout / order flow
 
@@ -55,5 +55,5 @@
 
 - **Guest-vs-auth inconsistency**: `/wishlist`, `/cart`, `/checkout` aren't wrapped in `ProtectedRoute`; each branches on `isAuthenticated` internally instead (by design — see the route table above for `/wishlist`'s guest behavior).
 - **No password field anywhere** in SignIn/SignUp — this is OTP/phone-based auth by design, confirm with the user before treating it as an oversight.
-- Only Cash-on-Delivery is implemented in Checkout despite credit-card iconography suggesting more was planned; the Facebook/Google buttons on SignIn are decorative (no `onClick`) — both are known gaps, not yet decided how to resolve.
+- Only Cash-on-Delivery is implemented in Checkout despite credit-card iconography suggesting more was planned; the Facebook/Google buttons that were on SignIn/SignUp and did nothing are gone — the other known gap is not yet decided how to resolve.
 - Several commented-out sections throughout (Footer newsletter block, Testimonials on Home, social icons) indicate features that were built but disabled, not necessarily bugs.

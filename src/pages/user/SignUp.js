@@ -1,230 +1,129 @@
 import React, { useEffect, useState } from "react";
-import {
-  FaFacebook,
-  FaGoogle,
-  FaEnvelope,
-  FaLock,
-  FaUser,
-  FaEye,
-  FaEyeSlash,
-  FaPhone,
-  FaCheck,
-} from "react-icons/fa";
 import {useDispatch, useSelector} from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { FaUserPlus } from "react-icons/fa";
 import {clearSignupState, signUpUser} from "../../redux/slice/authSlice";
-import {ErrorDisplay, Loader, SuccessMessage} from '../../components/common';
+import {AuthLayout, ErrorDisplay, Field, PhoneInput, SuccessMessage, controlClass, describedBy} from '../../components/common';
+import {PHONE_PREFIX, validatePhone} from '../../utils/phone';
 
+// What the form asks for and what is wrong with it, one sentence each (the phone: +880 and exactly 10 digits, the backend's rule)
+const validate = ({ name, phone, email }) => {
+  const problems = {};
+  if (!name.trim()) problems.name = 'Enter your full name';
+  const phoneProblem = validatePhone(phone);
+  if (phoneProblem) problems.phone = phoneProblem;
+  if (email.trim() && !/^\S+@\S+\.\S+$/.test(email.trim())) problems.email = 'Enter a valid email address, or leave it empty';
+  return problems;
+};
+const ORDER = ['name', 'phone', 'email'];
+
+// Phone first: name, phone (fixed +880, cleaned as you type) and an optional e-mail, 48 px controls with labels above them, the
+// button under them. The code goes to the phone and is entered on the next page.
 const SignUp = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const {signupLoading, signupMessage, signupError, token, isAuthenticated } = useSelector((state) => state.auth);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    country_code: "+880",
-    email: "",
-  });
-  const [errors, setErrors] = useState({});
+  const [formData, setFormData] = useState({ name: "", phone: "", email: "" });
+  const [touched, setTouched] = useState({});
 
   useEffect(() => {
     isAuthenticated && navigate('/');
 
     if (signupMessage) {
-      // Redirect to the sign-in page after a successful signup
-      navigate(`/verify-otp/${token}`);
-      // Optionally clear the signup state
+      // On to the code page (with the number it went to), and forget this attempt
+      navigate(`/verify-otp/${token}`, { state: { phone: formData.phone } });
       dispatch(clearSignupState());
     }
-   
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signupMessage, dispatch, navigate, isAuthenticated]);
 
-  const validateField = (name, value) => {
-    let error = "";
-
-    switch (name) {
-      case "name":
-        if (!value.trim()) error = "Full name is required";
-        break;
-
-      case "phone":
-        if (!value.trim()) {
-          error = "Phone number is required";
-        } else if (!/^\+?(\d{10})$/.test(value)) {
-          error = "Enter a valid phone number";
-        }
-        break;
-
-      default:
-        break;
-    }
-
-    return error;
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    // Update the form data
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Validate the field and update the errors state
-    const error = validateField(name, value);
-    setErrors((prev) => ({
-      ...prev,
-      [name]: error,
-    }));
-  };
-
-  const validateForm = () => {
-    const validationErrors = {};
-
-    Object.keys(formData).forEach((field) => {
-      const error = validateField(field, formData[field]);
-      if (error) {
-        validationErrors[field] = error;
-      }
-    });
-
-    return validationErrors;
-  };
+  const problems = validate(formData);
+  const problem = (field) => (touched[field] && problems[field]) || '';
+  const leave = (field) => () => setTouched((prev) => ({ ...prev, [field]: true }));
+  const change = (field) => (e) => setFormData((prev) => ({ ...prev, [field]: e.target.value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setTouched({ name: true, phone: true, email: true });
 
-    const validationErrors = validateForm();
-
-    if (Object.keys(validationErrors).length === 0) {
-      const regFormData = {
-        "phone_number": formData.country_code+formData.phone,
-        "email": formData.email,
-        "name":  formData.name,
-      }
-      dispatch(signUpUser(regFormData));
-    } else {
-      setErrors(validationErrors);
+    const first = ORDER.find((field) => problems[field]);
+    if (first) {
+      document.getElementById(`signup-${first}`)?.focus();
+      return;
     }
+    dispatch(signUpUser({
+      "phone_number": PHONE_PREFIX + formData.phone,
+      "email": formData.email.trim(),
+      "name": formData.name.trim(),
+    }));
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen  p-6 relative overflow-hidden">
-      <div className="relative w-full max-w-lg p-8 bg-white bg-opacity-80 rounded-2xl shadow-lg backdrop-blur-lg">
-        <div className="flex flex-wrap justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-center text-blue-700">
-            Create Account
-          </h2>
-          <Link
-            to="/signin"
-            className="text-sm text-gray-500 underline hover:text-blue-600 transition"
-          >
-            Already a member?
-          </Link>
-        </div>
+    <AuthLayout
+      title="Create your account"
+      subtitle="Just your name and phone. No password, ever."
+      icon={FaUserPlus}
+      step={1}
+      footer={<>Already a member? <Link to="/signin" className="font-semibold text-blue-700 hover:underline">Sign in</Link></>}
+    >
+      <SuccessMessage message={signupMessage} />
+      <ErrorDisplay errors={signupError} />
 
-        <SuccessMessage message={signupMessage} />
-        <ErrorDisplay errors={signupError} />
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        <Field id="signup-name" label="Full name" error={problem('name')}>
+          <input
+            id="signup-name"
+            name="name"
+            type="text"
+            autoComplete="name"
+            enterKeyHint="next"
+            value={formData.name}
+            onChange={change('name')}
+            onBlur={leave('name')}
+            aria-invalid={Boolean(problem('name'))}
+            aria-describedby={describedBy('signup-name', problem('name'))}
+            className={controlClass(problem('name'))}
+          />
+        </Field>
 
-        <form onSubmit={handleSubmit}>
-          {/* Full Name */}
-          <div className="mb-4">
-            <label htmlFor="name" className="block text-gray-700 font-medium mb-1">
-              Full Name
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-              <FaUser className="text-gray-400 m-3" title="Full Name" />
-              <input
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Enter your full name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
-              />
-            </div>
-            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-          </div>
+        <Field id="signup-phone" label="Phone number" error={problem('phone')}>
+          <PhoneInput
+            id="signup-phone"
+            name="phone"
+            value={formData.phone}
+            onChange={(phone) => setFormData((prev) => ({ ...prev, phone }))}
+            onBlur={leave('phone')}
+            error={problem('phone')}
+          />
+        </Field>
 
-          {/* Phone Number */}
-          <div className="mb-4">
-            <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">
-              Phone Number
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-              <select
-                id="country-code"
-                className="bg-gray-100 text-gray-700 font-medium px-3 py-2 border-r border-gray-300 focus:outline-none rounded-l-md"
-                defaultValue="+880"
-              >
-                <option value="+880">+880</option>
-              </select>
-              <input
-                type="number"
-                id="phone"
-                name="phone"
-                placeholder="Enter your phone number"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
-              />
-            </div>
-            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
-          </div>
+        <Field id="signup-email" label="Email" optional hint="For your order updates." error={problem('email')}>
+          <input
+            id="signup-email"
+            name="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            enterKeyHint="go"
+            value={formData.email}
+            onChange={change('email')}
+            onBlur={leave('email')}
+            aria-invalid={Boolean(problem('email'))}
+            aria-describedby={describedBy('signup-email', problem('email'))}
+            className={controlClass(problem('email'))}
+          />
+        </Field>
 
-          {/* Email */}
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 font-medium mb-1">
-              Email Address (Optional)
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70">
-              <FaEnvelope className="text-gray-400 m-3" title="Email" />
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border-none focus:outline-none rounded-r-md"
-              />
-            </div>
-          </div>
-
-
-          {/* Sign Up Button */}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-full shadow-lg transition duration-300 transform hover:scale-105"
-            disabled={signupLoading}
-          >
-            {signupLoading ? <Loader message="Signing Up" /> : 
-            'Sign Up'
-            }
-          </button>
-        </form>
-
-        {/* Divider */}
-        <div className="flex items-center my-6">
-          <hr className="w-full border-gray-300" />
-          <span className="px-4 text-center text-gray-500 text-sm">or sign up with</span>
-          <hr className="w-full border-gray-300" />
-        </div>
-
-        {/* Social Media Sign-Up */}
-        <div className="flex justify-center space-x-4">
-          <button className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition duration-200 shadow-md">
-            <FaFacebook className="text-white text-lg" />
-          </button>
-          <button className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition duration-200 shadow-md">
-            <FaGoogle className="text-white text-lg" />
-          </button>
-        </div>
-      </div>
-    </div>
+        <button
+          type="submit"
+          disabled={signupLoading}
+          className="flex h-12 w-full items-center justify-center rounded-lg bg-blue-600 text-base font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-wait disabled:opacity-70"
+        >
+          {signupLoading ? 'Creating account…' : 'Sign Up'}
+        </button>
+      </form>
+    </AuthLayout>
   );
 };
 
