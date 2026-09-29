@@ -2,7 +2,7 @@
 
 ## App shell
 
-`BrowserRouter` → `GlobalErrorHandler` → `ScrollToTop` → `Layout` (wraps every route) → `Routes`. On mount, `App.js` dispatches `restoreSession()` (`authActions`) to rehydrate auth from cookies (a persisted signed-in flag with no refresh cookie behind it becomes a guest, quietly). `Layout` (`src/components/layout/Layout.js`) renders `NavBar` + `<main>{children}</main>` + `BottomNav` + `Footer` + `BackToTop` around **all** routes uniformly — there is no separate "auth layout" without nav/footer chrome.
+`BrowserRouter` → `ScrollToTop` → `Layout` (wraps every route) → `Routes`. On mount, `App.js` dispatches `restoreSession()` (`authActions`) to rehydrate auth from cookies (a persisted signed-in flag with no refresh cookie behind it becomes a guest, quietly). `Layout` (`src/components/layout/Layout.js`) renders `NavBar` + `<main>{children}</main>` + `BottomNav` + `Footer` + `BackToTop` around **all** routes uniformly — there is no separate "auth layout" without nav/footer chrome.
 
 ## Route table
 

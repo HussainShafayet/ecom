@@ -10,6 +10,7 @@ import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 import {ProductDetailsSkeleton} from '../components/common/skeleton';
 import defaultImage from '../assets/images/default_product_image.jpg';
+import {SectionError} from '../components/common';
 
 const ProductDetails = () => {
   const { slug } = useParams();
@@ -255,9 +256,7 @@ useEffect(() => {
     <>
      {isLoading ? <ProductDetailsSkeleton /> :
       error ? (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {error} - Please try again later.
-      </div>
+      <SectionError message={error} />
     ) :
     <div className="container mx-auto  my-6">
     {Array.isArray(cartError) ? 

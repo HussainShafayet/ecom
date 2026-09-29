@@ -24,6 +24,7 @@ import {CheckoutErrors, ShowAddress} from '../components/checkout';
 import debounce from 'lodash.debounce'; // Import lodash debounce
 import {CheckoutSkeleton} from '../components/common/skeleton';
 import {Loader} from '../components/common';
+import {SectionError} from '../components/common';
 
 
  
@@ -338,9 +339,7 @@ const Checkout = () => {
 
 
   if (contentError) {
-    return <div className="text-center text-red-500 font-semibold py-4">
-      {contentError} - Please try again later.
-    </div>;
+    return <SectionError message={contentError} />;
   }
 
   return (
@@ -349,9 +348,7 @@ const Checkout = () => {
       <CheckoutSkeleton />
      :
       checkoutContentError ? (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {checkoutContentError} - Please try again later.
-      </div>
+      <SectionError message={checkoutContentError} />
     ) :
     <div className="mx-auto px-1 lg:flex  mb-3 gap-3">
      {/* Right Section: Order Summary */}
@@ -361,9 +358,7 @@ const Checkout = () => {
           <OrderSummarySkeleton />
           :
             cartError ? (
-            <div className="text-center text-red-500 font-semibold py-4">
-              {cartError} - Please try again later.
-            </div>
+            <SectionError message={cartError} />
           ) :
           <div className="bg-gray-100 rounded-lg shadow-md sticky top-20">
             <div className="max-h-[60vh] overflow-y-auto scrollbar-custom p-4 sm:p-2">

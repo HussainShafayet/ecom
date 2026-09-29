@@ -7,6 +7,7 @@ import { fetchAllProducts, setIsSidebarOpen } from '../redux/slice/productSlice'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { FaArrowDown, FaArrowUp, FaFilter, FaFlag } from 'react-icons/fa';
 import { ProductCardSkeleton, ProductsPageSkeleton } from '../components/common/skeleton';
+import {SectionError} from '../components/common';
 
 const Products = ({ scrollContainerRef }) => {
         //
@@ -135,9 +136,7 @@ const Products = ({ scrollContainerRef }) => {
                     <div className='lg:col-span-4'>
 
                         {isLoading ? <ProductsPageSkeleton /> : error ? (
-                            <div className="text-center text-red-500 font-semibold py-4">
-                                {error} - Please try again later.
-                            </div>
+                            <SectionError message={error} />
                         ) :
                             <>
                                 {/* Sort and Show Items Options Above Product List */}

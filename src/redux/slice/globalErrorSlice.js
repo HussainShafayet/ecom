@@ -1,16 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+// Errors of one part of the page, by the `section` a request was made with (e.g. { "flash-sale": "..." }). The part reads
+// its own and shows it where it would have been (`SectionError`); nothing here ever replaces the whole page.
 const globalErrorSlice = createSlice({
   name: "globalError",
   initialState: {
-    globalError: null, // For app-wide critical errors
-    sectionErrors: {}, // For section-specific errors (e.g., { "flash-sale": "API failed" })
+    sectionErrors: {},
   },
   reducers: {
-    setGlobalError: (state, action) => {
-      state.globalError = action.payload;
-      state.sectionErrors = {}; // Clear section errors if global error occurs
-    },
     setSectionError: (state, action) => {
       const { section, error } = action.payload;
       state.sectionErrors[section] = error;
@@ -19,11 +16,10 @@ const globalErrorSlice = createSlice({
       delete state.sectionErrors[action.payload];
     },
     clearAllErrors: (state) => {
-      state.globalError = null;
       state.sectionErrors = {};
     },
   },
 });
 
-export const { setGlobalError, setSectionError, clearSectionError, clearAllErrors } = globalErrorSlice.actions;
+export const { setSectionError, clearSectionError, clearAllErrors } = globalErrorSlice.actions;
 export default globalErrorSlice.reducer;

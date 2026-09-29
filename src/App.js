@@ -6,7 +6,7 @@ import { Home, Products, ProductDetails, Cart, NotFound, Checkout, Categories, O
 import {useDispatch} from 'react-redux';
 import {restoreSession} from './redux/slice/authActions';
 import {useEffect, useRef} from 'react';
-import {GlobalErrorHandler, ProtectedRoute, ScrollToTop} from './components/common';
+import {ProtectedRoute, ScrollToTop} from './components/common';
 import {Contact, FAQPage, OrderTracking, StaticPage} from './pages/others';
 import {BestSelling, FeaturedProducts, FlashSale, NewArrival} from './components/sections';
 
@@ -21,7 +21,6 @@ function App() {
   
   return (
       <Router>
-        <GlobalErrorHandler>
           <ScrollToTop scrollContainerRef={scrollContainerRef} />{/* Add ScrollToTop here */}
           <Layout scrollContainerRef={scrollContainerRef}> {/* Directly wrap Layout around Routes */}
             <Routes>
@@ -71,7 +70,6 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
-        </GlobalErrorHandler>
       </Router>
   );
 }

@@ -6,7 +6,7 @@
 
 The `auth` reducer gets its **own, separate** nested `persistReducer` (`key: "auth"`, `whitelist: ["isAuthenticated"]`) before being combined into the root — so auth is persisted independently of, and in addition to, the root whitelist (which doesn't list `"auth"` itself). Easy to miss; worth remembering when debugging why auth state does or doesn't survive a refresh.
 
-All other slices (`product`, `new_arrival`, `best_selling`, `flash_sale`, `category`, `checkout`, `content`, `profile`, `review`, `order`, `globalError`) are **not** persisted.
+All other slices (`product`, `new_arrival`, `best_selling`, `flash_sale`, `category`, `checkout`, `content`, `profile`, `review`, `order`, `globalError`, `toast`) are **not** persisted.
 
 Middleware: default RTK middleware with `serializableCheck: false`. `persistor` is exported via `persistStore(store)` and wired in `src/index.js` with `<Provider>` + `<PersistGate loading={null}>`.
 
@@ -75,7 +75,11 @@ CMS-style content per page (home/new-arrival/flash-sale/best-selling/featured/sh
 
 ## `slice/globalErrorSlice.js`
 
-Simple UI-error bus: `globalError` (string|null) + `sectionErrors` (map). Reducers: `setGlobalError` (also wipes `sectionErrors`), `setSectionError`, `clearSectionError`, `clearAllErrors`. No thunks. Not persisted. See [03-api-integration.md](03-api-integration.md) for how this connects to the axios interceptors.
+The errors of the parts of a page, by the `section` a request was made with: `sectionErrors` (map). Reducers: `setSectionError`, `clearSectionError`, `clearAllErrors`. No thunks. Not persisted. There is no page-wide error any more (`globalError`/`setGlobalError` and the `GlobalErrorHandler` screen are gone): a part reads its own entry and draws `common/SectionError`. The interceptors set an entry when a request of that section fails and clear it when one succeeds. See [03-api-integration.md](03-api-integration.md).
+
+## `slice/toastSlice.js`
+
+Short messages over the page: `items` `[{id, message, type}]` (`type` `error`|`success`|`info`). `showToast` (an identical message+type already showing is not added twice: five failed requests with one cause are one toast), `dismissToast`, and the thunk `pushToast(message, type = 'info', ms = 6000)` which shows one and removes it after `ms`. `selectToasts` tolerates a store without this slice. Drawn by `common/Toaster` (in `Layout`). Used by the interceptors for a failed request that names no `section`, and by `OfflineBanner` ("You're back online."). Not persisted.
 
 ## `slice/productSlice.js`
 

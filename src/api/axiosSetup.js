@@ -3,8 +3,9 @@ import axios from "axios";
 import * as Sentry from "@sentry/react";
 import store from "../redux/store";
 import { endSession } from "../redux/slice/authActions";
-import { setGlobalError, setSectionError } from "../redux/slice/globalErrorSlice";
 import publicApi from "./publicApi";
+import { canRetry, retryRequest } from "./retry";
+import { clearFailure, reportFailure } from "./report";
 import { refreshSession, SessionError } from "./session";
 
 const api = axios.create({
@@ -34,15 +35,20 @@ const asGuest = (request) => {
 };
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    clearFailure(store, response.config?.section); // this part of the page works again: forget its old error
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
-    const section = originalRequest?.section; // Get section from config
+
+    // A read that failed on the connection or a briefly unavailable server is tried again (twice) before anyone hears of it
+    if (canRetry(error)) return retryRequest(api, error);
 
     if (!error.response) {
-      // Network Error: Treat as global
-      Sentry.captureException(error);
-      store.dispatch(setGlobalError("Network error: Unable to connect to the server"));
+      // No answer at all. Offline is the customer's connection, not a bug worth a Sentry issue.
+      if (navigator.onLine !== false) Sentry.captureException(error);
+      reportFailure(store, error);
       return Promise.reject(error);
     }
 
@@ -70,48 +76,17 @@ api.interceptors.response.use(
           // Requests for pages everyone may see (the shop, a product) carry on as a guest instead of failing.
           store.dispatch(endSession());
           if (originalRequest.optionalAuth) return asGuest(originalRequest);
-        } else if (section) {
+        } else {
           // The renewal itself did not get through (connection, 5xx): says nothing about the session, which stays.
-          store.dispatch(setSectionError({ section, error: "Could not reach the server. Please try again." }));
+          reportFailure(store, error, "Could not reach the server. Please try again.");
         }
         return Promise.reject(error);
       }
     }
 
-    // Handle other errors
-    const errorMessage = getErrorMessage(status);
-    if (section) {
-      // Section-specific error
-      store.dispatch(setSectionError({ section, error: errorMessage }));
-    } else {
-      // No section specified: Treat as global
-      store.dispatch(setGlobalError(errorMessage));
-    }
-
+    reportFailure(store, error);
     return Promise.reject(error);
   }
 );
-
-function getErrorMessage(status) {
-  switch (status) {
-    case 400:
-      return "Invalid request. Please check your input.";
-    case 401:
-      return "Please sign in to continue.";
-    case 403:
-      return "You do not have permission to access this resource.";
-    case 404:
-      return "Data not found";
-    case 429:
-      return "Too many requests. Please try again later.";
-    case 500:
-    case 502:
-    case 503:
-    case 504:
-      return "Server error: Please try again later";
-    default:
-      return "An unexpected error occurred. Please try again.";
-  }
-}
 
 export default api;

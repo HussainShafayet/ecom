@@ -7,6 +7,8 @@ import {Link} from 'react-router-dom';
 import blurImage from '../../assets/images/blur.jpg';
 import {HeroSectionSkeleton} from '../common/skeleton';
 import defaultImage from '../../assets/images/default_product_image.jpg';
+import {SectionError} from '../common';
+import {clearSectionError} from '../../redux/slice/globalErrorSlice';
 
 const HeroSection = () => {
   
@@ -23,10 +25,14 @@ const HeroSection = () => {
     
    }, [dispatch]);
 
+   // "Try again" on the error card: forget the error and ask for this part again
+   const retry = () => {
+     ['home-content'].forEach((section) => dispatch(clearSectionError(section)));
+     dispatch(fetchHomeContent());
+   };
+
    if (sectionError) {
-    return <div className="text-center text-red-500 font-semibold py-4">
-      {sectionError} - Please try again later.
-    </div>;
+    return <SectionError message={sectionError} onRetry={retry} />;
   }
 
 
@@ -57,9 +63,7 @@ const HeroSection = () => {
     <>
     {isLoading ? <HeroSectionSkeleton /> :
       error ? (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {error} - Please try again later.
-      </div>
+      <SectionError message={error} onRetry={retry} />
     ) :
 
     <div className="flex flex-col lg:flex-row gap-4 min-h-[30vh] lg:max-h-[40vh]">

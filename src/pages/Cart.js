@@ -8,6 +8,7 @@ import {ErrorDisplay, Loader, ProductCard} from '../components/common';
 import {minimumOf, minimumOrderProblems} from '../utils/minimumOrder';
 import debounce from 'lodash.debounce'; // Import lodash debounce
 import {CartSkeleton, SectionSkeleton} from '../components/common/skeleton';
+import {SectionError} from '../components/common';
 
 const Cart = () => {
   const totalPrice = useSelector(selectTotalPrice);
@@ -61,9 +62,7 @@ const Cart = () => {
  
  
   if (fetchCartError) {
-    return <div className="text-center text-red-500 font-semibold py-4">
-      {fetchCartError} - Please try again later.
-    </div>;
+    return <SectionError message={fetchCartError} />;
   }
   const handleRemoveItem = (item) =>{
     isAuthenticated && dispatch(handleRemovetoCart({product_id: item?.id, variant_id: item?.variant_id}));
@@ -111,16 +110,12 @@ const Cart = () => {
       <div className="mx-auto">
       {cartFetchLoading ? <CartSkeleton /> :
         cartFetchError ? (
-        <div className="text-center text-red-500 font-semibold py-4">
-          {cartFetchError} - Please try again later.
-        </div>
+        <SectionError message={cartFetchError} />
       ) :
       <>
           <ErrorDisplay errors={quantityError} />
           {cartRemoveError &&
-            <div className="text-center text-red-500 font-semibold py-4">
-              {cartRemoveError} - Please try again later.
-            </div>
+            <p role="alert" className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700">{cartRemoveError}</p>
           }
           {cartItems?.length === 0 ? (
             <div className="text-center">
@@ -345,9 +340,7 @@ const Cart = () => {
           {/* Related Products Section */}
           {isLoading ? <SectionSkeleton /> :
             error ? (
-            <div className="text-center text-red-500 font-semibold py-4">
-              {error} - Please try again later.
-            </div>
+            <SectionError message={error} />
           ) :
           <>
           {cartItems?.length  >0 && 

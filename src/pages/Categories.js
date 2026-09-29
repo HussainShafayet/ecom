@@ -6,6 +6,7 @@ import {fetchFlashSaleCategories, fetchNewArrivalCategories, fetchBestSellingCat
 import {fetchCategoriesContent} from '../redux/slice/contentSlice';
 import blurImage from '../assets/images/blur.jpg';
 import {HeroSectionSkeleton, SectionSkeleton} from '../components/common/skeleton';
+import {SectionError} from '../components/common';
 
 const Categories = () => {
     const { flash_sale_loading,new_arrival_loading,best_selling_loading,featured_loading,flash_sale, new_arrival, best_selling,featured, flash_sale_error,new_arrival_error,best_selling_error,featured_error } = useSelector((state) => state.category);
@@ -46,9 +47,7 @@ const Categories = () => {
 
         {isLoading ? <HeroSectionSkeleton /> :
         error ? (
-        <div className="text-center text-red-500 font-semibold py-4">
-            {error} - Please try again later.
-        </div>
+        <SectionError message={error} />
         ) :
         
         <div className="flex flex-col lg:flex-row gap-4 min-h-[30vh] lg:max-h-[40vh]">
@@ -106,9 +105,7 @@ const Categories = () => {
         {/*flash sale*/}
          {flash_sale_loading ? <SectionSkeleton /> :
               flash_sale_error ? (
-              <div className="text-center text-red-500 font-semibold py-4">
-                {flash_sale_error} - Please try again later.
-              </div>
+              <SectionError message={flash_sale_error} />
             ) :
             <div className="container mx-auto my-8">
                 <h2 className="text-3xl font-bold">Flash Sale Categories</h2>
@@ -159,9 +156,7 @@ const Categories = () => {
         {/*New Arrival*/}
          {new_arrival_loading ? <HeroSectionSkeleton /> :
               new_arrival_error ? (
-              <div className="text-center text-red-500 font-semibold py-4">
-                {new_arrival_error} - Please try again later.
-              </div>
+              <SectionError message={new_arrival_error} />
             ) :
         <div className="container mx-auto my-8">
             <h2 className="text-3xl font-bold">New Arrival Categories</h2>
@@ -212,9 +207,7 @@ const Categories = () => {
         {/*Best Selling*/}
          {best_selling_loading ? <HeroSectionSkeleton /> :
               best_selling_error ? (
-              <div className="text-center text-red-500 font-semibold py-4">
-                {best_selling_error} - Please try again later.
-              </div>
+              <SectionError message={best_selling_error} />
             ) :
         <div className="container mx-auto my-8">
             <h2 className="text-3xl font-bold">Best Selling Categories</h2>
@@ -265,9 +258,7 @@ const Categories = () => {
         {/*Featrued*/}
          {featured_loading ? <SectionSkeleton /> :
               featured_error ? (
-              <div className="text-center text-red-500 font-semibold py-4">
-                {featured_error} - Please try again later.
-              </div>
+              <SectionError message={featured_error} />
             ) :
             <div className="container mx-auto my-8">
                 <h2 className="text-3xl font-bold">Best Featured Categories</h2>

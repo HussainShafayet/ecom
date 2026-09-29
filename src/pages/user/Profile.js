@@ -8,6 +8,7 @@ import { WishList } from '../user';
 import {dhakaCityData, districtsData, divisionsData, upazilasData} from '../../data/location';
 import {ProfileSkeleton} from '../../components/common/skeleton';
 import {debounce} from 'lodash';
+import {SectionError} from '../../components/common';
 
 const Profile = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
@@ -238,9 +239,7 @@ const Profile = () => {
     <>
     {isLoading ? <ProfileSkeleton /> :
       error ? (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {error} - Please try again later.
-      </div>
+      <SectionError message={error} />
     ) :
       <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-4 md:p-8">
         <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
@@ -596,9 +595,7 @@ const Profile = () => {
               
                :
                 addressError ? (
-                <div className="text-center text-red-500 font-semibold py-4">
-                  {addressError} - Please try again later.
-                </div>
+                <SectionError message={addressError} />
               ) :
                 <>
                 <div className="flex justify-between items-center mb-4">

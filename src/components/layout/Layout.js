@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { NavBar, Footer, TrustBadgeBar, SessionExpiredBanner } from '../layout';
+import { NavBar, Footer, TrustBadgeBar, SessionExpiredBanner, OfflineBanner } from '../layout';
+import Toaster from '../common/Toaster';
 import BackToTop from '../common/BackToTop';
 import {BottomNav} from '../common';
 import { handleFetchSite, selectSite } from '../../redux/slice/siteSlice';
@@ -22,6 +23,7 @@ const Layout = ({ children, scrollContainerRef}) => {
   return (
     <div ref={scrollContainerRef} className="flex flex-col h-screen overflow-y-auto scrollbar-custom">
       <NavBar />
+      <OfflineBanner />
       <SessionExpiredBanner />
       <TrustBadgeBar />
       <div className="flex-grow">
@@ -30,6 +32,7 @@ const Layout = ({ children, scrollContainerRef}) => {
         </main>
       </div>
       <BottomNav />
+      <Toaster />
       <Footer className="shadow-lg" />
       
       {/* Pass the scrollable container ref to BackToTop */}

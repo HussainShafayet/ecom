@@ -5,6 +5,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {fetchShopContent} from "../../../redux/slice/contentSlice";
 import {useSearchParams} from "react-router-dom";
 import {SidebarSkeleton} from "../skeleton";
+import SectionError from '../SectionError';
 
 
 // Sidebar Component
@@ -151,9 +152,7 @@ const Sidebar = ({ onClose }) => {
     <>
      {isLoading ? <SidebarSkeleton /> :
       error ? (
-      <div className="text-center text-red-500 font-semibold py-4">
-        {error} - Please try again later.
-      </div>
+      <SectionError message={error} />
     ) :
     <div className="bg-gray-100 p-4 rounded-lg space-y-4 max-h-svh overflow-y-auto lg:sticky top-[100px]">
       {/* Close Icon for Mobile */}

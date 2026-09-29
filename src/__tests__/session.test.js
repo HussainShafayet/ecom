@@ -19,6 +19,7 @@ import authReducer, {dismissSessionNotice, sessionEnded, sessionRefreshed} from 
 import {restoreSession} from '../redux/slice/authActions';
 import {addToCart, clearCart} from '../redux/slice/cartSlice';
 import {clearAllErrors} from '../redux/slice/globalErrorSlice';
+import {dismissToast} from '../redux/slice/toastSlice';
 import {SessionExpiredBanner} from '../components/layout';
 
 const ITEM = {id: 1, name: 'Kettle', quantity: 2, variant_id: 3, base_price: 10, discount_price: 10};
@@ -45,6 +46,7 @@ beforeEach(() => {
   store.dispatch(dismissSessionNotice()); // ...and nothing said about it
   store.dispatch(clearCart());
   store.dispatch(clearAllErrors());
+  state().toast.items.forEach(({id}) => store.dispatch(dismissToast(id)));
 });
 
 afterEach(() => {
@@ -96,7 +98,7 @@ describe('When the session really is over', () => {
     expect(Cookies.get('refresh_token')).toBeUndefined();
     expect(Cookies.get('access_token')).toBeUndefined();
     expect(state().cart.cartItems).toEqual([]); // the account's cart is not left behind to be added to it again
-    expect(state().globalError.globalError).toBeNull(); // no page-wide error screen
+    expect(state().toast.items).toEqual([]); // nothing over the page: the banner and the sign-in page say it
     expect(state().globalError.sectionErrors).toEqual({});
   };
 
@@ -164,7 +166,7 @@ describe('When the renewal itself does not get through', () => {
     expect(state().auth.isAuthenticated).toBe(true);
     expect(state().auth.sessionExpired).toBe(false);
     expect(Cookies.get('refresh_token')).toBe('r1'); // still there for the next try
-    expect(state().globalError.globalError).toBeNull();
+    expect(state().toast.items).toEqual([]); // told to the part of the page that asked, not as a toast
     expect(state().globalError.sectionErrors['fetch-cart']).toBe('Could not reach the server. Please try again.');
   });
 });
