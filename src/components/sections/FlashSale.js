@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {shallowEqual, useDispatch, useSelector} from 'react-redux';
-import {ProductCard, Slider} from '../common';
+import {ProductSection, Slider} from '../common';
 import {Link} from 'react-router-dom';
 import {fetchFlashSaleContent} from '../../redux/slice/contentSlice';
 import blurImage from '../../assets/images/blur.jpg';
@@ -117,59 +117,16 @@ const FlashSale = ({forRoute}) => {
         }
        
          
-          {products?.length !== 0 &&
-          <div className='my-5'>
-            <h2 className="text-3xl font-bold">Flash Sale</h2>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
-              <span className="text-sm md:text-base text-gray-600">
-                Discover the latest trends with our Flash Sale Products.
-              </span>
-              {!forRoute && 
-              <Link
-                to="/products/flash-sale"
-                className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
-                target='_blank'
-              >
-                View All
-              </Link>
-              }
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              {products?.map((product) => (
-                <ProductCard key={product?.id} product={product} />
-              ))}
-            </div>
-          </div>
-          }
-        
-        {forRoute && 
-          <>
-          {products?.length !== 0  &&
-            <div className='my-5'>
-              <h2 className="text-3xl font-bold">Recomendent Products</h2>
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
-                <span className="text-sm md:text-base text-gray-600">
-                  Discover the latest trends with our Flash Sale Products.
-                </span>
-                {!forRoute && 
-                <Link
-                  to="/products/flash-sale"
-                  className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
-                >
-                  View All
-                </Link>
-                }
-              </div>
-              
+        <ProductSection
+          title="Flash Sale"
+          subtitle="Limited-time deals on popular products."
+          to={forRoute ? undefined : '/products/flash-sale'}
+          products={products}
+          carousel={!forRoute}
+        />
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                {products?.map((product) => (
-                  <ProductCard key={product?.id} product={product} />
-                ))}
-              </div>
-            </div>
-          }
-          </>
+        {forRoute &&
+          <ProductSection title="Recommended Products" subtitle="More you might like." products={products} />
         }
       </div>
      }
