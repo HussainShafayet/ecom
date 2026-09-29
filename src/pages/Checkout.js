@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import { FaCreditCard, FaTruck, FaCheckCircle, FaMoneyBillWave, FaCheck, FaTrash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { FaMoneyBillWave } from 'react-icons/fa';
 
 import {
   updateFormData,
@@ -17,23 +17,36 @@ import {
   handleApplyCoupon,
   clearCoupon,
 } from '../redux/slice/checkoutSlice';
-import {clearCart, handleAddtoCart, handleFetchCart, handleRemovetoCart, removeFromCart, selectCartItems, selectTotalPrice, updateQuantity} from '../redux/slice/cartSlice';
+import {clearCart, selectTotalPrice} from '../redux/slice/cartSlice';
+import {clearSectionError} from '../redux/slice/globalErrorSlice';
 import {divisionsData,districtsData, upazilasData, dhakaCityData} from '../data/location';
-import {handleGetAddress} from '../redux/slice/profileSlice';
-import {CheckoutErrors, ShowAddress} from '../components/checkout';
-import debounce from 'lodash.debounce'; // Import lodash debounce
+import {CheckoutErrors, CheckoutSummary, Field, PlaceOrderBar, ShowAddress, controlClass, describedBy} from '../components/checkout';
 import {CheckoutSkeleton} from '../components/common/skeleton';
-import {Loader} from '../components/common';
 import {SectionError} from '../components/common';
+import {FIELD_ORDER, normalizePhone, validateCheckout, validateField} from '../utils/checkoutValidation';
 
+const Step = ({ number, title }) => (
+  <h2 className="mb-3 flex items-center text-base font-semibold text-gray-900">
+    <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">{number}</span>
+    {title}
+  </h2>
+);
 
- 
+// The order summary while the cart is on its way
+const SummarySkeleton = () => (
+  <div className="animate-pulse rounded-lg border border-gray-200 bg-white p-4">
+    <div className="mb-3 h-5 w-48 rounded bg-gray-300"></div>
+    <div className="h-4 w-full rounded bg-gray-200"></div>
+  </div>
+);
 
+// Mobile first: the folded order summary, then three short steps (contact, delivery, payment), then the total and Place Order in
+// a bar fixed above the bottom navigation. From `lg` the summary is open beside the form and the button is under it.
 const Checkout = () => {
   const dispatch = useDispatch();
   const {cartLoading, cartItems, cartError} = useSelector((state)=>state.cart);
   const navigate = useNavigate();
- 
+
   const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, order, delivery_charges, responseError, checkoutContentLoading, checkoutContentError, couponStatus, couponError, discountAmount, appliedCouponCode} = useSelector(
     (state) => state.checkout
   );
@@ -42,15 +55,13 @@ const Checkout = () => {
     (state) => state.auth
   );
    const contentError = useSelector((state) => state.globalError.sectionErrors["checkout-content"]);
-   const [confirmDelete, setConfirmDelete] = useState({});
-   const [originalQuantities, setOriginalQuantities] = useState({}); // Store original quantities
    const [couponInput, setCouponInput] = useState('');
+   const totalPrice = useSelector(selectTotalPrice);
 
- 
   // Step 1: Initialize checkout on page load if not fulfilled
   useEffect(() => {
     !isCheckoutFulfilled && dispatch(initializeCheckout());
-    
+
   }, [isCheckoutFulfilled, dispatch]);
 
   // A refusal from an earlier visit (the customer went to the cart to fix it) is not shown again on arrival
@@ -66,7 +77,7 @@ const Checkout = () => {
         dispatch(clearCart());
         dispatch(resetForm());
       }, 500);
-      
+
     }
   }, [isCheckoutFulfilled, dispatch, navigate, order_id, order]);
 
@@ -77,71 +88,66 @@ const Checkout = () => {
     }
   }, [cartItems, cartLoading, isCheckoutFulfilled, navigate]);
 
-  // Debounced API call
-  const debouncedUpdateQuantity = useCallback(
-    
-    debounce((product, difference) => {
-      if (difference !== 0) {
-      const cartBody = {};
-      cartBody.product_id = product?.id;
-      cartBody.quantity = Math.abs(difference);
-      cartBody.variant_id = product?.variant_id;
-      cartBody.action = difference < 0 ? 'decrease' : 'increase';
-      dispatch(handleAddtoCart(cartBody));
-      setOriginalQuantities((prev) => ({
-        ...prev,
-        [product?.id]: null,
-      }));
-      }
-    }, 1000),
-    []
-  );
+  // What delivery costs: the charge the shop set for the chosen area (0 is a free delivery, only "no charge set" is unknown)
+  const deliveryCharge = formData?.shipping_type ? delivery_charges?.[formData.shipping_type] : undefined;
+  const deliveryChargeKnown = deliveryCharge !== undefined && deliveryCharge !== null;
+  const shippingCost = deliveryChargeKnown ? Number(deliveryCharge) || 0 : 0;
+  const discount = couponStatus === 'applied' ? discountAmount : 0;
+  const grandTotal = totalPrice + shippingCost - discount;
 
+  // The cart changed since a coupon was applied: its preview no longer matches, so it is cleared (placing the
+  // order always re-validates a coupon_code against the real subtotal anyway; this just keeps the summary honest).
+  useEffect(() => {
+    if (couponStatus === 'applied') {
+      dispatch(clearCoupon());
+      setCouponInput('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalPrice]);
 
+  // Only a field that was left (or every field, once Place Order was pressed) shows its problem
+  const problem = (name) => (touched?.[name] && errors?.[name]) || '';
+  const clearErrors = (...names) => dispatch(setErrors({ ...errors, ...Object.fromEntries(names.map((name) => [name, ''])) }));
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     dispatch(updateFormData({ [name]: value }));
 
     // Validate field on change and clear error if valid
-    if (value?.trim()) {
-      dispatch(setErrors({ ...errors, [name]: '' }));
-    }
-    
-    isAuthenticated && (name === 'title' || 'address') && dispatch(setSelectedAddressId(null));
+    if (value?.trim()) clearErrors(name);
+
+    // Typing the address by hand means it is no longer the saved address that was chosen (the phone, name and e-mail have nothing to do with it)
+    isAuthenticated && ['address', 'upazila'].includes(name) && dispatch(setSelectedAddressId(null));
+  };
+
+  // 01712345678, 8801712345678 or a pasted "+880 1712-345678" all become the 10 digits after +880
+  const handlePhoneChange = (e) => {
+    const phone_number = normalizePhone(e.target.value);
+    dispatch(updateFormData({ phone_number }));
+    if (!validateField('phone_number', phone_number)) clearErrors('phone_number');
   };
 
   const handleBlur = (e) => {
-    const { name } = e.target;
+    const { name, value } = e.target;
     dispatch(updateTouched({ [name]: true }));
-
-    // Validate field on blur to show error if empty
-    if (!formData[name].trim()) {
-      dispatch(setErrors({ ...errors, [name]: `${name} is required` }));
-    }
+    dispatch(setErrors({ ...errors, [name]: validateField(name, value, formData) }));
   };
 
   const handleLocationType= (e) =>{
     const locationType = e.target.value;
-    
+
     locationType && dispatch(updateFormData({ shipping_type:locationType, shipping_area: '', division: '', district: '', upazila: '', address: '' }));
 
-     // Validate field on change and clear error if valid
-     if (locationType.trim()) {
-      dispatch(setErrors({ ...errors, ['shipping_type']: '' }));
-    }
+    if (locationType.trim()) clearErrors('shipping_type', 'delivery_charge');
 
     isAuthenticated && dispatch(setSelectedAddressId(null));
   }
-  
+
   const handleDhakaArea = (e) => {
     const shipping_area = e.target.value;
     dispatch(updateFormData({ shipping_area, division: '', district: '', upazila: '',}));
 
-     // Validate field on change and clear error if valid
-     if (shipping_area.trim()) {
-      dispatch(setErrors({ ...errors, ['shipping_area']: '' }));
-    }
+    if (shipping_area.trim()) clearErrors('shipping_area');
     isAuthenticated && dispatch(setSelectedAddressId(null));
   }
 
@@ -151,16 +157,12 @@ const Checkout = () => {
     if (divisionItem) {
       dispatch(updateFormData({ division:divisionItem.name, district: '', upazila: '' }));
       const divisionDist = districtsData.filter((item)=> item.division_id === divisionItem.id);
-      
+
       dispatch(setDistricts(divisionDist|| []));
       dispatch(setUpazilas([]));
     }
-    
 
-    // Validate field on change and clear error if valid
-    if (division.trim()) {
-      dispatch(setErrors({ ...errors, ['division']: '' }));
-    }
+    if (division.trim()) clearErrors('division');
 
     isAuthenticated && dispatch(setSelectedAddressId(null));
   };
@@ -172,20 +174,26 @@ const Checkout = () => {
       dispatch(updateFormData({ district:districtItem.name, upazila: '' }));
 
       const upzillaDist = upazilasData.filter((item)=> item.district_id === districtItem.id);
-      
+
       dispatch(setUpazilas(upzillaDist|| []));
     }
-     // Validate field on change and clear error if valid
-     if (district.trim()) {
-      dispatch(setErrors({ ...errors, ['district']: '' }));
-    }
+    if (district.trim()) clearErrors('district');
 
     isAuthenticated && dispatch(setSelectedAddressId(null));
   };
 
+  // Takes the customer to the first field with a problem: on a phone that field can be far from the button just pressed
+  const focusFirstProblem = (problems) => {
+    const first = FIELD_ORDER.find((name) => problems[name]) || (problems.delivery_charge ? 'shipping_type' : null);
+    const field = first && document.getElementById(`field-${first}`);
+    if (!field) return;
+    field.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+    field.focus({ preventScroll: true });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Mark all fields as touched to show errors for untouched fields
     const allTouchedFields = Object.keys(formData).reduce((acc, field) => {
       acc[field] = true;
@@ -193,10 +201,10 @@ const Checkout = () => {
     }, {});
     dispatch(updateTouched(allTouchedFields));
 
-    const formErrors = validateForm();
+    const formErrors = validateCheckout(formData, { deliveryChargeKnown });
 
     if (Object.keys(formErrors).length === 0) {
-      const {name,phone_code,phone_number, email,title, shipping_type,shipping_area, division,district, upazila, address, payment_type } = formData;
+      const {name,phone_code,phone_number, email, shipping_type,shipping_area, division,district, upazila, address, payment_type } = formData;
       const checkoutBody ={
         name,email,shipping_type,shipping_area,
         phone_number: phone_code + phone_number,
@@ -221,56 +229,12 @@ const Checkout = () => {
         })
       });
 
-      console.log(checkoutBody, 'body');
       dispatch(handleCheckout(checkoutBody));
     } else {
       dispatch(setErrors(formErrors));
+      focusFirstProblem(formErrors);
     }
   };
-
-  const validateForm = () => {
-    const formErrors = {};
-    if (!formData.name) formErrors.name = 'Name is required';
-    if (!formData.phone_number) formErrors.phone_number = 'Phone Number is required';
-
-    if (!formData.shipping_type) formErrors.shipping_type = 'Shipping Type is required';
-    if (formData.shipping_type == 'inside_dhaka') {
-       if (!formData.shipping_area) formErrors.shipping_area = 'shipping_area is required';
-    } else if(formData.shipping_type === 'outside_dhaka') {
-      if (!formData.division) formErrors.division = 'Division is required';
-      if (!formData.district) formErrors.district = 'District is required';
-      if (!formData.upazila) formErrors.upazila = 'Upazila/thana is required';
-    }
-    if (shippingCost === 0) formErrors.delivery_charge = 'Delivery Charge is required';
-    if (!formData.address) formErrors.address = 'Address is required';
-    return formErrors;
-  };
-
-  const getLocationType = ()=>{
-    if (formData?.shipping_type === 'inside_dhaka') {
-      return 'md:grid-cols-2'
-    }else if(formData?.shipping_type === 'outside_dhaka'){
-      return 'md:grid-cols-4 sm:grid-cols-2'
-    } else {
-      return 'grid-cols-1'
-    }
-  }
-
-  const totalPrice = useSelector(selectTotalPrice);
-
-  const shippingCost = formData?.shipping_type && delivery_charges[formData.shipping_type] ? delivery_charges[formData.shipping_type] : 0;
-
-  const grandTotal = totalPrice + shippingCost - (couponStatus === 'applied' ? discountAmount : 0);
-
-  // The cart changed since a coupon was applied: its preview no longer matches, so it is cleared (placing the
-  // order always re-validates a coupon_code against the real subtotal anyway; this just keeps the summary honest).
-  useEffect(() => {
-    if (couponStatus === 'applied') {
-      dispatch(clearCoupon());
-      setCouponInput('');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalPrice]);
 
   const onApplyCoupon = () => {
     const code = couponInput.trim();
@@ -283,504 +247,224 @@ const Checkout = () => {
     setCouponInput('');
   };
 
- const handleUpdateQuantity = (id, newQuantity, item) => {
-     let prevQuantity = 0;
-     if (originalQuantities[id]) {
-       prevQuantity = originalQuantities[id];
-     } else {
-        setOriginalQuantities((prev) => ({
-         ...prev,
-         [id]: item?.quantity,
-       }));
-       prevQuantity = item?.quantity;
-     }
-     const difference = newQuantity - prevQuantity; // Calculate actual difference
-     
-     // Update UI immediately
-     dispatch(updateQuantity({ id, quantity: newQuantity, variant_id: item?.variant_id }));
- 
-     // Only send API request if the quantity actually changed
-     if (isAuthenticated && difference !== 0) {
-         debouncedUpdateQuantity(item, difference); // API gets the actual difference
-     }
- };
-
-  const handleRemoveItem = (item) =>{
-    dispatch(handleRemovetoCart({product_id: item?.id}));
-    dispatch(removeFromCart(item));
-  }
-
-  const OrderSummarySkeleton = () => {
-    return (
-      <div className="bg-gray-100 rounded-lg shadow-md p-4 sm:p-2">
-        {/* Cart Items Skeleton */}
-        {[...Array(5)].map((_, index) => (
-          <div key={index} className="flex items-center justify-between gap-2 mb-2 border p-2 rounded-md bg-gray-200">
-            <div className="w-20 h-20 bg-gray-300 rounded-md"></div>
-            <div className="flex-grow min-w-0">
-              <div className="h-4 bg-gray-300 rounded w-32 mb-2"></div>
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 bg-gray-300 rounded"></div>
-                <div className="h-8 w-12 bg-gray-300 rounded"></div>
-                <div className="h-8 w-8 bg-gray-300 rounded"></div>
-                <div className="h-8 w-8 bg-gray-300 rounded"></div>
-              </div>
-            </div>
-            <div className="h-4 bg-gray-300 rounded w-16"></div>
-          </div>
-        ))}
-        {/* Price Summary Skeleton */}
-        <div className="h-4 bg-gray-300 rounded w-full my-3"></div>
-        <div className="h-4 bg-gray-300 rounded w-full my-3"></div>
-        <div className="h-6 bg-gray-400 rounded w-full my-3"></div>
-      </div>
-    )
-  }
-
+  const retryContent = () => {
+    dispatch(clearSectionError('checkout-content'));
+    dispatch(initializeCheckout());
+  };
 
   if (contentError) {
-    return <SectionError message={contentError} />;
+    return <SectionError message={contentError} onRetry={retryContent} />;
   }
+
+  // The props one field needs: its id (the page scrolls to it), and its problem announced to a screen reader
+  const control = (name, extra = {}) => ({
+    id: `field-${name}`,
+    name,
+    'aria-invalid': Boolean(problem(name)),
+    'aria-describedby': describedBy(`field-${name}`, problem(name)),
+    ...extra,
+  });
 
   return (
     <>
-    {checkoutContentLoading ? 
+    {checkoutContentLoading ?
       <CheckoutSkeleton />
      :
       checkoutContentError ? (
-      <SectionError message={checkoutContentError} />
+      <SectionError message={checkoutContentError} onRetry={retryContent} />
     ) :
-    <div className="mx-auto px-1 lg:flex  mb-3 gap-3">
-     {/* Right Section: Order Summary */}
-     <div className="lg:w-7/12">
-        <h3 className="text-2xl font-bold mb-4">Order Summary</h3>
-        {cartLoading ? 
-          <OrderSummarySkeleton />
-          :
-            cartError ? (
+    // phone: room for the fixed Place Order bar (72 px) above the bottom nav (56 px); tablet: for the bar alone
+    <div className="mx-auto pb-44 md:pb-28 lg:pb-0">
+      <h1 className="mb-3 text-xl font-bold sm:text-2xl">Checkout</h1>
+
+      <div className="grid gap-4 lg:grid-cols-[7fr_5fr] lg:gap-6">
+        {/* The order: folded above the form on a phone, open in the right column from lg */}
+        <div className="lg:col-start-2 lg:row-start-1">
+          {cartLoading ? <SummarySkeleton /> : cartError ? (
             <SectionError message={cartError} />
-          ) :
-          <div className="bg-gray-100 rounded-lg shadow-md sticky top-20">
-            <div className="max-h-[60vh] overflow-y-auto scrollbar-custom p-4 sm:p-2">
-              {cartItems?.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between gap-2 mb-2 relative border p-1"
-                >
-                  {/* Image */}
-                  <Link to={`/products/detail/${item?.slug}`}>
-                    <img
-                      src={item?.image}
-                      alt={item?.name}
-                      className="w-20 h-20 object-contain rounded-md flex-shrink-0"
-                    />
-                  </Link>
+          ) : (
+            <CheckoutSummary
+              items={cartItems || []}
+              subtotal={totalPrice}
+              discount={discount}
+              shipping={formData?.shipping_type && deliveryChargeKnown ? shippingCost : null}
+              total={grandTotal}
+              coupon={{
+                status: couponStatus,
+                error: couponError,
+                appliedCode: appliedCouponCode,
+                input: couponInput,
+                onInput: setCouponInput,
+                onApply: onApplyCoupon,
+                onRemove: onRemoveCoupon,
+              }}
+            />
+          )}
+        </div>
 
-                  
-                  {/* Product Details */}
-                  <div className="flex-grow min-w-0">
-                    <h2
-                      className="font-semibold text-sm truncate"
-                      title={item?.name} // Tooltip for full name
-                    >
-                     <Link to={`/products/detail/${item?.slug}`} className="hover:text-blue-500 transition-colors duration-200">
-                        {item?.name}
-                      </Link>
-                    </h2>
-                    <p className="text-gray-500 text-sm truncate mb-2">
-                      {item?.brand_name && <span>Brand: {item?.brand_name} • </span>}
-                      {item?.color_name && <span>Color: {item?.color_name} • </span>}
-                      
-                      {item?.size_name && <span>Size: {item?.size_name} • </span>}
-                      {item?.color_name && <span>Avg Rating: {item?.avg_rating}</span>}
-                    </p>
-                  
-                    <div className="flex items-center gap-3 mt-1">
-                      {/* Decrease Quantity / Remove Button */}
-                      {item?.quantity === 1 ? (
-                        <button
-                          className="bg-red-500 text-white p-[0.5rem] rounded-full hover:bg-red-700 transition duration-200 shadow-md flex justify-center items-center"
-                          onClick={() => setConfirmDelete({ id: item?.id, variant_id: item?.variant_id })}
-                        >
-                          <FaTrash />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleUpdateQuantity(item?.id, item?.quantity - 1, item)}
-                          disabled={item?.quantity <= 1}
-                          className="p-[0.2rem] w-8 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
-                        >
-                          -
-                        </button>
-                      )}
-
-                      {/* Quantity Input Field */}
-                      <input
-                        type="number"
-                        value={item?.quantity}
-                        onChange={(e) => {
-                          const newValue = parseInt(e.target.value, 10) || 1;
-                          handleUpdateQuantity(item?.id, newValue, item);
-                        }}
-                        className="w-12 text-center border border-gray-300 rounded-md py-[0.2rem]"
-                        min="1"
-                      />
-
-                      {/* Increase Quantity Button */}
-                      <button
-                        onClick={() => handleUpdateQuantity(item?.id, item?.quantity + 1, item)}
-                        className="w-8 p-[0.2rem] border border-gray-300 rounded-md text-gray-700 hover:bg-gray-200 transition flex justify-center items-center"
-                      >
-                        +
-                      </button>
-                    </div>
-                    
-                  </div>
-
-                  {/* Price */}
-                  <div className="text-sm font-semibold text-right flex-shrink-0">
-                    ৳{item?.has_discount
-                      ? (item?.discount_price * item?.quantity).toFixed(2)
-                      : (item?.base_price * item?.quantity).toFixed(2)}
-                  </div>
-
-
-
-                  {/* Confirm Delete Warning in Card */}
-                  {confirmDelete?.id === item?.id && confirmDelete?.variant_id === item.variant_id && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-90 p-3 rounded-lg">
-                        <div className="text-center">
-                          <p className="text-gray-800 mb-2">Are you sure you want to remove this item?</p>
-                          <div className="flex justify-center gap-2">
-                            <button
-                              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
-                              onClick={() => {
-                                handleRemoveItem(item);
-                                setConfirmDelete({});
-                              }}
-                            >
-                              Yes
-                            </button>
-                            <button
-                              className="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition-colors"
-                              onClick={() => setConfirmDelete({})}
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                </div>
-              ))}
-            </div>
-
-            <div className="p-4 sm:p-2">
-              <hr className="my-3" />
-
-              {/* Promo code */}
-              <div className="mb-3">
-                {couponStatus === 'applied' ? (
-                  <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                    <span className="text-green-700 text-sm font-medium">
-                      Coupon <strong>{appliedCouponCode}</strong> applied
-                    </span>
-                    <button type="button" onClick={onRemoveCoupon} className="text-red-500 text-sm hover:text-red-600">
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Promo code"
-                      value={couponInput}
-                      onChange={(e) => setCouponInput(e.target.value)}
-                      disabled={couponStatus === 'validating'}
-                      className="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={onApplyCoupon}
-                      disabled={couponStatus === 'validating' || !couponInput.trim()}
-                      className="bg-gray-800 text-white px-4 rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {couponStatus === 'validating' ? '...' : 'Apply'}
-                    </button>
-                  </div>
-                )}
-                {couponStatus === 'failed' && <p className="text-red-500 text-xs mt-1">{couponError}</p>}
-              </div>
-
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>৳{totalPrice.toFixed(2)}</span>
-              </div>
-              {couponStatus === 'applied' && (
-                <div className="flex justify-between text-green-600">
-                  <span>Discount</span>
-                  <span>-৳{discountAmount.toFixed(2)}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>৳{shippingCost.toFixed(2)}</span>
-              </div>
-              {errors?.delivery_charge && <p className="text-red-500 text-xs mt-1">{errors?.delivery_charge}</p>}
-              <hr className="my-3" />
-              <div className="flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span>৳{grandTotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <Link to="/cart" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
-                  Edit Cart
-                </Link>
-                <Link to="/products" className="mt-4 inline-block text-blue-500 hover:text-blue-600">
-                  Add more products
-                </Link>
-              </div>
-              
-            </div>
-          </div>
-          }
-      </div>
-
-      {/*form section*/}
-      <div className="lg:w-5/12">
-        <h2 className="text-2xl font-bold mb-1">Checkout</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-2">
-
-          
-          {/* Personal Information */}
-          <div className="p-2 bg-white rounded-lg">
-            <h3 className="text-lg font-semibold flex items-center mb-1">
-              <FaCheckCircle className="mr-2 text-green-500" /> Personal Information
-            </h3>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
-              <div>
+        <form onSubmit={handleSubmit} noValidate className="space-y-4 lg:col-start-1 lg:row-start-1">
+          {/* 1. Contact */}
+          <section className="rounded-lg border border-gray-200 bg-white p-4">
+            <Step number="1" title="Contact" />
+            <div className="space-y-3">
+              <Field id="field-name" label="Full name" error={problem('name')}>
                 <input
-                  type="text"
-                  name="name"
-                  placeholder="Full Name"
+                  {...control('name', { type: 'text', autoComplete: 'name', enterKeyHint: 'next' })}
                   value={formData?.name}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  required
-                  className={`border ${touched?.name && errors?.name ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                  className={controlClass(problem('name'))}
                 />
-                {touched?.name && errors?.name && <p className="text-red-500 text-xs mt-1">{errors?.name}</p>}
-              </div>
-              <div>
-               <div className={`flex items-center border ${touched.phone_number && errors?.phone_number ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus-within:ring-2 focus-within:ring-blue-400 bg-white bg-opacity-70`}>
-                <select
-                  id="country-code"
-                  className="bg-gray-100 text-gray-700 font-medium p-2 border-r border-gray-300 focus:outline-none rounded-l-md"
-                  defaultValue="+880"
-                >
-                  <option value="+880">+880</option>
-                </select>
+              </Field>
+
+              <Field id="field-phone_number" label="Phone number" error={problem('phone_number')}>
+                <div className={`flex overflow-hidden rounded-lg border bg-white focus-within:ring-2 focus-within:ring-blue-400 ${problem('phone_number') ? 'border-red-500' : 'border-gray-300'}`}>
+                  <span className="flex items-center border-r border-gray-300 bg-gray-50 px-3 text-base text-gray-700">{formData?.phone_code || '+880'}</span>
+                  <input
+                    {...control('phone_number', { type: 'tel', inputMode: 'numeric', autoComplete: 'tel-national', enterKeyHint: 'next', placeholder: '1712345678' })}
+                    value={formData?.phone_number}
+                    onChange={handlePhoneChange}
+                    onBlur={handleBlur}
+                    className="h-12 min-w-0 flex-1 border-none bg-transparent px-3 text-base text-gray-900 focus:outline-none"
+                  />
+                </div>
+              </Field>
+
+              <Field id="field-email" label="Email" optional hint="For your order updates.">
                 <input
-                  type="tel"
-                  id="phone"
-                  name="phone_number"
-                  placeholder="Phone number"
-                  value={formData?.phone_number}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  maxLength={10}
-                  className="w-full p-2 border-none focus:outline-none rounded-r-md"
-                  required
-                />
-                
-              </div>
-              {touched?.phone_number && errors?.phone_number && <p className="text-red-500 text-xs mt-1">{errors?.phone_number}</p>}
-              </div>
-             
-            </div>
-            <div>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email Address (optional)"
+                  {...control('email', { type: 'email', inputMode: 'email', autoComplete: 'email', enterKeyHint: 'next' })}
                   value={formData?.email}
                   onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                  className={controlClass(false)}
                 />
-              </div>
-          </div>
-          
-
-          {/* Shipping Information */}
-          <div className="p-2 bg-white rounded-lg">
-
-          <div>
-            {isAuthenticated && <ShowAddress /> }
-          </div>
-
-            <h3 className="text-lg font-semibold flex items-center mb-1">
-              <FaTruck className="mr-2 text-blue-500" /> Shipping Information
-            </h3>
-
-            <div className="w-full mb-3">
-              <input
-                type="text"
-                name="title"
-                placeholder="Home or office"
-                value={formData?.title}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={`border border-gray-300 p-2 rounded-lg w-full`}
-              />
+              </Field>
             </div>
+          </section>
 
-            <div className={`grid grid-cols-1 ${getLocationType()} gap-3 mb-3`}>
-              <div>
+          {/* 2. Delivery */}
+          <section className="rounded-lg border border-gray-200 bg-white p-4">
+            <Step number="2" title="Delivery" />
+            {isAuthenticated && <ShowAddress />}
+
+            <div className="space-y-3">
+              <Field id="field-shipping_type" label="Delivery area" error={problem('shipping_type') || errors?.delivery_charge}>
                 <select
-                  name="shipping_type"
+                  {...control('shipping_type')}
                   value={formData?.shipping_type || ''}
                   onChange={handleLocationType}
                   onBlur={handleBlur}
-                  required
-                  className="border border-gray-300 p-2 rounded-lg w-full"
+                  className={controlClass(problem('shipping_type') || errors?.delivery_charge)}
                 >
-                  <option value="">Select Shipping Area</option>
+                  <option value="">Select delivery area</option>
                   <option value="inside_dhaka">In Dhaka City</option>
                   <option value="outside_dhaka">Out of Dhaka City</option>
                 </select>
-                {touched?.shipping_type && errors?.shipping_type && <p className="text-red-500 text-xs mt-1">{errors?.shipping_type}</p>}
-              </div>
+              </Field>
 
               {formData?.shipping_type === 'inside_dhaka' && (
-              <div className="grid grid-cols-1 gap-3">
-                <div className="w-full">
+                <Field id="field-shipping_area" label="Area in Dhaka" error={problem('shipping_area')}>
                   <select
-                    name="shipping_area"
+                    {...control('shipping_area')}
                     value={formData?.shipping_area || ''}
                     onChange={handleDhakaArea}
                     onBlur={handleBlur}
-                    required
-                    className={`border ${touched?.shipping_area && errors?.shipping_area ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                    className={controlClass(problem('shipping_area'))}
                   >
-                    <option value="">Select Area in Dhaka City</option>
+                    <option value="">Choose your area</option>
                     {dhakaCityData?.map((area) => (
                       <option key={area?.id} value={area?.name}>{area?.name}</option>
                     ))}
                   </select>
-                  {touched?.shipping_area && errors?.shipping_area && <p className="text-red-500 text-xs mt-1">{errors?.shipping_area}</p>}
-                </div>
-              </div>
-            )}
-             
-           
-            {formData?.shipping_type === 'outside_dhaka' && (
-              <>
-                <div>
-                  <select
-                    name="division"
-                    value={formData?.division || ''}
-                    onChange={handleDivisionChange}
-                    onBlur={handleBlur}
-                    required
-                    className={`border ${touched?.division && errors?.division ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                  >
-                    <option value="">Select Division</option>
-                    {divisionsData?.map((division) => (
-                      <option key={division?.id} value={division?.name}>{division?.name}</option>
-                    ))}
-                  </select>
-                  {touched?.division && errors?.division && <p className="text-red-500 text-xs mt-1">{errors?.division}</p>}
-                </div>
+                </Field>
+              )}
 
-                <div>
-                  <select
-                    name="district"
-                    value={formData?.district || ''}
-                    onChange={handleDistrictChange}
-                    onBlur={handleBlur}
-                    required
-                    className={`border ${touched?.district && errors?.district ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                    disabled={!formData.division}
-                  >
-                    <option value="">Select District</option>
-                    {districts?.map((district) => (
-                      <option key={district?.id} value={district?.name}>{district?.name}</option>
-                    ))}
-                  </select>
-                  {touched?.district && errors?.district && <p className="text-red-500 text-xs mt-1">{errors?.district}</p>}
-                </div>
+              {formData?.shipping_type === 'outside_dhaka' && (
+                <div className="grid gap-3 md:grid-cols-3">
+                  <Field id="field-division" label="Division" error={problem('division')}>
+                    <select
+                      {...control('division')}
+                      value={formData?.division || ''}
+                      onChange={handleDivisionChange}
+                      onBlur={handleBlur}
+                      className={controlClass(problem('division'))}
+                    >
+                      <option value="">Choose division</option>
+                      {divisionsData?.map((division) => (
+                        <option key={division?.id} value={division?.name}>{division?.name}</option>
+                      ))}
+                    </select>
+                  </Field>
 
-                <div>
-                  <select
-                    name="upazila"
-                    value={formData?.upazila || ''}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    required
-                    className={`border ${touched?.upazila && errors?.upazila ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
-                    disabled={!formData?.district}
-                  >
-                    <option value="">Select Upazila/Thana</option>
-                    {upazilas?.map((station) => (
-                      <option key={station?.id} value={station?.name}>{station?.name}</option>
-                    ))}
-                  </select>
-                  {touched?.upazila && errors?.upazila && <p className="text-red-500 text-xs mt-1">{errors?.upazila}</p>}
+                  <Field id="field-district" label="District" error={problem('district')}>
+                    <select
+                      {...control('district')}
+                      value={formData?.district || ''}
+                      onChange={handleDistrictChange}
+                      onBlur={handleBlur}
+                      disabled={!formData?.division}
+                      className={controlClass(problem('district'))}
+                    >
+                      <option value="">Choose district</option>
+                      {districts?.map((district) => (
+                        <option key={district?.id} value={district?.name}>{district?.name}</option>
+                      ))}
+                    </select>
+                  </Field>
+
+                  <Field id="field-upazila" label="Upazila / Thana" error={problem('upazila')}>
+                    <select
+                      {...control('upazila')}
+                      value={formData?.upazila || ''}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      disabled={!formData?.district}
+                      className={controlClass(problem('upazila'))}
+                    >
+                      <option value="">Choose upazila / thana</option>
+                      {upazilas?.map((station) => (
+                        <option key={station?.id} value={station?.name}>{station?.name}</option>
+                      ))}
+                    </select>
+                  </Field>
                 </div>
-              </>
-            )}
-            
+              )}
+
+              <Field id="field-address" label="Full address" error={problem('address')}>
+                <textarea
+                  {...control('address', { rows: 3, autoComplete: 'street-address', placeholder: 'House, road, area' })}
+                  value={formData?.address}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={controlClass(problem('address'), true)}
+                />
+              </Field>
             </div>
-            <div className="w-full">
+          </section>
+
+          {/* 3. Payment: cash on delivery is the only way for now, drawn as the chosen one of a choice so more can join it */}
+          <section className="rounded-lg border border-gray-200 bg-white p-4">
+            <Step number="3" title="Payment" />
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border-2 border-blue-600 bg-blue-50 p-3">
               <input
-                type="text"
-                name="address"
-                placeholder="Delivery Address"
-                value={formData?.address}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-                className={`border ${touched?.address && errors?.address ? 'border-red-500' : 'border-gray-300'} p-2 rounded-lg w-full`}
+                type="radio"
+                name="payment_type"
+                value="cash"
+                checked
+                onChange={() => dispatch(updateFormData({ payment_type: 'cash' }))}
+                className="h-5 w-5 accent-blue-600"
               />
-              {touched?.address && errors?.address && <p className="text-red-500 text-xs mt-1">{errors?.address}</p>}
-            </div>
-          </div>
-
-
-          {/* Payment Method */}
-          <div className="p-2 bg-white rounded-lg">
-            <h3 className="text-lg font-semibold flex items-center mb-1">
-              <FaCreditCard className="mr-2 text-yellow-500" />Payment Method
-            </h3>
-
-            <div className="flex items-center space-x-2 mb-3">
-              <div
-                className={`flex items-center p-2 rounded-lg transition-all ${formData.payment_type === 'cod' ? 'border-2 border-blue-500 bg-blue-50' : 'border border-gray-300'}`}
-              >
-                <FaMoneyBillWave className="text-green-500 mr-2" />
-                <span>Cash on Delivery</span>
-                {formData.payment_type === 'cod' && <FaCheck className="ml-auto text-blue-500" />}
-              </div>
-            </div>
-          </div>
+              <FaMoneyBillWave aria-hidden="true" className="text-xl text-green-600" />
+              <span>
+                <span className="block font-semibold text-gray-900">Cash on Delivery</span>
+                <span className="block text-sm text-gray-600">Pay when your order arrives. Nothing is charged now.</span>
+              </span>
+            </label>
+          </section>
 
           {/* Why the shop refused the order (minimum order, stock, ...): shown right above the button just pressed */}
           <CheckoutErrors errors={responseError} />
 
-          <button type="submit" className={`bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors w-full transform duration-200 cursor-pointer ${
-              isLoading ? 'cursor-wait' : 'hover:scale-105'
-            }`}
-            disabled={isLoading}
-          
-          >
-           {isLoading ? (
-              <Loader message="Place Order Progreccing" />
-            ) : (
-              "Place Order"
-            )}
-          </button>
+          <PlaceOrderBar total={grandTotal} loading={isLoading} deliveryKnown={Boolean(formData?.shipping_type && deliveryChargeKnown)} />
         </form>
       </div>
     </div>

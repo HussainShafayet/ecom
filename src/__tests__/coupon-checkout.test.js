@@ -100,11 +100,11 @@ describe('The promo code box at checkout', () => {
     fireEvent.click(screen.getByText('Apply'));
     await screen.findByText('SUMMER25');
 
-    fireEvent.change(screen.getByPlaceholderText('Full Name'), {target: {value: 'Rahim Uddin'}});
-    fireEvent.change(screen.getByPlaceholderText('Phone number'), {target: {value: '1712345678'}});
-    fireEvent.change(screen.getByDisplayValue('Select Shipping Area'), {target: {value: 'inside_dhaka'}});
-    fireEvent.change(screen.getByText('Select Area in Dhaka City').closest('select'), {target: {value: 'Gulshan'}});
-    fireEvent.change(screen.getByPlaceholderText('Delivery Address'), {target: {value: 'House 1'}});
+    fireEvent.change(screen.getByLabelText('Full name'), {target: {value: 'Rahim Uddin'}});
+    fireEvent.change(screen.getByLabelText('Phone number'), {target: {value: '1712345678'}});
+    fireEvent.change(screen.getByLabelText('Delivery area'), {target: {value: 'inside_dhaka'}});
+    fireEvent.change(screen.getByLabelText('Area in Dhaka'), {target: {value: 'Gulshan'}});
+    fireEvent.change(screen.getByLabelText('Full address'), {target: {value: 'House 1'}});
     fireEvent.click(screen.getByText('Place Order'));
 
     await waitFor(() => expect(publicApi.post).toHaveBeenCalled());

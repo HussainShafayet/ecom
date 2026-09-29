@@ -1,9 +1,11 @@
 import React from 'react';
-import { FaTruck } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { setDistricts, setSelectedAddressId, setUpazilas, updateFormData } from '../../redux/slice/checkoutSlice';
 import { districtsData, divisionsData, upazilasData } from '../../data/location';
 
+// A signed-in customer's saved addresses, one tap to fill the form with one. They are a radio group (a screen reader and the
+// keyboard know which is chosen), each at least 64 px tall. Nothing is drawn for a customer without saved addresses: the form
+// below is all they need.
 const ShowAddress = () => {
   const dispatch = useDispatch();
   const {selectedAddressId, addresses } = useSelector((state) => state.checkout);
@@ -38,37 +40,30 @@ const ShowAddress = () => {
     }
   };
 
-  return (
-    <div className="container mx-auto mb-3">
-      <h3 className="text-lg font-semibold flex items-center mb-1">
-        <FaTruck className="mr-2 text-blue-500" /> Select a Shipping Address
-      </h3>
+  if (!addresses || addresses.length === 0) return null;
 
-      {addresses?.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {addresses?.map((address) => (
-            <div
+  return (
+    <div className="mb-4">
+      <h3 className="mb-2 text-sm font-medium text-gray-800">Use a saved address</h3>
+      <div role="radiogroup" aria-label="Saved addresses" className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {addresses.map((address) => {
+          const chosen = selectedAddressId === address?.id;
+          return (
+            <button
               key={address?.id}
+              type="button"
+              role="radio"
+              aria-checked={chosen}
               onClick={() => handleAddressSelection(address?.id)}
-              className={`p-3 border rounded-md shadow-sm cursor-pointer transition ${
-                selectedAddressId === address?.id ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-              }`}
+              className={`min-h-16 rounded-lg border p-3 text-left transition ${chosen ? 'border-2 border-blue-600 bg-blue-50' : 'border-gray-300 bg-white'}`}
             >
-              <h4 className="font-semibold text-md mb-1">
-                {address?.title || 'Untitled Address'}
-              </h4>
-              <p className="text-sm text-gray-600 truncate">
-                {address?.address}
-              </p>
-              <p className="text-xs text-gray-500">
-                {address?.shipping_type.replace('_', ' ')}
-              </p>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-700 text-center">No addresses found!</p>
-      )}
+              <span className="block font-semibold text-gray-900">{address?.title || 'Untitled address'}</span>
+              <span className="line-clamp-2 block text-sm text-gray-600">{address?.address}</span>
+              <span className="block text-xs text-gray-500">{address?.shipping_type?.replace('_', ' ')}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };
