@@ -1,4 +1,6 @@
 export {default as ProductCard} from './product/ProductCard ';
+export {default as ProductSection} from './ProductSection';
+export {default as SectionHeader} from './SectionHeader';
 export {default as InputField} from './InputField';
 export {default as Sidebar} from './product/Sidebar';
 export {default as Accordion} from './Accordion';

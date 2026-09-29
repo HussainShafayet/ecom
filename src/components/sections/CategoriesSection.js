@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchAllCategories } from '../../redux/slice/categorySlice';
 import CategorySectionSkeleton from '../common/skeleton/CategorySectionSkeleton';
+import SectionHeader from '../common/SectionHeader';
 import defaultImage from '../../assets/images/default_product_image.jpg';
 
 const CategoriesSection = () => {
@@ -31,26 +32,13 @@ const CategoriesSection = () => {
       <>
       {categories?.length !== 0  &&
       <div className="container mx-auto my-8">
-        <h2 className="text-3xl font-bold">Shop by Category</h2>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
-          <span className="text-sm md:text-base text-gray-600">
-            Discover the latest trends with Categories.
-          </span>
-          <Link
-            to="/categories"
-            className="underline text-blue-500 hover:text-blue-600 text-sm md:text-base"
-            target='_blank'
-          >
-            View All
-          </Link>
-        </div>
+        <SectionHeader title="Shop by Category" subtitle="Discover the latest trends with Categories." to="/categories" />
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {categories?.map((category) => (
             <Link
               key={category?.id}
               to={`/products/?category=${category?.slug}`}
-              target='_blank'
               className="relative aspect-[4/3] overflow-hidden rounded-xl group block"
             >
               {category?.has_discount && (

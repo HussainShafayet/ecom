@@ -65,7 +65,7 @@ Phone-number + OTP based — there is no password field anywhere in `SignIn`/`Si
 - `common/` — generic, mostly Redux-independent UI primitives (Button, InputField, Loader, Accordion, ErrorDisplay/SuccessMessage, SearchDropdown, Slider, etc.), barrel-exported via `common/index.js`.
 - `common/product/` — product-specific building blocks (ProductCard, Sidebar, SelectFilter, RatingAndReview, Breadcrum).
 - `common/skeleton/` — one `animate-pulse` Tailwind skeleton per loading state, no external skeleton library.
-- `sections/` — homepage/shop Redux-driven sections (HeroSection, FlashSale, BestSelling, NewArrival, FeaturedProducts, CategoriesSection, AllProducts); the sale-style sections (`FlashSale`, `BestSelling`, `NewArrival`, `FeaturedProducts`) share a `forRoute` prop that toggles between "homepage section" and "full page" rendering and are ~90% duplicated JSX — when modifying one of these, check whether the same change is needed in the other three.
+- `sections/` — homepage/shop Redux-driven sections (HeroSection, FlashSale, BestSelling, NewArrival, FeaturedProducts, CategoriesSection, AllProducts); the sale-style sections (`FlashSale`, `BestSelling`, `NewArrival`, `FeaturedProducts`) share a `forRoute` prop that toggles between "homepage section" and "full page" rendering; their product lists are the shared `common/ProductSection` (title row `SectionHeader` + `ProductCard`s), but the `forRoute` banner block is still copy-pasted in each — when modifying that block, check whether the same change is needed in the other three.
 - `layout/`, `checkout/`, `profile/`, `orders/` — page-shell and domain-specific composite components (`orders/`: status badge, progress timeline, item list and formatters shared by the order pages).
 
 ### Styling
