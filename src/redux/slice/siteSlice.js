@@ -1,5 +1,5 @@
 // src/redux/slice/siteSlice.js
-// The shop's identity (name, logo, contact details, social links, announcement bar, footer pages), read once when the
+// The shop's identity (name, logo, contact details, social links, trust badges, announcement bar, footer pages), read once when the
 // storefront opens. Until it arrives, and if it never does, the empty values below keep every place that reads it
 // working: nothing is drawn for what is missing.
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
@@ -12,6 +12,7 @@ export const EMPTY_SITE = {
   announcement: null,
   contact: { email: '', phone: '', address: '', opening_hours: '', map_url: '' },
   social_links: [],
+  trust_badges: [],
   footer_pages: { company: [], service: [], legal: [] },
 };
 
@@ -51,6 +52,7 @@ const siteSlice = createSlice({
           contact: { ...EMPTY_SITE.contact, ...site.contact },
           footer_pages: { ...EMPTY_SITE.footer_pages, ...site.footer_pages },
           social_links: site.social_links || [],
+          trust_badges: site.trust_badges || [],
         };
       })
       .addCase(handleFetchSite.rejected, (state, action) => {
