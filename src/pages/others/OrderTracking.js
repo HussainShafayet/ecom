@@ -1,26 +1,30 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
 import {clearTracking, trackOrder} from '../../redux/slice/orderSlice';
-import {ErrorDisplay, Loader} from '../../components/common';
-import {OrderItems, OrderStatusBadge, OrderTimeline, formatDate, formatMoney} from '../../components/orders';
+import {ErrorDisplay, Field, PhoneInput, controlClass, describedBy} from '../../components/common';
+import {OrderDetailSkeleton} from '../../components/common/skeleton';
+import {CopyOrderId, OrderItems, OrderStatusBadge, OrderTimeline, OrderTotals, formatDate} from '../../components/orders';
+import {PHONE_PREFIX, validatePhone} from '../../utils/phone';
 
-// "01712345678", "1712345678" and "+8801712345678" are all the same number; the backend wants "+880" + 10 digits.
-const toPhoneNumber = (value) => {
-  let digits = value.replace(/\D/g, '');
-  if (digits.startsWith('880')) digits = digits.slice(3);
-  if (digits.startsWith('0')) digits = digits.slice(1);
-  return /^\d{10}$/.test(digits) ? `+880${digits}` : null;
-};
+const Card = ({title, children}) => (
+  <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+    {title && <h2 className="mb-3 text-base font-semibold text-gray-800 sm:text-lg">{title}</h2>}
+    {children}
+  </section>
+);
 
-// Follow an order with its number and the phone number it was placed with (guests have no account to look it up in).
+// Follow an order with its number and the phone number it was placed with (guests have no account to look it up in). Phone first:
+// one column, labels above 48 px boxes (the phone box is the shop's `PhoneInput`: a fixed +880, the number cleaned as it is typed),
+// a full-width button, and the answer scrolled into view (the form fills a phone's screen, the answer would be below it).
 const OrderTracking = () => {
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const {tracking, trackingLoading, trackingError} = useSelector((state) => state.order);
   const [orderId, setOrderId] = useState(searchParams.get('order_id') || '');
   const [phone, setPhone] = useState('');
-  const [formError, setFormError] = useState(null);
+  const [submitted, setSubmitted] = useState(false); // problems are shown once the button was pressed
+  const resultRef = useRef(null);
 
   useEffect(() => {
     return () => {
@@ -28,88 +32,95 @@ const OrderTracking = () => {
     };
   }, [dispatch]);
 
+  useEffect(() => {
+    if (tracking) resultRef.current?.scrollIntoView?.({behavior: 'smooth', block: 'start'});
+  }, [tracking]);
+
+  const problems = {
+    orderId: orderId.trim() ? '' : 'Enter your order ID',
+    phone: validatePhone(phone),
+  };
+  const shown = (field) => (submitted && problems[field]) || '';
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const phone_number = toPhoneNumber(phone);
-    if (!orderId.trim()) {
-      setFormError(['Enter your order ID.']);
-    } else if (!phone_number) {
-      setFormError(['Enter the 10 digit phone number you ordered with.']);
+    setSubmitted(true);
+    if (problems.orderId) {
+      document.getElementById('track-order-id')?.focus();
+    } else if (problems.phone) {
+      document.getElementById('track-phone')?.focus();
     } else {
-      setFormError(null);
-      dispatch(trackOrder({order_id: orderId.trim(), phone_number}));
+      dispatch(trackOrder({order_id: orderId.trim(), phone_number: PHONE_PREFIX + phone}));
     }
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-4xl space-y-8">
-      <section className="bg-gray-50 rounded-lg p-6 md:p-8 shadow-md">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">Track Your Order</h1>
-        <p className="text-gray-600 mb-6 text-center">Enter your order ID and the phone number you ordered with.</p>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-          <div>
-            <label htmlFor="order_id" className="block text-gray-700 font-medium mb-1">Order ID</label>
+    <div className="container mx-auto max-w-3xl space-y-4 px-3 py-4 sm:space-y-6 sm:px-4 sm:py-8">
+      <section className="rounded-lg bg-gray-50 p-4 shadow-md sm:p-8">
+        <h1 className="mb-1 text-center text-2xl font-bold text-gray-800 sm:text-3xl">Track Your Order</h1>
+        <p className="mb-5 text-center text-gray-600">Enter your order ID and the phone number you ordered with.</p>
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          <Field id="track-order-id" label="Order ID" error={shown('orderId')}>
             <input
-              id="order_id"
+              id="track-order-id"
+              name="order_id"
               value={orderId}
               onChange={(e) => setOrderId(e.target.value)}
               placeholder="GC-20260923-0001"
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="next"
+              aria-invalid={Boolean(shown('orderId'))}
+              aria-describedby={describedBy('track-order-id', shown('orderId'))}
+              className={controlClass(shown('orderId'))}
             />
-          </div>
-          <div>
-            <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">Phone number</label>
-            <div className="flex">
-              <span className="px-3 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md text-gray-600">+880</span>
-              <input
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="1712345678"
-                inputMode="numeric"
-                className="w-full p-2 border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              />
-            </div>
-          </div>
+          </Field>
+          <Field id="track-phone" label="Phone number" error={shown('phone')}>
+            <PhoneInput id="track-phone" name="phone" value={phone} onChange={setPhone} error={shown('phone')} enterKeyHint="go" />
+          </Field>
           <button
             type="submit"
             disabled={trackingLoading}
-            className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+            className="flex h-12 w-full items-center justify-center rounded-lg bg-blue-600 text-base font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-wait disabled:opacity-70"
           >
-            {trackingLoading ? 'Looking up...' : 'Track order'}
+            {trackingLoading ? 'Looking up…' : 'Track order'}
           </button>
         </form>
       </section>
 
-      <ErrorDisplay errors={formError || trackingError} />
-      {trackingLoading && <Loader message="Looking up your order" />}
+      <ErrorDisplay errors={trackingError} />
+      {trackingLoading && <OrderDetailSkeleton />}
 
       {tracking && (
-        <>
-          <section className="bg-white rounded-lg shadow-md p-6 text-center">
-            <p className="text-gray-600">Order ID: <span className="font-semibold">{tracking.order_id}</span></p>
-            <p className="text-gray-600 mb-3">Placed on: <span className="font-semibold">{formatDate(tracking.created_at)}</span></p>
-            <OrderStatusBadge status={tracking.status} label={tracking.status_display} />
-          </section>
+        <div ref={resultRef} className="scroll-mt-4 space-y-4 sm:space-y-6">
+          <Card>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1">
+                  <p className="break-all text-lg font-bold text-gray-800">{tracking.order_id}</p>
+                  <CopyOrderId value={tracking.order_id} />
+                </div>
+                <p className="text-sm text-gray-500">Placed on {formatDate(tracking.created_at)}</p>
+              </div>
+              <OrderStatusBadge status={tracking.status} label={tracking.status_display} />
+            </div>
+          </Card>
 
-          <section className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">Order Status</h2>
+          <Card title="Order Status">
             <OrderTimeline history={tracking.history} />
-          </section>
+          </Card>
 
-          <section className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Items in your order</h2>
+          <Card title="Items in your order">
             <OrderItems items={tracking.items} />
-            <div className="mt-4 space-y-1 text-gray-700">
-              <div className="flex justify-between"><span>Subtotal</span><span>{formatMoney(tracking.subtotal)}</span></div>
-              <div className="flex justify-between"><span>Delivery</span><span>{formatMoney(tracking.delivery_charge)}</span></div>
-              <div className="flex justify-between font-bold text-gray-900 border-t pt-2"><span>Total</span><span>{formatMoney(tracking.total)}</span></div>
+            <div className="mt-3 border-t border-gray-200 pt-3">
+              <OrderTotals order={tracking} />
               {tracking.payment && (
-                <p className="text-sm text-gray-500 pt-2">{tracking.payment.method_display}: {tracking.payment.status_display}</p>
+                <p className="pt-2 text-sm text-gray-500">{tracking.payment.method_display}: {tracking.payment.status_display}</p>
               )}
             </div>
-          </section>
-        </>
+          </Card>
+        </div>
       )}
     </div>
   );

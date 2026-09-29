@@ -1,7 +1,8 @@
 // Small formatters shared by the order pages.
+import { formatPrice } from '../../utils/formatPrice';
 
-// Prices come from the backend as numbers: 1060 -> "৳1060.00"
-export const formatMoney = (value) => `৳${Number(value || 0).toFixed(2)}`;
+// Prices come from the backend as numbers, and read like the rest of the shop (`formatPrice`): 1060 -> "৳1,060", 881.1 -> "৳881.10"
+export const formatMoney = (value) => formatPrice(value || 0);
 
 export const formatDate = (iso) => (iso ? new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '');
 

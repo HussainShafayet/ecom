@@ -49,7 +49,7 @@ Also in `common/`: **SectionHeader.js** (the title row every homepage section sh
 
 ## `common/skeleton/`
 
-Consistent pattern: plain functional components using Tailwind's `animate-pulse` + gray placeholder `div`s (no external skeleton library). Barrel-exported via `skeleton/index.js`: `HeroSectionSkeleton`, `ProductCardSkeleton`, `SectionSkeleton` (used generically by Flash Sale/Best Selling/New Arrival/Featured/AllProducts, toggled via `forRoute`; note its internal component is misspelled `Sectionkeleton`, though the export/usage is unaffected), `ProductDetailsSkeleton` (same shape as the page: square gallery + thumbnails, details, sections), `ProductsPageSkeleton` (composes `ProductCardSkeleton`), `SidebarSkeleton`, `ProfileSkeleton`, `CartSkeleton` (same shape as the cart page, no scroll box), `CheckoutSkeleton`.
+Consistent pattern: plain functional components using Tailwind's `animate-pulse` + gray placeholder `div`s (no external skeleton library). Barrel-exported via `skeleton/index.js`: `HeroSectionSkeleton`, `ProductCardSkeleton`, `SectionSkeleton` (used generically by Flash Sale/Best Selling/New Arrival/Featured/AllProducts, toggled via `forRoute`; note its internal component is misspelled `Sectionkeleton`, though the export/usage is unaffected), `ProductDetailsSkeleton` (same shape as the page: square gallery + thumbnails, details, sections), `ProductsPageSkeleton` (composes `ProductCardSkeleton`), `SidebarSkeleton`, `ProfileSkeleton`, `CartSkeleton` (same shape as the cart page, no scroll box), `CheckoutSkeleton`, `OrdersSkeleton` (three order cards) and `OrderDetailSkeleton` (header, progress, items; also the tracking lookup).
 
 ## `sections/` (homepage/shop sections, all Redux-driven)
 
@@ -88,9 +88,11 @@ Consistent pattern: plain functional components using Tailwind's `animate-pulse`
 Shared by `Orders`, `OrderDetail`, `OrderConfirmation` and `OrderTracking`.
 
 - **OrderStatusBadge.js** — coloured pill for a status (`status` picks the colour, `label` is the backend's `status_display`; an unknown status is grey). The backend's statuses: `pending, confirmed, paid, shipped, delivered, returned, cancelled, refunded`.
-- **OrderTimeline.js** — progress from the backend's `history` (`[{status, status_display, created_at}]`): placed → (confirmed, only if staff confirmed) → (paid, only if it happened) → shipped → delivered, unreached steps grey ("Not yet"); an order that ended without delivery (cancelled, a parcel that came back = returned, or refunded) ends in a red step and drops the steps that never happened.
-- **OrderItems.js** — the order's lines (picture, name linking to the product when its slug is known, variant, quantity × unit price, line total).
-- **format.js** — `formatMoney` (`৳1060.00`), `formatDate`, `formatDateTime`, `addressLines(order)`.
+- **OrderTimeline.js** — progress from the backend's `history` (`[{status, status_display, created_at}]`): placed → (confirmed, only if staff confirmed) → (paid, only if it happened) → shipped → delivered, unreached steps grey ("Not yet"); an order that ended without delivery (cancelled, a parcel that came back = returned, or refunded) ends in a red step and drops the steps that never happened. Drawn SMALL as an `<ol aria-label="Order progress">`: a dot (32 px) per step on a line, stacked on a phone (the items are not pushed out of the first screen; it used to be one big card per step), a row from `md`; the newest step that happened has `aria-current="step"` and a ring.
+- **OrderItems.js** — the order's lines (picture, name cut at two lines, variant, quantity × unit price, line total); a line whose product still exists is ONE link (the whole row, at least 72 px, opens the product) with the picture as decoration (`alt=""`).
+- **OrderTotals.js** — the sums so that they add up: Subtotal, Delivery ("Free" for 0), Discount with the coupon code (only when `discount_amount` > 0; it was ignored, so a coupon order did not add up), Total. Draws only the rows the order carries (what checkout answers a guest has no payment; every order has these numbers).
+- **CopyOrderId.js** — a 44 px button that copies the order number (`navigator.clipboard`), a tick and a toast when it worked, a toast saying so when the browser would not.
+- **format.js** — `formatMoney` (`formatPrice` of the number: `৳1,060`, `৳881.10`; it was `৳1060.00`), `formatDate`, `formatDateTime`, `addressLines(order)`.
 - **orders/index.js** — barrel exporting all of the above.
 
 ## `profile/`
