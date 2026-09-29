@@ -11,17 +11,18 @@ vi.mock('../components/sections', () => {
     return Stub;
   };
   return {
-    HeroSection: stub('hero'), FlashSale: stub('flash'), NewArrival: stub('new'), CategoriesSection: stub('categories'),
-    BestSelling: stub('best'), FeaturedProducts: stub('featured'), RecentlyViewed: stub('recent'), AllProducts: stub('all'),
+    HeroSection: stub('hero'), CategoryStrip: stub('strip'), FlashSale: stub('flash'), BestSelling: stub('best'), NewArrival: stub('new'),
+    FeaturedProducts: stub('featured'), RecentlyViewed: stub('recent'), AllProducts: stub('all'),
   };
 });
 
 describe('Home', () => {
-  it('shows the recently viewed list after the shop sections and before the full product list', () => {
+  it('goes from the offer to a way into any category, then what is on sale, what sells, what is new, the picks, where they left off, and everything', () => {
     const {container} = render(<Home />);
     const page = container.textContent;
-    expect(page).toContain('[recent]');
-    expect(page.indexOf('[featured]')).toBeLessThan(page.indexOf('[recent]'));
-    expect(page.indexOf('[recent]')).toBeLessThan(page.indexOf('[all]'));
+    const order = ['[hero]', '[strip]', '[flash]', '[best]', '[new]', '[featured]', '[recent]', '[all]'];
+
+    order.forEach((label) => expect(page).toContain(label));
+    order.slice(1).forEach((label, index) => expect(page.indexOf(order[index])).toBeLessThan(page.indexOf(label)));
   });
 });

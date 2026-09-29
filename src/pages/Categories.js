@@ -1,12 +1,13 @@
 import {useEffect, useState} from 'react'
 import {useDispatch, useSelector} from 'react-redux';
-import {Slider} from '../components/common';
+import {ContentLink, Slider} from '../components/common';
 import {Link} from 'react-router-dom';
 import {fetchFlashSaleCategories, fetchNewArrivalCategories, fetchBestSellingCategories, fetchFeaturedCategories} from '../redux/slice/categorySlice';
 import {fetchCategoriesContent} from '../redux/slice/contentSlice';
 import blurImage from '../assets/images/blur.jpg';
 import {HeroSectionSkeleton, SectionSkeleton} from '../components/common/skeleton';
 import {SectionError} from '../components/common';
+import {discountLabel} from '../utils/formatPrice';
 
 const Categories = () => {
     const { flash_sale_loading,new_arrival_loading,best_selling_loading,featured_loading,flash_sale, new_arrival, best_selling,featured, flash_sale_error,new_arrival_error,best_selling_error,featured_error } = useSelector((state) => state.category);
@@ -30,18 +31,6 @@ const Categories = () => {
     //  return <div className="text-center text-red-500">{error}</div>;
     //}
 
-    const getLink = (item)=>{
-        switch (item?.type) {
-            case 'product':
-                return `/products/detail/${item?.link}`
-            case 'category':
-                return `/products/?category=${item?.link}`
-            default:
-                return item?.external_link;
-        }
-    }
-  
-    
   return (
     <div>
 
@@ -60,7 +49,7 @@ const Categories = () => {
             {right_banner?.media_type === 'image' &&
                 <>
                 {/* Product Image */}
-                <Link to={getLink(right_banner)} target='_blank' className="block h-full">
+                <ContentLink item={right_banner} className="block h-full">
                     {/* Main Product Image */}
                     <img
                     src={right_banner?.media}
@@ -80,12 +69,12 @@ const Categories = () => {
                         className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
                     />
                     )}
-                </Link>
+                </ContentLink>
                 </>
             }
             {right_banner?.media_type === 'video' && 
                 <div className='relative h-full'>
-                <Link to={getLink(right_banner)} target='_blank' className='absolute right-2 top-2 z-10 text-blue-500 hover:underline text:2x'>{right_banner?.caption?right_banner?.caption :'Click'}</Link>
+                <ContentLink item={right_banner} className='absolute right-2 top-2 z-10 text-blue-500 hover:underline text:2x'>{right_banner?.caption?right_banner?.caption :'Click'}</ContentLink>
                 {/* Video */}
                 <video
                     src={right_banner?.media}
@@ -129,10 +118,10 @@ const Categories = () => {
                         {/* Discount Badge */}
                         {category?.has_discount && (
                         <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                            {category?.discount_amount}{category?.discount_type === 'percentage'?'%':'৳'} OFF
+                            {discountLabel(category?.discount_amount, category?.discount_type)}
                         </span>
                         )}
-                        <Link to={`/products/?category=${category?.slug}`} key={category?.id} target='_blank'>
+                        <Link to={`/products/?category=${category?.slug}`} key={category?.id}>
                         <div className="relative group cursor-pointer min-w-[150px]">
                             <img
                             src={category?.image}
@@ -180,10 +169,10 @@ const Categories = () => {
                     {/* Discount Badge */}
                     {category?.has_discount && (
                     <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                        {category?.discount_amount}{category?.discount_type === 'percentage'?'%':'৳'} OFF
+                        {discountLabel(category?.discount_amount, category?.discount_type)}
                     </span>
                     )}
-                    <Link to={`/products/?category=${category?.slug}`} key={category?.id} target='_blank'>
+                    <Link to={`/products/?category=${category?.slug}`} key={category?.id}>
                     <div className="relative group cursor-pointer min-w-[150px]">
                         <img
                         src={category?.image}
@@ -231,10 +220,10 @@ const Categories = () => {
                     {/* Discount Badge */}
                     {category?.has_discount && (
                     <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                        {category?.discount_amount}{category?.discount_type === 'percentage'?'%':'৳'} OFF
+                        {discountLabel(category?.discount_amount, category?.discount_type)}
                     </span>
                     )}
-                    <Link to={`/products/?category=${category?.slug}`} key={category?.id} target='_blank'>
+                    <Link to={`/products/?category=${category?.slug}`} key={category?.id}>
                     <div className="relative group cursor-pointer min-w-[150px]">
                         <img
                         src={category?.image}
@@ -282,10 +271,10 @@ const Categories = () => {
                         {/* Discount Badge */}
                         {category?.has_discount && (
                         <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                            {category?.discount_amount}{category?.discount_type === 'percentage'?'%':'৳'} OFF
+                            {discountLabel(category?.discount_amount, category?.discount_type)}
                         </span>
                         )}
-                        <Link to={`/products/?category=${category?.slug}`} target='_blank'>
+                        <Link to={`/products/?category=${category?.slug}`}>
                         <div className="relative group cursor-pointer min-w-[150px]">
                             <img
                             src={category?.image}

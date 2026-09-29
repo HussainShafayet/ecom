@@ -9,6 +9,7 @@ import {minimumOf, minimumOrderProblems} from '../utils/minimumOrder';
 import debounce from 'lodash.debounce'; // Import lodash debounce
 import {CartSkeleton, SectionSkeleton} from '../components/common/skeleton';
 import {SectionError} from '../components/common';
+import {discountLabel, formatPrice} from '../utils/formatPrice';
 
 const Cart = () => {
   const totalPrice = useSelector(selectTotalPrice);
@@ -173,14 +174,14 @@ const Cart = () => {
                         {/* Price Section */}
                         {item?.has_discount ? (
                           <div className="flex flex-row space-x-1">
-                            <p className="text-gray-500 line-through">{item?.base_price}</p>
+                            <p className="text-gray-500 line-through">{formatPrice(item?.base_price)}</p>
                             <p className="text-green-600 font-semibold">
-                              {item?.discount_price}{' '}
-                              <span className="text-red-500">({item?.discount_value}{item?.discount_type === 'percentage' ? '%' : '৳'} OFF)</span>
+                              {formatPrice(item?.discount_price)}{' '}
+                              <span className="text-red-500">({discountLabel(item?.discount_value, item?.discount_type)})</span>
                             </p>
                           </div>
                         ) : (
-                          <p className="text-green-600 font-semibold">{item?.base_price}</p>
+                          <p className="text-green-600 font-semibold">{formatPrice(item?.base_price)}</p>
                         )}
 
                         {/* Quantity Selector */}
@@ -288,12 +289,12 @@ const Cart = () => {
                 <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
                 <div className="flex justify-between mb-2">
                   <span>Subtotal</span>
-                  <span>{totalPrice.toFixed(2)}</span>
+                  <span>৳{totalPrice.toFixed(2)}</span>
                 </div>
                 <hr className="my-4" />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span>{totalPrice.toFixed(2)}</span>
+                  <span>৳{totalPrice.toFixed(2)}</span>
                 </div>
                 {minimumProblems.length > 0 && <div className="mt-4"><ErrorDisplay errors={[...minimumProblems, 'Increase the quantity to continue.']} /></div>}
                 {minimumProblems.length > 0 ? (
@@ -317,7 +318,7 @@ const Cart = () => {
               <div className="fixed bottom-0 left-0 w-full bg-white p-4 lg:hidden shadow-lg">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-bold text-lg">Total: {totalPrice}</p>
+                    <p className="font-bold text-lg">Total: ৳{totalPrice.toFixed(2)}</p>
                   </div>
                   {minimumProblems.length > 0 ? (
                     <span aria-disabled="true" className="bg-gray-300 text-gray-500 font-bold py-2 px-6 rounded-lg flex items-center cursor-not-allowed">

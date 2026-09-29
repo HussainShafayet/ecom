@@ -21,7 +21,6 @@ const initialState ={
 
 export const fetchAllCategories = createAsyncThunk("category/fetchAllCategories", async ({page_size=null,page=1,})=>{
     const response =  await getAllCategories(page_size, page);
-    console.log('get all categories res', response);
     return {data: response?.data?.data?.results || [], error: response?.message};
 });
 

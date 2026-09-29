@@ -11,6 +11,7 @@ import 'react-medium-image-zoom/dist/styles.css'
 import {ProductDetailsSkeleton} from '../components/common/skeleton';
 import defaultImage from '../assets/images/default_product_image.jpg';
 import {SectionError} from '../components/common';
+import {discountLabel, formatPrice} from '../utils/formatPrice';
 
 const ProductDetails = () => {
   const { slug } = useParams();
@@ -344,15 +345,15 @@ useEffect(() => {
               {product?.has_discount ? (
                 <div className="mb-1 flex flex-row space-x-1">
                   <p className=" text-gray-500 line-through">
-                    {selectedSize?.base_price}
+                    {formatPrice(selectedSize?.base_price)}
                   </p>
                   <p className="text-2x text-green-600 font-semibold">
-                  {selectedSize?.discount_price} <span className="text-red-500">({product?.discount_value}{product?.discount_type == 'percentage'?'%':'৳'} OFF)</span>
+                  {formatPrice(selectedSize?.discount_price)} <span className="text-red-500">({discountLabel(product?.discount_value, product?.discount_type)})</span>
                   </p>
                 </div>
               ) : (
                 <p className="text-2xl text-green-600 font-semibold mb-1">
-                  {selectedSize?.base_price}
+                  {formatPrice(selectedSize?.base_price)}
                 </p>
               )}
               </>
@@ -361,15 +362,15 @@ useEffect(() => {
                 {product?.has_discount ? (
                   <div className="mb-1 flex flex-row space-x-1">
                     <p className=" text-gray-500 line-through">
-                      {product?.base_price}
+                      {formatPrice(product?.base_price)}
                     </p>
                     <p className="text-2x text-green-600 font-semibold">
-                    {product?.discount_price} <span className="text-red-500">({product?.discount_value}{product?.discount_type == 'percentage'?'%':'৳'} OFF)</span>
+                    {formatPrice(product?.discount_price)} <span className="text-red-500">({discountLabel(product?.discount_value, product?.discount_type)})</span>
                     </p>
                   </div>
                 ) : (
                   <p className="text-2xl text-green-600 font-semibold mb-1">
-                    {product?.base_price}
+                    {formatPrice(product?.base_price)}
                   </p>
                 )}
               </>

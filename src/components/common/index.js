@@ -19,6 +19,7 @@ export {default as SuccessMessage} from './SuccessMessage';
 export {default as SearchDropdown} from './SearchDropdown';
 export {default as BottomNav} from './BottomNav';
 export {default as SectionError} from './SectionError';
+export {default as ContentLink} from './ContentLink';
 export {default as Toaster} from './Toaster';
 
 

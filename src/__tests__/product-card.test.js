@@ -59,8 +59,8 @@ describe('What the product card shows', () => {
     renderCards(<ProductCard product={KETTLE} />);
     expect(screen.getByText('Blue Kettle')).toBeTruthy();
     expect(screen.getByText('Acme')).toBeTruthy();
-    expect(screen.getByText('900')).toBeTruthy();
-    expect(screen.getByText('1200')).toBeTruthy();
+    expect(screen.getByText('৳900')).toBeTruthy();
+    expect(screen.getByText('৳1,200')).toBeTruthy();
     expect(screen.getByText('25% OFF')).toBeTruthy();
     expect(screen.getByAltText('Blue Kettle').closest('a').getAttribute('href')).toBe('/products/detail/blue-kettle');
   });
@@ -68,8 +68,8 @@ describe('What the product card shows', () => {
   it('does not show the discount or the old price for a product that has none', () => {
     renderCards(<ProductCard product={MUG} />);
     expect(screen.queryByText(/OFF/)).toBeNull();
-    expect(screen.getByText('1200')).toBeTruthy();
-    expect(screen.queryByText('900')).toBeNull();
+    expect(screen.getByText('৳1,200')).toBeTruthy();
+    expect(screen.queryByText('৳900')).toBeNull();
   });
 
   it('leaves out the view and order counters', () => {

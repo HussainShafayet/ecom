@@ -64,7 +64,7 @@ describe('The promo code box at checkout', () => {
     ));
     expect(await screen.findByText('SUMMER25')).toBeTruthy();
     expect(screen.getByText('Discount')).toBeTruthy();
-    expect(screen.getByText('-50.00')).toBeTruthy();
+    expect(screen.getByText('-৳50.00')).toBeTruthy();
     expect(screen.queryByPlaceholderText('Promo code')).toBeNull(); // the input hides once applied
   });
 

@@ -5,6 +5,7 @@ import { addToCart, handleAddtoCart, handleClonedProduct } from '../../../redux/
 import { FaBolt, FaHeart, FaRegHeart, FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
 import {addToWishlist, handleAddtoWishlist, handleRemovetoWishlist, removeFromWishlist} from '../../../redux/slice/wishlistSlice';
 import {minimumOf} from '../../../utils/minimumOrder';
+import {discountLabel, formatPrice} from '../../../utils/formatPrice';
 import defaultImage from '../../../assets/images/default_product_image.jpg';
 
 // These are declared here, not inside ProductCard: a component declared in a render is a new component every render,
@@ -12,7 +13,7 @@ import defaultImage from '../../../assets/images/default_product_image.jpg';
 
 const DiscountBadge = ({ discountValue, discountType }) => (
   <span className="absolute left-2 top-2 z-10 rounded-full bg-red-600 px-2 py-0.5 text-[11px] font-bold text-white">
-    {discountValue}{discountType === 'percentage' ? '%' : '৳'} OFF
+    {discountLabel(discountValue, discountType)}
   </span>
 );
 
@@ -84,11 +85,11 @@ const Rating = ({ rating, reviews }) => {
 const Price = ({ hasDiscount, discountPrice, basePrice }) => (
   hasDiscount ? (
     <div className="flex flex-wrap items-baseline gap-x-2">
-      <span className="text-base font-bold text-gray-900 sm:text-lg">{discountPrice}</span>
-      <span className="text-xs text-gray-400 line-through">{basePrice}</span>
+      <span className="text-base font-bold text-gray-900 sm:text-lg">{formatPrice(discountPrice)}</span>
+      <span className="text-xs text-gray-400 line-through">{formatPrice(basePrice)}</span>
     </div>
   ) : (
-    <span className="text-base font-bold text-gray-900 sm:text-lg">{basePrice}</span>
+    <span className="text-base font-bold text-gray-900 sm:text-lg">{formatPrice(basePrice)}</span>
   )
 );
 
