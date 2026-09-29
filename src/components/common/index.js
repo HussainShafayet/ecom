@@ -62,6 +62,8 @@ export { default as AuthLayout }
 from './AuthLayout';
 export { default as OtpInput }
 from './OtpInput';
+export { default as WaitNotice }
+from './WaitNotice';
 export { default as LazySection }
 from './LazySection';
 export { default as ContentLink }
