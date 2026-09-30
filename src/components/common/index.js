@@ -20,10 +20,6 @@ export { default as SectionHeader }
 from './SectionHeader';
 export { default as InputField }
 from './InputField';
-export { default as Sidebar }
-from './product/Sidebar';
-export { default as Accordion }
-from './Accordion';
 export { default as Button }
 from './Button';
 export { default as Loader }
@@ -42,8 +38,6 @@ export { default as Slider }
 from './Slider';
 export { default as RichTextToHTML }
 from './RichTextToHTML';
-export { default as SelectFilter }
-from './product/SelectFilter';
 export { default as ErrorDisplay }
 from './ErrorDisplay';
 export { default as SuccessMessage }

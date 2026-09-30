@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaFilter, FaSearch } from 'react-icons/fa';
-import { Breadcrum, ProductCard, SectionError, Sidebar } from '../components/common';
+import { Breadcrum, ProductCard, SectionError } from '../components/common';
+import { ActiveFilters, FilterSheet, FilterSidebar } from '../components/products';
 import { ProductsPageSkeleton } from '../components/common/skeleton';
-import { fetchAllProducts, setIsSidebarOpen } from '../redux/slice/productSlice';
+import { fetchAllProducts } from '../redux/slice/productSlice';
+import { fetchShopContent } from '../redux/slice/contentSlice';
 import { clearSectionError } from '../redux/slice/globalErrorSlice';
-import { filterCount, readFilters, withoutFilters } from '../utils/productFilters';
+import useMediaQuery from '../hooks/useMediaQuery';
+import { filterChips, filterCount, filtersToParams, readFilters, withoutFilters } from '../utils/productFilters';
 
 // What the shopper can sort by. `discount_price` is what they pay (the backend's `price` is the price before a discount, which
 // reads wrong next to a sale), so that is "Price". An address that carries one of the other orderings still shows it in the box.
@@ -41,15 +44,18 @@ const NoProducts = ({ search, chosen, onClearFilters, onSeeAll }) => (
   </div>
 );
 
-// The shop's products, phone first: a title with how many there are, a Filters button and a Sort box (44 px), the products two to a
-// row, and "Load more" under them. What the shopper chose lives in the address (`utils/productFilters`), and ANY change of it is a
+// The shop's products, phone first: a title with how many there are, a Filters button (a sheet from the bottom; beside the list from
+// `lg`) and a Sort box (44 px), a chip for each chosen filter, the products two to a row, and "Load more" under them. What the shopper chose lives in the address (`utils/productFilters`), and ANY change of it is a
 // new list from its first page: the old list is never added to (it used to be, so a new sort after "more" showed another page of
 // the new list under the old one). While the next page loads the list stays on the screen; while a new list loads, only the
 // cards wait (skeleton), the title and the controls stay.
-const Products = () => {
+const Products = ({ scrollContainerRef }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
-  const { items: products, isLoading, isLoadingMore, error, hasMore, count, listKey, listPage, isSidebarOpen } = useSelector((state) => state.product);
+  const { items: products, isLoading, isLoadingMore, error, hasMore, count, listKey, listPage } = useSelector((state) => state.product);
+  const categories = useSelector((state) => state.content.categories);
+  const isDesktop = useMediaQuery('(min-width: 1024px)'); // the filters are a sidebar there, a sheet on a phone
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [asked, setAsked] = useState(false); // nothing of an earlier visit's list is drawn before this visit's first request
   const [moreFailed, setMoreFailed] = useState(false);
 
@@ -62,6 +68,13 @@ const Products = () => {
     dispatch(fetchAllProducts({ ...readFilters(new URLSearchParams(query)), page: 1, key: query }));
     setAsked(true);
   }, [dispatch, query]);
+
+  useEffect(() => {
+    dispatch(fetchShopContent()); // what there is to filter by
+  }, [dispatch]);
+
+  const showFilters = (next) => setSearchParams(filtersToParams(searchParams, next)); // the address is the one place they live
+  const clearFilters = () => setSearchParams(withoutFilters(searchParams));
 
   const retry = () => {
     dispatch(clearSectionError('products'));
@@ -97,7 +110,7 @@ const Products = () => {
       <NoProducts
         search={filters.search}
         chosen={chosen > 0}
-        onClearFilters={() => setSearchParams(withoutFilters(searchParams))}
+        onClearFilters={clearFilters}
         onSeeAll={() => setSearchParams({})}
       />
     );
@@ -134,18 +147,12 @@ const Products = () => {
     <div className="min-h-screen">
       <Breadcrum />
 
-      {/* Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-10 lg:hidden" onClick={() => dispatch(setIsSidebarOpen(false))}></div>
-      )}
-
-      <div className="mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
-        {/* Sidebar (Sliding from below the Navbar on mobile) */}
-        <div className={`lg:col-span-1 fixed lg:sticky top-0 left-0 h-full bg-white z-20 transform ${
-            isSidebarOpen ? 'translate-x-0 mt-[100px]' : '-translate-x-full'
-          } transition-transform duration-300 lg:translate-x-0`}>
-          <Sidebar onClose={() => dispatch(setIsSidebarOpen(false))} />
-        </div>
+      <div className="mx-auto grid grid-cols-1 gap-8 lg:grid-cols-5">
+        {isDesktop && (
+          <aside className="self-start lg:col-span-1">
+            <FilterSidebar filters={filters} onChange={showFilters} onClear={clearFilters} />
+          </aside>
+        )}
 
         <div className="min-w-0 lg:col-span-4">
           <div className="mb-3">
@@ -158,7 +165,7 @@ const Products = () => {
           <div className="mb-4 grid grid-cols-2 gap-2 lg:flex lg:justify-end">
             <button
               type="button"
-              onClick={() => dispatch(setIsSidebarOpen(true))}
+              onClick={() => setSheetOpen(true)}
               aria-haspopup="dialog"
               className="flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-800 hover:bg-gray-50 lg:hidden"
             >
@@ -179,9 +186,20 @@ const Products = () => {
             </div>
           </div>
 
+          <ActiveFilters chips={filterChips(filters, categories)} onRemove={(chip) => showFilters(chip.remove(filters))} onClear={clearFilters} />
+
           {list}
         </div>
       </div>
+
+      {sheetOpen && !isDesktop && (
+        <FilterSheet
+          filters={filters}
+          scrollRef={scrollContainerRef}
+          onClose={() => setSheetOpen(false)}
+          onApply={(next) => { showFilters(next); setSheetOpen(false); }}
+        />
+      )}
     </div>
   );
 };
