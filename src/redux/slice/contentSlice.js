@@ -1,4 +1,5 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import {apiErrorMessage} from "../../api/errors";
 import {getBestSellingContent, getCategoriesContent, getFeaturedContent, getFlashSaleContent, getHomeContent, getNewArrivalContent, getShopContent} from "../../services/contentService";
 
 const initialState ={
@@ -15,6 +16,9 @@ const initialState ={
     left_banner: null,
     right_banner: null,
     error: null,
+    shopLoading: false, // the filters' lists (categories ... discounts) have their own flags: another content request must not draw or hide them
+    shopLoaded: false,
+    shopError: null,
 }
 
 export const fetchHomeContent = createAsyncThunk("content/fetchHomeContent", async ()=>{
@@ -47,10 +51,14 @@ export const fetchFeaturedContent = createAsyncThunk("content/fetchFeaturedConte
     return {data: response?.data?.data, error: response?.message};
 });
 
-export const fetchShopContent = createAsyncThunk("content/fetchShopContent", async ()=>{
-    const response =  await getShopContent();
-    console.log('get shop content res', response);
-    return {data: response?.data?.data, error: response?.message};
+// the lists the products page filters by. A failure is a sentence (apiErrorMessage), never a raw status line.
+export const fetchShopContent = createAsyncThunk("content/fetchShopContent", async (_, {rejectWithValue})=>{
+    try {
+        const response =  await getShopContent();
+        return {data: response?.data?.data};
+    } catch (error) {
+        return rejectWithValue(apiErrorMessage(error));
+    }
 });
 
 export const fetchCategoriesContent = createAsyncThunk("content/fetchCategoriesContent", async ()=>{
@@ -179,30 +187,24 @@ const contentSlice = createSlice({
 
         //get shop content
         builder.addCase(fetchShopContent.pending, (state)=>{
-            state.isLoading = true;
+            state.shopLoading = true;
+            state.shopError = null;
         });
         builder.addCase(fetchShopContent.fulfilled,(state, action)=>{
-            state.isLoading = false;
-            state.error = null;
-            state.categories =  action?.payload?.data?.categories;
-            state.tags =  action?.payload?.data?.tags;
-            state.brands =  action?.payload?.data?.brands;
-            state.colors =  action?.payload?.data?.colors;
-            state.sizes =  action?.payload?.data?.sizes;
-            state.price_range =  action?.payload?.data?.price_range;
-            state.discounts =  action?.payload?.data?.discounts;
-            
+            const shop = action?.payload?.data;
+            state.shopLoading = false;
+            state.shopLoaded = true;
+            state.categories =  shop?.categories || [];
+            state.tags =  shop?.tags || [];
+            state.brands =  shop?.brands || [];
+            state.colors =  shop?.colors || [];
+            state.sizes =  shop?.sizes || [];
+            state.price_range =  shop?.price_range || {};
+            state.discounts =  shop?.discounts || [];
         });
         builder.addCase(fetchShopContent.rejected,(state, action)=>{
-            state.isLoading = false;
-            state.categories = [];
-            state.tags = [];
-            state.brands = [];
-            state.colors = [];
-            state.sizes = [];
-            state.price_range = {};
-            state.discounts = [];
-            state.error = action?.error?.message  || 'Something went wrong!';
+            state.shopLoading = false;
+            state.shopError = action?.payload || action?.error?.message || 'Something went wrong!'; // what was loaded before stays
         });
 
 

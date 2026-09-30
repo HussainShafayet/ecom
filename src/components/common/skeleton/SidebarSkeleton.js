@@ -1,48 +1,17 @@
 import React from "react";
 
+// The filter groups while the shop's lists load: a heading and a few rows each, in the panel's shape
 const SidebarSkeleton = () => {
   return (
-    <div className="bg-gray-100 p-4 rounded-lg space-y-4 max-h-svh overflow-y-auto lg:sticky top-[100px] animate-pulse">
-      {/* Mobile Close Button Skeleton */}
-      <div className="flex justify-between items-center lg:hidden mb-4">
-        <div className="h-6 w-24 bg-gray-300 rounded"></div>
-        <div className="h-6 w-6 bg-gray-300 rounded-full"></div>
-      </div>
-
-      {/* Filters with Accordions Skeleton */}
-      <div className="space-y-4">
-        {/* Categories Skeleton */}
-        <div className="h-10 w-full bg-gray-300 rounded"></div>
-        <div className="h-32 w-full bg-gray-300 rounded"></div>
-
-        {/* Brands Skeleton */}
-        <div className="h-10 w-full bg-gray-300 rounded"></div>
-        <div className="h-24 w-full bg-gray-300 rounded"></div>
-
-        {/* Tags Skeleton */}
-        <div className="h-10 w-full bg-gray-300 rounded"></div>
-        <div className="h-24 w-full bg-gray-300 rounded"></div>
-
-        {/* Price Range Skeleton */}
-        <div className="h-10 w-full bg-gray-300 rounded"></div>
-        <div className="h-16 w-full bg-gray-300 rounded"></div>
-
-        {/* Color Filter Skeleton */}
-        <div className="h-10 w-full bg-gray-300 rounded"></div>
-        <div className="flex space-x-2">
-          {[...Array(5)].map((_, index) => (
-            <div key={index} className="w-6 h-6 bg-gray-300 rounded-full"></div>
+    <div className="animate-pulse space-y-4 py-2" aria-hidden="true">
+      {[3, 4, 2, 3].map((rows, group) => (
+        <div key={group} className="space-y-2">
+          <div className="h-6 w-32 rounded bg-gray-300"></div>
+          {Array.from({ length: rows }).map((_, row) => (
+            <div key={row} className="h-10 rounded bg-gray-200"></div>
           ))}
         </div>
-
-        {/* Size Filter Skeleton */}
-        <div className="h-10 w-full bg-gray-300 rounded"></div>
-        <div className="h-16 w-full bg-gray-300 rounded"></div>
-
-        {/* Discount Skeleton */}
-        <div className="h-10 w-full bg-gray-300 rounded"></div>
-        <div className="h-24 w-full bg-gray-300 rounded"></div>
-      </div>
+      ))}
     </div>
   );
 };

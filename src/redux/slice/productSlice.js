@@ -26,8 +26,6 @@ const initialState = {
     listKey: null, // which list `items` is (the page's query string; undefined when another page asked), so a page never draws another's
     listPage: 1, // the last page of it that was loaded
     listRequestId: null, // the request whose answer counts; an older one that arrives late is ignored
-    isSidebarOpen: false,
-    sortType: '',
     selectedColor: null,
     selectedSize: null,
     suggestionsLoading: false,
@@ -102,12 +100,6 @@ const productSlice = createSlice({
             const wanted = Math.floor(Number(action.payload));
             state.quantity = Math.min(MAX_QUANTITY, Math.max(state.minimum_quantity, Number.isFinite(wanted) ? wanted : state.minimum_quantity));
         },
-        setIsSidebarOpen: (state, action)=>{
-            state.isSidebarOpen = action.payload;
-        },
-        setSortType: (state, action)=>{
-            state.sortType = action.payload;
-        }, 
         setSelectedColor: (state, action)=>{
             state.selectedColor = action.payload
         },
@@ -230,5 +222,5 @@ const productSlice = createSlice({
     }
 });
 
-export const {setMainImage, setQuantity, setIsSidebarOpen, setSortType, setSelectedColor, setSelectedSize, suggestionsInputTime} = productSlice.actions;
+export const {setMainImage, setQuantity, setSelectedColor, setSelectedSize, suggestionsInputTime} = productSlice.actions;
 export default productSlice.reducer;
