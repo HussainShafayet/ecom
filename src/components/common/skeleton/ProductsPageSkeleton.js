@@ -1,34 +1,14 @@
 import React from "react";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 
+// The products in the shape of the list (two to a row on a phone, like the cards themselves); the title and the filter / sort
+// row above them stay on the screen, only the cards wait.
 const ProductsPageSkeleton = () => {
   return (
-    <div className="w-full min-h-screen animate-pulse">
-        {/* Main Content Skeleton */}
-          {/* Sort & Filters Skeleton */}
-          <div className="flex justify-between items-center mb-4">
-            {/* Show Filters Button */}
-            <div className="w-24 h-8 bg-gray-300 rounded lg:hidden"></div>
-
-            {/* Title Placeholder */}
-            <div className="hidden md:block h-6 w-48 bg-gray-300 rounded"></div>
-
-            {/* Sorting & Show Items Options */}
-            <div className="flex space-x-2">
-              <div className="h-8 w-16 bg-gray-300 rounded"></div>
-              <div className="h-8 w-32 bg-gray-300 rounded"></div>
-            </div>
-          </div>
-
-          {/* Product Grid Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
-            {[...Array(10)].map((_, index) => (
-              <ProductCardSkeleton key={index} />
-            ))}
-          </div>
-
-          {/* Loading More Products Message */}
-          <div className="text-center mt-4 h-6 w-48 bg-gray-300 rounded mx-auto"></div>
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5" aria-hidden="true">
+      {[...Array(8)].map((_, index) => (
+        <ProductCardSkeleton key={index} />
+      ))}
     </div>
   );
 };

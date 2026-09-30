@@ -1,6 +1,7 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {getAllProducts, getFeaturedProducts, getProductById} from "../../services/productService";
 import publicApi from "../../api/publicApi";
+import {apiErrorMessage} from "../../api/errors";
 // The most one cart line can hold (backend apps/cart/services.py MAX_QUANTITY)
 export const MAX_QUANTITY = 10000;
 
@@ -20,6 +21,11 @@ const initialState = {
     quantity: 1,
     minimum_quantity:1,
     hasMore: true,
+    count: null, // how many products the shop has for the list that is loaded (the backend's `count`)
+    isLoadingMore: false, // `isLoading` for the page after the first: the list stays on the screen
+    listKey: null, // which list `items` is (the page's query string; undefined when another page asked), so a page never draws another's
+    listPage: 1, // the last page of it that was loaded
+    listRequestId: null, // the request whose answer counts; an older one that arrives late is ignored
     isSidebarOpen: false,
     sortType: '',
     selectedColor: null,
@@ -29,13 +35,15 @@ const initialState = {
     suggestionsError: null,
 }
 
-//get all products
-export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", async ({page_size=null,ordering=null, page=1,category = null, brands=[], tags=[], min_price=0, max_price=0, sizes=[], colors=[],discount_type, discount_value, search=""})=>{
-
-    let response = await getAllProducts(page_size, ordering, page, category, brands,tags, min_price, max_price, sizes, colors,discount_type, discount_value,search);
-    console.log('get all product res', response);
-
-    return {data: response?.data?.data?.results || [], next: response?.data?.data?.next || null, error: response.message};
+//get all products. `page` > 1 is the next page of the same list (it is added under the first); `key` names the list (the
+//products page passes its query string) so the page can tell its own list from one another page loaded
+export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", async ({page_size=null,ordering=null, page=1,category = null, brands=[], tags=[], min_price=0, max_price=0, sizes=[], colors=[],discount_type, discount_value, search=""}, {rejectWithValue})=>{
+    try {
+        const response = await getAllProducts(page_size, ordering, page, category, brands,tags, min_price, max_price, sizes, colors,discount_type, discount_value,search);
+        return {data: response?.data?.data?.results || [], next: response?.data?.data?.next || null, count: response?.data?.data?.count ?? null};
+    } catch (error) {
+        return rejectWithValue(apiErrorMessage(error)); // a sentence, never a raw "Request failed with status code 503"
+    }
 });
 
 //get featured products
@@ -113,24 +121,37 @@ const productSlice = createSlice({
     extraReducers: (builder)=>{
 
         //get all products
-        builder.addCase(fetchAllProducts.pending, (state)=>{
+        builder.addCase(fetchAllProducts.pending, (state, action)=>{
+            const more = action.meta.arg.page > 1;
+            state.listRequestId = action.meta.requestId;
             state.relatedProductsLoading = true;
             state.isLoading = true;
+            state.isLoadingMore = more;
+            if (!more) {
+                state.error = null;
+                state.listKey = action.meta.arg.key;
+            }
         });
         builder.addCase(fetchAllProducts.fulfilled,(state, action)=>{
+            if (state.listRequestId !== action.meta.requestId) return; // a newer list is on its way: this answer is for one nobody looks at
+            const page = action.meta.arg.page || 1;
             state.relatedProductsLoading = false;
             state.isLoading = false;
+            state.isLoadingMore = false;
             state.error = null;
-            state.items = action.meta.arg.page > 1
+            state.items = page > 1
             ? [...state.items, ...action?.payload?.data]
             : action?.payload?.data;
+            state.listPage = page;
+            state.count = action?.payload?.count;
             state.hasMore = Boolean(action?.payload?.next); // the backend says whether another page exists
         });
         builder.addCase(fetchAllProducts.rejected,(state, action)=>{
+            if (state.listRequestId !== action.meta.requestId) return;
             state.relatedProductsLoading = false;
             state.isLoading = false;
-            //state.products = [];
-            state.error = action?.error?.message || 'Something went wrong';
+            state.isLoadingMore = false;
+            state.error = action?.payload || action?.error?.message || 'Something went wrong';
         });
 
 
