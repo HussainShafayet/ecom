@@ -6,7 +6,6 @@
 
 ## `common/` (top-level)
 
-- **Accordion.js** — collapsible section; props: `title`, `children`, `icon`; defaults **open** (slightly unusual default).
 - **BackToTop.js** — floating scroll-to-top button with a circular SVG progress ring; prop: `scrollContainerRef`; CSS Modules, not Tailwind.
 - **BottomNav.js** — mobile-only (`md:hidden`) bottom tab bar (Home/Shop/Cart/Wishlist/Account); reads Redux cart/auth state directly, no props.
 - **Button.js** — generic button; props: `label`, `onClick`, `type` (default `"button"`), `styleClass` (extra classes appended); hardcoded blue background, no `variant`/`color` prop.
@@ -44,12 +43,23 @@ Also in `common/`: **SectionHeader.js** (the title row every homepage section sh
 - **CollapsibleSection.js** — a titled block that folds up under a 48 px title button on a phone (`aria-expanded`), always open from `md` (the title is inert there).
 - **ShareMenu.js** — `navigator.share` sheet where the browser has one (phones over https); otherwise a menu: Copy link ("Link copied", falls back to `execCommand` without the Clipboard API, e.g. a page opened over plain http), Facebook, X, WhatsApp, all with the product's `name` (they used `product.title`, which does not exist, and `alert()`ed).
 - **RatingAndReview.js** — product-detail reviews list + review submission form (rating, comment, file/video upload); prop `product`. When the signed-in customer can not review, a file-local `ReviewEligibility` says why from `review_status`: `reviewed` ("use the edit icon"), `waiting_for_delivery` ("once your order has been delivered" + a *View my order* link to `/orders/{review_order_id}`), anything else the general rule. Minor bug: `dispatch(dispatch(updateReviewFormData(...)))` — a double-dispatch nesting around lines ~82–85, likely a copy-paste error.
-- **SelectFilter.js** — generic checkbox filter list synced to URL search params; props `items`, `type` (special-cased rendering for `type === 'colors'`).
-- **Sidebar.js** — shop filter sidebar (categories tree, brand/tag/color/size checkboxes via `SelectFilter`, price range, discount radio), wrapped in `Accordion`s; prop `onClose` (mobile close button).
+
+## `products/`
+
+The filters of the products page (see `pages/Products` in [02-routing-pages.md](02-routing-pages.md)). Everything is controlled: the panel edits a `filters` object (`{category, brands, tags, colors, sizes, min_price, max_price, discount_type, discount_value}`, see `utils/productFilters`) and hands each change to `onChange`.
+
+- **FilterPanel.js** — every group, one under another: Category (`CategoryTree`), Price (`PriceFilter`), Brand / Tag (`CheckList`: 48 px rows whose whole row is the `<label>`, the first 8 and "Show all N" / "Show fewer", what is chosen always shown), Color / Size (`Chip`: 44 px, `aria-pressed`), Discount (radios, "Any" first). It reads the shop's lists from `state.content` and draws `SidebarSkeleton` until they arrived or `SectionError` + Try again (`fetchShopContent`) if they could not. Prop `commitPrice`: `'change'` (every key, for the sheet's draft) or `'blur'` (on leaving the box / Enter, for the sidebar).
+- **FilterSection.js** — a group that opens and closes: a 48 px heading button with `aria-expanded`/`aria-controls` and the number chosen in it; `defaultOpen` is read once. Replaced `common/Accordion`.
+- **CategoryTree.js** — the categories as a tree with no scroll box; choosing one chooses it and what is under it (the backend's `category` includes children), choosing it again takes it off; a 44 px chevron opens the children, the path down to the chosen one starts open. `CategoryNode` is declared at module level (a component declared in a render forgets what it opened).
+- **PriceFilter.js** — From / To, `inputmode="numeric"`, digits only, ৳ in front; the wrong-way-round sentence comes from its own boxes, so it shows on the desktop too where nothing is applied until it is right; the shop's price range as a hint.
+- **FilterSheet.js** — the phone's sheet: `role="dialog" aria-modal`, `fixed inset-0 z-[60] lg:hidden`, `max-h-[90vh]` (`90dvh` where supported), a header with a 44 px X, the groups scrolling in the middle, and **Clear all** / **Show results** in a footer that never scrolls away (`env(safe-area-inset-bottom)`). `useDialog` (`hooks/useDialog.js`) gives it focus in and out, Tab inside, Esc, and stops the page behind it from scrolling (`scrollRef`, the Layout's scroll box, gets `overflow: hidden` while it is open). Show results with a range the wrong way round focuses the From box instead.
+- **FilterSidebar.js** — the same panel for `lg`: a sticky card with the heading and Clear all.
+- **ActiveFilters.js** — the chip row (`role="group"`, every chip a button "Remove Acme"), nothing when nothing is chosen.
+- **products/index.js** — barrel.
 
 ## `common/skeleton/`
 
-Consistent pattern: plain functional components using Tailwind's `animate-pulse` + gray placeholder `div`s (no external skeleton library). Barrel-exported via `skeleton/index.js`: `HeroSectionSkeleton`, `ProductCardSkeleton`, `SectionSkeleton` (used generically by Flash Sale/Best Selling/New Arrival/Featured/AllProducts, toggled via `forRoute`; note its internal component is misspelled `Sectionkeleton`, though the export/usage is unaffected), `ProductDetailsSkeleton` (same shape as the page: square gallery + thumbnails, details, sections), `ProductsPageSkeleton` (composes `ProductCardSkeleton`), `SidebarSkeleton`, `ProfileSkeleton` (the band with the picture on its edge, the orders row, the tabs, the details), `CartSkeleton` (same shape as the cart page, no scroll box), `CheckoutSkeleton`, `OrdersSkeleton` (three order cards) and `OrderDetailSkeleton` (header, progress, items; also the tracking lookup).
+Consistent pattern: plain functional components using Tailwind's `animate-pulse` + gray placeholder `div`s (no external skeleton library). Barrel-exported via `skeleton/index.js`: `HeroSectionSkeleton`, `ProductCardSkeleton`, `SectionSkeleton` (used generically by Flash Sale/Best Selling/New Arrival/Featured/AllProducts, toggled via `forRoute`; note its internal component is misspelled `Sectionkeleton`, though the export/usage is unaffected), `ProductDetailsSkeleton` (same shape as the page: square gallery + thumbnails, details, sections), `ProductsPageSkeleton` (just the cards, two to a row: the products page keeps its title and controls on the screen while a list loads), `SidebarSkeleton` (the filter groups in the panel's shape: a heading and some rows each), `ProfileSkeleton` (the band with the picture on its edge, the orders row, the tabs, the details), `CartSkeleton` (same shape as the cart page, no scroll box), `CheckoutSkeleton`, `OrdersSkeleton` (three order cards) and `OrderDetailSkeleton` (header, progress, items; also the tracking lookup).
 
 ## `sections/` (homepage/shop sections, all Redux-driven)
 

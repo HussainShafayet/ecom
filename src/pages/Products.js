@@ -1,218 +1,207 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useParams, useSearchParams } from 'react-router-dom';
-import { Breadcrum, Loader, ProductCard, Sidebar } from '../components/common'; // Reusable ProductCard component
-
+import { Link, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllProducts, setIsSidebarOpen } from '../redux/slice/productSlice';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { FaArrowDown, FaArrowUp, FaFilter, FaFlag } from 'react-icons/fa';
-import { ProductCardSkeleton, ProductsPageSkeleton } from '../components/common/skeleton';
-import {SectionError} from '../components/common';
+import { FaFilter, FaSearch } from 'react-icons/fa';
+import { Breadcrum, ProductCard, SectionError } from '../components/common';
+import { ActiveFilters, FilterSheet, FilterSidebar } from '../components/products';
+import { ProductsPageSkeleton } from '../components/common/skeleton';
+import { fetchAllProducts } from '../redux/slice/productSlice';
+import { fetchShopContent } from '../redux/slice/contentSlice';
+import { clearSectionError } from '../redux/slice/globalErrorSlice';
+import useMediaQuery from '../hooks/useMediaQuery';
+import { filterChips, filterCount, filtersToParams, readFilters, withoutFilters } from '../utils/productFilters';
 
+// What the shopper can sort by. `discount_price` is what they pay (the backend's `price` is the price before a discount, which
+// reads wrong next to a sale), so that is "Price". An address that carries one of the other orderings still shows it in the box.
+const SORTS = [
+  { value: '', label: 'Newest' },
+  { value: 'discount_price', label: 'Price: Low to High' },
+  { value: '-discount_price', label: 'Price: High to Low' },
+  { value: '-rating', label: 'Top rated' },
+];
+const OTHER_SORTS = {
+  price: 'List price: Low to High',
+  '-price': 'List price: High to Low',
+  rating: 'Lowest rated first',
+};
+
+// "men-shirts" -> "Men shirts": the title of a category page, until the shop's own name for it is at hand
+const humanize = (slug) => slug.replace(/-/g, ' ');
+
+// When nothing came back: which of three reasons it is (a search, filters, or simply an empty shop) says what to do next
+const NoProducts = ({ search, chosen, onClearFilters, onSeeAll }) => (
+  <div className="flex flex-col items-center rounded-2xl border border-gray-100 bg-white px-4 py-10 text-center shadow-sm">
+    <span aria-hidden="true" className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 text-2xl text-indigo-600"><FaSearch /></span>
+    <h2 className="mt-3 break-words font-semibold text-gray-900">
+      {chosen ? 'No products match these filters' : search ? `No results for “${search}”` : 'No products here yet'}
+    </h2>
+    <p className="mt-1 text-sm text-gray-600">
+      {chosen ? 'Try taking a filter off.' : search ? 'Check the spelling or try a shorter word.' : 'Please check back soon.'}
+    </p>
+    {chosen && <button type="button" onClick={onClearFilters} className="mt-4 h-12 rounded-lg bg-blue-600 px-6 font-semibold text-white hover:bg-blue-700">Clear filters</button>}
+    {!chosen && search && <button type="button" onClick={onSeeAll} className="mt-4 h-12 rounded-lg bg-blue-600 px-6 font-semibold text-white hover:bg-blue-700">See all products</button>}
+    {!chosen && !search && <Link to="/" className="mt-4 flex h-12 items-center rounded-lg bg-blue-600 px-6 font-semibold text-white hover:bg-blue-700">Back to home</Link>}
+  </div>
+);
+
+// The shop's products, phone first: a title with how many there are, a Filters button (a sheet from the bottom; beside the list from
+// `lg`) and a Sort box (44 px), a chip for each chosen filter, the products two to a row, and "Load more" under them. What the shopper chose lives in the address (`utils/productFilters`), and ANY change of it is a
+// new list from its first page: the old list is never added to (it used to be, so a new sort after "more" showed another page of
+// the new list under the old one). While the next page loads the list stays on the screen; while a new list loads, only the
+// cards wait (skeleton), the title and the controls stay.
 const Products = ({ scrollContainerRef }) => {
-        //
-        const [searchParams, setSearchParams] = useSearchParams();
-        const dispatch = useDispatch();
-        const { items: products, isLoading, error, hasMore, isSidebarOpen } = useSelector((state) => state.product);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const dispatch = useDispatch();
+  const { items: products, isLoading, isLoadingMore, error, hasMore, count, listKey, listPage } = useSelector((state) => state.product);
+  const categories = useSelector((state) => state.content.categories);
+  const isDesktop = useMediaQuery('(min-width: 1024px)'); // the filters are a sidebar there, a sheet on a phone
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [asked, setAsked] = useState(false); // nothing of an earlier visit's list is drawn before this visit's first request
+  const [moreFailed, setMoreFailed] = useState(false);
 
-        //get lastpath
-        const location = useLocation();
-        // Split the pathname and filter out empty strings
-        const pathParts = location.pathname.split('/').filter(part => part);
-        // Get the last part of the path
-        const lastPathSegment = pathParts[pathParts.length - 1] || 'Products'; //end last path
+  const query = searchParams.toString();
+  const filters = readFilters(searchParams);
+  const chosen = filterCount(filters);
 
-        // Initialize page and limit from searchParams
-        const [page, setPage] = useState(parseInt(searchParams.get('page') || 1));
-        const [page_size, setPage_Size] = useState(parseInt(searchParams.get('page_size') || 30)); // Default limit of 30
-        const [ordering, setOrdering] = useState(searchParams.get('ordering') || '');
+  useEffect(() => {
+    setMoreFailed(false);
+    dispatch(fetchAllProducts({ ...readFilters(new URLSearchParams(query)), page: 1, key: query }));
+    setAsked(true);
+  }, [dispatch, query]);
 
+  useEffect(() => {
+    dispatch(fetchShopContent()); // what there is to filter by
+  }, [dispatch]);
 
-        // First useEffect: Reset values if URL parameters are missing
-        useEffect(() => {
-            if (!searchParams.has('page')) setPage(1);
-            if (!searchParams.has('page_size')) setPage_Size(30);
-        }, [searchParams]);
+  const showFilters = (next) => setSearchParams(filtersToParams(searchParams, next)); // the address is the one place they live
+  const clearFilters = () => setSearchParams(withoutFilters(searchParams));
 
-        useEffect(() => {
-            const category = searchParams.get("category");
+  const retry = () => {
+    dispatch(clearSectionError('products'));
+    dispatch(fetchAllProducts({ ...filters, page: 1, key: query }));
+  };
 
-            const brandsParam = searchParams.get("brands");
-            const brands = brandsParam ? brandsParam.split(",") : [];
+  const loadMore = async () => {
+    setMoreFailed(false);
+    const result = await dispatch(fetchAllProducts({ ...filters, page: listPage + 1 }));
+    if (fetchAllProducts.rejected.match(result)) setMoreFailed(true);
+  };
 
-            const tagsParam = searchParams.get("tags");
-            const tags = tagsParam ? tagsParam.split(",") : [];
+  const changeSort = (event) => {
+    const next = new URLSearchParams(searchParams);
+    if (event.target.value) next.set('ordering', event.target.value);
+    else next.delete('ordering');
+    next.delete('page');
+    setSearchParams(next);
+  };
 
-            const min_price = searchParams.get("min_price");
-            const max_price = searchParams.get("max_price");
+  const title = filters.search ? `Results for “${filters.search}”` : filters.category ? humanize(filters.category) : 'All products';
+  const fresh = asked && listKey === query; // `items` is THIS address's list, not one another page loaded
+  const nothing = !products || products.length === 0;
+  const sorts = filters.ordering in OTHER_SORTS ? [...SORTS, { value: filters.ordering, label: OTHER_SORTS[filters.ordering] }] : SORTS;
 
-            const sizesParam = searchParams.get("sizes");
-            const sizes = sizesParam ? sizesParam.split(",") : [];
+  let list;
+  if (!fresh || (isLoading && !isLoadingMore)) {
+    list = <ProductsPageSkeleton />;
+  } else if (error && nothing) {
+    list = <SectionError message={error} onRetry={retry} />;
+  } else if (nothing) {
+    list = (
+      <NoProducts
+        search={filters.search}
+        chosen={chosen > 0}
+        onClearFilters={clearFilters}
+        onSeeAll={() => setSearchParams({})}
+      />
+    );
+  } else {
+    list = (
+      <>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+        <div className="mt-6 text-center">
+          {hasMore ? (
+            <>
+              {moreFailed && <p role="alert" className="mb-2 text-sm text-red-600">We couldn&apos;t load more products. Please try again.</p>}
+              <button
+                type="button"
+                onClick={loadMore}
+                disabled={isLoadingMore}
+                className="h-12 w-full rounded-lg border border-blue-600 px-10 font-semibold text-blue-600 transition-colors hover:bg-blue-50 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
+              >
+                {isLoadingMore ? 'Loading…' : 'Load more'}
+              </button>
+            </>
+          ) : (
+            <p className="my-4 text-gray-500">You&apos;ve seen every product here.</p>
+          )}
+        </div>
+      </>
+    );
+  }
 
-            const colorsParam = searchParams.get("colors");
-            const colors = colorsParam ? colorsParam.split(",") : [];
+  return (
+    <div className="min-h-screen">
+      <Breadcrum />
 
-            const discount_type = searchParams.get("discount_type");
-            const discount_value = searchParams.get("discount_value");
-            const search = searchParams.get('search');
+      <div className="mx-auto grid grid-cols-1 gap-8 lg:grid-cols-5">
+        {isDesktop && (
+          <aside className="self-start lg:col-span-1">
+            <FilterSidebar filters={filters} onChange={showFilters} onClear={clearFilters} />
+          </aside>
+        )}
 
-            dispatch(fetchAllProducts({ page_size, ordering, page, category, brands, tags, min_price, max_price, sizes, colors, discount_type, discount_value, search }));
+        <div className="min-w-0 lg:col-span-4">
+          <div className="mb-3">
+            <h1 className="break-words text-xl font-bold capitalize sm:text-2xl">{title}</h1>
+            {fresh && !isLoading && typeof count === 'number' && (
+              <p className="text-sm text-gray-500">{count} {count === 1 ? 'product' : 'products'}</p>
+            )}
+          </div>
 
+          <div className="mb-4 grid grid-cols-2 gap-2 lg:flex lg:justify-end">
+            <button
+              type="button"
+              onClick={() => setSheetOpen(true)}
+              aria-haspopup="dialog"
+              className="flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-800 hover:bg-gray-50 lg:hidden"
+            >
+              <FaFilter aria-hidden="true" />
+              Filters
+              {chosen > 0 && (
+                <span aria-label={`${chosen} chosen`} className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 text-xs font-bold text-white">{chosen}</span>
+              )}
+            </button>
 
-        }, [dispatch, searchParams]); // Fetch new products whenever the query parameter changes
-
-        const fetchMoreProducts = () => {
-            const nextPage = page + 1;
-            setPage(nextPage);
-            // Update searchParams to include the new page, keeping existing params
-            setSearchParams({
-                ...Object.fromEntries(searchParams),
-                page: nextPage,
-                page_size, // Ensure limit stays the same
-            });
-        };
-
-        const handleSortChange = (e) => {
-
-            const selectedSort = e.target.value;
-            setOrdering(selectedSort);
-
-            // Start with all existing search params
-            const updatedParams = {...Object.fromEntries(searchParams) };
-
-
-            // Conditionally set 'order' if it differs from the default
-            if (selectedSort !== '') {
-                //updatedParams.sortBy = 'price';
-                updatedParams.ordering = selectedSort;
-            } else {
-
-                //delete updatedParams.sortBy;
-                delete updatedParams.ordering;
-            }
-
-            // Update search params in the URL
-            setSearchParams(updatedParams);
-
-        };
-
-        const handleItemsToShowChange = (e) => {
-            const itemShow = parseInt(e.target.value);
-
-            const sortBy = searchParams.get('sortBy');
-            const order = searchParams.get('order');
-
-            setPage_Size(itemShow);
-            setPage(1); // Reset page to 1 for the new limit
-            setSearchParams({...Object.fromEntries(searchParams), page_size: itemShow, page: 1 })
-
-        };
-
-        const handleSidebarOpen = (value) => {
-            dispatch(setIsSidebarOpen(value));
-        }
-
-        return (
-            <div className="min-h-screen">
-
-                {/* Responsive Breadcrumb Path */}
-                <Breadcrum />
-
-                {/* Sidebar Overlay */}
-                {isSidebarOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 z-10 lg:hidden"
-                        onClick={() => handleSidebarOpen(false)}>
-                    </div>
-                )}
-
-                <div className="mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
-                    {/* Sidebar (Sliding from below the Navbar on mobile) */}
-                    <div className={`lg:col-span-1 fixed lg:sticky top-0 left-0 h-full bg-white z-20 transform ${
-                        isSidebarOpen ? 'translate-x-0 mt-[100px]' : '-translate-x-full'
-                      } transition-transform duration-300 lg:translate-x-0`}>
-                        <Sidebar onClose={() => handleSidebarOpen(false)} />
-                    </div>
-
-                    <div className='lg:col-span-4'>
-
-                        {isLoading ? <ProductsPageSkeleton /> : error ? (
-                            <SectionError message={error} />
-                        ) :
-                            <>
-                                {/* Sort and Show Items Options Above Product List */}
-                                <div className="flex flex-wrap justify-between items-center mb-4">
-                                    {/* Mobile Toggle Button for Sidebar */}
-                                    <FaFilter className="block lg:hidden ml-2  z-10 relative"
-                                        onClick={() => handleSidebarOpen(true)}
-                                    />
-
-                                    <div>
-                                        <h1 className="hidden md:block text-2xl font-bold capitalize">{lastPathSegment.replace(/-/g, ' ')}</h1>
-                                    </div>
-
-                                    <div className='flex space-x-2'>
-                                        {/* Show Items Dropdown */}
-                                        <div className="flex items-center">
-                                            <span className="hidden sm:block text-gray-600 font-medium mr-2">Show</span>
-                                            <select
-                                                value={page_size}
-                                                onChange={handleItemsToShowChange}
-                                                className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500">
-                                                <option value={30}>30</option>
-                                                <option value={60}>60</option>
-                                                <option value={90}>90</option>
-                                                <option value={120}>120</option>
-                                            </select>
-                                        </div>
-                                        {/* Sort by Amount Dropdown */}
-                                        <div className="sm:flex items-center">
-                                            <span className="hidden sm:block text-gray-600 font-medium mr-2 text-nowrap">Sort by: </span>
-                                            <select
-                                                value={ordering}
-                                                onChange={handleSortChange}
-                                                className="bg-white border border-gray-300 text-gray-700 py-1 px-2 rounded-md focus:outline-none focus:border-blue-500">
-                                                <option value="">Default</option>
-                                                <option value="price">Price: Low to High</option>
-                                                <option value="-price">Price: High to Low</option>
-                                                <option value="discount_price">Discount Price: Low to High</option>
-                                                <option value="-discount_price">Discount Price: High to Low</option>
-                                                <option value="rating">Rating: Low to High</option>
-                                                <option value="-rating">Rating: High to Low</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-
-                                {/* Product List Section (Right) */}
-
-                                <InfiniteScroll
-                                    dataLength={products?.length}
-                                    next={fetchMoreProducts}
-                                    hasMore={hasMore}
-                                    loader={
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mt-3">
-                                            {[...Array(5)].map((_, index) => (
-                                                <ProductCardSkeleton key={index} />
-                                            ))}
-                                        </div>
-                                    }
-                                    endMessage={<div className="text-center my-4 text-gray-500">You've seen every product here.</div>}
-                                    scrollableTarget={scrollContainerRef.current} // Set the scrollable target
-                                >
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
-                                        {products?.map((product) => (
-                                            <ProductCard key={product.id} product={product} />
-                                        ))}
-                                    </div>
-                                </InfiniteScroll>
-                            </>
-                        }
-                    </div>
-                </div>
+            <div className="flex h-11 min-w-0 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 focus-within:ring-2 focus-within:ring-blue-400">
+              <label htmlFor="sort-by" className="shrink-0 text-sm text-gray-500">Sort</label>
+              <select id="sort-by" value={filters.ordering} onChange={changeSort} className="min-w-0 flex-1 bg-transparent text-sm font-medium text-gray-900 focus:outline-none">
+                {sorts.map((sort) => (
+                  <option key={sort.value} value={sort.value}>{sort.label}</option>
+                ))}
+              </select>
             </div>
-        );
-    };
+          </div>
+
+          <ActiveFilters chips={filterChips(filters, categories)} onRemove={(chip) => showFilters(chip.remove(filters))} onClear={clearFilters} />
+
+          {list}
+        </div>
+      </div>
+
+      {sheetOpen && !isDesktop && (
+        <FilterSheet
+          filters={filters}
+          scrollRef={scrollContainerRef}
+          onClose={() => setSheetOpen(false)}
+          onApply={(next) => { showFilters(next); setSheetOpen(false); }}
+        />
+      )}
+    </div>
+  );
+};
 
 export default Products;

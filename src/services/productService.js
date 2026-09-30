@@ -1,46 +1,28 @@
 // src/services/productService.js
+// The products list. Every value is encoded (a brand called "Marks & Spencer" must not end the query at the "&"); a list goes in as
+// its encoded items joined by commas, the way the backend splits it.
 export const getAllProducts = async (page_size = null, ordering = null, page = null, category= null,brands=[], tags=[], min_price = 0,max_price = 0, sizes=[], colors=[], discount_type, discount_value, search="") => {
-  let query = '';
+  const parts = [];
+  const add = (name, value) => parts.push(`${name}=${encodeURIComponent(value)}`);
+  const addList = (name, items) => parts.push(`${name}=${items.map(encodeURIComponent).join(',')}`);
 
-  if (page) {
-    query += `page=${page}&`; // Add page for pagination
-  }
-  if (page_size) {
-    query += `page_size=${page_size}&`; // Add limit
-  }
-  if (ordering) {
-    query += `ordering=${ordering}&`; // Add order 
-  }
-  if (category) {
-    query += `category=${category}&`; // Add order category
-  }
-  if (brands.length>0) {
-    query += `brands=${brands.toString()}&`; // Add brands
-  }
-  if (tags.length>0) {
-    query += `tags=${tags.toString()}&`; // Add tags
-  }
-  if (min_price > 0) {
-    query += `min_price=${min_price}&`; // Add min_price
-  }
-  if (max_price > 0) {
-    query += `max_price=${max_price}&`; // Add mas_price
-  }
-  if (sizes.length>0) {
-    query += `sizes=${sizes.toString()}&`; // sizes
-  }
-  if (colors.length>0) {
-    query += `colors=${colors.toString()}&`; // Add colors
-  }
+  if (page) add('page', page); // pagination
+  if (page_size) add('page_size', page_size);
+  if (ordering) add('ordering', ordering);
+  if (category) add('category', category);
+  if (brands.length>0) addList('brands', brands);
+  if (tags.length>0) addList('tags', tags);
+  if (min_price > 0) add('min_price', min_price);
+  if (max_price > 0) add('max_price', max_price);
+  if (sizes.length>0) addList('sizes', sizes);
+  if (colors.length>0) addList('colors', colors);
   if (discount_type && discount_value) {
-    query += `discount_type=${discount_type}&`; // Add discount
-    query += `discount_value=${discount_value}&`
+    add('discount_type', discount_type);
+    add('discount_value', discount_value);
   }
-  if (search) {
-    query += `search=${search}&`; // Add search
-  }
+  if (search) add('search', search);
   const api = (await import('../api/axiosSetup')).default;
-  return await api.get(`/products?${query}`, { section: "products", optionalAuth: true});
+  return await api.get(`/products?${parts.join('&')}`, { section: "products", optionalAuth: true});
 };
 
 // new arrival products

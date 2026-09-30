@@ -62,7 +62,7 @@ const SearchDropdown = () => {
       setSelectedIndex((prev) => Math.max(prev - 1, 0));
     } else if (e.key === "Enter" && selectedIndex >= 0) {
       handleSelectItem(suggestions[selectedIndex]);
-      navigate(`/products?search=${suggestions[selectedIndex]}`);
+      navigate(`/products?search=${encodeURIComponent(suggestions[selectedIndex])}`);
     }
   };
 
@@ -98,7 +98,7 @@ const SearchDropdown = () => {
           <>
             {suggestions.length > 0 ? (
               suggestions?.map((item, index) => (
-              <Link to={`/products?search=${item}`} key={item}>
+              <Link to={`/products?search=${encodeURIComponent(item)}`} key={item}>
                 <li
                   className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
                     selectedIndex === index ? "bg-blue-200" : ""
