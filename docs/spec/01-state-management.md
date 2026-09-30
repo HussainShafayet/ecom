@@ -126,7 +126,7 @@ Purely local, no thunks, no backend call. State: `items` (product snapshots, mos
 
 ## `slice/product/bestSellingSlice.js`, `flashSaleSlice.js`, `newArrivalSlice.js`
 
-Three near-identical slices, each with one loading flag, one data array, one error, and one thunk (`fetchBestSellingProducts`/`fetchFlashSaleProducts`/`fetchNewArrivalProducts`) calling the matching `services/productService` function, with pagination-append logic copy-pasted from `productSlice.js` — including the same `hasMore` fix (from the backend's `next` field). None are persisted.
+Three near-identical slices, each with one loading flag, one data array, one error, and one thunk (`fetchBestSellingProducts`/`fetchFlashSaleProducts`/`fetchNewArrivalProducts`) calling the matching `services/productService` function, with pagination-append logic copy-pasted from `productSlice.js` — including the same `hasMore` fix (from the backend's `next` field). None are persisted. **`flashSaleSlice` also keeps `flash_window`** — the flash sale's window from `GET /products/flash-sale/`'s `flash_sale` (the shop's seconds-left turned into moments on this device's clock *as of when the answer arrived*, by `utils/flashSale.anchorFlashSale`: `{isLive, startsAt, endsAt}` in ms, `null` when the shop set no window, i.e. the sale is always on and there is no countdown). The window is set by the latest answer of the thunk, so a window the shop takes away is forgotten.
 
 None of `FlashSale.js`/`BestSelling.js`/`NewArrival.js`/`FeaturedProducts.js` actually read `hasMore` (no load-more/infinite-scroll UI exists for these — each just renders a fixed `page_size:12`), so it's correct but currently unused outside `productSlice.items` (consumed by `Products.js`'s **Load more** and the homepage's All Products).
 

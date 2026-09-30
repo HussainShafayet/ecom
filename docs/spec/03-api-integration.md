@@ -32,7 +32,7 @@ Both files derive `errorMessage` from HTTP status only — the backend error bod
 | GET | `/products?...` (page/page_size/ordering/category/brands/tags/price/sizes/colors/discount/search) | `getAllProducts` (productService) | `fetchAllProducts` (productSlice) |
 | GET | `/products/new-arrivals?...` | `getNewArrivalProducts` | newArrivalSlice |
 | GET | `/products/best-selling?...` | `getBestSellingProducts` | bestSellingSlice |
-| GET | `/products/flash-sale?...` | `getFlashSaleProducts` | flashSaleSlice |
+| GET | `/products/flash-sale?...` | `getFlashSaleProducts` | flashSaleSlice (reads `data.flash_sale`: `{starts_at, ends_at, is_live, starts_in_seconds, ends_in_seconds}` or `null`, the window measured on the server; `results` is empty while the sale is not live) |
 | GET | `/products/featured?...` | `getFeaturedProducts` | `fetchFeaturedProducts` (productSlice) |
 | GET | `/products/detail/{slug}` | `getProductById` | `fetchProductById` (productSlice) |
 | GET | `/products/search-suggestions/?q=` | inlined in slice | `searchSuggestions` (productSlice) — authenticated client if logged in, `publicApi` otherwise |
