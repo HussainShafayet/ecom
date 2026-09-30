@@ -5,6 +5,7 @@ import { handleProfileUpdate, handleSendOtp, setInfoEditing, statusUpdateVerifie
 import { pushToast } from '../../redux/slice/toastSlice';
 import { Field, PhoneInput, controlClass, describedBy } from '../common';
 import VerifySheet from './VerifySheet';
+import { primary, secondary } from './styles';
 import { PHONE_PREFIX, normalizePhone, validatePhone } from '../../utils/phone';
 
 const GENDERS = { male: 'Male', female: 'Female', other: 'Other' };
@@ -16,9 +17,6 @@ const birthday = (iso) => {
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
-
-const primary = 'flex h-12 w-full items-center justify-center rounded-lg bg-blue-600 px-6 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-wait disabled:opacity-70';
-const secondary = 'flex h-12 w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-6 font-semibold text-gray-800 hover:bg-gray-50';
 
 // One detail: a small round icon and the label above, the value under it
 const Row = ({ label, icon, children }) => (

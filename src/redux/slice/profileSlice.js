@@ -1,6 +1,7 @@
 import {createAsyncThunk, createSlice, isAnyOf} from "@reduxjs/toolkit";
 import {logoutUser, sessionEnded} from "./authSlice";
 import {formatWait, retryAfterSeconds} from "../../api/errors";
+import {errorMessages} from "../../utils/errorMessages";
 
 const initialState = {
     isLoading: false,
@@ -9,23 +10,9 @@ const initialState = {
     updateLoading:false,
     updateError: null,
     updateFieldErrors: {}, // the backend's `field_errors` of a refused save ({username: ["..."]}), drawn under their fields
-    adrressLoading: false,
     addresses: [],
-    addressError: null,
-    isAddAddress: false,
-    addressFormData: {
-        "title": "",
-        "shipping_type": "",
-        "address": "",
-        "area": "",
-        "division": "",
-        "district": "",
-        "thana": ""
-    },
-    errors: {},
-    touched: {},
-    districts: [],
-    upazilas: [],
+    addressesLoaded: false, // the list was read once (until then the tab draws a skeleton, not "no addresses"); saving or deleting one address is the business of the form / card that asked
+    addressError: null, // why the list could not be read
 
     loading: {
         phone: false,
@@ -101,44 +88,43 @@ export const handleProfileUpdate = createAsyncThunk('profile/handleProfileUpdate
     }
 });
 
-// address get 
+// address get
 export const handleGetAddress = createAsyncThunk('profile/handleGetAddress', async (_, { rejectWithValue }) => {
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.get('/accounts/addresses/', { section: "get-address"});
-      console.log('get address response',response);
       return response?.data?.data || [];
     } catch (error) {
-        console.log('get address error: ', error);
-        
-      return rejectWithValue(error?.response?.data || error.message);
+      return rejectWithValue(error?.response?.data || error?.message || error);
     }
 });
 
-// address create 
+// address create / update / delete: a refusal comes back as `{errors: [sentences]}` (the backend's own, e.g. "You can save at most
+// 20 addresses", else a general one), which the form or card that asked says where the customer is looking
+const addressRefusal = (error, fallback) => ({errors: errorMessages(error, fallback)});
+
+// address create
 export const handleAddressCreate = createAsyncThunk('profile/handleAddressCreate', async (formData, { rejectWithValue }) => {
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
        const response = await api.post('/accounts/addresses/', formData, { section: "create-address"});
-      console.log('create address response',response);
       return response?.data?.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(addressRefusal(error, 'Could not save the address. Please try again.'));
     }
 });
 
-// address update
-export const handleAddressUpdate = createAsyncThunk('profile/handleAddressUpdate', async (formData, { rejectWithValue }) => {
+// address update: `id` names the address, the rest is what it becomes
+export const handleAddressUpdate = createAsyncThunk('profile/handleAddressUpdate', async ({id, ...fields}, { rejectWithValue }) => {
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
-       const response = await api.put(`/accounts/addresses/${formData.id}/`, formData, { section: "update-address"});
-      console.log('update address response',response);
+       const response = await api.put(`/accounts/addresses/${id}/`, fields, { section: "update-address"});
       return response?.data?.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(addressRefusal(error, 'Could not save the address. Please try again.'));
     }
 });
 
@@ -146,11 +132,10 @@ export const handleAddressDelete = createAsyncThunk('profile/handleAddressDelete
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
-       const response = await api.delete(`/accounts/addresses/${id}/`, { section: "delete-address"});
-      console.log('address delete response', response);
-      return id //response.data.data;
+       await api.delete(`/accounts/addresses/${id}/`, { section: "delete-address"});
+      return id;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(addressRefusal(error, 'Could not delete the address. Please try again.'));
     }
 });
 
@@ -180,35 +165,6 @@ const profileSlice = createSlice({
     name: 'profile',
     initialState,
     reducers: {
-        setAddress: (state, action) => {
-            state.addresses = action.payload;
-        },
-        setIsAddAddress: (state, action) =>{
-            state.isAddAddress = action.payload;
-        },
-        updateAddressFormData: (state, action) => {
-            state.addressFormData = { ...state.addressFormData, ...action.payload };
-        },
-        updateTouched: (state, action) => {
-            state.touched = { ...state.touched, ...action.payload };
-            
-        },
-        setErrors: (state, action) => {
-            state.errors = action.payload;
-        },
-        setDistricts: (state, action) => {
-            state.districts = action.payload;
-        },
-        setUpazilas: (state, action) => {
-            state.upazilas = action.payload;
-        },
-        resetAddressForm: (state) => {
-            state.addressFormData = initialState.addressFormData;
-            state.errors = {};
-            state.touched = {};
-            state.districts = [];
-            state.upazilas = [];
-        },
         statusUpdateVerifyPopup: (state, action) => {
             const {field} = action.payload;
             state.verifyPopup[field] = false;
@@ -266,72 +222,28 @@ const profileSlice = createSlice({
 
 
 
-        //get address
-         .addCase(handleGetAddress.pending, (state)=>{
-            state.adrressLoading = true;
+        //get address: a refresh that fails keeps the list that is on the screen, the sentence is drawn only when there is none
+        .addCase(handleGetAddress.pending, (state)=>{
+            state.addressError = null; // a retry is on its way
         })
         .addCase(handleGetAddress.fulfilled, (state, action)=>{
-            state.adrressLoading = false;
-            state.addressError = null;
+            state.addressesLoaded = true;
             state.addresses = action?.payload || [];
-            
         })
         .addCase(handleGetAddress.rejected, (state, action)=>{
-            state.adrressLoading = false;
-            state.addresses = [];
-            state.addressError = action?.payload?.error || action?.payload  || 'Something went wrong!';
+            state.addressError = errorText(action?.payload);
         })
 
-        //address create
-         .addCase(handleAddressCreate.pending, (state)=>{
-            state.adrressLoading = true;
-        })
+        //address create / update / delete: only what worked changes the list; a refusal is the caller's (see addressRefusal)
         .addCase(handleAddressCreate.fulfilled, (state, action)=>{
-            state.adrressLoading = false;
-            state.addressError = null;
             state.addresses = [...state.addresses, action.payload];
         })
-        .addCase(handleAddressCreate.rejected, (state, action)=>{
-            state.adrressLoading = false;
-            state.addressError = action?.payload?.error  || 'Something went wrong!';
-        })
-
-         //address update
-         .addCase(handleAddressUpdate.pending, (state)=>{
-            state.adrressLoading = true;
-        })
         .addCase(handleAddressUpdate.fulfilled, (state, action)=>{
-            state.adrressLoading = false;
-            state.addressError =  null;
-            const updateObj = action.payload;
-            
-            state.addresses = state.addresses?.map((item)=>{
-                return item.id === updateObj.id ? ({...item, ...updateObj}) : item
-            });
-            
-        })
-        .addCase(handleAddressUpdate.rejected, (state, action)=>{
-            state.adrressLoading = false;
-            state.addressError = action?.payload?.error  || 'Something went wrong!';
-        })
-
-
-        //address delete
-        .addCase(handleAddressDelete.pending, (state)=>{
-            state.adrressLoading = true;
+            const updated = action.payload;
+            state.addresses = state.addresses.map((item)=> item.id === updated.id ? {...item, ...updated} : item);
         })
         .addCase(handleAddressDelete.fulfilled, (state, action)=>{
-            state.adrressLoading = false;
-            state.addressError = null;
-            
-            const delete_id = action.payload;
-
-            state.addresses = state.addresses.filter((item)=> item.id !== delete_id);
-            
-        })
-        .addCase(handleAddressDelete.rejected, (state, action)=>{
-            state.adrressLoading = false;
-            state.addressError = action?.payload?.error  || 'Something went wrong!';
+            state.addresses = state.addresses.filter((item)=> item.id !== action.payload);
         })
 
         //send otp
@@ -386,14 +298,9 @@ const profileSlice = createSlice({
         .addMatcher(isAnyOf(logoutUser.fulfilled, logoutUser.rejected, sessionEnded), () => initialState);
     }
 });
-export const {setAddress, setIsAddAddress, updateAddressFormData,
-updateTouched,
-setErrors,
-  setDistricts,
-  setUpazilas,
-  resetAddressForm,
+export const {
   statusUpdateVerifyPopup,
-  statusUpdateVerified, 
+  statusUpdateVerified,
   setInfoEditing,
 } = profileSlice.actions;
 
