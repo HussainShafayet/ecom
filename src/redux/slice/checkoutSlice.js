@@ -31,6 +31,7 @@ const initialState = {
   order: null, // what POST /orders/ answered: { order_id, status, created_at, subtotal, delivery_charge, total }
   selectedAddressId: null,
   delivery_charges: {},
+  delivery_estimates: {}, // { inside_dhaka: {min_days, max_days} }: only for a shipping type the shop made an estimate for
   addresses: [],
   user_info: null,
   checkoutContentLoading: false,
@@ -149,6 +150,7 @@ const checkoutSlice = createSlice({
       state.order = null;
       state.selectedAddressId = null;
       state.delivery_charges = {};
+      state.delivery_estimates = {};
       state.addresses = [];
       state.user_info = null;
       state.couponStatus = 'idle';
@@ -190,9 +192,10 @@ const checkoutSlice = createSlice({
       .addCase(handleGetCheckoutContent.fulfilled, (state, action)=>{
           state.checkoutContentLoading = false;
           state.checkoutContentError = null;
-          const { delivery_charges, shipping_addresses, user_info} = action.payload;
+          const { delivery_charges, delivery_estimates, shipping_addresses, user_info} = action.payload;
           
           state.delivery_charges = delivery_charges;
+          state.delivery_estimates = delivery_estimates || {};
           state.addresses = shipping_addresses;
           
           state.user_info = user_info;

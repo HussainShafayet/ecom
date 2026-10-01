@@ -82,7 +82,7 @@ describe('My orders', () => {
     expect(screen.getByText('৳1,060')).toBeTruthy();
     expect(screen.getByText(/2 items/)).toBeTruthy();
     expect(screen.getByRole('link', {name: NUMBER}).getAttribute('href')).toBe(`/orders/${NUMBER}`);
-    expect(getOrders).toHaveBeenCalledWith(1, 10);
+    expect(getOrders).toHaveBeenCalledWith(1, 10, '');
   });
 
   it('makes the whole card the link (the number is stretched over it), and shows how many more pictures there are', async () => {
@@ -111,7 +111,7 @@ describe('My orders', () => {
 
     fireEvent.click(screen.getByRole('button', {name: 'Load more'}));
 
-    await waitFor(() => expect(getOrders).toHaveBeenLastCalledWith(2, 10));
+    await waitFor(() => expect(getOrders).toHaveBeenLastCalledWith(2, 10, ''));
     expect(await screen.findByText('Showing 2 of 12')).toBeTruthy();
     expect(screen.getByRole('link', {name: NUMBER})).toBeTruthy(); // the first page is still there
     expect(screen.getByRole('link', {name: 'GC-20260922-0007'})).toBeTruthy();
@@ -130,7 +130,7 @@ describe('My orders', () => {
 
     getOrders.mockResolvedValueOnce({data: {data: {count: 12, next: null, previous: null, results: [{...SUMMARY, order_id: 'GC-20260922-0007'}]}}});
     fireEvent.click(screen.getByRole('button', {name: 'Try again'}));
-    await waitFor(() => expect(getOrders).toHaveBeenLastCalledWith(2, 10));
+    await waitFor(() => expect(getOrders).toHaveBeenLastCalledWith(2, 10, ''));
     expect(await screen.findByRole('link', {name: 'GC-20260922-0007'})).toBeTruthy();
   });
 

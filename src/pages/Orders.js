@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useSearchParams} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
 import {FaChevronRight} from 'react-icons/fa';
 import {fetchOrders} from '../redux/slice/orderSlice';
 import {clearSectionError} from '../redux/slice/globalErrorSlice';
 import {SectionError} from '../components/common';
 import {OrdersSkeleton} from '../components/common/skeleton';
-import {OrderStatusBadge, formatDate, formatMoney} from '../components/orders';
+import {OrderFilters, OrderStatusBadge, formatDate, formatMoney, orderFilterFor} from '../components/orders';
 
 const PAGE_SIZE = 10;
 const THUMBS = 3; // pictures on a card; the rest is "+2"
@@ -47,37 +47,52 @@ const OrderCard = ({order}) => {
 };
 
 // My orders (signed in): newest first, one card per order, ten at a time and "Load more" under them (the list stays where it is
-// while the next ten come, instead of being swapped for a spinner).
+// while the next ten come, instead of being swapped for a spinner). A row of pills narrows it (All, On the way, Delivered,
+// Cancelled); the choice lives in the address (?show=delivered), so Back and a shared link keep it, and any other value is "All".
 const Orders = () => {
   const dispatch = useDispatch();
-  const [page, setPage] = useState(1);
-  const {orders, ordersCount, ordersNext, ordersLoading, ordersError} = useSelector((state) => state.order);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filter = orderFilterFor(searchParams.get('show') || '');
+  const [paging, setPaging] = useState({show: filter.show, page: 1}); // the page belongs to its filter: a new filter starts at page 1
+  const page = paging.show === filter.show ? paging.page : 1;
+  const {orders: loaded, ordersCount, ordersNext, ordersLoading, ordersError, ordersStatus} = useSelector((state) => state.order);
+  const orders = ordersStatus === filter.status ? loaded : []; // never a list that was made for another filter
 
   useEffect(() => {
-    dispatch(fetchOrders({page, page_size: PAGE_SIZE}));
-  }, [dispatch, page]);
+    dispatch(fetchOrders({page, page_size: PAGE_SIZE, status: filter.status}));
+  }, [dispatch, page, filter.status]);
 
   const retry = () => {
     dispatch(clearSectionError('orders'));
-    dispatch(fetchOrders({page, page_size: PAGE_SIZE}));
+    dispatch(fetchOrders({page, page_size: PAGE_SIZE, status: filter.status}));
   };
 
-  const firstLoad = ordersLoading && orders.length === 0;
+  const choose = (next) => setSearchParams(next.show ? {show: next.show} : {});
+
+  const firstLoad = (ordersLoading || ordersStatus !== filter.status) && orders.length === 0;
   const hasOrders = orders.length > 0;
 
   return (
     <div className="container mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-8">
       <h1 className="mb-4 text-2xl font-bold text-gray-800 sm:mb-6 sm:text-3xl">My Orders</h1>
 
+      <OrderFilters current={filter} onChange={choose} />
+
       {firstLoad && <OrdersSkeleton />}
       {ordersError && !hasOrders && <SectionError message={ordersError.join(' ')} onRetry={retry} />}
 
-      {!ordersLoading && !ordersError && !hasOrders && (
+      {!firstLoad && !ordersLoading && !ordersError && !hasOrders && (
         <div className="rounded-lg bg-gray-50 p-8 text-center shadow-md">
-          <p className="mb-4 text-gray-600">You have not placed any order yet.</p>
-          <Link to="/products" className="inline-flex h-12 items-center rounded-lg bg-blue-600 px-6 font-semibold text-white transition-colors hover:bg-blue-700">
-            Start shopping
-          </Link>
+          <p className="mb-4 text-gray-600">{filter.empty}</p>
+          {filter.show ? (
+            <button type="button" onClick={() => choose(orderFilterFor(''))} className="inline-flex h-12 items-center rounded-lg bg-blue-600 px-6 font-semibold text-white transition-colors hover:bg-blue-700">
+              Show all orders
+            </button>
+          ) : (
+            <Link to="/products" className="inline-flex h-12 items-center rounded-lg bg-blue-600 px-6 font-semibold text-white transition-colors hover:bg-blue-700">
+              Start shopping
+            </Link>
+          )}
         </div>
       )}
 
@@ -94,7 +109,7 @@ const Orders = () => {
           {ordersNext && !ordersError && (
             <button
               type="button"
-              onClick={() => setPage((current) => current + 1)}
+              onClick={() => setPaging({show: filter.show, page: page + 1})}
               disabled={ordersLoading}
               className="h-12 w-full rounded-lg border border-gray-300 bg-white font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-wait disabled:opacity-60 sm:w-auto sm:px-10"
             >

@@ -5,7 +5,7 @@ import {cancelOrder, clearOrder, fetchOrder} from '../redux/slice/orderSlice';
 import {clearSectionError} from '../redux/slice/globalErrorSlice';
 import {ErrorDisplay, SectionError} from '../components/common';
 import {OrderDetailSkeleton} from '../components/common/skeleton';
-import {CopyOrderId, OrderItems, OrderStatusBadge, OrderTimeline, OrderTotals, addressLines, formatDate, formatMoney} from '../components/orders';
+import {BuyAgain, CopyOrderId, ExpectedDelivery, OrderItems, OrderStatusBadge, OrderTimeline, OrderTotals, addressLines, formatDate, formatMoney} from '../components/orders';
 
 const Card = ({title, children, className = ''}) => (
   <section className={`rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6 ${className}`}>
@@ -70,6 +70,7 @@ const OrderDetail = () => {
               <CopyOrderId value={order.order_id} />
             </div>
             <p className="text-sm text-gray-500">Placed on {formatDate(order.created_at)}</p>
+            <ExpectedDelivery expected={order.expected_delivery} className="mt-1" />
           </div>
           <OrderStatusBadge status={order.status} label={order.status_display} />
         </div>
@@ -84,6 +85,7 @@ const OrderDetail = () => {
         <div className="mt-3 border-t border-gray-200 pt-3">
           <OrderTotals order={order} />
         </div>
+        <BuyAgain order={order} />
       </Card>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
