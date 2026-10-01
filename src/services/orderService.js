@@ -1,14 +1,18 @@
 // src/services/orderService.js
 // The customer's own orders (authenticated) and the guest lookup by order number + phone (public).
 
-// My orders, newest first: { count, next, previous, results: [order summary] }
-export const getOrders = async (page = null, page_size = null) => {
+// My orders, newest first: { count, next, previous, results: [order summary] }. `status` keeps only orders in those statuses: one, or
+// several with commas ("pending,confirmed,paid,shipped"); an unknown one is a 400.
+export const getOrders = async (page = null, page_size = null, status = '') => {
   let query = '';
   if (page) {
     query += `page=${page}&`;
   }
   if (page_size) {
     query += `page_size=${page_size}&`;
+  }
+  if (status) {
+    query += `status=${encodeURIComponent(status)}&`;
   }
   const api = (await import('../api/axiosSetup')).default;
   return await api.get(`/orders/?${query}`, { section: "orders"});

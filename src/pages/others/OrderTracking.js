@@ -4,7 +4,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {clearTracking, trackOrder} from '../../redux/slice/orderSlice';
 import {ErrorDisplay, Field, PhoneInput, controlClass, describedBy} from '../../components/common';
 import {OrderDetailSkeleton} from '../../components/common/skeleton';
-import {CopyOrderId, OrderItems, OrderStatusBadge, OrderTimeline, OrderTotals, formatDate} from '../../components/orders';
+import {CopyOrderId, ExpectedDelivery, OrderItems, OrderStatusBadge, OrderTimeline, OrderTotals, formatDate} from '../../components/orders';
 import {PHONE_PREFIX, validatePhone} from '../../utils/phone';
 
 const Card = ({title, children}) => (
@@ -102,6 +102,7 @@ const OrderTracking = () => {
                   <CopyOrderId value={tracking.order_id} />
                 </div>
                 <p className="text-sm text-gray-500">Placed on {formatDate(tracking.created_at)}</p>
+                <ExpectedDelivery expected={tracking.expected_delivery} className="mt-1" />
               </div>
               <OrderStatusBadge status={tracking.status} label={tracking.status_display} />
             </div>

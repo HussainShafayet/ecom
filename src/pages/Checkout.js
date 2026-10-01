@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { FaMoneyBillWave } from 'react-icons/fa';
+import { FaMoneyBillWave, FaTruck } from 'react-icons/fa';
 
 import {
   updateFormData,
@@ -25,6 +25,7 @@ import {CheckoutErrors, CheckoutSummary, PlaceOrderBar, ShowAddress} from '../co
 import {CheckoutSkeleton} from '../components/common/skeleton';
 import {Field, PhoneInput, SectionError, controlClass, describedBy} from '../components/common';
 import {FIELD_ORDER, validateCheckout, validateField} from '../utils/checkoutValidation';
+import {deliveryEstimateText} from '../utils/delivery';
 
 const Step = ({ number, title }) => (
   <h2 className="mb-3 flex items-center text-base font-semibold text-gray-900">
@@ -48,7 +49,7 @@ const Checkout = () => {
   const {cartLoading, cartItems, cartError} = useSelector((state)=>state.cart);
   const navigate = useNavigate();
 
-  const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, order, delivery_charges, responseError, checkoutContentLoading, checkoutContentError, couponStatus, couponError, discountAmount, appliedCouponCode, offers} = useSelector(
+  const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, order, delivery_charges, responseError, checkoutContentLoading, checkoutContentError, couponStatus, couponError, discountAmount, appliedCouponCode, offers, delivery_estimates} = useSelector(
     (state) => state.checkout
   );
 
@@ -98,6 +99,7 @@ const Checkout = () => {
   const deliveryCharge = formData?.shipping_type ? delivery_charges?.[formData.shipping_type] : undefined;
   const deliveryChargeKnown = deliveryCharge !== undefined && deliveryCharge !== null;
   const shippingCost = deliveryChargeKnown ? Number(deliveryCharge) || 0 : 0;
+  const estimate = deliveryEstimateText(formData?.shipping_type ? delivery_estimates?.[formData.shipping_type] : undefined); // "Delivery in 2–3 days", or '' when the shop made no promise
   const discount = couponStatus === 'applied' ? discountAmount : 0;
   const grandTotal = totalPrice + shippingCost - discount;
 
@@ -358,7 +360,12 @@ const Checkout = () => {
             {isAuthenticated && <ShowAddress />}
 
             <div className="space-y-3">
-              <Field id="field-shipping_type" label="Delivery area" error={problem('shipping_type') || errors?.delivery_charge}>
+              <Field
+                id="field-shipping_type"
+                label="Delivery area"
+                error={problem('shipping_type') || errors?.delivery_charge}
+                hint={estimate && <span className="inline-flex items-center gap-1 font-medium text-indigo-700"><FaTruck aria-hidden="true" /> {estimate}</span>}
+              >
                 <select
                   {...control('shipping_type')}
                   value={formData?.shipping_type || ''}
