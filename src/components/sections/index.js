@@ -6,5 +6,5 @@ export {default as FeaturedProducts} from './FeaturedProducts';
 export {default as CategoryStrip} from './CategoryStrip';
 export {default as FlashSale} from './FlashSale';
 export {default as AllProducts} from './AllProducts';
-export {default as Testomonials} from './Testomonials';
+export {default as Testimonials} from './Testimonials';
 export {default as RecentlyViewed} from './RecentlyViewed';

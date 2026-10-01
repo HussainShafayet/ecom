@@ -72,10 +72,11 @@ Both files derive `errorMessage` from HTTP status only — the backend error bod
 | GET | `products/reviews/?product_id=` (no leading `/`) | inlined | reviewSlice |
 | POST | `products/reviews/` (no leading `/`) | inlined | reviewSlice |
 | PUT | `products/reviews/{id}/` (no leading `/`) | inlined | reviewSlice |
+| GET | `/products/reviews/featured/` | `getFeaturedReviews` (reviewService, `publicApi`, section `home-testimonials`) | `fetchTestimonials` (testimonialsSlice) |
 
 Response shape convention: a DRF-style envelope `{ data: { results, count, ... } | data: {...}, message, errors }` — thunks read `response.data.data.results` or `response.data.data`, and rejection paths return `error.response?.data` (typically containing `.errors`).
 
-Only `categoryService.js`, `contentService.js`, `productService.js`, `orderService.js`, `siteService.js` and `couponService.js` exist under `src/services/` — auth, profile, cart, wishlist, checkout (except the coupon preview), and review calls are all inlined directly in their slices rather than routed through a service module. `productService.js`/`couponService.js` also lazy-import `axiosSetup`/`publicApi` per-call (`await import(...)`) to dodge the same circular-dependency issue many slices work around inline.
+Only `categoryService.js`, `contentService.js`, `productService.js`, `orderService.js`, `siteService.js`, `couponService.js` and `reviewService.js` (the homepage's reviews only) exist under `src/services/` — auth, profile, cart, wishlist, checkout (except the coupon calls), and the per-product review calls are all inlined directly in their slices rather than routed through a service module. `productService.js`/`couponService.js` also lazy-import `axiosSetup`/`publicApi` per-call (`await import(...)`) to dodge the same circular-dependency issue many slices work around inline.
 
 ## Error-handling pipeline
 

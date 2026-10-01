@@ -20,6 +20,7 @@ import reviewReducer from './slice/reviewSlice';
 import orderReducer from './slice/orderSlice';
 import globalErrorReducer from './slice/globalErrorSlice';
 import siteReducer from './slice/siteSlice';
+import testimonialsReducer from './slice/testimonialsSlice';
 import toastReducer from './slice/toastSlice';
 
 // ✅ Persist Only `isAuthenticated` (Not Full auth Slice)
@@ -54,6 +55,7 @@ const rootReducer = combineReducers({
   review: reviewReducer,        // not persisted
   order: orderReducer,          // not persisted (my orders, one order, the guest lookup)
   site: siteReducer,            // not persisted (the shop's name, logo, contact details, footer pages)
+  testimonials: testimonialsReducer, // not persisted (the reviews the homepage shows)
   globalError: globalErrorReducer, //not persisted
   toast: toastReducer,   // not persisted (short messages over the page)
 });
