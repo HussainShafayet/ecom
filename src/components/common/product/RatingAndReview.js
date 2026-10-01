@@ -296,13 +296,13 @@ const RatingAndReview = ({ product }) => {
             }
             <button
               type="submit"
-              className={`w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all disabled:opacity-50${reviewLoading ? 'cursor-wait' : 'hover:scale-105'
+              className={`w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all disabled:opacity-50 ${reviewLoading ? 'cursor-wait' : 'hover:scale-105'
               }`}
               disabled={!reviewFormData.rating || !reviewFormData.comment.trim() || reviewLoading}
               
             >
             {reviewLoading ? (
-              <Loader message="Progreccing" />
+              <Loader message="Processing" />
             ) : (
               <>
                 {can_edited? 'Update Review' : 'Submit Review' }

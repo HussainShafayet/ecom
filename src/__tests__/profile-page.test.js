@@ -289,6 +289,27 @@ describe('A new phone number or e-mail is verified with a code first', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
+  it('keeps Tab inside the sheet, and gives the focus back to the button that opened it', async () => {
+    api.post.mockResolvedValue(sent());
+    await newPhone();
+    const opener = screen.getByRole('button', {name: 'Send code'});
+    opener.focus();
+    await click('Send code');
+    const sheet = await screen.findByRole('dialog');
+    const code = within(sheet).getByLabelText('6-digit code');
+    const cancel = within(sheet).getByRole('button', {name: 'Cancel'});
+
+    cancel.focus(); // the last control: Tab goes round to the first, and Shift+Tab back
+    fireEvent.keyDown(cancel, {key: 'Tab'});
+    expect(document.activeElement).toBe(code);
+    fireEvent.keyDown(code, {key: 'Tab', shiftKey: true});
+    expect(document.activeElement).toBe(cancel);
+
+    fireEvent.keyDown(cancel, {key: 'Escape'});
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.activeElement).toBe(opener);
+  });
+
   it('says a wrong code under the boxes, then takes the right one, and the number can be saved', async () => {
     api.post.mockResolvedValueOnce(sent());
     api.put.mockResolvedValue({data: {data: {...PROFILE, phone_number: '+8801812345678'}}});
