@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice, isAnyOf} from "@reduxjs/toolkit";
-import {cancelOrder as cancelOrderRequest, getOrder, getOrders, trackOrder as trackOrderRequest} from "../../services/orderService";
+import {cancelOrder as cancelOrderRequest, getOrder, getOrders, getOrdersTotal, trackOrder as trackOrderRequest} from "../../services/orderService";
 import {logoutUser} from "./authSlice";
 import {handleAddtoCart, handleFetchCart} from "./cartSlice";
 
@@ -13,6 +13,8 @@ const initialState = {
     ordersError: null,
     ordersStatus: '', // the statuses the list is for ("" = all): a list is never drawn for another filter
     ordersRequestId: null, // the newest first-page request: an older answer that arrives late is dropped
+    ordersTotal: null, // how many orders I have, for the account page (apart from the list above, which a filter narrows); null until known
+
 
     // "Buy again": what went into the cart, and what could not (the shop's sentences)
     buyAgain: {loading: false, added: [], skipped: [], done: false},
@@ -54,8 +56,18 @@ export const fetchOrders = createAsyncThunk('order/fetchOrders', async ({page, p
     }
 });
 
+// How many orders I have (a failure just leaves it unknown: the account page then draws no number)
+export const fetchOrdersTotal = createAsyncThunk('order/fetchOrdersTotal', async (_, {rejectWithValue}) => {
+    try {
+        const response = await getOrdersTotal();
+        return response.data.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data);
+    }
+});
+
 //one order
-export const fetchOrder = createAsyncThunk('order/fetchOrder', async (orderId, {rejectWithValue}) => {
+export const fetchOrder =createAsyncThunk('order/fetchOrder', async (orderId, {rejectWithValue}) => {
     try {
         const response = await getOrder(orderId);
         return response.data.data;
@@ -155,6 +167,11 @@ const orderSlice = createSlice({
             if (staleOrdersAnswer(state, action)) return;
             state.ordersLoading = false;
             state.ordersError = errorsOf(action);
+        })
+
+        .addCase(fetchOrdersTotal.fulfilled, (state, action) => {
+            const count = action.payload?.count;
+            state.ordersTotal = typeof count === 'number' ? count : null;
         })
 
         //one order

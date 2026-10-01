@@ -14,6 +14,7 @@ import globalErrorReducer from '../redux/slice/globalErrorSlice';
 import toastReducer from '../redux/slice/toastSlice';
 import wishListReducer from '../redux/slice/wishlistSlice';
 import cartReducer from '../redux/slice/cartSlice';
+import orderReducer from '../redux/slice/orderSlice';
 import api from '../api/axiosSetup';
 import Profile from '../pages/user/Profile';
 
@@ -28,11 +29,12 @@ const PROFILE = {
 const sent = (data = {}) => ({data: {success: true, message: 'OTP sent to +88018****5678.', data: {token: 'tok-1', resend_after: 45, expires_in: 300, length: 6, ...data}}});
 const refused = (errors, extra = {}, status = 400) => ({response: {status, headers: {}, data: {success: false, errors, ...extra}}});
 
-const makeStore = (profile = undefined) => configureStore({
-  reducer: {profile: profileReducer, auth: authReducer, globalError: globalErrorReducer, toast: toastReducer, wishList: wishListReducer, cart: cartReducer},
+const makeStore = (profile = undefined, preloaded = {}) => configureStore({
+  reducer: {profile: profileReducer, auth: authReducer, globalError: globalErrorReducer, toast: toastReducer, wishList: wishListReducer, cart: cartReducer, order: orderReducer},
   preloadedState: {
     auth: {...authReducer(undefined, {type: '@@init'}), isAuthenticated: true},
     ...(profile ? {profile: {...profileReducer(undefined, {type: '@@init'}), profile}} : {}),
+    ...preloaded,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({serializableCheck: false}),
 });
@@ -456,5 +458,82 @@ describe('The profile state', () => {
     store.dispatch(action);
     expect(store.getState().profile.profile).toBeNull();
     expect(store.getState().profile.addresses).toEqual([]);
+  });
+});
+
+describe('The numbers beside My Orders and Wishlist', () => {
+  // the shop's answers by address: the profile, the order list (only its `count` is read), the wishlist
+  const answers = ({orders = 12, wishlist = [{id: 1}, {id: 2}, {id: 3}]} = {}) => {
+    api.get.mockImplementation((url) => {
+      if (url.startsWith('/orders/')) return typeof orders === 'function' ? orders() : Promise.resolve({data: {data: {count: orders, results: []}}});
+      if (url.startsWith('/accounts/favourite/')) return typeof wishlist === 'function' ? wishlist() : Promise.resolve({data: {data: wishlist}});
+      return Promise.resolve({data: {data: PROFILE}});
+    });
+  };
+  const orderCard = () => screen.getByRole('link', {name: /My Orders/});
+  const wishlistTab = () => screen.getAllByRole('tab')[2];
+
+  it('says how many orders and wishlist items there are, once the shop has answered', async () => {
+    answers();
+    await loaded();
+    await waitFor(() => expect(orderCard().textContent).toContain('12 orders'));
+    expect(orderCard().textContent).toContain('Track, cancel or look back'); // the sentence stays
+    await waitFor(() => expect(wishlistTab().textContent).toContain('3 items'));
+    expect(wishlistTab().textContent).toContain('Wishlist');
+    expect(api.get).toHaveBeenCalledWith('/orders/?page=1&page_size=1', expect.objectContaining({section: 'orders-total'}));
+  });
+
+  it('says "1 order" and "1 item", not "1 orders"', async () => {
+    answers({orders: 1, wishlist: [{id: 9}]});
+    await loaded();
+    await waitFor(() => expect(orderCard().textContent).toContain('1 order'));
+    expect(orderCard().textContent).not.toContain('1 orders');
+    await waitFor(() => expect(wishlistTab().textContent).toContain('1 item'));
+    expect(wishlistTab().textContent).not.toContain('1 items');
+  });
+
+  it('draws no number for no orders and an empty wishlist', async () => {
+    answers({orders: 0, wishlist: []});
+    await loaded();
+    await act(async () => {}); // let the two answers land
+    expect(orderCard().textContent).toBe('My OrdersTrack, cancel or look back at what you ordered');
+    expect(wishlistTab().textContent).toBe('Wishlist');
+  });
+
+  it('draws no number, and no error, when the shop could not say', async () => {
+    answers({orders: () => Promise.reject(refused(['The shop is busy.'], {}, 503)), wishlist: () => Promise.reject(refused(['The shop is busy.'], {}, 503))});
+    await loaded();
+    await act(async () => {});
+    expect(orderCard().textContent).toBe('My OrdersTrack, cancel or look back at what you ordered');
+    expect(wishlistTab().textContent).toBe('Wishlist');
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.queryByText('The shop is busy.')).toBeNull();
+  });
+
+  it('does not guess from what the phone remembers while the shop has not answered', async () => {
+    answers({wishlist: () => new Promise(() => {})});
+    const remembered = {...wishListReducer(undefined, {type: '@@init'}), items: [{id: 1}, {id: 2}]};
+    await loaded(makeStore(PROFILE, {wishList: remembered}));
+    await act(async () => {});
+    expect(wishlistTab().textContent).toBe('Wishlist');
+  });
+
+  it('keeps the orders page\'s own list and filter as they were', async () => {
+    answers({orders: 12});
+    const mine = {...orderReducer(undefined, {type: '@@init'}), orders: [{order_id: 'A1'}], ordersCount: 1, ordersStatus: 'delivered'};
+    const {store} = await loaded(makeStore(PROFILE, {order: mine}));
+    await waitFor(() => expect(store.getState().order.ordersTotal).toBe(12));
+    const after = store.getState().order;
+    expect(after.orders).toEqual([{order_id: 'A1'}]);
+    expect(after.ordersCount).toBe(1);
+    expect(after.ordersStatus).toBe('delivered');
+  });
+
+  it('forgets the number with the customer (a next person on this browser must not see it)', async () => {
+    answers();
+    const {store} = await loaded();
+    await waitFor(() => expect(store.getState().order.ordersTotal).toBe(12));
+    await act(async () => { store.dispatch({type: logoutUser.fulfilled.type}); });
+    expect(store.getState().order.ordersTotal).toBeNull();
   });
 });

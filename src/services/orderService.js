@@ -18,6 +18,13 @@ export const getOrders = async (page = null, page_size = null, status = '') => {
   return await api.get(`/orders/?${query}`, { section: "orders"});
 };
 
+// How many orders I have, for the account page: the `count` of a list of one (the list itself is not wanted). Its own section, so a
+// failure is not the orders page's failure.
+export const getOrdersTotal = async () => {
+  const api = (await import('../api/axiosSetup')).default;
+  return await api.get('/orders/?page=1&page_size=1', { section: "orders-total"});
+};
+
 // One of my orders in full: address, totals, payment, status history, can_cancel
 export const getOrder = async (orderId) => {
   const api = (await import('../api/axiosSetup')).default;
