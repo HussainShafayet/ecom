@@ -219,7 +219,7 @@ describe('The flash sale section', () => {
     await renderSection(true);
     expect(await screen.findByText('The flash sale has not started yet')).toBeTruthy();
 
-    expect((await screen.findAllByText('Product 1', {}, {timeout: 4000})).length).toBeGreaterThan(0); // (this page also lists them as "Recommended")
+    expect((await screen.findAllByText('Product 1', {}, {timeout: 4000})).length).toBe(1); // listed once
     expect(screen.queryByText('The flash sale has not started yet')).toBeNull();
     expect((await screen.findByRole('timer')).textContent).toContain('Ends in');
   });

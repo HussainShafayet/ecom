@@ -105,9 +105,6 @@ const FeaturedProducts = ({forRoute}) => {
           carousel={!forRoute}
         />
 
-        {forRoute &&
-          <ProductSection title="Recommended Products" subtitle="More you might like." products={products} />
-        }
       </div>
     }
     </>

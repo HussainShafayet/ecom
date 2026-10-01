@@ -148,9 +148,6 @@ const FlashSale = ({forRoute}) => {
 
         {forRoute && products.length === 0 && sale && !sale.isLive && <NotLiveNotice sale={sale} onStart={refresh} />}
 
-        {forRoute &&
-          <ProductSection title="Recommended Products" subtitle="More you might like." products={products} />
-        }
       </div>
      }
     </>
