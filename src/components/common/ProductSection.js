@@ -9,13 +9,13 @@ const CAROUSEL =
   'flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ' +
   'md:grid md:grid-cols-3 md:overflow-visible md:pb-0 lg:grid-cols-6';
 
-// A titled list of product cards: `SectionHeader` + the cards. Draws nothing without products.
-const ProductSection = ({ title, subtitle, to, products, carousel = false, className = 'my-6' }) => {
+// A titled list of product cards: `SectionHeader` + the cards. Draws nothing without products. `extra` goes under the subtitle.
+const ProductSection = ({ title, subtitle, to, products, carousel = false, className = 'my-6', extra }) => {
   if (!products?.length) return null;
 
   return (
     <section className={className} aria-label={title}>
-      <SectionHeader title={title} subtitle={subtitle} to={to} />
+      <SectionHeader title={title} subtitle={subtitle} to={to} extra={extra} />
       <div className={carousel ? CAROUSEL : GRID}>
         {products.map((product) =>
           carousel ? (

@@ -3,16 +3,20 @@ import { Link } from 'react-router-dom';
 import { FaChevronDown } from 'react-icons/fa';
 import { discountLabel, formatPrice } from '../../utils/formatPrice';
 import defaultImage from '../../assets/images/default_product_image.jpg';
+import CouponOffers from './CouponOffers';
 
 // The order, read-only (it is changed in the cart, where the minimum order, the stock and Undo are handled): what is in it, a
 // promo code, and what it comes to. On a phone it is folded under one line ("Order summary (2 items)  ৳1,400"), opened with a tap,
 // so the form is the first thing on the page; from `lg` it is always open beside the form.
 //   shipping   the delivery charge, or null before an area is chosen
-//   coupon     { status, error, appliedCode, input, onInput, onApply, onRemove }
+//   coupon     { status, error, appliedCode, input, onInput, onApply, onRemove, offers, onUseOffer }
+//              offers: what the shop suggests (see CouponOffers); on a phone the folded header says when there are some
 const CheckoutSummary = ({ items, subtotal, discount, shipping, total, coupon }) => {
   const [open, setOpen] = useState(false);
   const id = useId();
   const count = items.length;
+  const offers = coupon.offers || [];
+  const usableOffers = offers.filter((offer) => offer.eligible).length;
 
   return (
     <section aria-label="Order summary" className="rounded-lg border border-gray-200 bg-white lg:sticky lg:top-24">
@@ -23,8 +27,13 @@ const CheckoutSummary = ({ items, subtotal, discount, shipping, total, coupon })
         onClick={() => setOpen((value) => !value)}
         className="flex min-h-14 w-full items-center justify-between gap-3 px-4 py-3 text-left lg:pointer-events-none"
       >
-        <span className="font-semibold text-gray-900">
-          Order summary <span className="font-normal text-gray-500">({count} {count === 1 ? 'item' : 'items'})</span>
+        <span>
+          <span className="font-semibold text-gray-900">
+            Order summary <span className="font-normal text-gray-500">({count} {count === 1 ? 'item' : 'items'})</span>
+          </span>
+          {!open && coupon.status !== 'applied' && usableOffers > 0 && (
+            <span className="block text-xs font-medium text-indigo-700 lg:hidden">{usableOffers === 1 ? '1 offer' : `${usableOffers} offers`} for you: tap to see</span>
+          )}
         </span>
         <span className="flex items-center gap-2 font-bold text-gray-900">
           {formatPrice(total)}
@@ -91,6 +100,7 @@ const CheckoutSummary = ({ items, subtotal, discount, shipping, total, coupon })
             </div>
           )}
           {coupon.status === 'failed' && <p className="mt-1 text-sm text-red-600">{coupon.error}</p>}
+          {coupon.status !== 'applied' && <CouponOffers offers={offers} disabled={coupon.status === 'validating'} onUse={coupon.onUseOffer} />}
         </div>
 
         <div className="space-y-1 text-sm text-gray-700">
