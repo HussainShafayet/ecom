@@ -194,6 +194,15 @@ describe('The hero', () => {
     expect(container.querySelector('video')).toBeNull(); // not downloaded over mobile data into a box too small to watch
   });
 
+  it('is one column that cannot grow with its content on a phone (Swiper stretched an "auto" column past 33 million px)', async () => {
+    getHomeContent.mockResolvedValue(homeContent(CONTENT));
+    renderWithStore(<HeroSection />);
+
+    const grid = (await screen.findByAltText('Big Sale')).closest('.grid');
+    expect(grid.classList.contains('grid-cols-1')).toBe(true); // minmax(0, 1fr): as wide as the page, whatever the slides want
+    expect(grid.classList.contains('lg:grid-cols-3')).toBe(true); // and from a computer the 2/3 + 1/3 row
+  });
+
   it('on a computer: the video too, which you can page through', async () => {
     stubMatchMedia(DESKTOP);
     getHomeContent.mockResolvedValue(homeContent(CONTENT));

@@ -74,7 +74,9 @@ const HeroSection = () => {
     ) :
     !hasSlides && !hasSide ? null :
 
-    <div className="grid gap-3 lg:grid-cols-3 lg:gap-4">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
+      {/* One column that may not grow past the page: the default `auto` column is as wide as its content wants, and the
+          slider's slides are as wide as their box, so below `lg` the box grew with every Swiper resize (past 33 million px). */}
       {/* image slider: 16:9 on a phone, a fixed height beside the tiles on a computer */}
       {hasSlides && (
         <div className={`aspect-[16/9] sm:aspect-[2/1] lg:aspect-auto ${HERO_HEIGHT} ${hasSide ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
