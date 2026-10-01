@@ -1,15 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigationType, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaFilter, FaSearch } from 'react-icons/fa';
 import { Breadcrum, ProductCard, SectionError } from '../components/common';
 import { ActiveFilters, FilterSheet, FilterSidebar } from '../components/products';
 import { ProductsPageSkeleton } from '../components/common/skeleton';
-import { fetchAllProducts } from '../redux/slice/productSlice';
+import { fetchAllProducts, restoreProductsList } from '../redux/slice/productSlice';
 import { fetchShopContent } from '../redux/slice/contentSlice';
 import { clearSectionError } from '../redux/slice/globalErrorSlice';
 import useMediaQuery from '../hooks/useMediaQuery';
 import { filterChips, filterCount, filtersToParams, readFilters, withoutFilters } from '../utils/productFilters';
+import { recallScroll, rememberScroll, restoreScroll } from '../utils/scrollMemory';
+
+// How long a list that was left (for a product) is still shown as it was when the shopper comes Back to it
+const LIST_FRESH_MS = 5 * 60 * 1000;
+
+const nothingYet = (items) => !items || items.length === 0;
 
 // What the shopper can sort by. `discount_price` is what they pay (the backend's `price` is the price before a discount, which
 // reads wrong next to a sale), so that is "Price". An address that carries one of the other orderings still shows it in the box.
@@ -49,25 +55,68 @@ const NoProducts = ({ search, chosen, onClearFilters, onSeeAll }) => (
 // new list from its first page: the old list is never added to (it used to be, so a new sort after "more" showed another page of
 // the new list under the old one). While the next page loads the list stays on the screen; while a new list loads, only the
 // cards wait (skeleton), the title and the controls stay.
+// Back from a product (the browser's Back, not a new visit) to the same list, loaded within the last few minutes: it comes back as it
+// was, every page that had been loaded and the same scroll, with no request and no skeleton. A new visit (a link, a changed address)
+// is still a new list from its first page. (The product page and the cart load their own products into the same `items`, so the list
+// is kept apart in the slice: `savedList`.)
 const Products = ({ scrollContainerRef }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
-  const { items: products, isLoading, isLoadingMore, error, hasMore, count, listKey, listPage } = useSelector((state) => state.product);
+  const location = useLocation();
+  const navigationType = useNavigationType();
+  const { items: products, isLoading, isLoadingMore, error, hasMore, count, listKey, listPage, savedList } = useSelector((state) => state.product);
   const categories = useSelector((state) => state.content.categories);
   const isDesktop = useMediaQuery('(min-width: 1024px)'); // the filters are a sidebar there, a sheet on a phone
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [asked, setAsked] = useState(false); // nothing of an earlier visit's list is drawn before this visit's first request
   const [moreFailed, setMoreFailed] = useState(false);
 
   const query = searchParams.toString();
   const filters = readFilters(searchParams);
   const chosen = filterCount(filters);
 
+  // decided once, as the page opens: is this a Back to a list that is still good?
+  const [cameBack] = useState(
+    () => navigationType === 'POP' && savedList?.key === query && savedList.items.length > 0 && Date.now() - savedList.at < LIST_FRESH_MS
+  );
+  const [asked, setAsked] = useState(cameBack); // nothing of an earlier visit's list is drawn before this visit's first request
+  const keepFor = useRef(cameBack ? query : null); // the address whose list is already there: no request for it, once
+
   useEffect(() => {
     setMoreFailed(false);
+    if (keepFor.current === query) {
+      setAsked(true);
+      return;
+    }
+    keepFor.current = null; // any other address is a new list
     dispatch(fetchAllProducts({ ...readFilters(new URLSearchParams(query)), page: 1, key: query }));
     setAsked(true);
   }, [dispatch, query]);
+
+  // Back: the saved list is `items` again before the first paint (a state change made in a layout effect is drawn before the screen is)
+  useLayoutEffect(() => {
+    if (cameBack) dispatch(restoreProductsList());
+  }, [cameBack, dispatch]);
+
+  // ...and the scroll is put back once it is drawn (the page scrolls inside Layout's box, which `ScrollToTop` leaves alone then). A list
+  // that has to be asked for again starts at the top.
+  const ready = asked && listKey === query && !nothingYet(products); // this address's list is what is on the screen
+  const scrolled = useRef(false);
+  useLayoutEffect(() => {
+    const saved = navigationType === 'POP' ? recallScroll(location.key) : undefined;
+    if (saved === undefined || scrolled.current) return;
+    if (!cameBack) {
+      scrolled.current = true;
+      restoreScroll(scrollContainerRef?.current, 0);
+    } else if (ready) {
+      scrolled.current = true;
+      restoreScroll(scrollContainerRef?.current, saved);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready]);
+
+  // Where the shopper was, noted as they open a product (reading it as the page is left is too late: the product's page has replaced
+  // this one, and the box has already been cut to its height)
+  const leaving = () => rememberScroll(location.key, scrollContainerRef?.current?.scrollTop ?? 0);
 
   useEffect(() => {
     dispatch(fetchShopContent()); // what there is to filter by
@@ -83,7 +132,7 @@ const Products = ({ scrollContainerRef }) => {
 
   const loadMore = async () => {
     setMoreFailed(false);
-    const result = await dispatch(fetchAllProducts({ ...filters, page: listPage + 1 }));
+    const result = await dispatch(fetchAllProducts({ ...filters, page: listPage + 1, key: query }));
     if (fetchAllProducts.rejected.match(result)) setMoreFailed(true);
   };
 
@@ -188,7 +237,7 @@ const Products = ({ scrollContainerRef }) => {
 
           <ActiveFilters chips={filterChips(filters, categories)} onRemove={(chip) => showFilters(chip.remove(filters))} onClear={clearFilters} />
 
-          {list}
+          <div onClickCapture={leaving}>{list}</div>
         </div>
       </div>
 

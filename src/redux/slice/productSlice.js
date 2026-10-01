@@ -26,6 +26,10 @@ const initialState = {
     listKey: null, // which list `items` is (the page's query string; undefined when another page asked), so a page never draws another's
     listPage: 1, // the last page of it that was loaded
     listRequestId: null, // the request whose answer counts; an older one that arrives late is ignored
+    // The products page's list as it was last loaded, kept apart: the product page (related products), the cart (suggestions) and the
+    // home page all load their own products into `items`, so by the time the shopper comes Back it is no longer there. Written whenever
+    // the products page's own request (the ones that carry a `key`) is answered; `restoreProductsList` puts it back. `at` is when (ms).
+    savedList: null, // {key, items, page, hasMore, count, at}
     selectedColor: null,
     selectedSize: null,
     suggestionsLoading: false,
@@ -38,7 +42,7 @@ const initialState = {
 export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", async ({page_size=null,ordering=null, page=1,category = null, brands=[], tags=[], min_price=0, max_price=0, sizes=[], colors=[],discount_type, discount_value, search=""}, {rejectWithValue})=>{
     try {
         const response = await getAllProducts(page_size, ordering, page, category, brands,tags, min_price, max_price, sizes, colors,discount_type, discount_value,search);
-        return {data: response?.data?.data?.results || [], next: response?.data?.data?.next || null, count: response?.data?.data?.count ?? null};
+        return {data: response?.data?.data?.results || [], next: response?.data?.data?.next || null, count: response?.data?.data?.count ?? null, at: Date.now()};
     } catch (error) {
         return rejectWithValue(apiErrorMessage(error)); // a sentence, never a raw "Request failed with status code 503"
     }
@@ -109,6 +113,20 @@ const productSlice = createSlice({
         suggestionsInputTime: (state) =>{
             state.suggestionsLoading = true;
         },
+        // Back to the products list: its saved copy is `items` again (and any answer still on its way for another page's products is ignored)
+        restoreProductsList: (state)=>{
+            const saved = state.savedList;
+            if (!saved) return;
+            state.items = saved.items;
+            state.listKey = saved.key;
+            state.listPage = saved.page;
+            state.hasMore = saved.hasMore;
+            state.count = saved.count;
+            state.listRequestId = null;
+            state.isLoading = false;
+            state.isLoadingMore = false;
+            state.error = null;
+        },
     },
     extraReducers: (builder)=>{
 
@@ -137,6 +155,9 @@ const productSlice = createSlice({
             state.listPage = page;
             state.count = action?.payload?.count;
             state.hasMore = Boolean(action?.payload?.next); // the backend says whether another page exists
+            if (action.meta.arg.key !== undefined) {
+                state.savedList = {key: action.meta.arg.key, items: state.items, page, hasMore: state.hasMore, count: state.count, at: action.payload?.at ?? Date.now()};
+            }
         });
         builder.addCase(fetchAllProducts.rejected,(state, action)=>{
             if (state.listRequestId !== action.meta.requestId) return;
@@ -222,5 +243,5 @@ const productSlice = createSlice({
     }
 });
 
-export const {setMainImage, setQuantity, setSelectedColor, setSelectedSize, suggestionsInputTime} = productSlice.actions;
+export const {setMainImage, setQuantity, setSelectedColor, setSelectedSize, suggestionsInputTime, restoreProductsList} = productSlice.actions;
 export default productSlice.reducer;
