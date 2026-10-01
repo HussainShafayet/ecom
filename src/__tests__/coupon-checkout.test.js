@@ -115,3 +115,45 @@ describe('The promo code box at checkout', () => {
     expect(body.coupon_code).toBe('SUMMER25');
   });
 });
+
+describe('The delivery estimate at checkout', () => {
+  const renderWithEstimates = async (estimates) => {
+    const {default: Checkout} = await import('../pages/Checkout');
+    publicApi.get.mockResolvedValue({data: {data: {delivery_charges: {inside_dhaka: 60, outside_dhaka: 120}, delivery_estimates: estimates, shipping_addresses: [], user_info: null}}});
+    render(<Provider store={makeStore()}><MemoryRouter><Checkout /></MemoryRouter></Provider>);
+    await screen.findByText('Place Order');
+  };
+
+  it('says how long delivery takes under the delivery area once an area that has an estimate is chosen', async () => {
+    await renderWithEstimates({inside_dhaka: {min_days: 2, max_days: 3}});
+    expect(screen.queryByText(/Delivery in/)).toBeNull(); // no area chosen yet
+
+    fireEvent.change(screen.getByLabelText('Delivery area'), {target: {value: 'inside_dhaka'}});
+
+    expect(screen.getByText('Delivery in 2–3 days')).toBeTruthy();
+  });
+
+  it('says nothing for an area the shop made no promise for, and never invents one', async () => {
+    await renderWithEstimates({inside_dhaka: {min_days: 2, max_days: 3}});
+
+    fireEvent.change(screen.getByLabelText('Delivery area'), {target: {value: 'outside_dhaka'}});
+
+    expect(screen.queryByText(/Delivery in/)).toBeNull();
+  });
+
+  it('says nothing at all from a shop that has not set any (or a backend that sends none)', async () => {
+    await renderWithEstimates(undefined);
+
+    fireEvent.change(screen.getByLabelText('Delivery area'), {target: {value: 'inside_dhaka'}});
+
+    expect(screen.queryByText(/Delivery in/)).toBeNull();
+  });
+
+  it('says "in 2 days" for an estimate that is one number', async () => {
+    await renderWithEstimates({inside_dhaka: {min_days: 2, max_days: 2}});
+
+    fireEvent.change(screen.getByLabelText('Delivery area'), {target: {value: 'inside_dhaka'}});
+
+    expect(screen.getByText('Delivery in 2 days')).toBeTruthy();
+  });
+});

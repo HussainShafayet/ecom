@@ -15,6 +15,7 @@ const initialState ={
     discounts: [],
     left_banner: null,
     right_banner: null,
+    mid_banner: null, // a wide banner between the Home page's sections (only the Home page has one)
     error: null,
     shopLoading: false, // the filters' lists (categories ... discounts) have their own flags: another content request must not draw or hide them
     shopLoaded: false,
@@ -83,6 +84,7 @@ const contentSlice = createSlice({
             state.video_sliders = action?.payload?.data?.page_content?.video_sliders;
             state.left_banner = action?.payload?.data?.page_content?.left_banner;
             state.right_banner = action?.payload?.data?.page_content?.right_banner;
+            state.mid_banner = action?.payload?.data?.page_content?.mid_banner ?? null;
         });
         builder.addCase(fetchHomeContent.rejected,(state, action)=>{
             state.isLoading = false;
@@ -90,6 +92,7 @@ const contentSlice = createSlice({
             state.video_sliders = [];
             state.left_banner = null;
             state.right_banner = null;
+            state.mid_banner = null;
             state.error = action?.error?.message  || 'Something went wrong!';
         });
 

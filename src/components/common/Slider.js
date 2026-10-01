@@ -14,7 +14,8 @@ const ARROW = 'absolute top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-cen
     'opacity-0 transition-opacity duration-200 hover:bg-white focus-visible:opacity-100 group-hover:opacity-100 sm:flex';
 
 // The hero's image slides (`image_sliders` of the CMS). Each slide is one link; when the admin gave it a caption it is
-// the headline over the picture with a "Shop Now" button. It changes by itself every 5 s, stops while the pointer is over
+// the headline over the picture, and its button says what the admin wrote (`cta_label`: "Shop Now" unless they chose other words,
+// empty = no button; an older backend sends none, and then a slide with a headline has the "Shop Now" it always had). It changes by itself every 5 s, stops while the pointer is over
 // it (and not at all for someone who asked their system for less motion), and on a phone it is swiped.
 const Slider = ({image_sliders}) => {
     const slides = image_sliders || [];
@@ -38,7 +39,9 @@ const Slider = ({image_sliders}) => {
                 loop={several}
                 className="h-full"
             >
-                {slides.map((slide, index) => (
+                {slides.map((slide, index) => {
+                    const label = slide.cta_label ?? (slide.caption ? 'Shop Now' : '');
+                    return (
                     <SwiperSlide key={slide.id ?? slide.order ?? index}>
                         <ContentLink item={slide} className="relative block h-full w-full">
                             <img
@@ -48,15 +51,16 @@ const Slider = ({image_sliders}) => {
                                 fetchPriority={index === 0 ? 'high' : undefined}
                                 className="h-full w-full object-cover"
                             />
-                            {slide.caption && (
+                            {(slide.caption || label) && (
                                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 pb-9 text-left sm:p-6 sm:pb-10">
-                                    <p className="line-clamp-2 max-w-xl text-lg font-bold text-white drop-shadow sm:text-2xl lg:text-3xl">{slide.caption}</p>
-                                    <span className="mt-2 inline-block rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-gray-900">Shop Now</span>
+                                    {slide.caption && <p className="line-clamp-2 max-w-xl text-lg font-bold text-white drop-shadow sm:text-2xl lg:text-3xl">{slide.caption}</p>}
+                                    {label && <span className="mt-2 inline-block rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-gray-900">{label}</span>}
                                 </div>
                             )}
                         </ContentLink>
                     </SwiperSlide>
-                ))}
+                    );
+                })}
             </Swiper>
             {several && (
                 <>

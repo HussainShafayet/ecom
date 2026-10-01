@@ -4,7 +4,7 @@ import { FaCheckCircle } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
 import {resetForm} from '../redux/slice/checkoutSlice';
 import {clearOrder, fetchOrder} from '../redux/slice/orderSlice';
-import {CopyOrderId, OrderItems, OrderTotals, addressLines, formatDate} from '../components/orders';
+import {CopyOrderId, ExpectedDelivery, OrderItems, OrderTotals, addressLines, formatDate} from '../components/orders';
 
 // After "Place order": the good news and the order number first, what to press next (View / Track order) before anything else, then
 // what was ordered. One column of cards that fits a 360 px phone (the old page put white cards inside a grey card inside padding).
@@ -70,6 +70,7 @@ const OrderConfirmation = () => {
         <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
           <h2 className="mb-3 text-base font-semibold text-gray-800 sm:text-lg">Order Summary</h2>
           <p className="mb-3 text-sm text-gray-600">Placed on {formatDate(summary.created_at)}</p>
+          <ExpectedDelivery expected={summary.expected_delivery} className="-mt-2 mb-3" />
           {full && <div className="mb-3"><OrderItems items={full.items} /></div>}
           <div className={full ? 'border-t border-gray-200 pt-3' : ''}>
             <OrderTotals order={summary} />

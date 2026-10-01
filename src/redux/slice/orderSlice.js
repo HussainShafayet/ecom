@@ -1,6 +1,7 @@
 import {createAsyncThunk, createSlice, isAnyOf} from "@reduxjs/toolkit";
 import {cancelOrder as cancelOrderRequest, getOrder, getOrders, trackOrder as trackOrderRequest} from "../../services/orderService";
 import {logoutUser} from "./authSlice";
+import {handleAddtoCart, handleFetchCart} from "./cartSlice";
 
 const initialState = {
     // my orders (list page)
@@ -10,6 +11,11 @@ const initialState = {
     ordersPrevious: null,
     ordersLoading: false,
     ordersError: null,
+    ordersStatus: '', // the statuses the list is for ("" = all): a list is never drawn for another filter
+    ordersRequestId: null, // the newest first-page request: an older answer that arrives late is dropped
+
+    // "Buy again": what went into the cart, and what could not (the shop's sentences)
+    buyAgain: {loading: false, added: [], skipped: [], done: false},
 
     // one of my orders (detail and confirmation pages); `orderNotFound`: the backend answered 404 (somebody else's or unknown), which
     // is not something trying again will change
@@ -28,13 +34,20 @@ const initialState = {
     trackingError: null,
 };
 
+// An answer for a list nobody is looking at any more: another filter was chosen, or a newer first page was asked for
+const staleOrdersAnswer = (state, action) => {
+    const arg = action.meta.arg || {};
+    if ((arg.status || '') !== state.ordersStatus) return true;
+    return (arg.page || 1) === 1 && action.meta.requestId !== state.ordersRequestId;
+};
+
 // The backend answers errors as { success:false, message, error, errors:[...] }: pages show the sentences.
 const errorsOf = (action) => action.payload?.errors || ['Something went wrong!'];
 
 //my orders
-export const fetchOrders = createAsyncThunk('order/fetchOrders', async ({page, page_size} = {}, {rejectWithValue}) => {
+export const fetchOrders = createAsyncThunk('order/fetchOrders', async ({page, page_size, status = ''} = {}, {rejectWithValue}) => {
     try {
-        const response = await getOrders(page, page_size);
+        const response = await getOrders(page, page_size, status);
         return response.data.data;
     } catch (error) {
         return rejectWithValue(error.response?.data);
@@ -61,6 +74,28 @@ export const cancelOrder = createAsyncThunk('order/cancelOrder', async (orderId,
     }
 });
 
+// Put every line of one of my orders back in the cart, one at a time (a line the shop refuses must not stop the others), then
+// read the cart again so the page shows what is really in it. A line whose product or variant is gone cannot be bought.
+export const buyOrderAgain = createAsyncThunk('order/buyOrderAgain', async (items, {dispatch}) => {
+    const added = [];
+    const skipped = [];
+    for (const item of items || []) {
+        if (!item.product_id || !item.variant_id) {
+            skipped.push(`${item.product_name} is not sold any more.`);
+            continue;
+        }
+        try {
+            await dispatch(handleAddtoCart({product_id: item.product_id, variant_id: item.variant_id, quantity: item.quantity, action: 'increase'})).unwrap();
+            added.push(item.product_name);
+        } catch (error) {
+            const sentence = Array.isArray(error?.errors) ? error.errors[0] : null;
+            skipped.push(sentence || `${item.product_name} could not be added.`);
+        }
+    }
+    await dispatch(handleFetchCart());
+    return {added, skipped};
+});
+
 //guest tracking
 export const trackOrder = createAsyncThunk('order/trackOrder', async ({order_id, phone_number}, {rejectWithValue}) => {
     try {
@@ -80,6 +115,7 @@ const orderSlice = createSlice({
             state.orderError = null;
             state.orderNotFound = false;
             state.cancelError = null;
+            state.buyAgain = initialState.buyAgain;
         },
         clearTracking: (state) => {
             state.tracking = null;
@@ -89,11 +125,23 @@ const orderSlice = createSlice({
     extraReducers: (builder) => {
         builder
         //my orders
-        .addCase(fetchOrders.pending, (state) => {
+        .addCase(fetchOrders.pending, (state, action) => {
             state.ordersLoading = true;
             state.ordersError = null;
+            const status = action.meta.arg?.status || '';
+            if ((action.meta.arg?.page || 1) === 1) {
+                state.ordersRequestId = action.meta.requestId;
+                if (status !== state.ordersStatus) { // another filter: nothing of the old list may show
+                    state.orders = [];
+                    state.ordersCount = 0;
+                    state.ordersNext = null;
+                    state.ordersPrevious = null;
+                }
+                state.ordersStatus = status;
+            }
         })
         .addCase(fetchOrders.fulfilled, (state, action) => {
+            if (staleOrdersAnswer(state, action)) return;
             state.ordersLoading = false;
             // page 1 starts the list again; a later page ("Load more") goes under what is already there
             const results = action.payload?.results || [];
@@ -104,6 +152,7 @@ const orderSlice = createSlice({
             state.ordersPrevious = action.payload?.previous || null;
         })
         .addCase(fetchOrders.rejected, (state, action) => {
+            if (staleOrdersAnswer(state, action)) return;
             state.ordersLoading = false;
             state.ordersError = errorsOf(action);
         })
@@ -138,6 +187,17 @@ const orderSlice = createSlice({
         .addCase(cancelOrder.rejected, (state, action) => {
             state.cancelLoading = false;
             state.cancelError = errorsOf(action);
+        })
+
+        //buy again
+        .addCase(buyOrderAgain.pending, (state) => {
+            state.buyAgain = {loading: true, added: [], skipped: [], done: false};
+        })
+        .addCase(buyOrderAgain.fulfilled, (state, action) => {
+            state.buyAgain = {loading: false, added: action.payload.added, skipped: action.payload.skipped, done: true};
+        })
+        .addCase(buyOrderAgain.rejected, (state) => {
+            state.buyAgain = {loading: false, added: [], skipped: ['Something went wrong. Please try again.'], done: true};
         })
 
         //guest tracking
