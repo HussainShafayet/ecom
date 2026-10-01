@@ -63,6 +63,7 @@ Both files derive `errorMessage` from HTTP status only — the backend error bod
 | GET | `/orders/track/?order_id=&phone_number=` | `trackOrder` (uses `publicApi`) | `trackOrder` (orderSlice) |
 | GET | `/content/checkout/` | inlined | checkoutSlice |
 | POST | `/coupons/validate/` | `validateCoupon` (couponService, `publicApi`) | `handleApplyCoupon` (checkoutSlice) |
+| GET | `/coupons/available/?subtotal=` | `getAvailableOffers` (couponService, `publicApi`, section `checkout-offers`) | `handleGetOffers` (checkoutSlice) |
 | GET | `/site/` | `getSite` (siteService, `publicApi`) | `handleFetchSite` (siteSlice, dispatched once by `Layout`) |
 | GET | `/site/pages/{slug}/` | `getSitePage` | none: `StaticPage` reads it into local state |
 | GET | `/site/faq/` | `getFaqs` | none: `FAQPage` reads it into local state |

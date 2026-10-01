@@ -2,7 +2,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {clearCart, handleFetchCart} from './cartSlice';
 import publicApi from '../../api/publicApi';
-import {validateCoupon} from '../../services/couponService';
+import {validateCoupon, getAvailableOffers} from '../../services/couponService';
 
 const initialState = {
   isLoading: false,
@@ -39,6 +39,8 @@ const initialState = {
   couponError: null,
   discountAmount: 0,
   appliedCouponCode: '',
+  offers: [], // the coupons the shop suggests for this cart (GET /coupons/available/)
+  offersRequestId: null, // the newest request: an older answer (a cart that changed meanwhile) is dropped
 };
 
 // checkout process
@@ -93,6 +95,17 @@ export const handleApplyCoupon = createAsyncThunk('checkout/handleApplyCoupon', 
   }
 });
 
+// the coupons worth suggesting for a cart of `subtotal`; a hint, so a failure just leaves the list empty
+export const handleGetOffers = createAsyncThunk('checkout/handleGetOffers', async (subtotal, { rejectWithValue }) => {
+  try {
+    const response = await getAvailableOffers({ subtotal });
+    const offers = response?.data?.data?.offers;
+    return Array.isArray(offers) ? offers : [];
+  } catch (error) {
+    return rejectWithValue(error?.response?.data);
+  }
+});
+
 const checkoutSlice = createSlice({
   name: 'checkout',
   initialState,
@@ -142,6 +155,8 @@ const checkoutSlice = createSlice({
       state.couponError = null;
       state.discountAmount = 0;
       state.appliedCouponCode = '';
+      state.offers = [];
+      state.offersRequestId = null;
     },
   },
   extraReducers: (builder) =>{
@@ -211,6 +226,17 @@ const checkoutSlice = createSlice({
           state.couponError = Array.isArray(errors) && errors.length > 0
             ? errors[0]
             : (action?.payload?.error || 'This coupon could not be applied.');
+      })
+
+      // the suggested coupons
+      .addCase(handleGetOffers.pending, (state, action) => {
+          state.offersRequestId = action.meta.requestId;
+      })
+      .addCase(handleGetOffers.fulfilled, (state, action) => {
+          if (state.offersRequestId === action.meta.requestId) state.offers = action.payload;
+      })
+      .addCase(handleGetOffers.rejected, (state, action) => {
+          if (state.offersRequestId === action.meta.requestId) state.offers = []; // never a list that was made for another cart
       })
 
   }

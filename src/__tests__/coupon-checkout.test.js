@@ -21,7 +21,7 @@ vi.setConfig({testTimeout: 15000});
 
 vi.mock('../api/axiosSetup', () => ({default: {get: vi.fn(), post: vi.fn(), put: vi.fn()}}));
 vi.mock('../api/publicApi', () => ({default: {get: vi.fn(), post: vi.fn()}}));
-vi.mock('../services/couponService', () => ({validateCoupon: vi.fn()}));
+vi.mock('../services/couponService', () => ({validateCoupon: vi.fn(), getAvailableOffers: vi.fn()}));
 
 const MUG = {
   id: 1, name: 'Mug', slug: 'mug', sku: 'M-1', image: '', base_price: 500, discount_price: 500,

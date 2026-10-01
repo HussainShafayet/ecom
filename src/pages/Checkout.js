@@ -15,6 +15,7 @@ import {
   clearResponseError,
   setSelectedAddressId,
   handleApplyCoupon,
+  handleGetOffers,
   clearCoupon,
 } from '../redux/slice/checkoutSlice';
 import {clearCart, selectTotalPrice} from '../redux/slice/cartSlice';
@@ -47,7 +48,7 @@ const Checkout = () => {
   const {cartLoading, cartItems, cartError} = useSelector((state)=>state.cart);
   const navigate = useNavigate();
 
-  const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, order, delivery_charges, responseError, checkoutContentLoading, checkoutContentError, couponStatus, couponError, discountAmount, appliedCouponCode} = useSelector(
+  const { isLoading, formData, errors, touched, districts, upazilas, isCheckoutFulfilled, order_id, order, delivery_charges, responseError, checkoutContentLoading, checkoutContentError, couponStatus, couponError, discountAmount, appliedCouponCode, offers} = useSelector(
     (state) => state.checkout
   );
 
@@ -68,6 +69,11 @@ const Checkout = () => {
   useEffect(() => {
     dispatch(clearResponseError());
   }, [dispatch]);
+
+  // The coupons the shop suggests, for what the cart is worth now (it can change as the saved cart arrives)
+  useEffect(() => {
+    if (!cartLoading && totalPrice > 0) dispatch(handleGetOffers(totalPrice.toFixed(2)));
+  }, [cartLoading, totalPrice, dispatch]);
 
   // Step 2: Handle checkout success (redirect + clear cart + reset form)
   useEffect(() => {
@@ -235,10 +241,17 @@ const Checkout = () => {
     }
   };
 
-  const onApplyCoupon = () => {
-    const code = couponInput.trim();
+  const applyCode = (code) => {
     if (!code || couponStatus === 'validating') return;
     dispatch(handleApplyCoupon({ code, subtotal: totalPrice.toFixed(2), phone_number: formData.phone_code + formData.phone_number }));
+  };
+
+  const onApplyCoupon = () => applyCode(couponInput.trim());
+
+  // A tapped offer is checked like a typed code; its code stays in the box in case the backend refuses it
+  const onUseOffer = (offer) => {
+    setCouponInput(offer.code);
+    applyCode(offer.code);
   };
 
   const onRemoveCoupon = () => {
@@ -296,6 +309,8 @@ const Checkout = () => {
                 onInput: setCouponInput,
                 onApply: onApplyCoupon,
                 onRemove: onRemoveCoupon,
+                offers,
+                onUseOffer,
               }}
             />
           )}
