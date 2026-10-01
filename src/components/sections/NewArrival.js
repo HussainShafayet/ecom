@@ -107,9 +107,6 @@ const NewArrival = ({forRoute}) => {
           carousel={!forRoute}
         />
 
-        {forRoute &&
-          <ProductSection title="Recommended Products" subtitle="More you might like." products={newArrival} />
-        }
       </div>
       }
     </>
