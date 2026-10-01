@@ -3,17 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { handleSendOtp, handleSubmitOtp, statusUpdateVerifyPopup } from '../../redux/slice/profileSlice';
 import { Field, OtpInput } from '../common';
 import useCountdown from '../../hooks/useCountdown';
+import useDialog from '../../hooks/useDialog';
 import { formatWait } from '../../api/errors';
 
 const RESEND_SECONDS = 60; // until the backend says (`otpTiming.resend_after`)
 const CODE_LENGTH = 6;
 
-const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), [href], select, textarea, [tabindex]:not([tabindex="-1"])';
-
 // The code for a NEW phone number or e-mail (the backend wants it verified before it is saved): a sheet that comes up from the
 // bottom on a phone (so it is in view wherever the form was scrolled to; the old popup was `absolute` with nothing positioned around
 // it and opened at the top of the page), a dialog in the middle from `md`. The code is the shared `OtpInput`, a wrong code is said
-// under the boxes, Resend counts down what the backend said, Esc or Cancel leave (Cancel is a plain button: it used to submit).
+// under the boxes, Resend counts down what the backend said, Esc or Cancel leave (Cancel is a plain button: it used to submit). `useDialog`
+// keeps the Tab key inside, closes on Esc and gives the focus back to what had it.
 //   field    'phone' | 'email'
 //   request  what `request-otp/` is asked for again on Resend: {phone_number} or {email}
 //   label    "phone number" | "e-mail", for the words
@@ -30,27 +30,12 @@ const VerifySheet = ({ field, request, label }) => {
   const dialog = useRef(null);
 
   const close = () => dispatch(statusUpdateVerifyPopup({ field }));
+  useDialog(dialog, close);
 
+  // after useDialog (which focuses the sheet itself): the first box of the code is where typing starts
   useEffect(() => {
     document.getElementById('profile-otp')?.focus();
   }, []);
-
-  const keys = (event) => {
-    if (event.key === 'Escape') {
-      close();
-    } else if (event.key === 'Tab') { // keep the Tab key inside the sheet
-      const items = [...dialog.current.querySelectorAll(FOCUSABLE)];
-      const first = items[0];
-      const last = items[items.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-  };
 
   const submit = (event) => {
     event.preventDefault();
@@ -76,11 +61,12 @@ const VerifySheet = ({ field, request, label }) => {
   const sending = loading[field];
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 md:items-center md:p-4" onKeyDown={keys}>
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 md:items-center md:p-4">
       <div
         ref={dialog}
         role="dialog"
         aria-modal="true"
+        tabIndex={-1}
         aria-labelledby="verify-title"
         className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-xl md:rounded-2xl"
       >
