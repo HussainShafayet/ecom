@@ -19,7 +19,7 @@ vi.mock('../components/sections', () => {
   };
   return {
     HeroSection: stub('hero'), CategoryStrip: stub('strip'), FlashSale: stub('flash'), BestSelling: stub('best'), NewArrival: stub('new'),
-    FeaturedProducts: stub('featured'), RecentlyViewed: stub('recent'), Testimonials: stub('testimonials'), AllProducts: stub('all'),
+    FeaturedProducts: stub('featured'), RecentlyViewed: stub('recent'), Testimonials: stub('testimonials'), MidBanner: stub('mid'), AllProducts: stub('all'),
   };
 });
 
@@ -115,8 +115,8 @@ describe('The homepage', () => {
   it('loads the first screen with the page and the sections below only when scrolled near', () => {
     render(<Home />);
 
-    // hero, categories, flash sale, recently viewed: mounted (the flash sale is under the first screen's categories); the rest wait
-    expect(mounted).toEqual(['hero', 'strip', 'flash', 'recent']);
+    // hero, categories, flash sale, the promotion banner (it asks for nothing), recently viewed: mounted; the rest wait
+    expect(mounted).toEqual(['hero', 'strip', 'flash', 'mid', 'recent']);
     expect(screen.queryByText('[best]')).toBeNull();
     expect(screen.queryByText('[new]')).toBeNull();
     expect(screen.queryByText('[featured]')).toBeNull();
@@ -132,7 +132,7 @@ describe('The homepage', () => {
     expect(mounted).toEqual(expect.arrayContaining(['best', 'new', 'featured', 'testimonials', 'all']));
     // still in the page's order
     const page = document.body.textContent;
-    ['[hero]', '[strip]', '[flash]', '[best]', '[new]', '[featured]', '[recent]', '[testimonials]', '[all]'].forEach((label, index, all) => {
+    ['[hero]', '[strip]', '[flash]', '[best]', '[mid]', '[new]', '[featured]', '[recent]', '[testimonials]', '[all]'].forEach((label, index, all) => {
       if (index > 0) expect(page.indexOf(all[index - 1])).toBeLessThan(page.indexOf(label));
     });
   });
