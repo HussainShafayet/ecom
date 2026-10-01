@@ -19,7 +19,7 @@ vi.mock('../components/sections', () => {
   };
   return {
     HeroSection: stub('hero'), CategoryStrip: stub('strip'), FlashSale: stub('flash'), BestSelling: stub('best'), NewArrival: stub('new'),
-    FeaturedProducts: stub('featured'), RecentlyViewed: stub('recent'), AllProducts: stub('all'),
+    FeaturedProducts: stub('featured'), RecentlyViewed: stub('recent'), Testimonials: stub('testimonials'), AllProducts: stub('all'),
   };
 });
 
@@ -71,6 +71,16 @@ describe('LazySection', () => {
     expect(container.querySelector('.animate-pulse')).toBeNull();
   });
 
+  it('keeps its own placeholder instead of the product skeleton when given one', () => {
+    const {container} = render(<LazySection placeholder={<div data-testid="spacer" />}><Child /></LazySection>);
+
+    expect(screen.getByTestId('spacer')).toBeTruthy();
+    expect(container.querySelector('.animate-pulse')).toBeNull(); // no fake product grid for a part that may draw nothing
+    act(() => observers[0].see(true));
+    expect(screen.queryByTestId('spacer')).toBeNull();
+    expect(screen.getByText('the section')).toBeTruthy();
+  });
+
   it('stops watching once it has shown, and never takes the section away again', () => {
     render(<LazySection><Child /></LazySection>);
     act(() => observers[0].see(true));
@@ -110,18 +120,19 @@ describe('The homepage', () => {
     expect(screen.queryByText('[best]')).toBeNull();
     expect(screen.queryByText('[new]')).toBeNull();
     expect(screen.queryByText('[featured]')).toBeNull();
+    expect(screen.queryByText('[testimonials]')).toBeNull();
     expect(screen.queryByText('[all]')).toBeNull();
-    expect(observers).toHaveLength(4); // one per lazy section
+    expect(observers).toHaveLength(5); // one per lazy section
 
     act(() => observers[0].see(true)); // the customer scrolls: best selling is near
     expect(mounted).toContain('best');
     expect(mounted).not.toContain('new');
 
-    act(() => { observers[1].see(true); observers[2].see(true); observers[3].see(true); });
-    expect(mounted).toEqual(expect.arrayContaining(['best', 'new', 'featured', 'all']));
+    act(() => { observers[1].see(true); observers[2].see(true); observers[3].see(true); observers[4].see(true); });
+    expect(mounted).toEqual(expect.arrayContaining(['best', 'new', 'featured', 'testimonials', 'all']));
     // still in the page's order
     const page = document.body.textContent;
-    ['[hero]', '[strip]', '[flash]', '[best]', '[new]', '[featured]', '[recent]', '[all]'].forEach((label, index, all) => {
+    ['[hero]', '[strip]', '[flash]', '[best]', '[new]', '[featured]', '[recent]', '[testimonials]', '[all]'].forEach((label, index, all) => {
       if (index > 0) expect(page.indexOf(all[index - 1])).toBeLessThan(page.indexOf(label));
     });
   });

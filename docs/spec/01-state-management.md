@@ -70,6 +70,10 @@ The shop's own identity, written by the admin (Django admin > Site) and read onc
 
 The contact form, the newsletter box, a static page and the FAQ keep their state in the component (they belong to one page each) and call `siteService` directly; the sentences to show for a failed request come from `utils/errorMessages.js`.
 
+## `slice/testimonialsSlice.js`
+
+What customers say, for the homepage (`fetchTestimonials` → `services/reviewService.getFeaturedReviews` → `GET /products/reviews/featured/`, public). Not persisted. State: `reviews` (at most 8: `{id, reviewer, rating, comment, created_at, verified, product_name, product_slug, image}`; `[]` until there is one) and `isLoading`. Only decoration, so a failed request keeps what there was (nothing the first time) and says nothing: the request names its own section (`home-testimonials`, no toast) and nothing renders that section's error.
+
 ## `slice/contentSlice.js`
 
 CMS-style content per page (home/new-arrival/flash-sale/best-selling/featured/shop/categories): `image_sliders`, `video_sliders`, banners, plus shop-only fields (`tags`, `brands`, `colors`, `sizes`, `price_range`, `discounts`). 7 near-identical thunks hitting `services/contentService`. A single shared `isLoading`/`error` covers six of the 7 async flows — concurrent fetches can clobber each other's loading state (unlike `categorySlice`, which has per-section flags). The seventh, `fetchShopContent` (the lists the products page filters by), has its own flags `shopLoading`, `shopLoaded` and `shopError` (a **sentence**, `apiErrorMessage`), so another content request can neither draw nor hide the filters, and a failed refresh keeps the lists that were loaded. Not persisted.

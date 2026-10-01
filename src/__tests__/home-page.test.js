@@ -12,15 +12,15 @@ vi.mock('../components/sections', () => {
   };
   return {
     HeroSection: stub('hero'), CategoryStrip: stub('strip'), FlashSale: stub('flash'), BestSelling: stub('best'), NewArrival: stub('new'),
-    FeaturedProducts: stub('featured'), RecentlyViewed: stub('recent'), AllProducts: stub('all'),
+    FeaturedProducts: stub('featured'), RecentlyViewed: stub('recent'), Testimonials: stub('testimonials'), AllProducts: stub('all'),
   };
 });
 
 describe('Home', () => {
-  it('goes from the offer to a way into any category, then what is on sale, what sells, what is new, the picks, where they left off, and everything', () => {
+  it('goes from the offer to a way into any category, then what is on sale, what sells, what is new, the picks, where they left off, what customers say, and everything', () => {
     const {container} = render(<Home />);
     const page = container.textContent;
-    const order = ['[hero]', '[strip]', '[flash]', '[best]', '[new]', '[featured]', '[recent]', '[all]'];
+    const order = ['[hero]', '[strip]', '[flash]', '[best]', '[new]', '[featured]', '[recent]', '[testimonials]', '[all]'];
 
     order.forEach((label) => expect(page).toContain(label));
     order.slice(1).forEach((label, index) => expect(page.indexOf(order[index])).toBeLessThan(page.indexOf(label)));
