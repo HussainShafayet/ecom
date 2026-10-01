@@ -2,12 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectSite } from '../../redux/slice/siteSlice';
+import useHasPassed from '../../hooks/useHasPassed';
 
 // The bar above the header. The admin turns it on and writes the text (and, if they like, where it leads: a page of
-// the shop or another website) in Site settings; without it nothing is drawn.
+// the shop or another website) in Site settings; without it nothing is drawn. If the admin also set an end, the bar goes by itself
+// when it comes, even in a tab that has been open since before (the site is read once when the storefront opens).
 const AnnouncementBar = () => {
   const { announcement } = useSelector(selectSite);
-  if (!announcement?.text) return null;
+  const over = useHasPassed(announcement?.endsAt ?? null);
+  if (!announcement?.text || over) return null;
 
   const { text, link } = announcement;
   let content = text;
