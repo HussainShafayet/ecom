@@ -2,8 +2,8 @@
 // social links, footer pages), the contact page, a static page and the FAQ. The backend's answers are the shapes in
 // backend docs/API_CONTRACT.md section 9 (services/siteService is mocked).
 import React from 'react';
-import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {cleanup, fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
+import {act, cleanup, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {Provider} from 'react-redux';
 import {configureStore} from '@reduxjs/toolkit';
 import {Link, MemoryRouter, Navigate, Route, Routes} from 'react-router-dom';
@@ -110,6 +110,78 @@ describe('the site slice', () => {
     expect(store.getState().site.site).toEqual(EMPTY_SITE);
     expect(store.getState().site.isLoaded).toBe(false);
     expect(store.getState().site.error).toBe('Server error');
+  });
+});
+
+describe('the announcement bar and its end', () => {
+  // The admin may set a moment after which the bar goes; the backend says how many seconds are left (measured by ITS clock), the slice
+  // turns them into a moment on this device's clock, and the bar takes itself away then, without asking the shop again.
+  const NOW = new Date('2026-10-01T10:00:00Z');
+  const DAY = 24 * 60 * 60 * 1000;
+  const sale = (seconds) => ({...SITE, announcement: {text: 'Flash Sale!', link: null, ends_in_seconds: seconds}});
+  const draw = async (site) => {
+    const utils = renderPage(<AnnouncementBar />, {site});
+    await act(async () => { await utils.ready; });
+    return utils;
+  };
+  const after = async (ms) => { await act(async () => { vi.advanceTimersByTime(ms); }); };
+
+  beforeEach(() => {
+    vi.useFakeTimers({toFake: ['setTimeout', 'clearTimeout', 'Date']});
+    vi.setSystemTime(NOW);
+    Object.defineProperty(document, 'visibilityState', {value: 'visible', configurable: true});
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('turns the seconds left into a moment on this clock, and keeps no end as no end', async () => {
+    const {store} = await draw(sale(3600));
+    expect(store.getState().site.site.announcement).toEqual({text: 'Flash Sale!', link: null, endsAt: NOW.getTime() + 3600 * 1000});
+
+    const open = await draw(sale(null));
+    expect(open.store.getState().site.site.announcement).toEqual({text: 'Flash Sale!', link: null, endsAt: null});
+
+    const none = await draw({...SITE, announcement: null});
+    expect(none.store.getState().site.site.announcement).toBeNull();
+  });
+
+  it('shows the bar while there is time left and takes it away when the moment comes, without asking the shop again', async () => {
+    await draw(sale(60));
+    expect(screen.getByText('Flash Sale!')).toBeTruthy();
+    await after(59 * 1000);
+    expect(screen.getByText('Flash Sale!')).toBeTruthy();
+    await after(1000);
+    expect(screen.queryByText('Flash Sale!')).toBeNull();
+    expect(getSite).toHaveBeenCalledTimes(1);
+  });
+
+  it('draws nothing for a bar that has no time left at all', async () => {
+    const {container} = await draw(sale(0));
+    expect(container.innerHTML).toBe('');
+  });
+
+  it('keeps a bar with no end, however long the page stays open', async () => {
+    await draw(sale(null));
+    await after(400 * DAY);
+    expect(screen.getByText('Flash Sale!')).toBeTruthy();
+  });
+
+  it('is right again the moment a sleeping tab wakes (a phone with the screen off), even though no timer fired', async () => {
+    await draw(sale(3600));
+    expect(screen.getByText('Flash Sale!')).toBeTruthy();
+    vi.setSystemTime(new Date(NOW.getTime() + 2 * 3600 * 1000)); // two hours pass; the clock moved, the timer did not fire
+    await act(async () => { document.dispatchEvent(new Event('visibilitychange')); });
+    expect(screen.queryByText('Flash Sale!')).toBeNull();
+  });
+
+  it('waits for an end further away than one timer can wait (about 24.8 days), and does not hide the bar at once', async () => {
+    await draw(sale(40 * 24 * 60 * 60));
+    expect(screen.getByText('Flash Sale!')).toBeTruthy();
+    await after(39 * DAY);
+    expect(screen.getByText('Flash Sale!')).toBeTruthy();
+    await after(DAY + 1000);
+    expect(screen.queryByText('Flash Sale!')).toBeNull();
   });
 });
 

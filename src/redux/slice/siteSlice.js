@@ -4,12 +4,13 @@
 // working: nothing is drawn for what is missing.
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getSite } from '../../services/siteService';
+import { anchorAnnouncement } from '../../utils/announcement';
 
 export const EMPTY_SITE = {
   name: '',
   tagline: '',
   logo: null,
-  announcement: null,
+  announcement: null, // `{text, link, endsAt}` (`endsAt`: a moment on this device's clock, or null for no end), or null for no bar
   contact: { email: '', phone: '', address: '', opening_hours: '', map_url: '' },
   social_links: [],
   trust_badges: [],
@@ -26,7 +27,9 @@ const initialState = {
 export const handleFetchSite = createAsyncThunk('site/handleFetchSite', async (_, { rejectWithValue }) => {
   try {
     const response = await getSite();
-    return response?.data?.data?.site;
+    const site = response?.data?.data?.site;
+    // the bar's seconds left (measured by the server) become a moment on this clock as of now, when the answer arrived
+    return site ? { ...site, announcement: anchorAnnouncement(site.announcement) } : site;
   } catch (error) {
     return rejectWithValue(error?.response?.data || { error: 'Could not load the shop details.' });
   }
