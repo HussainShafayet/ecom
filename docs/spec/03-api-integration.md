@@ -58,6 +58,7 @@ Both files derive `errorMessage` from HTTP status only — the backend error bod
 | PUT | `/accounts/cart/` | inlined | cartSlice (remove — `PUT`, not `DELETE`) |
 | POST | `/orders/` | inlined | checkoutSlice (authenticated client if logged in, `publicApi` otherwise) |
 | GET | `/orders/?page=&page_size=&status=` | `getOrders` (orderService) | `fetchOrders` (orderSlice) |
+| GET | `/orders/?page=1&page_size=1` | `getOrdersTotal` | `fetchOrdersTotal` (orderSlice; the account page's order count, section `orders-total`) |
 | GET | `/orders/{orderId}/` | `getOrder` | `fetchOrder` (orderSlice; also the confirmation page) |
 | POST | `/orders/{orderId}/cancel/` | `cancelOrder` | `cancelOrder` (orderSlice) |
 | GET | `/orders/track/?order_id=&phone_number=` | `trackOrder` (uses `publicApi`) | `trackOrder` (orderSlice) |
