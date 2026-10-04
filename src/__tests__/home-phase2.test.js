@@ -182,7 +182,7 @@ describe('The hero', () => {
     right_banner: {order: 1, type: 'external', link: null, external_link: 'https://example.com/promo', media: '/right.jpg', media_type: 'image', caption: 'Promo'},
   };
 
-  it('on a phone: the slider and the two tiles, each leading where the admin chose, and no video at all', async () => {
+  it('on a phone: the slider and the two tiles, each leading where the admin chose, and the video only as a Play tile', async () => {
     getHomeContent.mockResolvedValue(homeContent(CONTENT));
     const {container} = renderWithStore(<HeroSection />);
 
@@ -191,7 +191,43 @@ describe('The hero', () => {
     const promo = screen.getByAltText('Promo').closest('a'); // this one used to point at /products/detail/null
     expect(promo.getAttribute('href')).toBe('https://example.com/promo');
     expect(promo.getAttribute('target')).toBe('_blank');
-    expect(container.querySelector('video')).toBeNull(); // not downloaded over mobile data into a box too small to watch
+    expect(container.querySelector('video')).toBeNull(); // the file is not even asked for over mobile data until a tap
+    expect(screen.getByRole('button', {name: 'Play video: Video 1'})).toBeTruthy();
+  });
+
+  it('on a phone: a tap on Play loads the video and plays it with sound, once; the next video goes back to its Play tile', async () => {
+    getHomeContent.mockResolvedValue(homeContent(CONTENT));
+    const {container} = renderWithStore(<HeroSection />);
+    fireEvent.click(await screen.findByRole('button', {name: 'Play video: Video 1'}));
+
+    const video = container.querySelector('video');
+    expect(video.getAttribute('src')).toBe('/video-1.mp4');
+    expect(video.hasAttribute('controls')).toBe(true);
+    expect(video.muted).toBe(false); // a tap is a gesture, so sound is allowed
+    expect(video.loop).toBe(false);
+    expect(screen.queryByRole('button', {name: /^Play video/})).toBeNull();
+
+    fireEvent.click(screen.getByLabelText('Next video'));
+    expect(container.querySelector('video')).toBeNull(); // nothing downloaded that was not asked for
+    fireEvent.click(screen.getByRole('button', {name: 'Play video: Video 2'}));
+    expect(container.querySelector('video').getAttribute('src')).toBe('/video-2.mp4');
+  });
+
+  it('on a phone: the promo tiles come before the video, and the arrows are there without hovering', async () => {
+    getHomeContent.mockResolvedValue(homeContent(CONTENT));
+    renderWithStore(<HeroSection />);
+    const play = await screen.findByRole('button', {name: 'Play video: Video 1'});
+    const tiles = screen.getByAltText('Kettle').closest('.grid');
+    expect(tiles.classList.contains('order-1')).toBe(true);
+    expect(play.parentElement.classList.contains('order-2')).toBe(true);
+    expect(screen.getByLabelText('Next video').className).not.toMatch(/(^|\s)opacity-0/); // hidden until hover only from a computer (lg:)
+  });
+
+  it('on a phone: a single video has no arrows, and a video with no caption says only "Play video"', async () => {
+    getHomeContent.mockResolvedValue(homeContent({...CONTENT, video_sliders: [VIDEO(1, {caption: ''})]}));
+    renderWithStore(<HeroSection />);
+    expect(await screen.findByRole('button', {name: 'Play video'})).toBeTruthy();
+    expect(screen.queryByLabelText('Next video')).toBeNull();
   });
 
   it('is one column that cannot grow with its content on a phone (Swiper stretched an "auto" column past 33 million px)', async () => {
@@ -210,6 +246,9 @@ describe('The hero', () => {
 
     await waitFor(() => expect(container.querySelector('video')).toBeTruthy());
     expect(container.querySelector('video').getAttribute('src')).toBe('/video-1.mp4');
+    expect(container.querySelector('video').muted).toBe(true); // plays at once, so it must be silent
+    expect(container.querySelector('video').loop).toBe(true);
+    expect(screen.queryByRole('button', {name: /^Play video/})).toBeNull(); // no Play tile
     expect(screen.getByText('Video 1').closest('a').getAttribute('href')).toBe('/products/?category=cat-1');
 
     fireEvent.click(screen.getByLabelText('Next video'));
