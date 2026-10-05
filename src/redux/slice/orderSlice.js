@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice, isAnyOf} from "@reduxjs/toolkit";
-import {cancelOrder as cancelOrderRequest, getOrder, getOrders, getOrdersTotal, trackOrder as trackOrderRequest} from "../../services/orderService";
+import {cancelOrder as cancelOrderRequest, cancelReturn as cancelReturnRequest, getOrder, getOrders, getOrdersTotal, requestReturn as requestReturnRequest, trackOrder as trackOrderRequest} from "../../services/orderService";
 import {logoutUser} from "./authSlice";
 import {handleAddtoCart, handleFetchCart} from "./cartSlice";
 
@@ -29,6 +29,11 @@ const initialState = {
     // cancelling it
     cancelLoading: false,
     cancelError: null,
+
+    // asking to return some of its items, and calling a request off (`returnCancel.id` is the request being cancelled)
+    returnLoading: false,
+    returnError: null,
+    returnCancel: {id: null, loading: false, error: null},
 
     // a guest's lookup by order number + phone
     tracking: null,
@@ -86,6 +91,26 @@ export const cancelOrder = createAsyncThunk('order/cancelOrder', async (orderId,
     }
 });
 
+// Ask to return lines of a delivered order: { orderId, reason, details, items: [{item_id, quantity}] }
+export const requestOrderReturn = createAsyncThunk('order/requestOrderReturn', async ({orderId, reason, details, items}, {rejectWithValue}) => {
+    try {
+        const response = await requestReturnRequest(orderId, {reason, details, items});
+        return response.data.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data);
+    }
+});
+
+// Call off a return request the shop has not answered yet
+export const cancelOrderReturn = createAsyncThunk('order/cancelOrderReturn', async ({orderId, requestId}, {rejectWithValue}) => {
+    try {
+        const response = await cancelReturnRequest(orderId, requestId);
+        return response.data.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data);
+    }
+});
+
 // Put every line of one of my orders back in the cart, one at a time (a line the shop refuses must not stop the others), then
 // read the cart again so the page shows what is really in it. A line whose product or variant is gone cannot be bought.
 export const buyOrderAgain = createAsyncThunk('order/buyOrderAgain', async (items, {dispatch}) => {
@@ -127,6 +152,9 @@ const orderSlice = createSlice({
             state.orderError = null;
             state.orderNotFound = false;
             state.cancelError = null;
+            state.returnLoading = false;
+            state.returnError = null;
+            state.returnCancel = initialState.returnCancel;
             state.buyAgain = initialState.buyAgain;
         },
         clearTracking: (state) => {
@@ -204,6 +232,30 @@ const orderSlice = createSlice({
         .addCase(cancelOrder.rejected, (state, action) => {
             state.cancelLoading = false;
             state.cancelError = errorsOf(action);
+        })
+
+        //return requests: the answer is the order again, with its new `returns` (dropped when another order is on the page by now)
+        .addCase(requestOrderReturn.pending, (state) => {
+            state.returnLoading = true;
+            state.returnError = null;
+        })
+        .addCase(requestOrderReturn.fulfilled, (state, action) => {
+            state.returnLoading = false;
+            if (state.order?.order_id === action.payload?.order_id) state.order = action.payload;
+        })
+        .addCase(requestOrderReturn.rejected, (state, action) => {
+            state.returnLoading = false;
+            state.returnError = errorsOf(action);
+        })
+        .addCase(cancelOrderReturn.pending, (state, action) => {
+            state.returnCancel = {id: action.meta.arg.requestId, loading: true, error: null};
+        })
+        .addCase(cancelOrderReturn.fulfilled, (state, action) => {
+            state.returnCancel = initialState.returnCancel;
+            if (state.order?.order_id === action.payload?.order_id) state.order = action.payload;
+        })
+        .addCase(cancelOrderReturn.rejected, (state, action) => {
+            state.returnCancel = {id: action.meta.arg.requestId, loading: false, error: errorsOf(action)};
         })
 
         //buy again

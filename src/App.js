@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import './App.css';
 import { Layout } from './components/layout';
 import { Profile, SignIn, SignUp, VerifyOtp, WishList } from './pages/user';
-import { Home, Products, ProductDetails, Cart, NotFound, Checkout, Categories, OrderConfirmation, Orders, OrderDetail } from './pages';
+import { Home, Products, ProductDetails, Cart, NotFound, Checkout, Categories, OrderConfirmation, Orders, OrderDetail, OrderInvoice } from './pages';
 import {useDispatch} from 'react-redux';
 import {restoreSession} from './redux/slice/authActions';
 import {useEffect, useRef} from 'react';
@@ -10,17 +10,12 @@ import {ProtectedRoute, ScrollToTop} from './components/common';
 import {Contact, FAQPage, OrderTracking, StaticPage} from './pages/others';
 import {BestSelling, FeaturedProducts, FlashSale, NewArrival} from './components/sections';
 
-function App() {
+// The shop: its header, footer and bottom bar around whichever page the address names
+function Storefront() {
   const scrollContainerRef = useRef(null);
-  const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(restoreSession());
-  }, [dispatch]);
-
-  
   return (
-      <Router>
+      <>
           <ScrollToTop scrollContainerRef={scrollContainerRef} />{/* Add ScrollToTop here */}
           <Layout scrollContainerRef={scrollContainerRef}> {/* Directly wrap Layout around Routes */}
             <Routes>
@@ -70,6 +65,26 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
+      </>
+  );
+}
+
+function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(restoreSession());
+  }, [dispatch]);
+
+  return (
+      <Router>
+        <Routes>
+          {/* A page that is printed has nothing of the shop around it (no header, footer or bottom bar, and the page itself scrolls) */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/orders/:orderId/invoice" element={<OrderInvoice />} />
+          </Route>
+          <Route path="/*" element={<Storefront />} />
+        </Routes>
       </Router>
   );
 }

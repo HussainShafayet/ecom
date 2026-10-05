@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
+import {FaFileInvoice} from 'react-icons/fa';
 import {cancelOrder, clearOrder, fetchOrder} from '../redux/slice/orderSlice';
 import {clearSectionError} from '../redux/slice/globalErrorSlice';
 import {ErrorDisplay, SectionError} from '../components/common';
 import {OrderDetailSkeleton} from '../components/common/skeleton';
-import usePageTitle from '../hooks/usePageTitle';
-import {BuyAgain, CopyOrderId, ExpectedDelivery, OrderItems, OrderStatusBadge, OrderTimeline, OrderTotals, addressLines, formatDate, formatMoney} from '../components/orders';
+import {BuyAgain, CopyOrderId, ExpectedDelivery, OrderItems, OrderStatusBadge, OrderTimeline, OrderTotals, Returns, addressLines, formatDate, formatMoney} from '../components/orders';
 
 const Card = ({title, children, className = ''}) => (
   <section className={`rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6 ${className}`}>
@@ -16,7 +16,8 @@ const Card = ({title, children, className = ''}) => (
 );
 
 // One of my orders in full: who and when, the progress (small), the items and the sums (a coupon's discount included), where it
-// goes and how it is paid, and, while it is still pending, a Cancel that asks in the page instead of in a browser dialog.
+// goes and how it is paid, the returns of a delivered order (`Returns`), and, while it is still pending, a Cancel that asks in the page instead of in a
+// browser dialog.
 const OrderDetail = () => {
   const {orderId} = useParams();
   usePageTitle(`Order ${orderId}`);
@@ -73,6 +74,11 @@ const OrderDetail = () => {
             </div>
             <p className="text-sm text-gray-500">Placed on {formatDate(order.created_at)}</p>
             <ExpectedDelivery expected={order.expected_delivery} className="mt-1" />
+            {order.status !== 'cancelled' && (
+              <Link to={`/orders/${order.order_id}/invoice`} className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-blue-700 hover:underline">
+                <FaFileInvoice aria-hidden="true" /> View invoice
+              </Link>
+            )}
           </div>
           <OrderStatusBadge status={order.status} label={order.status_display} />
         </div>
@@ -89,6 +95,8 @@ const OrderDetail = () => {
         </div>
         <BuyAgain order={order} />
       </Card>
+
+      <Returns order={order} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
         <Card title="Delivery address">
