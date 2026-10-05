@@ -10,6 +10,7 @@ import {addToCart, handleAddtoCart, handleClonedProduct} from '../redux/slice/ca
 import {recordViewed} from '../redux/slice/recentlyViewedSlice';
 import {ProductDetailsSkeleton, SectionSkeleton} from '../components/common/skeleton';
 import {discountLabel, formatPrice} from '../utils/formatPrice';
+import usePageTitle from '../hooks/usePageTitle';
 
 const RELATED_COUNT = 12;
 
@@ -34,6 +35,7 @@ const ProductDetails = () => {
   const { slug } = useParams();
   const {isLoading, product, error, mainImage, items:products, quantity, minimum_quantity: minimumQuantity, relatedProductsLoading, selectedColor, selectedSize} = useSelector((state)=> state.product);
   const {isAuthenticated} = useSelector((state)=> state.auth);
+  usePageTitle(product?.name);
 
   const [busy, setBusy] = useState(false); // this page is talking to the server
   const [added, setAdded] = useState(false); // the last Add to Cart worked (for a moment)

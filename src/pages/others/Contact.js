@@ -5,12 +5,14 @@ import { ErrorDisplay, SocialLinks, SuccessMessage } from '../../components/comm
 import { selectSite } from '../../redux/slice/siteSlice';
 import { sendContactMessage } from '../../services/siteService';
 import { errorMessages } from '../../utils/errorMessages';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const EMPTY_FORM = { name: '', email: '', phone: '', subject: '', message: '' };
 const FIELD = 'w-full px-2 py-1 text-gray-700 focus:outline-none';
 
 // The shop's details come from the admin (Site settings); the form stores a message the staff read in the admin.
 const Contact = () => {
+  usePageTitle('Contact us');
   const { contact, social_links } = useSelector(selectSite);
   const [form, setForm] = useState(EMPTY_FORM);
   const [sending, setSending] = useState(false);

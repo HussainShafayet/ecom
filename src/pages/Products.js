@@ -11,6 +11,7 @@ import { clearSectionError } from '../redux/slice/globalErrorSlice';
 import useMediaQuery from '../hooks/useMediaQuery';
 import { filterChips, filterCount, filtersToParams, readFilters, withoutFilters } from '../utils/productFilters';
 import { recallScroll, rememberScroll, restoreScroll } from '../utils/scrollMemory';
+import usePageTitle from '../hooks/usePageTitle';
 
 // How long a list that was left (for a product) is still shown as it was when the shopper comes Back to it
 const LIST_FRESH_MS = 5 * 60 * 1000;
@@ -145,6 +146,7 @@ const Products = ({ scrollContainerRef }) => {
   };
 
   const title = filters.search ? `Results for “${filters.search}”` : filters.category ? humanize(filters.category) : 'All products';
+  usePageTitle(title);
   const fresh = asked && listKey === query; // `items` is THIS address's list, not one another page loaded
   const nothing = !products || products.length === 0;
   const sorts = filters.ordering in OTHER_SORTS ? [...SORTS, { value: filters.ordering, label: OTHER_SORTS[filters.ordering] }] : SORTS;

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Loader, RichTextToHTML } from '../../components/common';
 import { getSitePage } from '../../services/siteService';
+import usePageTitle from '../../hooks/usePageTitle';
 
 // What the admin's HTML looks like: headings, paragraphs, lists, links, images and tables, styled here because the
 // backend sends bare tags (it has already removed scripts and styles).
@@ -18,6 +19,7 @@ const StaticPage = ({ slug: fixedSlug }) => {
   const params = useParams();
   const slug = fixedSlug || params.slug;
   const [state, setState] = useState({ status: 'loading', page: null }); // loading | ready | missing | failed
+  usePageTitle(state.status === 'ready' ? state.page?.title : state.status === 'missing' ? 'Page not found' : '');
 
   useEffect(() => {
     let current = true;

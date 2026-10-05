@@ -7,8 +7,10 @@ import {SectionSkeleton} from '../common/skeleton';
 import {fetchBestSellingProducts} from '../../redux/slice/product/bestSellingSlice';
 import {SectionError} from '../common';
 import {clearSectionError} from '../../redux/slice/globalErrorSlice';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const BestSelling = ({forRoute}) => {
+  usePageTitle(forRoute ? 'Best selling' : '');
   const bestSellingLoading = useSelector((state) => state.best_selling.best_selling_Loading);
   const bestSelling = useSelector((state) => state.best_selling.best_selling);
   const bestSellingError = useSelector((state) => state.best_selling.best_selling_error);

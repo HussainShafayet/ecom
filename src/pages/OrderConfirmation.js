@@ -5,11 +5,13 @@ import {useDispatch, useSelector} from 'react-redux';
 import {resetForm} from '../redux/slice/checkoutSlice';
 import {clearOrder, fetchOrder} from '../redux/slice/orderSlice';
 import {CopyOrderId, ExpectedDelivery, OrderItems, OrderTotals, addressLines, formatDate} from '../components/orders';
+import usePageTitle from '../hooks/usePageTitle';
 
 // After "Place order": the good news and the order number first, what to press next (View / Track order) before anything else, then
 // what was ordered. One column of cards that fits a 360 px phone (the old page put white cards inside a grey card inside padding).
 const OrderConfirmation = () => {
   const { orderId } = useParams();
+  usePageTitle('Order placed');
   const location = useLocation();
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);

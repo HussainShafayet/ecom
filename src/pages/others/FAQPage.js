@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom';
 import { FaChevronDown, FaChevronUp, FaHeadset, FaSearch } from 'react-icons/fa';
 import { Loader } from '../../components/common';
 import { getFaqs } from '../../services/siteService';
+import usePageTitle from '../../hooks/usePageTitle';
 
 // The questions come from the admin (Site > FAQ); they are grouped by category in the order the admin arranged them.
 const FAQPage = () => {
+  usePageTitle('FAQ');
   const [faqs, setFaqs] = useState(null); // null while loading
   const [failed, setFailed] = useState(false);
   const [openKey, setOpenKey] = useState(null);

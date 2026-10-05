@@ -7,6 +7,7 @@ import {clearVerifyOtpState, resendOtp, verifyOtp} from "../../redux/slice/authS
 import {maskPhone} from "../../utils/phone";
 import {formatWait} from "../../api/errors";
 import useCountdown from "../../hooks/useCountdown";
+import usePageTitle from '../../hooks/usePageTitle';
 
 // What the code page assumes until the backend says otherwise (its answer to "send a code" carries `resend_after`, `expires_in` and
 // `length`, see `state.auth.otpTiming`): 60 s before another code can be asked for (the backend's OTP_RESEND_COOLDOWN_SECONDS), and
@@ -22,6 +23,7 @@ const shortWait = (seconds) => (seconds < 90 ? `${seconds}s` : formatWait(second
 // SMS"), the number the code went to (its middle hidden), a resend button that counts down (the backend's 60 s, or what it says
 // when it says "too many"), what the shop said about the code under the boxes, and a way back if the number was wrong.
 const VerifyOtp = () => {
+  usePageTitle('Verify your phone');
   const dispatch = useDispatch();
   const { verifyOtpLoading, verifyOtpMessage, verifyOtpError, verifyWait, resendWait, resendOtpError, otpTiming, signinMessage, isAuthenticated } = useSelector((state) => state.auth);
   const verifyError = useSelector((state) => state.globalError.sectionErrors["verify-otp"]);

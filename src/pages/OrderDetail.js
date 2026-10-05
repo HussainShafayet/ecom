@@ -20,6 +20,7 @@ const Card = ({title, children, className = ''}) => (
 // browser dialog.
 const OrderDetail = () => {
   const {orderId} = useParams();
+  usePageTitle(`Order ${orderId}`);
   const dispatch = useDispatch();
   const {order, orderError, orderNotFound, cancelLoading, cancelError} = useSelector((state) => state.order);
   const [confirming, setConfirming] = useState(false);

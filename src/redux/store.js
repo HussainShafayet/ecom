@@ -22,6 +22,7 @@ import globalErrorReducer from './slice/globalErrorSlice';
 import siteReducer from './slice/siteSlice';
 import testimonialsReducer from './slice/testimonialsSlice';
 import toastReducer from './slice/toastSlice';
+import pageTitleReducer from './slice/pageTitleSlice';
 
 // ✅ Persist Only `isAuthenticated` (Not Full auth Slice)
 const authPersistConfig = {
@@ -58,6 +59,7 @@ const rootReducer = combineReducers({
   testimonials: testimonialsReducer, // not persisted (the reviews the homepage shows)
   globalError: globalErrorReducer, //not persisted
   toast: toastReducer,   // not persisted (short messages over the page)
+  pageTitle: pageTitleReducer, // not persisted (the name of the page, for the browser tab)
 });
 
 // Apply Persist Reducer

@@ -9,6 +9,7 @@ import {SectionSkeleton} from '../common/skeleton';
 import {fetchFlashSaleProducts} from '../../redux/slice/product/flashSaleSlice';
 import {SectionError} from '../common';
 import {clearSectionError} from '../../redux/slice/globalErrorSlice';
+import usePageTitle from '../../hooks/usePageTitle';
 
 // What the flash sale page says when the shop has nothing to show because of the sale's window: it has not started (with the time to
 // its start) or it is over. Not drawn on the homepage, where the whole section simply is not there.
@@ -31,6 +32,7 @@ const NotLiveNotice = ({sale, onStart}) => (
 );
 
 const FlashSale = ({forRoute}) => {
+  usePageTitle(forRoute ? 'Flash sale' : '');
   const dispatch = useDispatch();
   const {
     flash_sale_Loading,

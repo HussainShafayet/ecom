@@ -10,6 +10,7 @@ import {SectionError} from '../../components/common';
 import {AddressesTab, PersonalInfo, ProfileHeader} from '../../components/profile';
 import { WishList } from '../user';
 import {ProfileSkeleton} from '../../components/common/skeleton';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const TABS = [
   { label: 'Profile', icon: <FaUserEdit aria-hidden="true" />, id: 'overview' },
@@ -23,6 +24,7 @@ const countOf = (number, word) => `${number} ${word}${number === 1 ? '' : 's'}`;
 // names always written out (the icons alone said nothing), and the tab. It sits straight on the page (the old one was a grey
 // gradient page > white card > grey card > white card, which left a 360 px phone about 250 px for the form).
 const Profile = () => {
+  usePageTitle('My account');
   const [selectedTab, setSelectedTab] = useState('overview');
   const dispatch = useDispatch();
   const {isAuthenticated} = useSelector((state)=>state.auth);

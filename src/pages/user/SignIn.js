@@ -7,10 +7,12 @@ import useCountdown from '../../hooks/useCountdown';
 import { formatWait } from '../../api/errors';
 import { clearSigninState, signInUser } from '../../redux/slice/authSlice';
 import { PHONE_PREFIX, validatePhone } from '../../utils/phone';
+import usePageTitle from '../../hooks/usePageTitle';
 
 // Phone first: the form is the first thing on the page, one field (a phone has a fixed +880 in front of it and cleans up what is
 // typed or pasted), one 48 px button. The customer gets a code by SMS and enters it on the next page.
 const SignIn = () => {
+  usePageTitle('Sign in');
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();

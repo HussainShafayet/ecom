@@ -12,6 +12,7 @@ import {minimumOf, minimumOrderProblems} from '../utils/minimumOrder';
 import {formatPrice} from '../utils/formatPrice';
 import debounce from 'lodash.debounce'; // Import lodash debounce
 import {CartSkeleton, SectionSkeleton} from '../components/common/skeleton';
+import usePageTitle from '../hooks/usePageTitle';
 
 const SUGGESTION_COUNT = 12;
 const UNDO_SECONDS = 6;
@@ -23,6 +24,7 @@ const lineKey = (item) => `${item?.id}-${item?.variant_id ?? 0}`;
 // a bar fixed above the bottom navigation, a removal that is undone with one tap instead of asked about first. From `lg`:
 // the lines beside a sticky order summary that has the Checkout button.
 const Cart = () => {
+  usePageTitle('Cart');
   const totalPrice = useSelector(selectTotalPrice);
   const [confirmAllDelete, setConfirmAllDelete] = useState(false);
   const [quantityErrors, setQuantityErrors] = useState({}); // per line: why the shop refused the last quantity change (stock)
