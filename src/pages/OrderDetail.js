@@ -5,7 +5,7 @@ import {cancelOrder, clearOrder, fetchOrder} from '../redux/slice/orderSlice';
 import {clearSectionError} from '../redux/slice/globalErrorSlice';
 import {ErrorDisplay, SectionError} from '../components/common';
 import {OrderDetailSkeleton} from '../components/common/skeleton';
-import {BuyAgain, CopyOrderId, ExpectedDelivery, OrderItems, OrderStatusBadge, OrderTimeline, OrderTotals, addressLines, formatDate, formatMoney} from '../components/orders';
+import {BuyAgain, CopyOrderId, ExpectedDelivery, OrderItems, OrderStatusBadge, OrderTimeline, OrderTotals, Returns, addressLines, formatDate, formatMoney} from '../components/orders';
 
 const Card = ({title, children, className = ''}) => (
   <section className={`rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6 ${className}`}>
@@ -15,7 +15,8 @@ const Card = ({title, children, className = ''}) => (
 );
 
 // One of my orders in full: who and when, the progress (small), the items and the sums (a coupon's discount included), where it
-// goes and how it is paid, and, while it is still pending, a Cancel that asks in the page instead of in a browser dialog.
+// goes and how it is paid, the returns of a delivered order (`Returns`), and, while it is still pending, a Cancel that asks in the page instead of in a
+// browser dialog.
 const OrderDetail = () => {
   const {orderId} = useParams();
   const dispatch = useDispatch();
@@ -87,6 +88,8 @@ const OrderDetail = () => {
         </div>
         <BuyAgain order={order} />
       </Card>
+
+      <Returns order={order} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
         <Card title="Delivery address">

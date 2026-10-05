@@ -37,6 +37,19 @@ export const cancelOrder = async (orderId) => {
   return await api.post(`/orders/${orderId}/cancel/`, {}, { section: "order-cancel"});
 };
 
+// Ask to send some lines of a delivered order back: { reason, details, items: [{ item_id, quantity }] } (`item_id` is the line's `id`). Answers
+// with the updated order, whose `returns.requests` now has the request. Every refusal is a 400 with sentences in `errors`.
+export const requestReturn = async (orderId, body) => {
+  const api = (await import('../api/axiosSetup')).default;
+  return await api.post(`/orders/${orderId}/returns/`, body, { section: "order-return"});
+};
+
+// Call off my return request (only while the shop has not answered it); answers with the updated order
+export const cancelReturn = async (orderId, requestId) => {
+  const api = (await import('../api/axiosSetup')).default;
+  return await api.post(`/orders/${orderId}/returns/${requestId}/cancel/`, {}, { section: "order-return-cancel"});
+};
+
 // A guest follows an order: progress and items only (no name or address), 404 for a wrong number or phone
 export const trackOrder = async (orderId, phoneNumber) => {
   const publicApi = (await import('../api/publicApi')).default;
