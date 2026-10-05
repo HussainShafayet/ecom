@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
+import {FaFileInvoice} from 'react-icons/fa';
 import {cancelOrder, clearOrder, fetchOrder} from '../redux/slice/orderSlice';
 import {clearSectionError} from '../redux/slice/globalErrorSlice';
 import {ErrorDisplay, SectionError} from '../components/common';
@@ -71,6 +72,11 @@ const OrderDetail = () => {
             </div>
             <p className="text-sm text-gray-500">Placed on {formatDate(order.created_at)}</p>
             <ExpectedDelivery expected={order.expected_delivery} className="mt-1" />
+            {order.status !== 'cancelled' && (
+              <Link to={`/orders/${order.order_id}/invoice`} className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-blue-700 hover:underline">
+                <FaFileInvoice aria-hidden="true" /> View invoice
+              </Link>
+            )}
           </div>
           <OrderStatusBadge status={order.status} label={order.status_display} />
         </div>

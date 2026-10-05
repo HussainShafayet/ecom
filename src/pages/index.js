@@ -8,3 +8,4 @@ export {default as NotFound} from './NotFound';
 export {default as OrderConfirmation} from './OrderConfirmation';
 export {default as Orders} from './Orders';
 export {default as OrderDetail} from './OrderDetail';
+export {default as OrderInvoice} from './OrderInvoice';
