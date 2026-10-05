@@ -6,6 +6,7 @@ import {cancelOrder, clearOrder, fetchOrder} from '../redux/slice/orderSlice';
 import {clearSectionError} from '../redux/slice/globalErrorSlice';
 import {ErrorDisplay, SectionError} from '../components/common';
 import {OrderDetailSkeleton} from '../components/common/skeleton';
+import usePageTitle from '../hooks/usePageTitle';
 import {BuyAgain, CopyOrderId, ExpectedDelivery, OrderItems, OrderStatusBadge, OrderTimeline, OrderTotals, Returns, addressLines, formatDate, formatMoney} from '../components/orders';
 
 const Card = ({title, children, className = ''}) => (
