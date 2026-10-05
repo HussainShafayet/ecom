@@ -61,6 +61,8 @@ Both files derive `errorMessage` from HTTP status only — the backend error bod
 | GET | `/orders/?page=1&page_size=1` | `getOrdersTotal` | `fetchOrdersTotal` (orderSlice; the account page's order count, section `orders-total`) |
 | GET | `/orders/{orderId}/` | `getOrder` | `fetchOrder` (orderSlice; also the confirmation page) |
 | POST | `/orders/{orderId}/cancel/` | `cancelOrder` | `cancelOrder` (orderSlice) |
+| POST | `/orders/{orderId}/returns/` | `requestReturn` (section `order-return`) | `requestOrderReturn` (orderSlice) |
+| POST | `/orders/{orderId}/returns/{requestId}/cancel/` | `cancelReturn` (section `order-return-cancel`) | `cancelOrderReturn` (orderSlice) |
 | GET | `/orders/track/?order_id=&phone_number=` | `trackOrder` (uses `publicApi`) | `trackOrder` (orderSlice) |
 | GET | `/content/checkout/` | inlined | checkoutSlice |
 | POST | `/coupons/validate/` | `validateCoupon` (couponService, `publicApi`) | `handleApplyCoupon` (checkoutSlice) |
