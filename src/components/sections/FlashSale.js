@@ -1,10 +1,10 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {Link} from 'react-router-dom';
 import {shallowEqual, useDispatch, useSelector} from 'react-redux';
-import {ContentLink, ProductSection, Slider} from '../common';
+import {ProductSection} from '../common';
 import FlashSaleCountdown from './FlashSaleCountdown';
+import RouteBanner from './RouteBanner';
 import {fetchFlashSaleContent} from '../../redux/slice/contentSlice';
-import blurImage from '../../assets/images/blur.jpg';
 import {SectionSkeleton} from '../common/skeleton';
 import {fetchFlashSaleProducts} from '../../redux/slice/product/flashSaleSlice';
 import {SectionError} from '../common';
@@ -43,16 +43,9 @@ const FlashSale = ({forRoute}) => {
   // once it has started), so the section goes away, or appears, by itself
   const refresh = useCallback(() => dispatch(fetchFlashSaleProducts({ page_size: 12 })), [dispatch]);
 
-  const {
-    image_sliders,
-    right_banner,
-  } = useSelector((state) => state.content, shallowEqual);
-
   const sectionError = useSelector(
     (state) => state.globalError.sectionErrors["flash-sale"]
   );
-
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
 
   // ✅ useEffect dependency fix
@@ -83,58 +76,7 @@ const FlashSale = ({forRoute}) => {
       <SectionError message={flash_sale_error} onRetry={retry} />
     ) :
       <div className="container mx-auto">
-        {forRoute && 
-        <div className="flex flex-col lg:flex-row gap-4 min-h-[30vh] lg:max-h-[40vh]">
-          {/*image slider*/}
-          <div className="lg:w-4/6 w-full flex">
-              <Slider image_sliders={image_sliders} />
-          </div>
-    
-          <div className="lg:w-2/6 gap-4 w-full  flex flex-col">
-            {right_banner?.media_type === 'image' &&
-              <>
-                {/* Product Image */}
-                <ContentLink item={right_banner} className="block h-full">
-                  {/* Main Product Image */}
-                  <img
-                    src={right_banner?.media}
-                    alt={right_banner?.caption}
-                    loading="lazy"
-                    className={`w-full h-full object-contain rounded-md transition-opacity duration-500 ${
-                      isImageLoaded ? 'opacity-100' : 'opacity-0'
-                    }`}
-                    onLoad={() => setIsImageLoaded(true)} // Set image loaded state
-                  />
-
-                  {/* Blurred Placeholder */}
-                  {!isImageLoaded && (
-                    <img
-                      src={blurImage}
-                      alt="Loading"
-                      className="absolute inset-0 w-full h-36 rounded-md mb-2 animate-pulse object-cover"
-                    />
-                  )}
-                </ContentLink>
-              </>
-            }
-            {right_banner?.media_type === 'video' && 
-              <div className='relative h-full'>
-                <ContentLink item={right_banner} className='absolute right-2 top-2 z-10 text-blue-500 hover:underline text:2x'>{right_banner?.caption?right_banner?.caption :'Click'}</ContentLink>
-                {/* Video */}
-                <video
-                  src={right_banner?.media}
-                  controls
-                  autoPlay
-                  muted
-                  loop
-                  preload='true'
-                  className="w-full h-full object-cover rounded-sm"
-                />
-              </div>
-            }
-          </div>
-        </div>
-        }
+        {forRoute && <RouteBanner />}
        
          
         <ProductSection
