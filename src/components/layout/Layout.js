@@ -5,20 +5,25 @@ import Toaster from '../common/Toaster';
 import BackToTop from '../common/BackToTop';
 import {BottomNav} from '../common';
 import { handleFetchSite, selectSite } from '../../redux/slice/siteSlice';
+import { selectPageTitle } from '../../redux/slice/pageTitleSlice';
+import { documentTitle } from '../../utils/pageTitle';
 
 const Layout = ({ children, scrollContainerRef}) => {
   const dispatch = useDispatch();
   const { name, tagline } = useSelector(selectSite);
+  const pageTitle = useSelector(selectPageTitle);
 
   // The shop's identity (header, footer, contact page) is read once, when the storefront opens
   useEffect(() => {
     dispatch(handleFetchSite());
   }, [dispatch]);
 
-  // The browser tab carries the shop's name; until the answer arrives the page's own title stays
+  // The browser tab carries the page's name (`usePageTitle`) and the shop's; this is the only place that writes it. Until there is something
+  // to say (no shop name yet, no page name) the title the HTML came with stays
   useEffect(() => {
-    if (name) document.title = tagline ? `${name} | ${tagline}` : name;
-  }, [name, tagline]);
+    const title = documentTitle({ page: pageTitle, name, tagline });
+    if (title) document.title = title;
+  }, [pageTitle, name, tagline]);
 
   return (
     <div ref={scrollContainerRef} className="flex flex-col h-screen overflow-y-auto scrollbar-custom">

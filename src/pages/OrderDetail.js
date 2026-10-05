@@ -5,6 +5,7 @@ import {cancelOrder, clearOrder, fetchOrder} from '../redux/slice/orderSlice';
 import {clearSectionError} from '../redux/slice/globalErrorSlice';
 import {ErrorDisplay, SectionError} from '../components/common';
 import {OrderDetailSkeleton} from '../components/common/skeleton';
+import usePageTitle from '../hooks/usePageTitle';
 import {BuyAgain, CopyOrderId, ExpectedDelivery, OrderItems, OrderStatusBadge, OrderTimeline, OrderTotals, addressLines, formatDate, formatMoney} from '../components/orders';
 
 const Card = ({title, children, className = ''}) => (
@@ -18,6 +19,7 @@ const Card = ({title, children, className = ''}) => (
 // goes and how it is paid, and, while it is still pending, a Cancel that asks in the page instead of in a browser dialog.
 const OrderDetail = () => {
   const {orderId} = useParams();
+  usePageTitle(`Order ${orderId}`);
   const dispatch = useDispatch();
   const {order, orderError, orderNotFound, cancelLoading, cancelError} = useSelector((state) => state.order);
   const [confirming, setConfirming] = useState(false);

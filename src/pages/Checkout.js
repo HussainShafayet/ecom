@@ -26,6 +26,7 @@ import {CheckoutSkeleton} from '../components/common/skeleton';
 import {Field, PhoneInput, SectionError, controlClass, describedBy} from '../components/common';
 import {FIELD_ORDER, validateCheckout, validateField} from '../utils/checkoutValidation';
 import {deliveryEstimateText} from '../utils/delivery';
+import usePageTitle from '../hooks/usePageTitle';
 
 const Step = ({ number, title }) => (
   <h2 className="mb-3 flex items-center text-base font-semibold text-gray-900">
@@ -45,6 +46,7 @@ const SummarySkeleton = () => (
 // Mobile first: the folded order summary, then three short steps (contact, delivery, payment), then the total and Place Order in
 // a bar fixed above the bottom navigation. From `lg` the summary is open beside the form and the button is under it.
 const Checkout = () => {
+  usePageTitle('Checkout');
   const dispatch = useDispatch();
   const {cartLoading, cartItems, cartError} = useSelector((state)=>state.cart);
   const navigate = useNavigate();

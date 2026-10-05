@@ -79,7 +79,7 @@ Consistent pattern: plain functional components using Tailwind's `animate-pulse`
 
 ## `layout/`
 
-- **Layout.js** — page shell: `NavBar` + `main` + `BottomNav` + `Footer` + `BackToTop`; prop `scrollContainerRef`.
+- **Layout.js** — page shell: `NavBar` + `main` + `BottomNav` + `Footer` + `BackToTop`; prop `scrollContainerRef`. It is also the only writer of the browser tab's title (the shop's name and tagline from `site`, the page's name from `pageTitle`, see `slice/pageTitleSlice.js` in spec 01; pages name themselves with `hooks/usePageTitle`).
 - **NavBar.js** — desktop nav (logo, `SearchDropdown`, cart/wishlist icons, auth/profile dropdowns; the profile menu has Profile, My Orders, Wishlist, Logout); internal component named `Navbar` (casing differs from the filename `NavBar.js`).
 - **Footer.js** — site footer: the newsletter box, the pages the admin put in the Company / Customer service groups (`site.footer_pages`, linked to `/pages/:slug`) next to the fixed Contact / FAQ / account links, the social icons the admin listed, the tagline, `© year name` (only once the name is known) and the legal pages in the bottom row.
 - **AnnouncementBar.js** — the bar above the header from `site.announcement`: a `<Link>` for a shop path, an `<a target=_blank rel=noopener>` for an `http(s)` address, plain text for none (anything else is text too); nothing without text. When the admin set an end (`announcement.endsAt`) it takes itself away at that moment (`hooks/useHasPassed`: one timer, not a tick a second; the clock is read each time it wakes, so a tab that slept is right again when it wakes, and an end further away than a timer can wait, about 24.8 days, is waited for in steps), because the site is read only once when the storefront opens.

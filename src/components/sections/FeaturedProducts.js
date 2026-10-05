@@ -7,8 +7,10 @@ import blurImage from '../../assets/images/blur.jpg';
 import {SectionSkeleton} from '../common/skeleton';
 import {SectionError} from '../common';
 import {clearSectionError} from '../../redux/slice/globalErrorSlice';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const FeaturedProducts = ({forRoute}) => {
+  usePageTitle(forRoute ? 'Featured products' : '');
   const {featured_Loading, featured:products, featured_error} = useSelector((state)=> state.product);
   const {image_sliders, right_banner} = useSelector((state)=> state.content);
   const sectionError = useSelector((state) => state.globalError.sectionErrors["featured"]);

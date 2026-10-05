@@ -7,6 +7,7 @@ import {AuthLayout, ErrorDisplay, Field, PhoneInput, SuccessMessage, WaitNotice,
 import useCountdown from '../../hooks/useCountdown';
 import {formatWait} from '../../api/errors';
 import {PHONE_PREFIX, validatePhone} from '../../utils/phone';
+import usePageTitle from '../../hooks/usePageTitle';
 
 // What the form asks for and what is wrong with it, one sentence each (the phone: +880 and exactly 10 digits, the backend's rule)
 const validate = ({ name, phone, email }) => {
@@ -22,6 +23,7 @@ const ORDER = ['name', 'phone', 'email'];
 // Phone first: name, phone (fixed +880, cleaned as you type) and an optional e-mail, 48 px controls with labels above them, the
 // button under them. The code goes to the phone and is entered on the next page.
 const SignUp = () => {
+  usePageTitle('Create account');
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const {signupLoading, signupMessage, signupError, signupWait, token, isAuthenticated } = useSelector((state) => state.auth);

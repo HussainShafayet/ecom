@@ -6,6 +6,7 @@ import {ErrorDisplay, Field, PhoneInput, controlClass, describedBy} from '../../
 import {OrderDetailSkeleton} from '../../components/common/skeleton';
 import {CopyOrderId, ExpectedDelivery, OrderItems, OrderStatusBadge, OrderTimeline, OrderTotals, formatDate} from '../../components/orders';
 import {PHONE_PREFIX, validatePhone} from '../../utils/phone';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const Card = ({title, children}) => (
   <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
@@ -18,6 +19,7 @@ const Card = ({title, children}) => (
 // one column, labels above 48 px boxes (the phone box is the shop's `PhoneInput`: a fixed +880, the number cleaned as it is typed),
 // a full-width button, and the answer scrolled into view (the form fills a phone's screen, the answer would be below it).
 const OrderTracking = () => {
+  usePageTitle('Track your order');
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const {tracking, trackingLoading, trackingError} = useSelector((state) => state.order);

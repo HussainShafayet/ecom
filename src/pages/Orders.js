@@ -7,6 +7,7 @@ import {clearSectionError} from '../redux/slice/globalErrorSlice';
 import {SectionError} from '../components/common';
 import {OrdersSkeleton} from '../components/common/skeleton';
 import {OrderFilters, OrderStatusBadge, formatDate, formatMoney, orderFilterFor} from '../components/orders';
+import usePageTitle from '../hooks/usePageTitle';
 
 const PAGE_SIZE = 10;
 const THUMBS = 3; // pictures on a card; the rest is "+2"
@@ -50,6 +51,7 @@ const OrderCard = ({order}) => {
 // while the next ten come, instead of being swapped for a spinner). A row of pills narrows it (All, On the way, Delivered,
 // Cancelled); the choice lives in the address (?show=delivered), so Back and a shared link keep it, and any other value is "All".
 const Orders = () => {
+  usePageTitle('My orders');
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const filter = orderFilterFor(searchParams.get('show') || '');

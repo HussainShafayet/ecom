@@ -7,8 +7,10 @@ import {SectionSkeleton} from '../common/skeleton';
 import {fetchNewArrivalProducts} from '../../redux/slice/product/newArrivalSlice';
 import {SectionError} from '../common';
 import {clearSectionError} from '../../redux/slice/globalErrorSlice';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const NewArrival = ({forRoute}) => {
+  usePageTitle(forRoute ? 'New arrivals' : '');
   const newArrivalLoading = useSelector((state) => state.new_arrival.new_arrival_Loading);
   const newArrival = useSelector((state) => state.new_arrival.new_arrival);
   const newArrivalError = useSelector((state) => state.new_arrival.new_arrival_error);

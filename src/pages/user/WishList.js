@@ -6,8 +6,10 @@ import {clearWishlist, fetchtoWishlist, handleRemovetoWishlist} from '../../redu
 import {ProductCardSkeleton} from '../../components/common/skeleton';
 import {SectionError} from '../../components/common';
 import {pushToast} from '../../redux/slice/toastSlice';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const WishList = () => {
+  usePageTitle('Wishlist');
   const {isLoading, items, error} = useSelector((state)=> state.wishList);
   const dispatch = useDispatch();
   const {isAuthenticated} = useSelector((state)=>state.auth);

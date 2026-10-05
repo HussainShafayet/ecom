@@ -8,8 +8,10 @@ import blurImage from '../assets/images/blur.jpg';
 import {HeroSectionSkeleton, SectionSkeleton} from '../components/common/skeleton';
 import {SectionError} from '../components/common';
 import {discountLabel} from '../utils/formatPrice';
+import usePageTitle from '../hooks/usePageTitle';
 
 const Categories = () => {
+  usePageTitle('Categories');
     const { flash_sale_loading,new_arrival_loading,best_selling_loading,featured_loading,flash_sale, new_arrival, best_selling,featured, flash_sale_error,new_arrival_error,best_selling_error,featured_error } = useSelector((state) => state.category);
     const {isLoading, image_sliders, right_banner, error} = useSelector((state)=> state.content);
     const dispatch = useDispatch();
