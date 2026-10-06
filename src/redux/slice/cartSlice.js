@@ -25,8 +25,9 @@ export const handleAddtoCart = createAsyncThunk('cart/handleAddtoCart', async (f
   }
 });
 
-// Async action for get to cart
-export const handleFetchCart = createAsyncThunk('cart/handleFetchCart', async (_, { rejectWithValue }) => {
+// Async action for get to cart. `{ quiet: true }` is a read nobody asked for with a page (Layout does it when the customer is signed in, to keep the
+// count on the cart icon right): it does not put the cart page into its loading state, and when it fails what is shown stays as it is.
+export const handleFetchCart = createAsyncThunk('cart/handleFetchCart', async (options, { rejectWithValue }) => {
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
@@ -114,16 +115,17 @@ const cartSlice = createSlice({
     })
 
      //get cart 
-     .addCase(handleFetchCart.pending, (state)=>{
-      state.cartLoading = true;
+     .addCase(handleFetchCart.pending, (state, action)=>{
+      if (!action.meta.arg?.quiet) state.cartLoading = true;
     })
     .addCase(handleFetchCart.fulfilled, (state, action)=>{
       state.cartLoading = false;
       state.cartError = false;
-      state.cartItems = action?.payload?.data;
-      
+      state.cartItems = action?.payload?.data || []; // the count on the cart icon adds this up on every page: never undefined
+
     })
     .addCase(handleFetchCart.rejected, (state, action)=>{
+      if (action.meta.arg?.quiet) return;
       state.cartLoading = false;
       state.cartItems = [];
       state.cartError = action.payload?.error || action?.payload || 'Something went wrong!';

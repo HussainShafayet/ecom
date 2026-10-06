@@ -33,7 +33,7 @@ State: `cartItems: []` plus separate loading/error flags for add/fetch/remove.
 
 Thunks (dynamic `import('../../api/axiosSetup')`, authenticated client):
 - `handleAddtoCart` → `POST /accounts/cart/`
-- `handleFetchCart` → `GET /accounts/cart/`
+- `handleFetchCart` → `GET /accounts/cart/` — a signed-in customer's cart is the shop's: besides the cart page (and checkout, buy-again) `Layout` reads it as soon as `state.auth.isAuthenticated` is true (right after the sign-in, and when the shop opens with a saved session), so `selectCartCount` (the badge on the cart icon, top bar and bottom bar) is right on every page. That read is `handleFetchCart({ quiet: true })`: it does not set `cartLoading` (the cart page must not flash a skeleton for a count) and when it fails it leaves `cartItems`/`cartError` as they are (the plain read empties the cart on a failure). `fulfilled` always stores a list (`[]` when the answer has none), because the count adds it up on every page.
 - `handleRemovetoCart` → `PUT /accounts/cart/` (not `DELETE` — matches the backend contract)
 
 Sync reducers `addToCart`, `removeFromCart`, `updateQuantity`, `clearCart` operate purely on local `cartItems` (no API call), matched on `id` + optional `variant_id`. Selectors: `selectCartItems`, `selectCartCount`, `selectTotalPrice` (uses `discount_price` if `has_discount` else `base_price`). Helper `handleClonedProduct(...)` builds a cart-item DTO from a product/variant (it keeps `minimum_order_quantity`, which the cart and the product cards use: `src/utils/minimumOrder.js` has `minimumOf`, `belowMinimum` and `minimumOrderProblems`, worded like the backend's checkout refusal).

@@ -5,6 +5,7 @@ import Toaster from '../common/Toaster';
 import BackToTop from '../common/BackToTop';
 import {BottomNav} from '../common';
 import { handleFetchSite, selectSite } from '../../redux/slice/siteSlice';
+import { handleFetchCart } from '../../redux/slice/cartSlice';
 import { selectPageTitle } from '../../redux/slice/pageTitleSlice';
 import { documentTitle } from '../../utils/pageTitle';
 
@@ -17,6 +18,14 @@ const Layout = ({ children, scrollContainerRef}) => {
   useEffect(() => {
     dispatch(handleFetchSite());
   }, [dispatch]);
+
+  // A signed-in customer's cart is the shop's, not this phone's: read it as soon as they are known to be signed in (right after the sign-in, and
+  // when the shop opens with a saved session), so the count on the cart icon is right on every page, not only after the cart page was opened.
+  // Quietly: it does not put the cart page into its loading state, and a failed read leaves what is shown as it is.
+  const isAuthenticated = useSelector((state) => state.auth?.isAuthenticated);
+  useEffect(() => {
+    isAuthenticated && dispatch(handleFetchCart({ quiet: true }));
+  }, [dispatch, isAuthenticated]);
 
   // The browser tab carries the page's name (`usePageTitle`) and the shop's; this is the only place that writes it. Until there is something
   // to say (no shop name yet, no page name) the title the HTML came with stays
