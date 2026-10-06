@@ -68,6 +68,7 @@ const fillValidForm = () => {
 beforeEach(() => {
   cleanup();
   vi.clearAllMocks();
+  window.sessionStorage.clear(); // a guest's checkout draft lives in the tab: one test's typing must not come back in the next
   Element.prototype.scrollIntoView = vi.fn();
 });
 

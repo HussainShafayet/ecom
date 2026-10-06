@@ -9,3 +9,4 @@ export {default as MidBanner} from './MidBanner';
 export {default as AllProducts} from './AllProducts';
 export {default as Testimonials} from './Testimonials';
 export {default as RecentlyViewed} from './RecentlyViewed';
+export {default as SuggestedProducts} from './SuggestedProducts';

@@ -14,8 +14,8 @@ const CIRCLE = 'h-14 w-14 rounded-full sm:h-16 sm:w-16';
 
 // The first thing under the hero: one tap into any category. Round pictures in a row you swipe on a phone (all of it
 // shows on a computer), then "All". A category with a discount carries a small pill saying so. Draws nothing until there are
-// categories, and nothing if they could not be loaded (the rest of the page does not depend on them).
-const CategoryStrip = () => {
+// categories, and nothing if they could not be loaded (the rest of the page does not depend on them). `title` is an optional heading above the row.
+const CategoryStrip = ({ title }) => {
   const dispatch = useDispatch();
   const { isLoading, categories } = useSelector((state) => state.category);
 
@@ -40,6 +40,7 @@ const CategoryStrip = () => {
 
   return (
     <nav aria-label="Shop by category" className="my-4">
+      {title && <h2 className="mb-2 text-base font-semibold text-gray-800">{title}</h2>}
       <ul className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:justify-between">
         {categories.map((category) => (
           <li key={category.id}>

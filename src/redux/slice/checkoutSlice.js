@@ -3,6 +3,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {clearCart, handleFetchCart} from './cartSlice';
 import publicApi from '../../api/publicApi';
 import {validateCoupon, getAvailableOffers} from '../../services/couponService';
+import {divisionsData, districtsData, upazilasData} from '../../data/location';
+import {loadCheckoutDraft} from '../../utils/checkoutDraft';
 
 const initialState = {
   isLoading: false,
@@ -138,6 +140,19 @@ const checkoutSlice = createSlice({
     clearResponseError: (state) => {
       state.responseError = null;
     },
+    // A guest's saved form (`utils/checkoutDraft`) goes back into the fields that are still empty, with the district and upazila lists the saved
+    // division and district need. Runs after the checkout content arrived: that answer fills the name, phone and e-mail itself (from the
+    // profile, empty for a guest) and would wipe what was put back before it.
+    restoreDraft: (state, action) => {
+      const draft = action.payload || {};
+      Object.keys(draft).forEach((field) => {
+        if (!state.formData[field]) state.formData[field] = draft[field];
+      });
+      const division = divisionsData.find((item) => item.name === state.formData.division);
+      if (division) state.districts = districtsData.filter((item) => item.division_id === division.id);
+      const district = districtsData.find((item) => item.name === state.formData.district && (!division || item.division_id === division.id));
+      if (district) state.upazilas = upazilasData.filter((item) => item.district_id === district.id);
+    },
     resetForm: (state) => {
       state.formData = initialState.formData;
       state.errors = {};
@@ -247,11 +262,17 @@ const checkoutSlice = createSlice({
 
 export const initializeCheckout = () => async (dispatch, getState) => {
   const {isAuthenticated} = getState().auth;
+  // A guest's saved form is read FIRST (the page's own save, which runs after this, would otherwise replace it with the empty form of a new page)
+  const draft = isAuthenticated ? null : loadCheckoutDraft();
   // Profile name/phone/email and saved addresses both come from handleGetCheckoutContent below
   // (GET /content/checkout/ returns user_info + shipping_addresses together); see ShowAddress.js
   // for how a selected saved address fills the rest of the form.
-  dispatch(handleGetCheckoutContent());
+  const content = dispatch(handleGetCheckoutContent());
   isAuthenticated && await dispatch(handleFetchCart()).unwrap();
+  if (draft) {
+    await content; // it fills the name, phone and e-mail itself: the draft goes back after it, not before
+    dispatch(restoreDraft(draft));
+  }
 }
 
 export const {
@@ -262,6 +283,7 @@ export const {
   setUpazilas,
   clearResponseError,
   resetForm,
+  restoreDraft,
   setSelectedAddressId,
   clearCoupon,
 } = checkoutSlice.actions;

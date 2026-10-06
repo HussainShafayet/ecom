@@ -26,6 +26,7 @@ import {CheckoutSkeleton} from '../components/common/skeleton';
 import {Field, PhoneInput, SectionError, controlClass, describedBy} from '../components/common';
 import {FIELD_ORDER, validateCheckout, validateField} from '../utils/checkoutValidation';
 import {deliveryEstimateText} from '../utils/delivery';
+import {clearCheckoutDraft, saveCheckoutDraft} from '../utils/checkoutDraft';
 import usePageTitle from '../hooks/usePageTitle';
 
 const Step = ({ number, title }) => (
@@ -68,6 +69,12 @@ const Checkout = () => {
 
   }, [isCheckoutFulfilled, dispatch]);
 
+  // Keep what a guest types while the order is not placed (`initializeCheckout` puts it back after a refresh); the draft goes when it is placed.
+  // A signed-in customer has saved addresses instead.
+  useEffect(() => {
+    if (!isAuthenticated && !isCheckoutFulfilled) saveCheckoutDraft(formData);
+  }, [formData, isAuthenticated, isCheckoutFulfilled]);
+
   // A refusal from an earlier visit (the customer went to the cart to fix it) is not shown again on arrival
   useEffect(() => {
     dispatch(clearResponseError());
@@ -81,6 +88,7 @@ const Checkout = () => {
   // Step 2: Handle checkout success (redirect + clear cart + reset form)
   useEffect(() => {
     if (isCheckoutFulfilled) {
+      clearCheckoutDraft();
       order_id && navigate(`/order-confirmation/${order_id}`, { state: { order } }); // the page shows it without another call
       setTimeout(() => {
         dispatch(clearCart());
