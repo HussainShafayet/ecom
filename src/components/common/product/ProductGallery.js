@@ -1,19 +1,69 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
-import Zoom from 'react-medium-image-zoom';
-import 'react-medium-image-zoom/dist/styles.css';
-import { FaPlay } from 'react-icons/fa';
+import { FaExpand, FaPlay } from 'react-icons/fa';
 import defaultImage from '../../../assets/images/default_product_image.jpg';
+import useMediaQuery from '../../../hooks/useMediaQuery';
+import ImageViewer from './ImageViewer';
+
+// How much the picture grows under a mouse (a computer only), and what "a mouse" means: it can hover and it points finely. A phone has
+// neither, so a tap goes straight to the full-screen viewer and nothing grows under a finger.
+const HOVER_ZOOM = 2.5;
+const MOUSE = '(hover: hover) and (pointer: fine)';
+
+// One picture on the page: a button that opens the viewer (a tap or a click), and, under a mouse, a magnifier: the picture grows around the
+// pointer while it moves over it, and goes back when it leaves.
+const Picture = ({ src, alt, eager, hoverZoom, onOpen }) => {
+  const [origin, setOrigin] = useState(null); // where the pointer is on the picture, in %
+
+  const follow = (event) => {
+    const box = event.currentTarget.getBoundingClientRect();
+    setOrigin({
+      x: box.width ? ((event.clientX - box.left) / box.width) * 100 : 50,
+      y: box.height ? ((event.clientY - box.top) / box.height) * 100 : 50,
+    });
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      onMouseMove={hoverZoom ? follow : undefined}
+      onMouseLeave={hoverZoom ? () => setOrigin(null) : undefined}
+      aria-label={`Open ${alt} full screen`}
+      className={`relative block w-full overflow-hidden ${hoverZoom ? 'cursor-zoom-in' : ''}`}
+    >
+      <img
+        src={src}
+        alt={alt}
+        loading={eager ? 'eager' : 'lazy'}
+        onError={(event) => {
+          event.currentTarget.onerror = null;
+          event.currentTarget.src = defaultImage;
+        }}
+        style={origin ? { transform: `scale(${HOVER_ZOOM})`, transformOrigin: `${origin.x}% ${origin.y}%` } : undefined}
+        className="aspect-square w-full object-contain transition-transform duration-150 ease-out"
+      />
+      {!hoverZoom && (
+        <span aria-hidden="true" className="pointer-events-none absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-xs text-white">
+          <FaExpand />
+        </span>
+      )}
+    </button>
+  );
+};
 
 // The product's pictures and videos, phone first: one full-width square you swipe, a "2/5" counter, and a row of small
 // thumbnails under it (56 px, easy to tap). A thumbnail is a picture, never a <video>, and a video only loads when it is played,
-// so opening a product does not pull every clip over mobile data. Tapping a picture zooms it.
+// so opening a product does not pull every clip over mobile data. Tapping a picture opens it full screen (`ImageViewer`: swipe, pinch and
+// double-tap to zoom, the video too); under a mouse the picture also grows around the pointer.
 //   media     [{ file_url, thumbnail_url, file_type: 'image' | 'video' }]
 //   selected  the media item on show; onSelect(item) says which one the customer chose (a thumbnail tap or a swipe)
 const ProductGallery = ({ media, selected, onSelect, name }) => {
   const items = media || [];
   const swiperRef = useRef(null);
+  const hoverZoom = useMediaQuery(MOUSE);
+  const [viewerAt, setViewerAt] = useState(null); // the picture the full-screen viewer was opened on, or null while it is closed
   const selectedIndex = Math.max(0, items.findIndex((item) => item?.file_url === selected?.file_url));
   // Another colour has other pictures: a new set starts a new slider
   const setKey = items.map((item) => item?.file_url).join('|');
@@ -33,6 +83,7 @@ const ProductGallery = ({ media, selected, onSelect, name }) => {
       <div className="relative overflow-hidden rounded-lg bg-gray-50">
         <Swiper
           key={setKey}
+          simulateTouch={false}
           initialSlide={selectedIndex}
           onSwiper={(swiper) => { swiperRef.current = swiper; }}
           onSlideChange={(swiper) => {
@@ -52,18 +103,13 @@ const ProductGallery = ({ media, selected, onSelect, name }) => {
                   className="aspect-square w-full bg-black object-contain"
                 />
               ) : (
-                <Zoom>
-                  <img
-                    src={item.file_url}
-                    alt={`${name} (${index + 1} of ${items.length})`}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    onError={(event) => {
-                      event.currentTarget.onerror = null;
-                      event.currentTarget.src = defaultImage;
-                    }}
-                    className="aspect-square w-full object-contain"
-                  />
-                </Zoom>
+                <Picture
+                  src={item.file_url}
+                  alt={`${name} (${index + 1} of ${items.length})`}
+                  eager={index === 0}
+                  hoverZoom={hoverZoom}
+                  onOpen={() => setViewerAt(index)}
+                />
               )}
             </SwiperSlide>
           ))}
@@ -74,6 +120,19 @@ const ProductGallery = ({ media, selected, onSelect, name }) => {
           </span>
         )}
       </div>
+
+      {viewerAt !== null && (
+        <ImageViewer
+          media={items}
+          startIndex={viewerAt}
+          name={name}
+          onClose={(shown) => {
+            setViewerAt(null);
+            const item = items[shown];
+            if (item && item.file_url !== selected?.file_url) onSelect(item); // the page shows the picture they ended on
+          }}
+        />
+      )}
 
       {items.length > 1 && (
         <div className="mt-2 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
