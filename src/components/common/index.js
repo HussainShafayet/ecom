@@ -16,6 +16,8 @@ export { default as CollapsibleSection }
 from './product/CollapsibleSection';
 export { default as ShareMenu }
 from './product/ShareMenu';
+export { default as TrustPoints }
+from './product/TrustPoints';
 export { default as SectionHeader }
 from './SectionHeader';
 export { default as InputField }

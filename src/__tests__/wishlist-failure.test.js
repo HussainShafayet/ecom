@@ -98,6 +98,8 @@ describe('The heart on a product card', () => {
 });
 
 describe('Clear Wishlist', () => {
+  // (the empty page also asks for suggestions through the same client: count only the wishlist's own reads)
+  const wishlistFetches = () => api.get.mock.calls.filter(([url]) => String(url).includes('/accounts/favourite/')).length;
   const renderWishlist = (store) => render(<Provider store={store}><MemoryRouter><WishList /></MemoryRouter></Provider>);
   // (the page shows its skeleton while it fetches the signed-in customer's list)
   const clearAll = async () => {
@@ -115,7 +117,7 @@ describe('Clear Wishlist', () => {
 
     await clearAll();
 
-    await waitFor(() => expect(screen.getByText(/Your wishlist is currently empty/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/Your wishlist is empty/)).toBeTruthy());
     expect(toasts(store)).toEqual([]);
   });
 
@@ -125,11 +127,11 @@ describe('Clear Wishlist', () => {
     const store = makeStore();
     store.dispatch(addToWishlist(KETTLE));
     renderWishlist(store);
-    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1)); // the page's own fetch
+    await waitFor(() => expect(wishlistFetches()).toBe(1)); // the page's own fetch
 
     await clearAll();
 
     await waitFor(() => expect(toasts(store)).toEqual(['Could not clear your wishlist. Please try again.']));
-    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(2)); // fetched again to show what is really there
+    await waitFor(() => expect(wishlistFetches()).toBe(2)); // fetched again to show what is really there
   });
 });

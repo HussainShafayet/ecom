@@ -11,9 +11,13 @@ import siteReducer, {handleFetchSite} from '../redux/slice/siteSlice';
 import authReducer from '../redux/slice/authSlice';
 import pageTitleReducer, {selectPageTitle, setPageTitle} from '../redux/slice/pageTitleSlice';
 import orderReducer from '../redux/slice/orderSlice';
+import categoryReducer from '../redux/slice/categorySlice';
+import bestSellingReducer from '../redux/slice/product/bestSellingSlice';
 import toastReducer from '../redux/slice/toastSlice';
 import {getFaqs, getSite, getSitePage} from '../services/siteService';
 import {getOrder} from '../services/orderService';
+import {getAllCategories} from '../services/categoryService';
+import {getBestSellingProducts} from '../services/productService';
 import usePageTitle from '../hooks/usePageTitle';
 import {documentTitle, siteTitle} from '../utils/pageTitle';
 import {Layout} from '../components/layout';
@@ -26,6 +30,9 @@ vi.setConfig({testTimeout: 15000});
 
 vi.mock('../services/siteService', () => ({getSite: vi.fn(), getSitePage: vi.fn(), getFaqs: vi.fn(), sendContactMessage: vi.fn(), subscribeToNewsletter: vi.fn()}));
 vi.mock('../services/orderService', () => ({getOrders: vi.fn(), getOrder: vi.fn(), cancelOrder: vi.fn(), trackOrder: vi.fn()}));
+// the not-found page draws the categories and the best sellers
+vi.mock('../services/categoryService', () => ({getAllCategories: vi.fn()}));
+vi.mock('../services/productService', () => ({getBestSellingProducts: vi.fn()}));
 // Layout draws the whole shell; only the title matters here
 vi.mock('../components/layout/NavBar', () => ({default: () => <nav>nav</nav>}));
 vi.mock('../components/common/BackToTop', () => ({default: () => null}));
@@ -34,7 +41,7 @@ vi.mock('../components/common/BottomNav', () => ({default: () => null}));
 const SITE = {name: 'GoCart', tagline: 'Everyday things', logo: null, contact: {email: '', phone: '', address: '', opening_hours: '', map_url: ''}};
 
 const makeStore = () => configureStore({
-  reducer: {site: siteReducer, auth: authReducer, pageTitle: pageTitleReducer, order: orderReducer, toast: toastReducer},
+  reducer: {site: siteReducer, auth: authReducer, pageTitle: pageTitleReducer, order: orderReducer, toast: toastReducer, category: categoryReducer, best_selling: bestSellingReducer},
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({serializableCheck: false}),
 });
 
@@ -71,6 +78,8 @@ beforeEach(() => {
   document.title = 'GoCart';
   getSite.mockResolvedValue({data: {data: {site: SITE}}});
   getFaqs.mockResolvedValue({data: {data: {faqs: []}}});
+  getAllCategories.mockResolvedValue({data: {data: {results: []}}});
+  getBestSellingProducts.mockResolvedValue({data: {data: {results: [], next: null}}});
 });
 afterEach(() => {
   document.title = 'GoCart';

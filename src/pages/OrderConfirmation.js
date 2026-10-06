@@ -3,9 +3,12 @@ import { useParams, Link, useLocation } from 'react-router-dom';
 import { FaCheckCircle } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
 import {resetForm} from '../redux/slice/checkoutSlice';
+import {clearCheckoutDraft} from '../utils/checkoutDraft';
 import {clearOrder, fetchOrder} from '../redux/slice/orderSlice';
 import {CopyOrderId, ExpectedDelivery, OrderItems, OrderTotals, addressLines, formatDate} from '../components/orders';
 import usePageTitle from '../hooks/usePageTitle';
+import { LazySection } from '../components/common';
+import { SuggestedProducts } from '../components/sections';
 
 // After "Place order": the good news and the order number first, what to press next (View / Track order) before anything else, then
 // what was ordered. One column of cards that fits a 360 px phone (the old page put white cards inside a grey card inside padding).
@@ -20,6 +23,7 @@ const OrderConfirmation = () => {
 
   useEffect(() => {
     dispatch(resetForm());
+    clearCheckoutDraft(); // the order is placed: what was typed is not kept for the next visitor of this browser
   }, [dispatch])
 
   // A signed-in customer's order can be read back (also after a refresh); a guest only has what checkout handed over.
@@ -35,7 +39,8 @@ const OrderConfirmation = () => {
   const viewLink = isAuthenticated ? `/orders/${orderId}` : `/order-tracking?order_id=${orderId}`;
 
   return (
-    <div className="container mx-auto max-w-2xl space-y-4 px-3 py-6 sm:py-10">
+    <>
+    <div className="container mx-auto max-w-2xl space-y-4 px-3 pt-6 sm:pt-10">
       <div className="text-center">
         <FaCheckCircle className="mx-auto mb-3 text-5xl text-green-500 sm:text-6xl" aria-hidden="true" />
         <h1 className="text-2xl font-bold text-gray-800 sm:text-3xl">Order Confirmed!</h1>
@@ -95,7 +100,23 @@ const OrderConfirmation = () => {
           <li>💬 For any inquiries, feel free to <Link to="/contact" className="text-blue-700 underline">contact us</Link>.</li>
         </ul>
       </section>
+
+      {!isAuthenticated && (
+        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-4 text-white shadow sm:p-6">
+          <span aria-hidden="true" className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10" />
+          <h2 className="relative text-base font-semibold sm:text-lg">Order faster next time</h2>
+          <p className="relative mt-1 text-sm text-indigo-100">Create an account with just your phone number: no password to remember, and your addresses and orders stay in one place.</p>
+          <Link to="/signup" className="relative mt-3 flex h-11 items-center justify-center rounded-lg bg-white px-5 font-semibold text-indigo-700 hover:bg-indigo-50">
+            Create an account
+          </Link>
+        </section>
+      )}
     </div>
+    {/* outside the narrow column: a row of cards sizes itself by the screen, not by the column it sits in */}
+    <div className="container mx-auto px-3 pb-6 pt-2 sm:pb-10">
+      <LazySection><SuggestedProducts /></LazySection>
+    </div>
+    </>
   );
 };
 

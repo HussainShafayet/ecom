@@ -4,7 +4,7 @@ import { FaAward, FaHeadset, FaLock, FaMoneyBillWave, FaTruck, FaUndo } from 're
 import { selectSite } from '../../redux/slice/siteSlice';
 
 // `icon` is a fixed list on the backend (docs/API_CONTRACT.md section 9); the picture is ours.
-const ICONS = {
+export const BADGE_ICONS = {
   delivery: FaTruck,
   returns: FaUndo,
   secure_payment: FaLock,
@@ -23,7 +23,7 @@ const TrustBadgeBar = () => {
     <section className="bg-gray-50 border-b" aria-label="Why shop with us">
       <ul className="container mx-auto flex gap-6 overflow-x-auto px-3 py-2 md:justify-around scrollbar-custom">
         {badges.map(({ icon, title, subtitle }, index) => {
-          const Icon = ICONS[icon];
+          const Icon = BADGE_ICONS[icon];
           return (
             <li key={`${icon}-${index}`} className="flex shrink-0 items-center gap-2 text-gray-700">
               {Icon && <Icon className="text-blue-600" size={22} aria-hidden="true" />}

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   CollapsibleSection, ProductGallery, ProductOptions, ProductSection, PurchaseBar, QuantitySelector, RatingAndReview,
-  RatingStars, RichTextToHTML, SectionError, ShareMenu,
+  RatingStars, RichTextToHTML, SectionError, ShareMenu, TrustPoints,
 } from '../components/common/';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, setQuantity, fetchProductById, fetchAllProducts, setSelectedColor, setSelectedSize} from '../redux/slice/productSlice';
@@ -132,6 +132,7 @@ const ProductDetails = () => {
   const priced = selectedSize || product;
   const price = formatPrice(product.has_discount ? priced.discount_price : priced.base_price);
   const oldPrice = product.has_discount ? formatPrice(priced.base_price) : null;
+  const saving = product.has_discount ? Number(priced.base_price) - Number(priced.discount_price) : 0; // what the discount takes off one unit
 
   const related = (products || []).filter((item) => item?.id !== product.id).slice(0, RELATED_COUNT);
   const dimension = product.dimension && [product.dimension.width, product.dimension.height, product.dimension.depth].some(Boolean)
@@ -178,6 +179,8 @@ const ProductDetails = () => {
             )}
           </div>
 
+          {saving > 0 && <p className="-mt-2 text-sm font-medium text-green-700">You save {formatPrice(saving)}</p>}
+
           <RichTextToHTML content={product.short_description} />
 
           <ProductOptions
@@ -200,6 +203,8 @@ const ProductDetails = () => {
             onAddToCart={handleAddToCart}
             onBuyNow={handleBuyNow}
           />
+
+          <TrustPoints />
 
           <ShareMenu name={product.name} />
         </div>
