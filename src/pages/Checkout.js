@@ -98,12 +98,13 @@ const Checkout = () => {
     }
   }, [isCheckoutFulfilled, dispatch, navigate, order_id, order]);
 
-  // Step 3: If cart is empty after loading, redirect to products page
+  // Step 3: If cart is empty after loading, redirect to products page. Not while the order is being placed: `handleCheckout` empties the cart the
+  // moment the shop took the order, a beat BEFORE `isCheckoutFulfilled` says so, and in that beat the customer must not be sent away from their order.
   useEffect(() => {
-    if (!cartLoading && cartItems.length === 0 && !isCheckoutFulfilled) {
+    if (!cartLoading && !isLoading && cartItems.length === 0 && !isCheckoutFulfilled) {
       navigate('/products');
     }
-  }, [cartItems, cartLoading, isCheckoutFulfilled, navigate]);
+  }, [cartItems, cartLoading, isLoading, isCheckoutFulfilled, navigate]);
 
   // What delivery costs: the charge the shop set for the chosen area (0 is a free delivery, only "no charge set" is unknown)
   const deliveryCharge = formData?.shipping_type ? delivery_charges?.[formData.shipping_type] : undefined;
