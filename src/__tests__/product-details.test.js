@@ -78,8 +78,6 @@ const renderPage = async (product = PLAIN, {signedIn = false, related = []} = {}
 beforeEach(() => {
   cleanup();
   vi.clearAllMocks();
-  // react-medium-image-zoom (tap a picture to zoom) watches its picture with one; jsdom has none, every real browser does
-  globalThis.ResizeObserver = class { observe() {} unobserve() {} disconnect() {} };
 });
 
 afterEach(() => {
