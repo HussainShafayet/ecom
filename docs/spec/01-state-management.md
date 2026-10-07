@@ -147,4 +147,3 @@ These three overlap conceptually with `categorySlice`'s flash-sale/new-arrival/b
 - **Inconsistent async client usage**: most slices lazy `import()` `api/axiosSetup` per-thunk to dodge circular deps; `authSlice`'s `logoutUser` (and the renewal in `api/session.js`, on purpose: it must not go through the interceptor it serves) use raw `axios` with manually attached headers instead — these calls skip the shared interceptor error handling.
 - **Inconsistent auth-branching pattern**: `checkoutSlice` and `productSlice.searchSuggestions` branch client-by-auth-state; cart/wishlist/profile/review assume the user is always authenticated.
 - **`wishlistSlice` action-type namespace bug** (`'cart/...'` prefix — see above).
-- Excessive `console.log` of API responses left in nearly every thunk.

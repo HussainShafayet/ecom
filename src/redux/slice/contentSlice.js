@@ -24,31 +24,26 @@ const initialState ={
 
 export const fetchHomeContent = createAsyncThunk("content/fetchHomeContent", async ()=>{
     const response =  await getHomeContent();
-    console.log('get home page content res', response);
     return {data: response?.data?.data, error: response?.message};
 });
 
 export const fetchNewArrivalContent = createAsyncThunk("content/fetchNewArrivalContent", async ()=>{
     const response =  await getNewArrivalContent();
-    console.log('get new arrival content res', response);
     return {data: response?.data?.data, error: response?.message};
 });
 
 export const fetchFlashSaleContent = createAsyncThunk("content/fetchFlashSaleContent", async ()=>{
     const response =  await getFlashSaleContent();
-    console.log('get flash sale content res', response);
     return {data: response?.data?.data, error: response?.message};
 });
 
 export const fetchBestSellingContent = createAsyncThunk("content/fetchBestSellingContent", async ()=>{
     const response =  await getBestSellingContent();
-    console.log('get best sale content res', response);
     return {data: response?.data?.data, error: response?.message};
 });
 
 export const fetchFeaturedContent = createAsyncThunk("content/fetchFeaturedContent", async ()=>{
     const response =  await getFeaturedContent();
-    console.log('get featured content res', response);
     return {data: response?.data?.data, error: response?.message};
 });
 
@@ -64,7 +59,6 @@ export const fetchShopContent = createAsyncThunk("content/fetchShopContent", asy
 
 export const fetchCategoriesContent = createAsyncThunk("content/fetchCategoriesContent", async ()=>{
     const response =  await getCategoriesContent();
-    console.log('get categories content res', response);
     return {data: response?.data?.data, error: response?.message};
 });
 

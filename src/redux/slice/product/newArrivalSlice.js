@@ -13,7 +13,6 @@ const initialState = {
 //get new arrival products
 export const fetchNewArrivalProducts = createAsyncThunk("product/fetchNewArrivalProducts", async ({page=1, page_size=null})=>{
     let response = await getNewArrivalProducts(page, page_size);
-    console.log('get new arrival product res', response);
 
     return {data: response?.data?.data?.results || [], next: response?.data?.data?.next || null, error: response?.message};
 });

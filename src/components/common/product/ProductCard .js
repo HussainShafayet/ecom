@@ -139,7 +139,6 @@ const ProductCard = ({ product, cardForTrending }) => {
       clonedProduct && dispatch(addToCart(clonedProduct));
       setCartMessage(null);
     } catch (error) {
-      console.log('handle add to cart error: ', error)
       setCartMessage(error?.errors?.[0] || error?.error || 'Could not add this item. Please try again.');
     } finally {
       setBusy(false);
@@ -175,7 +174,6 @@ const ProductCard = ({ product, cardForTrending }) => {
         navigate(`/checkout`);
       }
     } catch (error) {
-      console.log('handle buy now error: ', error);
       setCartMessage(error?.errors?.[0] || error?.error || 'Could not order this item. Please try again.');
     } finally {
       setBusy(false);

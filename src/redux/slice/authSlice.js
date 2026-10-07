@@ -50,7 +50,6 @@ export const signUpUser = createAsyncThunk('auth/signUpUser', async (credentials
   try {
      const response = await publicApi.post('/accounts/register/', credentials, {section: 'sign-up'});
 
-    console.log('signup response',response);
     
     return response?.data;
   } catch (error) {
@@ -63,7 +62,6 @@ export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (credentials, 
   try {
      const response = await publicApi.post('/accounts/verify-otp/', credentials, {section: 'verify-otp'});
 
-    console.log('verifyotp response',response);
     
     return response?.data?.data;
   } catch (error) {
@@ -77,7 +75,6 @@ export const resendOtp = createAsyncThunk('auth/resendOtp', async (credentials, 
   try {
     const response = await publicApi.post('/accounts/resend-otp/', credentials, {section: 'resend-otp'});
 
-    console.log('resend otp response',response);
     
     return response?.data;
   } catch (error) {
@@ -90,7 +87,6 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
   try {
     const response = await publicApi.post('/accounts/login/', credentials, {section: 'sign-in'});
 
-    console.log('signin response',response);
     
     return response?.data; // { accessToken, refreshToken, user }
   } catch (error) {
@@ -115,7 +111,6 @@ export const logoutUser = createAsyncThunk('auth/logoutUser', async (credential,
             'Content-Type': 'application/json'
         }
     });
-    console.log('logout response', response);
     return response?.data;
 } catch (error) {
     console.error('Error submitting form:', error.response?.data || error.message);

@@ -31,4 +31,11 @@ module.exports = [
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  {
+    // The app does not log: a response printed to the console showed the customer's tokens, order and profile to anyone looking over a
+    // shoulder. `console.error` / `console.warn` for a real fault are still fine.
+    files: ['src/**/*.js'],
+    ignores: ['src/__tests__/**'],
+    rules: { 'no-console': ['warn', { allow: ['error', 'warn'] }] },
+  },
 ];

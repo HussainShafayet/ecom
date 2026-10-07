@@ -59,7 +59,6 @@ export const handleCheckout = createAsyncThunk('checkout/handleCheckout', async 
       response = await publicApi.post(`/orders/`, formData, { section: "checkout"});
      }
      response.data.success && dispatch(clearCart());
-    console.log('order post response',response);
     return response?.data?.data;
   } catch (error) {
     return rejectWithValue(error?.response?.data);
@@ -79,10 +78,8 @@ export const handleGetCheckoutContent = createAsyncThunk('profile/handleGetCheck
       response = await publicApi.get(`/content/checkout/`, { section: "checkout-content"});
     }
      
-    console.log('get checkout content response',response);
     return response?.data?.data;
   } catch (error) {
-    console.log(error);
     
     return rejectWithValue(error?.response?.data);
   }

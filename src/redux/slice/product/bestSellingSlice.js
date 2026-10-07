@@ -12,7 +12,6 @@ const initialState = {
 //get Best Selling products
 export const fetchBestSellingProducts = createAsyncThunk("product/fetchBestSellingProducts", async ({page=1, page_size=null})=>{
     let response = await getBestSellingProducts(page, page_size);
-    console.log('get best selling product res', response);
 
     return {data: response?.data?.data?.results, next: response?.data?.data?.next || null, error: response?.message};
 });
