@@ -15,6 +15,7 @@ import toastReducer from '../redux/slice/toastSlice';
 import globalErrorReducer from '../redux/slice/globalErrorSlice';
 import api from '../api/axiosSetup';
 import {Layout} from '../components/layout';
+import {badgeCount} from '../utils/badgeCount';
 
 vi.mock('../api/axiosSetup', () => ({default: {get: vi.fn(), post: vi.fn(), put: vi.fn()}}));
 vi.mock('../api/publicApi', () => ({default: {get: vi.fn(), post: vi.fn()}}));
@@ -82,6 +83,26 @@ describe('The count on the cart icon', () => {
     await waitFor(() => expect(store.getState().cart.cartLoading).toBe(false));
     expect(selectCartCount(store.getState())).toBe(4);
     expect(store.getState().cart.cartError).toBeFalsy();
+  });
+});
+
+describe('What the count counts', () => {
+  it('is the pieces, not the products: a-2, b-1, c-1 is 4 (the cart page says the same)', async () => {
+    renderShell(makeStore({signedIn: false, cartItems: [line(1, 2), line(2, 1), line(3, 1)]}));
+    expect((await screen.findAllByText('4')).length).toBeGreaterThan(0);
+    expect(screen.queryByText('3')).toBeNull();
+  });
+
+  it('stops at 99+, so a big number does not push the badge out of its circle', async () => {
+    renderShell(makeStore({signedIn: false, cartItems: [line(1, 120)]}));
+    expect((await screen.findAllByText('99+')).length).toBeGreaterThan(0);
+    expect(screen.queryByText('120')).toBeNull();
+  });
+
+  it('writes 99 as 99 and 100 as 99+', () => {
+    expect(badgeCount(0)).toBe('0');
+    expect(badgeCount(99)).toBe('99');
+    expect(badgeCount(100)).toBe('99+');
   });
 });
 
