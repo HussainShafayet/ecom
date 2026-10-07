@@ -51,7 +51,6 @@ export const fetchAllProducts = createAsyncThunk("product/fetchAllProducts", asy
 //get featured products
 export const fetchFeaturedProducts = createAsyncThunk("product/fetchFeaturedProducts", async ({page=1, page_size=null})=>{
     let response = await getFeaturedProducts(page, page_size);
-    console.log('get fetured products res', response);
 
     return {data: response?.data?.data?.results || [], next: response?.data?.data?.next || null, error: response.message};
 });
@@ -60,7 +59,6 @@ export const fetchFeaturedProducts = createAsyncThunk("product/fetchFeaturedProd
 export const fetchProductById = createAsyncThunk("product/getProductById", async (slug, {rejectWithValue}) => {
     try {
       const response = await getProductById(slug);
-      console.log('get product res', response);
       return response?.data?.data || [];
     } catch (error) {
       console.error(`Error fetching product with ID ${slug}:`, error);
@@ -82,7 +80,6 @@ export const fetchProductById = createAsyncThunk("product/getProductById", async
         }
        
   
-      console.log('suggestions response',response);
       
       return response?.data?.data || [];
     } catch (error) {
@@ -220,7 +217,6 @@ const productSlice = createSlice({
         builder.addCase(fetchProductById.rejected,(state, action)=>{
             state.isLoading = false;
             state.product = null;
-            console.log(action.payload);
             
             state.error = action?.payload?.message || 'Something went wrong';
         });

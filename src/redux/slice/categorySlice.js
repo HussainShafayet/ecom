@@ -26,25 +26,21 @@ export const fetchAllCategories = createAsyncThunk("category/fetchAllCategories"
 
 export const fetchFlashSaleCategories = createAsyncThunk("category/fetchFlashSaleCategories", async ({page_size=null,page=1,})=>{
     const response =  await getFlashSaleCategories(page_size, page);
-    console.log('get flash sale categories res', response);
     return {data: response?.data?.data?.results || [], error: response?.message};
 });
 
 export const fetchNewArrivalCategories = createAsyncThunk("category/fetchNewArrivalCategories", async ({page_size=null,page=1,})=>{
     const response =  await getNewArrivalCategories(page_size, page);
-    console.log('get new arrival categories res', response);
     return {data: response?.data?.data?.results || [], error: response?.message};
 });
 
 export const fetchBestSellingCategories = createAsyncThunk("category/fetchBestSellingCategories", async ({page_size=null,page=1,})=>{
     const response =  await getBestSellingCategories(page_size, page);
-    console.log('get best selling categories res', response);
     return {data: response?.data?.data?.results || [], error: response?.message};
 });
 
 export const fetchFeaturedCategories = createAsyncThunk("category/fetchFeaturedCategories", async ({page_size=null,page=1,})=>{
     const response =  await getFeaturedCategories(page_size, page);
-    console.log('get featured categories res', response);
     return {data: response?.data?.data?.results || [], error: response?.message};
 });
 

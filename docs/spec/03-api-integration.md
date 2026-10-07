@@ -108,6 +108,5 @@ Vite + `@vitejs/plugin-react` (migrated off Create React App), Redux Toolkit + r
 - **Only 3 of 9 API-consuming domains have a `services/` wrapper** — auth/profile/cart/wishlist/checkout/review calls are inlined in slices instead, an inconsistent layering choice.
 - **Inconsistent REST verbs**: wishlist and cart "remove" both use `PUT` rather than `DELETE`.
 - A few endpoint strings are missing the leading slash (profileSlice's OTP endpoints, all of reviewSlice's endpoints) — works only because axios baseURL concatenation happens to tolerate it, but inconsistent with the rest of the codebase.
-- Leftover `console.log(section)` / other debug logging left in both interceptors and most thunks.
 - `location.js` has the corrupted upazila name noted above.
 - Confirmed frontend-only repo — no backend/server code anywhere in the tree; every endpoint above is assumed to be served by an external API reachable at `VITE_BASE_URL`.

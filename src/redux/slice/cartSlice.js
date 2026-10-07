@@ -18,7 +18,6 @@ export const handleAddtoCart = createAsyncThunk('cart/handleAddtoCart', async (f
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
      const response = await api.post('/accounts/cart/', formData, {section: 'add-cart'});
-    console.log('add to cart response',response);
     return response?.data;
   } catch (error) {
     return rejectWithValue(error.response.data);
@@ -32,10 +31,8 @@ export const handleFetchCart = createAsyncThunk('cart/handleFetchCart', async (o
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
      const response = await api.get('/accounts/cart/',  {section: "fetch-cart"});
-    console.log('get cart response',response);
     return response?.data || [];
   } catch (error) {
-    console.log('fetch error cart:', error);
     
     return rejectWithValue(error?.response?.data || error?.message);
   }
@@ -47,7 +44,6 @@ export const handleRemovetoCart = createAsyncThunk('cart/handleRemovetoCart', as
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
      const response = await api.put('/accounts/cart/', formData, {section: 'cart-remove'});
-    console.log('remove to cart response',response);
     return response?.data;
   } catch (error) {
     return rejectWithValue(error?.response?.data || error?.message || 'Something went wrong!');
@@ -138,7 +134,6 @@ const cartSlice = createSlice({
     .addCase(handleRemovetoCart.fulfilled, (state, action)=>{
       state.cartRemoveLoading = false;
       state.cartRemoveError = null;
-      //console.log(action);
       
     })
     .addCase(handleRemovetoCart.rejected, (state, action)=>{

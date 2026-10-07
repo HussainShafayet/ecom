@@ -29,7 +29,6 @@ export const fetchReviews = createAsyncThunk('review/fetchRevies', async (produc
         // Import axiosSetup only when debounceneeded to avoid circular dependency issues
         const api = (await import('../../api/axiosSetup')).default;
         const response = await api.get(`products/reviews/?product_id=${product_id}`, { section: "get-review", optionalAuth: true});
-       console.log('fetch reviews response', response);
        return response.data.data;
      } catch (error) {
        return rejectWithValue(error.response.data);
@@ -42,7 +41,6 @@ export const createReview = createAsyncThunk('review/createReview', async (formD
         // Import axiosSetup only when needed to avoid circular dependency issues
         const api = (await import('../../api/axiosSetup')).default;
         const response = await api.post(`products/reviews/`, formData, { section: "create-review"});
-       console.log('create review response', response);
        return response.data.data;
      } catch (error) {
        return rejectWithValue(error.response.data);
@@ -55,7 +53,6 @@ export const updateReview = createAsyncThunk('review/updateReview', async ({form
         // Import axiosSetup only when needed to avoid circular dependency issues
         const api = (await import('../../api/axiosSetup')).default;
         const response = await api.put(`products/reviews/${review_id}/`, formData, { section: "update-review"});
-       console.log('update review response', response);
        return response.data.data;
      } catch (error) {
        return rejectWithValue(error.response.data);
