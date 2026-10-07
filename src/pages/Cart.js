@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {addToCart, removeFromCart, updateQuantity, selectTotalPrice, handleFetchCart, handleRemovetoCart, handleAddtoCart, clearCart} from '../redux/slice/cartSlice';
+import {addToCart, removeFromCart, updateQuantity, selectCartCount, selectTotalPrice, handleFetchCart, handleRemovetoCart, handleAddtoCart, clearCart} from '../redux/slice/cartSlice';
 import {fetchAllProducts, MAX_QUANTITY} from '../redux/slice/productSlice';
 import {clearSectionError} from '../redux/slice/globalErrorSlice';
 import {ErrorDisplay, ProductSection, SectionError} from '../components/common';
@@ -38,6 +38,7 @@ const Cart = () => {
   const dispatch = useDispatch();
   const [originalQuantities, setOriginalQuantities] = useState({}); // Store original quantities
   const hasItems = cartItems.length > 0;
+  const itemCount = useSelector(selectCartCount); // the pieces, the number on the cart icon: a-2, b-1, c-1 is 4 items, not 3
 
   useEffect(() => {
     isAuthenticated && dispatch(handleFetchCart());
@@ -196,7 +197,7 @@ const Cart = () => {
               <div className="lg:col-span-2">
                 <div className="mb-3 flex items-center justify-between">
                   <h1 className="text-xl font-bold sm:text-2xl">
-                    Shopping Cart <span className="text-base font-normal text-gray-500">({cartItems.length})</span>
+                    Shopping Cart <span className="text-base font-normal text-gray-500">({itemCount} {itemCount === 1 ? 'item' : 'items'})</span>
                   </h1>
                   <button type="button" onClick={() => setConfirmAllDelete(true)} className="min-h-10 px-2 text-sm font-medium text-red-600 hover:underline">
                     Clear cart
@@ -205,7 +206,7 @@ const Cart = () => {
 
                 {confirmAllDelete && (
                   <div role="group" aria-label="Clear the cart" className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-gray-800">
-                    <span>Remove all {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}?</span>
+                    <span>Remove all {itemCount} {itemCount === 1 ? 'item' : 'items'}?</span>
                     <span className="flex gap-2">
                       <button type="button" onClick={handleRemoveAllItem} className="h-10 rounded-lg bg-red-600 px-4 font-semibold text-white hover:bg-red-700">Remove all</button>
                       <button type="button" onClick={() => setConfirmAllDelete(false)} className="h-10 rounded-lg border border-gray-300 bg-white px-4 font-semibold text-gray-700">Keep</button>

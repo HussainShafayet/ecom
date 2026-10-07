@@ -11,6 +11,7 @@ import {AddressesTab, PersonalInfo, ProfileHeader} from '../../components/profil
 import { WishList } from '../user';
 import {ProfileSkeleton} from '../../components/common/skeleton';
 import usePageTitle from '../../hooks/usePageTitle';
+import { badgeCount } from '../../utils/badgeCount';
 
 const TABS = [
   { label: 'Profile', icon: <FaUserEdit aria-hidden="true" />, id: 'overview' },
@@ -96,7 +97,7 @@ const Profile = () => {
               {tab.label}
               {count > 0 && (
                 <span className={`min-w-[1.25rem] rounded-full px-1.5 text-xs font-semibold leading-5 ${selected ? 'bg-white/25 text-white' : 'bg-indigo-100 text-indigo-700'}`}>
-                  <span aria-hidden="true">{count > 99 ? '99+' : count}</span>
+                  <span aria-hidden="true">{badgeCount(count)}</span>
                   <span className="sr-only">, {countOf(count, 'item')}</span>
                 </span>
               )}

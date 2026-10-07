@@ -65,6 +65,18 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+describe('The count in the heading', () => {
+  it('is the pieces, the number on the cart icon: 2 of one product and 1 of another are 3 items, not 2', () => {
+    renderCart(); // KNIFE x 2, MUG x 1
+    expect(screen.getByRole('heading', {level: 1}).textContent).toContain('(3 items)');
+  });
+
+  it('says "1 item" for one piece', () => {
+    renderCart({cartItems: [{...MUG, quantity: 1}]});
+    expect(screen.getByRole('heading', {level: 1}).textContent).toContain('(1 item)');
+  });
+});
+
 describe('The layout on a phone', () => {
   it('has the checkout bar just above the bottom navigation (it used to be under it), and room for it', () => {
     const {container} = renderCart();
@@ -223,7 +235,7 @@ describe('Clear cart', () => {
     fireEvent.click(screen.getByText('Clear cart'));
 
     const question = screen.getByRole('group', {name: 'Clear the cart'});
-    expect(question.textContent).toContain('Remove all 2 items?');
+    expect(question.textContent).toContain('Remove all 3 items?'); // 2 pieces of one product and 1 of another
     expect(screen.getByRole('heading', {level: 2, name: 'Blue Mug'})).toBeTruthy(); // not covered up
 
     fireEvent.click(screen.getByText('Keep'));

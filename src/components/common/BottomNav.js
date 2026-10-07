@@ -2,6 +2,7 @@ import { FaHeart, FaHome, FaShoppingBag, FaShoppingCart, FaSignInAlt, FaSignOutA
 import {useDispatch, useSelector} from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import {selectCartCount} from "../../redux/slice/cartSlice";
+import {badgeCount} from "../../utils/badgeCount";
 import {useEffect, useRef, useState} from "react";
 import {Logout} from "../../redux/slice/authActions";
 
@@ -66,7 +67,7 @@ const BottomNav = () => {
         </Link>
         {cartCount > 0 && (
             <span className="absolute top-[-10px] right-[-18px] inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-            {cartCount}
+            {badgeCount(cartCount)}
             </span>
         )}
         </div>

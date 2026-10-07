@@ -4,6 +4,7 @@ import { FaShoppingCart, FaUser, FaBars, FaTimes, FaSearch, FaHeart, FaSignInAlt
 import {useDispatch, useSelector} from 'react-redux';
 import {logoutUser} from '../../redux/slice/authSlice';
 import { selectCartCount } from '../../redux/slice/cartSlice';
+import { badgeCount } from '../../utils/badgeCount';
 import {Logout} from '../../redux/slice/authActions';
 import SearchDropdown from '../common/SearchDropdown';
 import AnnouncementBar from './AnnouncementBar';
@@ -86,7 +87,7 @@ const Navbar = () => {
             </Link>
             {cartCount > 0 && (
               <span className="absolute top-[-19px] right-[-18px] inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                {cartCount}
+                {badgeCount(cartCount)}
               </span>
             )}
           </div>
