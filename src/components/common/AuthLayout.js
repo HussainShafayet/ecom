@@ -1,6 +1,6 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { FaLock, FaShieldAlt } from 'react-icons/fa';
+import ShopBand from './ShopBand';
 
 const STEPS = ['Your phone', 'Your code'];
 
@@ -11,29 +11,9 @@ const STEPS = ['Your phone', 'Your code'];
 // is drawn with CSS: no picture to download from another website.
 //   icon   a react-icons component for the badge; step  1 or 2, which of the two steps this page is
 const AuthLayout = ({ title, subtitle, icon: Icon, step = 1, children, footer }) => {
-  const site = useSelector((state) => state.site?.site);
-  const name = site?.name || '';
-
   return (
     <div className="mx-auto w-full max-w-md pb-6">
-      <div className="relative overflow-hidden rounded-b-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 px-5 pb-20 pt-5 text-white sm:rounded-3xl">
-        {/* decoration only */}
-        <span aria-hidden="true" className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10" />
-        <span aria-hidden="true" className="absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-white/10" />
-        <span aria-hidden="true" className="absolute bottom-6 right-6 h-16 w-16 opacity-30 [background-image:radial-gradient(currentColor_1.5px,transparent_1.5px)] [background-size:10px_10px]" />
-
-        <div className="relative flex items-center gap-3">
-          <img
-            src={site?.logo || '/static image/gocart-logo.svg'}
-            alt={name ? `${name} logo` : 'Shop logo'}
-            className="h-11 w-11 shrink-0 rounded-full bg-white object-contain p-1.5 shadow"
-          />
-          <div className="min-w-0">
-            <p className="truncate text-lg font-bold leading-tight">{name || 'Welcome'}</p>
-            {site?.tagline && <p className="truncate text-xs text-indigo-100">{site.tagline}</p>}
-          </div>
-        </div>
-
+      <ShopBand className="rounded-b-3xl px-5 pb-20 pt-5 sm:rounded-3xl" fallbackName="Welcome">
         <ol aria-label="Steps" className="relative mt-5 flex items-center text-xs font-medium">
           {STEPS.map((label, index) => {
             const number = index + 1;
@@ -50,7 +30,7 @@ const AuthLayout = ({ title, subtitle, icon: Icon, step = 1, children, footer })
             );
           })}
         </ol>
-      </div>
+      </ShopBand>
 
       <div className="relative -mt-12 px-4">
         <div className="relative rounded-2xl border border-gray-100 bg-white px-5 pb-6 pt-11 text-center shadow-xl sm:px-8 sm:pb-8">

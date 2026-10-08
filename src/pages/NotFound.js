@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { FaCompass, FaSearch } from 'react-icons/fa';
 import usePageTitle from '../hooks/usePageTitle';
-import { LazySection } from '../components/common';
+import { LazySection, ShopBand } from '../components/common';
 import { CategoryStrip, SuggestedProducts } from '../components/sections';
 
 // A dead link is not the end of the visit. The shop's own look (the band of the sign-in pages: its logo and name over the blue-to-purple
@@ -13,7 +12,6 @@ import { CategoryStrip, SuggestedProducts } from '../components/sections';
 const NotFound = () => {
   usePageTitle('Page not found');
   const navigate = useNavigate();
-  const site = useSelector((state) => state.site?.site);
   const [term, setTerm] = useState('');
 
   const search = (event) => {
@@ -25,25 +23,9 @@ const NotFound = () => {
   return (
     <>
     <div className="mx-auto w-full max-w-3xl">
-      <div className="relative overflow-hidden rounded-b-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 px-5 pb-20 pt-5 text-white sm:rounded-3xl">
-        {/* decoration only */}
-        <span aria-hidden="true" className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10" />
-        <span aria-hidden="true" className="absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-white/10" />
-        <span aria-hidden="true" className="absolute bottom-6 right-6 h-16 w-16 opacity-30 [background-image:radial-gradient(currentColor_1.5px,transparent_1.5px)] [background-size:10px_10px]" />
-
-        <div className="relative flex items-center gap-3">
-          <img
-            src={site?.logo || '/static image/gocart-logo.svg'}
-            alt={site?.name ? `${site.name} logo` : 'Shop logo'}
-            className="h-11 w-11 shrink-0 rounded-full bg-white object-contain p-1.5 shadow"
-          />
-          <div className="min-w-0">
-            <p className="truncate text-lg font-bold leading-tight">{site?.name || 'Welcome'}</p>
-            {site?.tagline && <p className="truncate text-xs text-indigo-100">{site.tagline}</p>}
-          </div>
-        </div>
+      <ShopBand className="rounded-b-3xl px-5 pb-20 pt-5 sm:rounded-3xl" fallbackName="Welcome">
         <p aria-hidden="true" className="relative mt-6 text-6xl font-extrabold leading-none tracking-tight text-white/90">404</p>
-      </div>
+      </ShopBand>
 
       <div className="relative -mt-12 px-4">
         <div className="relative rounded-2xl border border-gray-100 bg-white px-5 pb-6 pt-11 text-center shadow-xl sm:px-8">
