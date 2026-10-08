@@ -2,7 +2,7 @@
 // Swiper needs a real browser, so it is a stand-in here; the content service is mocked.
 import React from 'react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {cleanup, fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {cleanup, fireEvent, render, screen} from '@testing-library/react';
 import {Provider} from 'react-redux';
 import {configureStore} from '@reduxjs/toolkit';
 import {MemoryRouter} from 'react-router-dom';

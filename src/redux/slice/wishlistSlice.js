@@ -14,7 +14,7 @@ const initialState = {
 
 
 //add to wishlist
-export const handleAddtoWishlist = createAsyncThunk('cart/handleAddtoWishlist', async (formData, { rejectWithValue }) => {
+export const handleAddtoWishlist = createAsyncThunk('wishList/handleAddtoWishlist', async (formData, { rejectWithValue }) => {
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
@@ -27,7 +27,7 @@ export const handleAddtoWishlist = createAsyncThunk('cart/handleAddtoWishlist', 
 });
 
 //fetch to wishlist
-export const fetchtoWishlist = createAsyncThunk('cart/fetchtoWishlist', async (_, { rejectWithValue }) => {
+export const fetchtoWishlist = createAsyncThunk('wishList/fetchtoWishlist', async (_, { rejectWithValue }) => {
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
@@ -40,7 +40,7 @@ export const fetchtoWishlist = createAsyncThunk('cart/fetchtoWishlist', async (_
 });
 
 //remove to wishlist
-export const handleRemovetoWishlist = createAsyncThunk('cart/handleRemovetoWishlist', async (formData, { rejectWithValue }) => {
+export const handleRemovetoWishlist = createAsyncThunk('wishList/handleRemovetoWishlist', async (formData, { rejectWithValue }) => {
   try {
      // Import axiosSetup only when needed to avoid circular dependency issues
      const api = (await import('../../api/axiosSetup')).default;
@@ -121,7 +121,7 @@ const wishlistSlice = createSlice({
       .addCase(handleRemovetoWishlist.pending, (state)=>{
         state.removeWishlistLoading = true;
       })
-      .addCase(handleRemovetoWishlist.fulfilled, (state, action)=>{
+      .addCase(handleRemovetoWishlist.fulfilled, (state)=>{
         state.removeWishlistLoading = false;
         state.removeWishlistError = null;
         

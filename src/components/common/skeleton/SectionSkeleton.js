@@ -1,7 +1,7 @@
 import React from "react";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 
-const Sectionkeleton = ({forRoute}) => {
+const SectionSkeleton = ({forRoute}) => {
   return (
     <div className="container mx-auto animate-pulse">
     {forRoute &&
@@ -42,4 +42,4 @@ const Sectionkeleton = ({forRoute}) => {
   );
 };
 
-export default Sectionkeleton;
+export default SectionSkeleton;

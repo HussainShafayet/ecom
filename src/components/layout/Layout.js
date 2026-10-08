@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { NavBar, Footer, TrustBadgeBar, SessionExpiredBanner, OfflineBanner } from '../layout';
 import Toaster from '../common/Toaster';

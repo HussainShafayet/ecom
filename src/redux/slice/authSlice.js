@@ -96,7 +96,7 @@ export const signInUser = createAsyncThunk('auth/signInUser', async (credentials
 
 
 // Logout action
-export const logoutUser = createAsyncThunk('auth/logoutUser', async (credential, { rejectWithValue, getState, dispatch }) => {
+export const logoutUser = createAsyncThunk('auth/logoutUser', async (credential, { rejectWithValue, getState }) => {
   try {
     const { accessToken } = getState().auth;
     const refresh_token = Cookies.get('refresh_token');
@@ -175,7 +175,7 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       //sign in
-      .addCase(signInUser.pending, (state, action)=>{
+      .addCase(signInUser.pending, (state)=>{
         state.signinLoading = true;
         state.signinWait = null;
       })
@@ -208,7 +208,7 @@ const authSlice = createSlice({
         state.sessionExpired = false;
         clearTokens();
       })
-      .addCase(logoutUser.rejected, (state,action) => {
+      .addCase(logoutUser.rejected, (state) => {
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
@@ -217,7 +217,7 @@ const authSlice = createSlice({
       })
 
       //signup
-      .addCase(signUpUser.pending, (state, action)=>{
+      .addCase(signUpUser.pending, (state)=>{
         state.signupLoading = true;
         state.signupWait = null;
       })
@@ -243,7 +243,7 @@ const authSlice = createSlice({
       })
 
       //verifyOtp
-      .addCase(verifyOtp.pending, (state, action)=>{
+      .addCase(verifyOtp.pending, (state)=>{
         state.verifyOtpLoading = true;
         state.verifyWait = null;
       })
@@ -270,7 +270,7 @@ const authSlice = createSlice({
 
 
        //resendOtp
-       .addCase(resendOtp.pending, (state, action)=>{
+       .addCase(resendOtp.pending, (state)=>{
         state.verifyOtpLoading = true;
         state.resendWait = null;
         state.resendOtpError = null;

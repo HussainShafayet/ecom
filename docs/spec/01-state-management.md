@@ -125,7 +125,6 @@ State: `items`, `favouriteIds` (id lookup map for O(1) checks), add/fetch/remove
 
 Thunks via the authenticated client: `handleAddtoWishlist` (`POST /accounts/favourite/`), `fetchtoWishlist` (`GET /accounts/favourite/`), `handleRemovetoWishlist` (`PUT /accounts/favourite/`, not `DELETE`).
 
-**Bug**: all three thunk type strings are prefixed `'cart/...'` (e.g. `'cart/handleAddtoWishlist'`) instead of `'wishList/...'` — a copy-paste leftover from `cartSlice`. Doesn't break functionality (the type strings are still unique) but pollutes the `cart/*` namespace in Redux DevTools/action logs and is misleading when debugging.
 
 Sync reducers `addToWishlist`/`removeFromWishlist`/`clearWishlist` mirror `cartSlice`'s local-mutation pattern. Persisted via the root whitelist (`"wishList"`) — this is what lets a guest build a wishlist locally (via `addToWishlist` on a product card) with no auth needed; `WishList.js` only additionally fetches the server copy when signed in.
 
@@ -146,4 +145,3 @@ These three overlap conceptually with `categorySlice`'s flash-sale/new-arrival/b
 - **Auth persistence split**: `auth` is nested-persisted independently of the root `persistConfig.whitelist` — easy to overlook.
 - **Inconsistent async client usage**: most slices lazy `import()` `api/axiosSetup` per-thunk to dodge circular deps; `authSlice`'s `logoutUser` (and the renewal in `api/session.js`, on purpose: it must not go through the interceptor it serves) use raw `axios` with manually attached headers instead — these calls skip the shared interceptor error handling.
 - **Inconsistent auth-branching pattern**: `checkoutSlice` and `productSlice.searchSuggestions` branch client-by-auth-state; cart/wishlist/profile/review assume the user is always authenticated.
-- **`wishlistSlice` action-type namespace bug** (`'cart/...'` prefix — see above).

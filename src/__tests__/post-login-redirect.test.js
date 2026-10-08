@@ -54,7 +54,7 @@ beforeEach(() => {
 
 describe('Post-login redirect', () => {
   it('sends a signed-in customer back to the page they were on, not home', async () => {
-    const store = renderApp(makeStore());
+    renderApp(makeStore());
 
     fireEvent.change(screen.getByLabelText(/phone number/i), {target: {value: '1712345678'}});
     fireEvent.click(screen.getByRole('button', {name: /sign in/i}));
