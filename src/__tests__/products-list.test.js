@@ -10,6 +10,7 @@ import {configureStore} from '@reduxjs/toolkit';
 import {MemoryRouter, Route, Routes, useLocation} from 'react-router-dom';
 
 import productReducer, {fetchAllProducts} from '../redux/slice/productSlice';
+import bestSellingReducer from '../redux/slice/product/bestSellingSlice';
 import contentReducer from '../redux/slice/contentSlice';
 import cartReducer from '../redux/slice/cartSlice';
 import authReducer from '../redux/slice/authSlice';
@@ -42,11 +43,16 @@ const makeStore = (product = {}) => configureStore({
   preloadedState: {product: {...init(productReducer), ...product}},
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({serializableCheck: false}),
 });
+const makeStoreWithSuggestions = () => configureStore({
+  reducer: {product: productReducer, content: contentReducer, cart: cartReducer, auth: authReducer, globalError: globalErrorReducer, wishList: wishListReducer, toast: toastReducer, best_selling: bestSellingReducer},
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({serializableCheck: false}),
+});
 const Where = () => <p data-testid="where">{useLocation().search}</p>;
 const where = () => screen.getByTestId('where').textContent;
 
 // `respond(params)` answers a products request (params = its query), by default the first two products
 let respond;
+let bestSellers = () => page([21, 22]); // the best sellers the page suggests under an empty list
 const requested = () => api.get.mock.calls.map(([url]) => url).filter((url) => url.startsWith('/products'));
 
 const renderPage = (url = '/products', store = makeStore()) => {
@@ -66,6 +72,7 @@ const click = async (name) => { await act(async () => { fireEvent.click(screen.g
 // A products request is answered by `respond`: a value, a promise, or a throw (which is a refusal)
 const reply = (url) => {
   const {pathname, searchParams} = new URL(url, 'http://shop.test');
+  if (pathname === '/products/best-selling') return Promise.resolve(bestSellers());
   if (pathname !== '/products') return Promise.reject(new Error(`unexpected ${url}`));
   try { return Promise.resolve(respond(searchParams)); } catch (thrown) { return Promise.reject(thrown); }
 };
@@ -74,6 +81,7 @@ beforeEach(() => {
   cleanup();
   vi.clearAllMocks();
   respond = () => page([1, 2]);
+  bestSellers = () => page([21, 22]);
   api.get.mockImplementation(reply);
   publicApi.get.mockResolvedValue({data: {data: {categories: [], brands: [], tags: [], colors: [], sizes: [], price_range: {}, discounts: []}}});
 });
@@ -289,6 +297,37 @@ describe('When there is nothing to show', () => {
     await click('See all products');
     expect(await screen.findByText('Product 1')).toBeTruthy();
     expect(where()).toBe('');
+  });
+
+  it('shows the best sellers under a search that found nothing, so the visit goes on', async () => {
+    respond = (params) => (params.get('search') ? page([]) : page([1, 2]));
+    renderPage('/products?search=zzz', makeStoreWithSuggestions());
+    expect(await screen.findByText('No results for “zzz”')).toBeTruthy();
+
+    expect(await screen.findByText('Popular right now')).toBeTruthy();
+    expect(await screen.findByText('Product 21')).toBeTruthy();
+    expect(screen.getByText('Product 22')).toBeTruthy();
+  });
+
+  it('shows them under filters that match nothing too, but not while there are products', async () => {
+    respond = (params) => (params.get('brands') ? page([]) : page([1, 2]));
+    renderPage('/products?brands=Acme', makeStoreWithSuggestions());
+    expect(await screen.findByText('No products match these filters')).toBeTruthy();
+    expect(await screen.findByText('Product 21')).toBeTruthy();
+    cleanup();
+
+    renderPage('/products', makeStoreWithSuggestions());
+    expect(await screen.findByText('Product 1')).toBeTruthy();
+    expect(screen.queryByText('Popular right now')).toBeNull();
+  });
+
+  it('says nothing about suggestions when they cannot be loaded: the empty answer stands alone', async () => {
+    respond = (params) => (params.get('search') ? page([]) : page([1, 2]));
+    bestSellers = () => { throw refused(['Something went wrong on our side.'], 500); };
+    renderPage('/products?search=zzz', makeStoreWithSuggestions());
+    expect(await screen.findByText('No results for “zzz”')).toBeTruthy();
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 100)); });
+    expect(screen.queryByText('Popular right now')).toBeNull();
   });
 
   it('is honest about an empty shop', async () => {
