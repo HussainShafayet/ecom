@@ -128,35 +128,88 @@ describe('The full-screen viewer', () => {
   });
 });
 
-describe('The picture under a mouse', () => {
-  const mouse = (matches) => {
-    window.matchMedia = (query) => ({matches: matches && query.includes('hover: hover'), addEventListener() {}, removeEventListener() {}});
+describe('The picture under a mouse (the lens and the zoom pane, like Alibaba)', () => {
+  // `fine`: a pointer that hovers and is precise; `wide`: a screen with room for two columns
+  const device = ({fine, wide = true}) => {
+    window.matchMedia = (query) => ({
+      matches: query.includes('hover: hover') ? fine : query.includes('min-width: 768px') ? wide : false,
+      addEventListener() {}, removeEventListener() {},
+    });
   };
   const pictureOf = () => screen.getByRole('button', {name: 'Open Blue Kettle (1 of 3) full screen'});
+  const overPicture = (clientX, clientY) => {
+    pictureOf().getBoundingClientRect = () => ({left: 0, top: 0, width: 200, height: 200});
+    fireEvent.mouseMove(pictureOf(), {clientX, clientY});
+  };
 
-  it('grows around the pointer while it moves over it, and goes back when it leaves', () => {
-    mouse(true);
+  it('shows a lens on the picture and the area under it, enlarged, in a pane beside it; the picture itself does not move', () => {
+    device({fine: true});
     render(<Page />);
-    fireEvent.mouseMove(pictureOf(), {clientX: 10, clientY: 10});
-    const image = screen.getByAltText('Blue Kettle (1 of 3)');
-    expect(image.style.transform).toBe('scale(2.5)');
+    overPicture(100, 100); // the middle
 
-    fireEvent.mouseLeave(pictureOf());
-    expect(image.style.transform).toBe('');
+    const lens = screen.getByTestId('zoom-lens');
+    expect(lens.style.left).toBe('30%'); // 40 % wide (1 / 2.5), centred on the pointer
+    expect(lens.style.top).toBe('30%');
+    expect(lens.style.width).toBe('40%');
+    const pane = screen.getByTestId('zoom-pane');
+    const image = pane.querySelector('img');
+    expect(image.getAttribute('src')).toBe('/a.jpg'); // the full-size picture, not the thumbnail
+    expect(image.parentElement.style.width).toBe('250%'); // 2.5 times the pane
+    expect(image.parentElement.style.transform).toBe('translate(-30%, -30%)'); // moved so the lens's area fills the pane
+    expect(screen.getByAltText('Blue Kettle (1 of 3)').style.transform).toBe(''); // the picture stays as it is
   });
 
-  it('is not a thing on a phone: a finger does not magnify, a tap opens the viewer and a small icon says so', () => {
-    mouse(false);
+  it('follows the pointer and never leaves the picture: at a corner the lens stops at the edge', () => {
+    device({fine: true});
     render(<Page />);
-    fireEvent.mouseMove(pictureOf(), {clientX: 10, clientY: 10}); // the mouse events a browser sends after a tap
-    expect(screen.getByAltText('Blue Kettle (1 of 3)').style.transform).toBe('');
+    overPicture(0, 200); // the bottom left corner
+
+    expect(screen.getByTestId('zoom-lens').style.left).toBe('0%');
+    expect(screen.getByTestId('zoom-lens').style.top).toBe('60%'); // 100 - 40
+    expect(screen.getByTestId('zoom-pane').querySelector('img').parentElement.style.transform).toBe('translate(-0%, -60%)');
+
+    overPicture(200, 0); // the top right corner
+    expect(screen.getByTestId('zoom-lens').style.left).toBe('60%');
+    expect(screen.getByTestId('zoom-lens').style.top).toBe('0%');
+  });
+
+  it('goes away when the pointer leaves the picture', () => {
+    device({fine: true});
+    render(<Page />);
+    overPicture(100, 100);
+    expect(screen.getByTestId('zoom-pane')).toBeTruthy();
+
+    fireEvent.mouseLeave(pictureOf());
+
+    expect(screen.queryByTestId('zoom-lens')).toBeNull();
+    expect(screen.queryByTestId('zoom-pane')).toBeNull();
+  });
+
+  it('is not a thing on a phone: nothing follows a finger, a tap opens the viewer and a small icon says so', () => {
+    device({fine: false});
+    render(<Page />);
+    overPicture(100, 100); // the mouse events a browser sends after a tap
+    expect(screen.queryByTestId('zoom-lens')).toBeNull();
+    expect(screen.queryByTestId('zoom-pane')).toBeNull();
     expect(pictureOf().querySelector('svg')).not.toBeNull();
   });
 
-  it('still opens the viewer on a click', () => {
-    mouse(true);
+  it('is not drawn on a narrow screen either, even with a mouse: the pane needs the details column beside the picture', () => {
+    device({fine: true, wide: false});
     render(<Page />);
+    overPicture(100, 100);
+    expect(screen.queryByTestId('zoom-pane')).toBeNull();
+    expect(pictureOf().querySelector('svg')).not.toBeNull(); // it opens the viewer, the expand icon says so
+  });
+
+  it('opens the viewer on a click, and the pane gets out of its way', () => {
+    device({fine: true});
+    render(<Page />);
+    overPicture(100, 100);
+
     fireEvent.click(pictureOf());
+
     expect(viewer()).toBeTruthy();
+    expect(screen.queryByTestId('zoom-pane')).toBeNull();
   });
 });
