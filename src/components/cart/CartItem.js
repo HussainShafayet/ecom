@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaTrash } from 'react-icons/fa';
+import { FaHeart, FaTrash } from 'react-icons/fa';
 import QuantitySelector from '../common/product/QuantitySelector';
 import { minimumOf } from '../../utils/minimumOrder';
 import { discountLabel, formatPrice } from '../../utils/formatPrice';
@@ -10,7 +10,8 @@ import defaultImage from '../../assets/images/default_product_image.jpg';
 // quantity (40 px targets, typed or − +) next to what the line comes to, a 40 px remove button. Whatever the shop said about
 // THIS line (not enough stock, below the minimum order) is written under it, not at the top of the page.
 //   error   why the last quantity change was refused (a sentence), or nothing
-const CartItem = ({ item, error, onQuantityChange, onRemove }) => {
+//   onMoveToWishlist(item)   when given, a 40 px "Move to wishlist" under the quantity: keep it for later instead of removing it
+const CartItem = ({ item, error, onQuantityChange, onRemove, onMoveToWishlist }) => {
   const minimum = minimumOf(item);
   const unitPrice = item.has_discount ? item.discount_price : item.base_price;
   const details = [item.brand_name, item.color_name && `Color: ${item.color_name}`, item.size_name && `Size: ${item.size_name}`].filter(Boolean).join(' · ');
@@ -61,6 +62,17 @@ const CartItem = ({ item, error, onQuantityChange, onRemove }) => {
             {formatPrice(unitPrice * item.quantity)}
           </span>
         </div>
+
+        {onMoveToWishlist && (
+          <button
+            type="button"
+            onClick={() => onMoveToWishlist(item)}
+            aria-label={`Move ${item.name} to your wishlist`}
+            className="-ml-1 mt-1 inline-flex h-10 items-center gap-1.5 rounded-lg px-1 text-sm font-medium text-pink-600 hover:bg-pink-50"
+          >
+            <FaHeart aria-hidden="true" /> Move to wishlist
+          </button>
+        )}
 
         {minimum > 1 && (
           <p className={`mt-1 text-xs ${item.quantity < minimum ? 'font-semibold text-red-500' : 'text-gray-500'}`}>
