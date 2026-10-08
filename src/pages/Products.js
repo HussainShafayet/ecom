@@ -2,7 +2,8 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigationType, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaFilter, FaSearch } from 'react-icons/fa';
-import { Breadcrum, ProductCard, SectionError } from '../components/common';
+import { Breadcrum, LazySection, ProductCard, SectionError } from '../components/common';
+import { SuggestedProducts } from '../components/sections';
 import { ActiveFilters, FilterSheet, FilterSidebar } from '../components/products';
 import { ProductsPageSkeleton } from '../components/common/skeleton';
 import { fetchAllProducts, restoreProductsList } from '../redux/slice/productSlice';
@@ -151,6 +152,7 @@ const Products = ({ scrollContainerRef }) => {
   const nothing = !products || products.length === 0;
   const sorts = filters.ordering in OTHER_SORTS ? [...SORTS, { value: filters.ordering, label: OTHER_SORTS[filters.ordering] }] : SORTS;
 
+  let suggestions = null; // what to look at instead, under a list that came back empty
   let list;
   if (!fresh || (isLoading && !isLoadingMore)) {
     list = <ProductsPageSkeleton />;
@@ -165,6 +167,8 @@ const Products = ({ scrollContainerRef }) => {
         onSeeAll={() => setSearchParams({})}
       />
     );
+    // An empty answer is not the end of the visit: the shop's best sellers, as a swipe row under it
+    suggestions = <LazySection><SuggestedProducts title="Popular right now" /></LazySection>;
   } else {
     list = (
       <>
@@ -242,6 +246,9 @@ const Products = ({ scrollContainerRef }) => {
           <div onClickCapture={leaving}>{list}</div>
         </div>
       </div>
+
+      {/* under the whole page, not in the list's column: a row of cards sizes itself by the screen */}
+      {suggestions && <div className="mt-8">{suggestions}</div>}
 
       {sheetOpen && !isDesktop && (
         <FilterSheet

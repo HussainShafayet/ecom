@@ -5,6 +5,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import {addToCart, removeFromCart, updateQuantity, selectCartCount, selectTotalPrice, handleFetchCart, handleRemovetoCart, handleAddtoCart, clearCart} from '../redux/slice/cartSlice';
 import {fetchAllProducts, MAX_QUANTITY} from '../redux/slice/productSlice';
 import {clearSectionError} from '../redux/slice/globalErrorSlice';
+import {addToWishlist, handleAddtoWishlist} from '../redux/slice/wishlistSlice';
+import {pushToast} from '../redux/slice/toastSlice';
 import {ErrorDisplay, ProductSection, SectionError} from '../components/common';
 import {CartCheckoutBar, CartItem, UndoSnackbar} from '../components/cart';
 import {RecentlyViewed} from '../components/sections';
@@ -28,6 +30,7 @@ const Cart = () => {
   const totalPrice = useSelector(selectTotalPrice);
   const [confirmAllDelete, setConfirmAllDelete] = useState(false);
   const [quantityErrors, setQuantityErrors] = useState({}); // per line: why the shop refused the last quantity change (stock)
+  const favouriteIds = useSelector((state) => state.wishList?.favouriteIds);
   const [undo, setUndo] = useState(null); // what was just removed { items, message }
   const {cartItems, cartFetchLoading, cartFetchError, cartRemoveError} = useSelector((state)=> state.cart);
 
@@ -108,11 +111,28 @@ const Cart = () => {
     if (handleRemovetoCart.rejected.match(result)) dispatch(handleFetchCart());
   };
 
-  const handleRemoveItem = (item) =>{
+  const handleRemoveItem = (item, message = `Removed “${item?.name}”`) =>{
     isAuthenticated && removeOnServer({product_id: item?.id, variant_id: item?.variant_id});
     dispatch(removeFromCart(item));
-    setUndo({items: [item], message: `Removed “${item?.name}”`});
+    setUndo({items: [item], message});
   }
+
+  // "Move to wishlist": into the wishlist FIRST (the shop's for a signed-in customer, this phone's for a guest), and only when that worked
+  // out of the cart, with the same one-tap undo as a removal (the undo brings back the cart line; the wishlist keeps its heart).
+  const handleMoveToWishlist = async (item) => {
+    if (!favouriteIds?.[item?.id]) {
+      if (isAuthenticated) {
+        const result = await dispatch(handleAddtoWishlist({product_id: item.id}));
+        if (handleAddtoWishlist.rejected.match(result)) {
+          dispatch(pushToast(result.payload?.errors?.[0] || result.payload?.error || 'Could not move this to your wishlist. Please try again.', 'error'));
+          return;
+        }
+      } else {
+        dispatch(addToWishlist(item));
+      }
+    }
+    handleRemoveItem(item, `Moved “${item?.name}” to your wishlist`);
+  };
 
   const handleRemoveAllItem = () => {
     const removeList = cartItems?.map(element =>
@@ -222,6 +242,7 @@ const Cart = () => {
                       error={quantityErrors[lineKey(item)]}
                       onQuantityChange={handleUpdateQuantity}
                       onRemove={handleRemoveItem}
+                      onMoveToWishlist={handleMoveToWishlist}
                     />
                   ))}
                 </ul>

@@ -147,8 +147,8 @@ const productSlice = createSlice({
             state.isLoadingMore = false;
             state.error = null;
             state.items = page > 1
-            ? [...state.items, ...action?.payload?.data]
-            : action?.payload?.data;
+            ? [...state.items, ...(action?.payload?.data || [])]
+            : action?.payload?.data || [];
             state.listPage = page;
             state.count = action?.payload?.count;
             state.hasMore = Boolean(action?.payload?.next); // the backend says whether another page exists
@@ -176,8 +176,8 @@ const productSlice = createSlice({
             state.featured_Loading = false;
             state.featured_error = null;
             state.featured = action.meta.arg.page > 1
-            ? [...state.featured, ...action?.payload?.data]
-            : action?.payload?.data;
+            ? [...state.featured, ...(action?.payload?.data || [])]
+            : action?.payload?.data || [];
             state.hasMore = Boolean(action?.payload?.next); // the backend says whether another page exists
         });
         builder.addCase(fetchFeaturedProducts.rejected,(state, action)=>{
