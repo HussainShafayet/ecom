@@ -32,8 +32,8 @@ const bestSellingSlice = createSlice({
             state.best_selling_Loading = false;
             state.best_selling_error = null;
             state.best_selling = action.meta.arg.page > 1
-            ? [...state.best_selling, ...action?.payload?.data]
-            : action?.payload?.data;
+            ? [...state.best_selling, ...(action?.payload?.data || [])]
+            : action?.payload?.data || [];
             state.hasMore = Boolean(action?.payload?.next); // the backend says whether another page exists
         });
         builder.addCase(fetchBestSellingProducts.rejected,(state, action)=>{

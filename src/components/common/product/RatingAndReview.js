@@ -193,24 +193,29 @@ const RatingAndReview = ({ product }) => {
         <div className="space-y-4">
           {can_review || can_edited ? 
           <form onSubmit={handleSubmitReview} className="space-y-4 p-4 border rounded-md shadow-md">
-            {/* Rating Selector */}
+            {/* Rating Selector: five radio buttons (a keyboard and a screen reader can use them), the stars drawn inside */}
             <div className="flex items-center">
-              <span className="text-gray-600 font-medium mr-4">Your Rating:</span>
-              {Array(5)
-                .fill(0)
-                .map((_, i) => (
-                  <FaStar
-                    key={i}
-                    className={`h-8 w-8 cursor-pointer ${
-                      i < (hoverRating || reviewFormData.rating)
-                        ? "text-yellow-500"
-                        : "text-gray-300"
-                    }`}
-                    onClick={() => dispatch(updateReviewFormData({ 'rating': i+1}))}
-                    onMouseEnter={() => setHoverRating(i + 1)}
+              <span id="review-rating-label" className="text-gray-600 font-medium mr-4">Your Rating:</span>
+              <div role="radiogroup" aria-labelledby="review-rating-label" className="flex">
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={reviewFormData.rating === value}
+                    aria-label={`${value} ${value === 1 ? 'star' : 'stars'}`}
+                    onClick={() => dispatch(updateReviewFormData({ 'rating': value }))}
+                    onMouseEnter={() => setHoverRating(value)}
                     onMouseLeave={() => setHoverRating(0)}
-                  />
+                    className="flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                  >
+                    <FaStar
+                      aria-hidden="true"
+                      className={`h-8 w-8 ${value <= (hoverRating || reviewFormData.rating) ? 'text-yellow-500' : 'text-gray-300'}`}
+                    />
+                  </button>
                 ))}
+              </div>
             </div>
 
             {/* Review Textarea */}

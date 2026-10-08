@@ -320,13 +320,13 @@ describe('The checkout draft', () => {
     expect(loadCheckoutDraft()).toEqual({name: 'Rahim', phone_number: '1712345678', address: 'House 1'});
   });
 
-  it('is gone once cleared, and when nothing is typed', () => {
+  it('is gone once cleared, but an empty form never wipes it (a new page starts empty, and StrictMode starts it twice)', () => {
     saveCheckoutDraft({name: 'Rahim'});
     clearCheckoutDraft();
     expect(loadCheckoutDraft()).toBeNull();
     saveCheckoutDraft({name: 'Rahim'});
     saveCheckoutDraft({name: ''});
-    expect(loadCheckoutDraft()).toBeNull();
+    expect(loadCheckoutDraft()).toEqual({name: 'Rahim'});
   });
 
   it('ignores a saved value that is not what it wrote', () => {
@@ -345,14 +345,22 @@ describe('The checkout draft', () => {
 });
 
 const MUG = {id: 1, name: 'Mug', slug: 'mug', image: '', base_price: 500, discount_price: 500, has_discount: false, quantity: 1, minimum_order_quantity: 1, variant_id: 1, availability_status: true};
-const renderCheckout = async ({signedIn = false} = {}) => {
+const renderCheckout = async ({signedIn = false, strict = false} = {}) => {
   const {default: Checkout} = await import('../pages/Checkout');
   const content = {data: {data: {delivery_charges: {inside_dhaka: 60, outside_dhaka: 120}, shipping_addresses: [], user_info: null}}};
   publicApi.get.mockResolvedValue(content);
   api.get.mockImplementation((url) => (String(url).includes('accounts/cart') ? Promise.resolve({data: {data: [MUG]}}) : Promise.resolve(content)));
   const store = makeStore({signedIn});
   store.dispatch({type: 'cart/addToCart', payload: MUG});
-  render(<Provider store={store}><MemoryRouter><Checkout /></MemoryRouter></Provider>);
+  if (strict) {
+    // StrictMode starts the page twice and asks the shop twice; on a real network the second answer comes LATER than the first (the first
+    // one's restore is already done by then), and it is the one that used to wipe the name, phone and e-mail
+    publicApi.get.mockReset();
+    publicApi.get.mockResolvedValueOnce(content);
+    publicApi.get.mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve(content), 250)));
+  }
+  const page = <Provider store={store}><MemoryRouter><Checkout /></MemoryRouter></Provider>;
+  render(strict ? <React.StrictMode>{page}</React.StrictMode> : page);
   await screen.findByText('Place Order');
   return store;
 };
@@ -375,6 +383,19 @@ describe('The checkout page for a guest who comes back', () => {
     expect(screen.getByLabelText('Phone number').value).toBe('1712345678');
     expect(screen.getByLabelText('Delivery area').value).toBe('inside_dhaka');
     expect(screen.getByLabelText('Area in Dhaka').value).toBe('Gulshan');
+    expect(screen.getByLabelText('Full address').value).toBe('House 1, Road 2');
+  });
+
+  it('comes back whole while React starts the page twice (StrictMode, as the dev server does): the second start used to clear the name, phone and e-mail', async () => {
+    saveCheckoutDraft({name: 'Rahim Uddin', phone_number: '1712345678', email: 'rahim@example.com', address: 'House 1, Road 2'});
+
+    await renderCheckout({strict: true});
+
+    await waitFor(() => expect(screen.getByLabelText('Full name').value).toBe('Rahim Uddin'));
+    await new Promise((resolve) => setTimeout(resolve, 600)); // the slower second answer has arrived by now
+    expect(screen.getByLabelText('Full name').value).toBe('Rahim Uddin');
+    expect(screen.getByLabelText('Phone number').value).toBe('1712345678');
+    expect(screen.getByLabelText(/^Email/).value).toBe('rahim@example.com');
     expect(screen.getByLabelText('Full address').value).toBe('House 1, Road 2');
   });
 

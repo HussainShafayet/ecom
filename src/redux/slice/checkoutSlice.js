@@ -63,6 +63,9 @@ export const handleCheckout = createAsyncThunk('checkout/handleCheckout', async 
   } catch (error) {
     return rejectWithValue(error?.response?.data);
   }
+}, {
+  // One order at a time: a second tap (or a retry) while the first is on its way would place the order twice. Nothing is sent, no state moves.
+  condition: (_, { getState }) => !getState().checkout?.isLoading,
 });
 
 // checkout content get 

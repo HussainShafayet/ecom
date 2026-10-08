@@ -32,8 +32,8 @@ const flashSaleSlice = createSlice({
             state.flash_sale_Loading = false;
             state.flash_sale_error = null;
             state.flash_sale = action.meta.arg.page > 1
-            ? [...state.flash_sale, ...action?.payload?.data]
-            : action?.payload?.data;
+            ? [...state.flash_sale, ...(action?.payload?.data || [])]
+            : action?.payload?.data || [];
             state.flash_window = action?.payload?.window || null;
             state.hasMore = Boolean(action?.payload?.next); // the backend says whether another page exists
         });

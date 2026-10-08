@@ -34,8 +34,8 @@ const newArrivalSlice = createSlice({
             state.new_arrival_Loading = false;
             state.new_arrival_error = null;
             state.new_arrival = action.meta.arg.page > 1
-            ? [...state.new_arrival, ...action?.payload?.data]
-            : action?.payload?.data;
+            ? [...state.new_arrival, ...(action?.payload?.data || [])]
+            : action?.payload?.data || [];
             state.hasMore = Boolean(action?.payload?.next); // the backend says whether another page exists
         });
         builder.addCase(fetchNewArrivalProducts.rejected,(state, action)=>{
