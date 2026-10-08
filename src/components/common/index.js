@@ -56,6 +56,8 @@ export { default as PhoneInput }
 from './PhoneInput';
 export { default as AuthLayout }
 from './AuthLayout';
+export { default as ShopBand }
+from './ShopBand';
 export { default as OtpInput }
 from './OtpInput';
 export { default as WaitNotice }

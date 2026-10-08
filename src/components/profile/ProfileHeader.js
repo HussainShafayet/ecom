@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaCamera, FaSpinner } from 'react-icons/fa';
 import { handleProfileUpdate } from '../../redux/slice/profileSlice';
+import ShopBand from '../common/ShopBand';
 
 // What the backend accepts as a picture (docs/API_CONTRACT.md section 3): the real format is checked there, this only saves a
 // slow upload that is bound to be refused.
@@ -15,7 +16,6 @@ const MAX_MB = 5;
 // comes back and says why. Everything is drawn with CSS.
 const ProfileHeader = ({ profile }) => {
   const dispatch = useDispatch();
-  const site = useSelector((state) => state.site?.site);
   const { updateLoading } = useSelector((state) => state.profile);
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -58,24 +58,10 @@ const ProfileHeader = ({ profile }) => {
   const picture = preview || profile?.profile_picture;
   const initial = (profile?.name || '?').trim().charAt(0).toUpperCase();
   const busy = uploading && updateLoading;
-  const shop = site?.name || '';
 
   return (
     <section className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md">
-      <div className="relative h-28 overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 px-5 pt-4 text-white sm:h-36">
-        {/* decoration only */}
-        <span aria-hidden="true" className="absolute -right-8 -top-10 h-36 w-36 rounded-full bg-white/10" />
-        <span aria-hidden="true" className="absolute -bottom-10 left-10 h-28 w-28 rounded-full bg-white/10" />
-        <span aria-hidden="true" className="absolute bottom-4 right-6 h-14 w-14 opacity-30 [background-image:radial-gradient(currentColor_1.5px,transparent_1.5px)] [background-size:10px_10px]" />
-        <div className="relative flex items-center gap-2">
-          <img
-            src={site?.logo || '/static image/gocart-logo.svg'}
-            alt={shop ? `${shop} logo` : 'Shop logo'}
-            className="h-8 w-8 shrink-0 rounded-full bg-white object-contain p-1 shadow"
-          />
-          <p className="truncate text-sm font-semibold">{shop || 'My account'}</p>
-        </div>
-      </div>
+      <ShopBand compact fallbackName="My account" className="h-28 px-5 pt-4 sm:h-36" />
 
       <div className="px-4 pb-5 text-center sm:px-6">
         <label
