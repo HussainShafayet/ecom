@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaUser, FaBars, FaTimes, FaSearch, FaHeart, FaSignInAlt, FaUserPlus, FaBoxOpen } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaHeart, FaSignInAlt, FaUserPlus, FaBoxOpen } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
-import {logoutUser} from '../../redux/slice/authSlice';
 import { selectCartCount } from '../../redux/slice/cartSlice';
 import { badgeCount } from '../../utils/badgeCount';
 import {Logout} from '../../redux/slice/authActions';
@@ -10,7 +9,7 @@ import SearchDropdown from '../common/SearchDropdown';
 import AnnouncementBar from './AnnouncementBar';
 import { selectSite } from '../../redux/slice/siteSlice';
 
-const Navbar = () => {
+const NavBar = () => {
   const [authMenuOpen, setAuthMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const {isAuthenticated, accessToken, refreshToken} = useSelector((state)=>state.auth)
@@ -179,6 +178,6 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default NavBar;
 
 

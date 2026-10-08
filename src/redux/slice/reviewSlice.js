@@ -28,7 +28,7 @@ export const fetchReviews = createAsyncThunk('review/fetchRevies', async (produc
     try {
         // Import axiosSetup only when debounceneeded to avoid circular dependency issues
         const api = (await import('../../api/axiosSetup')).default;
-        const response = await api.get(`products/reviews/?product_id=${product_id}`, { section: "get-review", optionalAuth: true});
+        const response = await api.get(`/products/reviews/?product_id=${product_id}`, { section: "get-review", optionalAuth: true});
        return response.data.data;
      } catch (error) {
        return rejectWithValue(error.response.data);
@@ -40,7 +40,7 @@ export const createReview = createAsyncThunk('review/createReview', async (formD
     try {
         // Import axiosSetup only when needed to avoid circular dependency issues
         const api = (await import('../../api/axiosSetup')).default;
-        const response = await api.post(`products/reviews/`, formData, { section: "create-review"});
+        const response = await api.post(`/products/reviews/`, formData, { section: "create-review"});
        return response.data.data;
      } catch (error) {
        return rejectWithValue(error.response.data);
@@ -52,7 +52,7 @@ export const updateReview = createAsyncThunk('review/updateReview', async ({form
     try {
         // Import axiosSetup only when needed to avoid circular dependency issues
         const api = (await import('../../api/axiosSetup')).default;
-        const response = await api.put(`products/reviews/${review_id}/`, formData, { section: "update-review"});
+        const response = await api.put(`/products/reviews/${review_id}/`, formData, { section: "update-review"});
        return response.data.data;
      } catch (error) {
        return rejectWithValue(error.response.data);

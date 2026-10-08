@@ -48,7 +48,7 @@ describe('The review area says why a customer can not review yet', () => {
     expect(await screen.findByText(/once your order has been delivered/)).toBeTruthy();
     expect(screen.getByText('View my order').getAttribute('href')).toBe(`/orders/${NUMBER}`);
     expect(screen.queryByText('Submit Review')).toBeNull();
-    expect(api.get).toHaveBeenCalledWith('products/reviews/?product_id=23', {section: 'get-review', optionalAuth: true});
+    expect(api.get).toHaveBeenCalledWith('/products/reviews/?product_id=23', {section: 'get-review', optionalAuth: true});
   });
 
   it('does not tell a customer who has not bought it that they only have to buy it (the old, misleading text)', async () => {

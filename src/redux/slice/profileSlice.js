@@ -143,7 +143,7 @@ export const handleSendOtp = createAsyncThunk('profile/handleSendOtp', async ({ 
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
-       const response = await api.post(`accounts/request-otp/`,formData, { section: "send-otp-verify"});
+       const response = await api.post(`/accounts/request-otp/`,formData, { section: "send-otp-verify"});
       return { data: response?.data, field };
     } catch (error) {
       return rejectWithValue({...error.response?.data, retry_after: retryAfterSeconds(error)});
@@ -154,7 +154,7 @@ export const handleSubmitOtp = createAsyncThunk('profile/handleSubmitOtp', async
     try {
        // Import axiosSetup only when needed to avoid circular dependency issues
        const api = (await import('../../api/axiosSetup')).default;
-       const response = await api.post(`accounts/verify-otp-for-profile/`,formData, { section: "submit-otp"});
+       const response = await api.post(`/accounts/verify-otp-for-profile/`,formData, { section: "submit-otp"});
       return { data: response?.data, field };
     } catch (error) {
       return rejectWithValue(error.response?.data);

@@ -18,7 +18,8 @@ vi.mock('../components/sections', () => {
     return Stub;
   };
   return {
-    HeroSection: stub('hero'), CategoryStrip: stub('strip'), FlashSale: stub('flash'), BestSelling: stub('best'), NewArrival: stub('new'),
+    HeroSection: stub('hero'), CategoryStrip: stub('strip'), CartReminder: () => null, // (only there with something in the cart: not part of what loads)
+    FlashSale: stub('flash'), BestSelling: stub('best'), NewArrival: stub('new'),
     FeaturedProducts: stub('featured'), RecentlyViewed: stub('recent'), Testimonials: stub('testimonials'), MidBanner: stub('mid'), AllProducts: stub('all'),
   };
 });
