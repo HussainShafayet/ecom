@@ -266,7 +266,7 @@ describe('A new phone number or e-mail is verified with a code first', () => {
 
     await click('Send code');
 
-    expect(api.post).toHaveBeenCalledWith('accounts/request-otp/', {phone_number: '+8801812345678'}, expect.anything());
+    expect(api.post).toHaveBeenCalledWith('/accounts/request-otp/', {phone_number: '+8801812345678'}, expect.anything());
     const sheet = await screen.findByRole('dialog', {name: 'Verify your new phone number'});
     expect(sheet.getAttribute('aria-modal')).toBe('true');
     expect(sheet.parentElement.className).toContain('fixed inset-0');
@@ -323,7 +323,7 @@ describe('A new phone number or e-mail is verified with a code first', () => {
     fireEvent.change(within(sheet).getByLabelText('6-digit code'), {target: {value: '111111'}});
     await click('Verify');
     expect(await within(sheet).findByText('Incorrect code. 4 attempts left.')).toBeTruthy();
-    expect(api.post).toHaveBeenLastCalledWith('accounts/verify-otp-for-profile/', {token: 'tok-1', otp: '111111'}, expect.anything());
+    expect(api.post).toHaveBeenLastCalledWith('/accounts/verify-otp-for-profile/', {token: 'tok-1', otp: '111111'}, expect.anything());
 
     fireEvent.change(within(sheet).getByLabelText('6-digit code'), {target: {value: '22222'}});
     expect(within(sheet).queryByText('Incorrect code. 4 attempts left.')).toBeNull(); // about the old code
@@ -361,7 +361,7 @@ describe('A new phone number or e-mail is verified with a code first', () => {
     const resend = await within(sheet).findByRole('button', {name: 'Resend code'}, {timeout: 3000});
     await act(async () => { fireEvent.click(resend); });
 
-    expect(api.post).toHaveBeenLastCalledWith('accounts/request-otp/', {phone_number: '+8801812345678'}, expect.anything());
+    expect(api.post).toHaveBeenLastCalledWith('/accounts/request-otp/', {phone_number: '+8801812345678'}, expect.anything());
     expect(api.post).toHaveBeenCalledTimes(2);
     expect(within(sheet).getByRole('button', {name: 'Resend code in 1s'})).toBeTruthy(); // counting again
   });
@@ -395,7 +395,7 @@ describe('A new phone number or e-mail is verified with a code first', () => {
 
     await click('Send code');
 
-    expect(api.post).toHaveBeenCalledWith('accounts/request-otp/', {email: 'new@example.com'}, expect.anything());
+    expect(api.post).toHaveBeenCalledWith('/accounts/request-otp/', {email: 'new@example.com'}, expect.anything());
     expect(await screen.findByRole('dialog', {name: 'Verify your new e-mail'})).toBeTruthy();
   });
 });

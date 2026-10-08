@@ -96,10 +96,10 @@ const RatingAndReview = ({ product }) => {
 
   const handleCanEdited = (review) => {
     setCanEdited(review.id);
-   dispatch(dispatch(updateReviewFormData({ product_id: review.product_id })));
-  dispatch(dispatch(updateReviewFormData({ rating: review.rating })));
-  dispatch(dispatch(updateReviewFormData({ comment: review.comment })));
-  dispatch(dispatch(updateReviewFormData({ media: review.media_urls })));
+   dispatch(updateReviewFormData({ product_id: review.product_id }));
+  dispatch(updateReviewFormData({ rating: review.rating }));
+  dispatch(updateReviewFormData({ comment: review.comment }));
+  dispatch(updateReviewFormData({ media: review.media_urls }));
     
   }
   return (

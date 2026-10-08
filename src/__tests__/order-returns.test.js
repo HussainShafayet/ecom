@@ -286,7 +286,9 @@ describe('The requests already made', () => {
   });
 
   it('draws only the refund for a shop that sends no breakdown (an older backend)', async () => {
-    const {goods_amount, return_charge, ...older} = request();
+    const older = request();
+    delete older.goods_amount; // an older backend sends no breakdown
+    delete older.return_charge;
     await open(returnsBlock({can_request: false, items: [], message: null, requests: [older]}));
     const row = screen.getByText('Return #5').closest('li');
     expect(within(row).queryByText('Goods')).toBeNull();

@@ -3,7 +3,7 @@
 // Real slices, a mocked client.
 import React from 'react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {act, cleanup, fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {act, cleanup, fireEvent, render, screen} from '@testing-library/react';
 import {Provider} from 'react-redux';
 import {configureStore} from '@reduxjs/toolkit';
 import {Link, MemoryRouter, Route, Routes, useNavigate} from 'react-router-dom';

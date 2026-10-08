@@ -56,7 +56,7 @@ export const fetchFeaturedProducts = createAsyncThunk("product/fetchFeaturedProd
 });
 
 // Fetch a single product by its slug
-export const fetchProductById = createAsyncThunk("product/getProductById", async (slug, {rejectWithValue}) => {
+export const fetchProductById = createAsyncThunk("product/getProductById", async (slug) => {
     try {
       const response = await getProductById(slug);
       return response?.data?.data || [];

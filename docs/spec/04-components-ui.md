@@ -129,10 +129,10 @@ Shared by `Orders`, `OrderDetail`, `OrderConfirmation` and `OrderTracking`.
 
 1. **Confirmed filename with a literal space**: `src/components/common/product/ProductCard .js` (also referenced with the space in `common/index.js`'s import path) — fragile, breaks on case/space-sensitive tooling.
 2. **Dead/unused code**: the `spinning-cube` Tailwind animation is defined but never referenced.
-3. **Filename/component naming mismatches**: `Breadcrum.js` → component `Breadcrumb`; `SectionSkeleton.js` → internal fn `Sectionkeleton`; `NavBar.js` → internal fn `Navbar`.
+3. **Filename/component naming mismatches**: `Breadcrum.js` → component `Breadcrumb` (the only one left: its name is imported in a few places).
 4. **Duplication**: ~~FlashSale/BestSelling/NewArrival/FeaturedProducts copy-pasted the `forRoute` banner block~~ — now one `RouteBanner` (their product lists were extracted into `ProductSection` before). (A `forRoute` page used to draw its products twice, the list and a "Recommended Products" copy of the same array; the copy is gone, and so is its skeleton.) The banners themselves are now `ContentLink`s (external addresses work).
 5. **Styling inconsistency**: `BackToTop` uses CSS Modules with hardcoded hex colors; no shared color/spacing tokens exist despite Tailwind being used everywhere else.
-6. **Potential bugs**: `InputField` applies `className` to both wrapper and `<input>` (duplicate/conflicting classes); `RatingAndReview.handleCanEdited` double-wraps `dispatch(dispatch(...))`; `RichTextToHTML` uses raw `dangerouslySetInnerHTML` with no visible sanitization.
+6. **Potential bugs**: `InputField` applies `className` to both wrapper and `<input>` (duplicate/conflicting classes); `RichTextToHTML` uses raw `dangerouslySetInnerHTML` with no visible sanitization.
 7. No Tailwind theme customization (colors/fonts/spacing) exists — all "design system" values are inlined per-component, so there's no single source of truth for brand colors. Worth defining `theme.extend.colors` if this project's visual design is meant to scale.
 
 ## `pages/ProductDetails.js` (see [02-routing-pages.md](02-routing-pages.md))

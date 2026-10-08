@@ -100,7 +100,7 @@ const cartSlice = createSlice({
     .addCase(handleAddtoCart.pending, (state)=>{
       state.cartLoading = true;
     })
-    .addCase(handleAddtoCart.fulfilled, (state, action)=>{
+    .addCase(handleAddtoCart.fulfilled, (state)=>{
       state.cartLoading = false;
       state.cartAddedSuccessfull = true;
     })
@@ -131,7 +131,7 @@ const cartSlice = createSlice({
     .addCase(handleRemovetoCart.pending, (state)=>{
       state.cartRemoveLoading = true;
     })
-    .addCase(handleRemovetoCart.fulfilled, (state, action)=>{
+    .addCase(handleRemovetoCart.fulfilled, (state)=>{
       state.cartRemoveLoading = false;
       state.cartRemoveError = null;
       
@@ -153,7 +153,7 @@ export const selectCartCount = (state) =>
 export const selectTotalPrice = (state) =>
   state.cart.cartItems.reduce((total, item) => total + (item.has_discount? item.discount_price : item.base_price) * item.quantity, 0);
 
-export const handleClonedProduct = (product, selectedSize, selectedColor, quantity)=>(dispatch)=>{
+export const handleClonedProduct = (product, selectedSize, selectedColor, quantity)=>()=>{
   const dummyProduct = {}
   dummyProduct['id'] = product.id;
   dummyProduct['name'] = product.name;
