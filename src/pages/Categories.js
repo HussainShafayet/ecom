@@ -10,6 +10,29 @@ import {SectionError} from '../components/common';
 import {discountLabel} from '../utils/formatPrice';
 import usePageTitle from '../hooks/usePageTitle';
 
+// One category: a card with its picture, and the discount badge ON the card (the badge used to sit beside the card, outside its
+// `relative` box, so every badge went to the same corner of the section; in three of the lists the key was on the link inside a fragment,
+// which React could not use)
+const CategoryTile = ({ category }) => (
+  <Link to={`/products/?category=${category?.slug}`}>
+    <div className="relative group cursor-pointer min-w-[150px]">
+      {category?.has_discount && (
+        <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
+          {discountLabel(category?.discount_amount, category?.discount_type)}
+        </span>
+      )}
+      <img
+        src={category?.image}
+        alt={category?.name}
+        className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-lg font-semibold">{category?.name}</span>
+      </div>
+    </div>
+  </Link>
+);
+
 const Categories = () => {
   usePageTitle('Categories');
     const { flash_sale_loading,new_arrival_loading,best_selling_loading,featured_loading,flash_sale, new_arrival, best_selling,featured, flash_sale_error,new_arrival_error,best_selling_error,featured_error } = useSelector((state) => state.category);
@@ -116,26 +139,7 @@ const Categories = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                     {flash_sale?.map((category) => (
-                        <>
-                        {/* Discount Badge */}
-                        {category?.has_discount && (
-                        <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                            {discountLabel(category?.discount_amount, category?.discount_type)}
-                        </span>
-                        )}
-                        <Link to={`/products/?category=${category?.slug}`} key={category?.id}>
-                        <div className="relative group cursor-pointer min-w-[150px]">
-                            <img
-                            src={category?.image}
-                            alt={category?.name}
-                            className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-lg font-semibold">{category?.name}</span>
-                            </div>
-                        </div>
-                        </Link>
-                        </>
+                      <CategoryTile key={category?.id} category={category} />
                     ))}
                 </div>
                 }
@@ -167,26 +171,7 @@ const Categories = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 {new_arrival?.map((category) => (
-                    <>
-                    {/* Discount Badge */}
-                    {category?.has_discount && (
-                    <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                        {discountLabel(category?.discount_amount, category?.discount_type)}
-                    </span>
-                    )}
-                    <Link to={`/products/?category=${category?.slug}`} key={category?.id}>
-                    <div className="relative group cursor-pointer min-w-[150px]">
-                        <img
-                        src={category?.image}
-                        alt={category?.name}
-                        className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-lg font-semibold">{category?.name}</span>
-                        </div>
-                    </div>
-                    </Link>
-                    </>
+                  <CategoryTile key={category?.id} category={category} />
                 ))}
             </div>
             }
@@ -218,26 +203,7 @@ const Categories = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 {best_selling?.map((category) => (
-                    <>
-                    {/* Discount Badge */}
-                    {category?.has_discount && (
-                    <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                        {discountLabel(category?.discount_amount, category?.discount_type)}
-                    </span>
-                    )}
-                    <Link to={`/products/?category=${category?.slug}`} key={category?.id}>
-                    <div className="relative group cursor-pointer min-w-[150px]">
-                        <img
-                        src={category?.image}
-                        alt={category?.name}
-                        className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-lg font-semibold">{category?.name}</span>
-                        </div>
-                    </div>
-                    </Link>
-                    </>
+                  <CategoryTile key={category?.id} category={category} />
                 ))}
             </div>
             }
@@ -269,26 +235,7 @@ const Categories = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                     {featured?.map((category) => (
-                        <div key={category?.id}>
-                        {/* Discount Badge */}
-                        {category?.has_discount && (
-                        <span className="absolute top-2 left-2 bg-red-500 text-white font-bold text-xs px-1 rounded z-10">
-                            {discountLabel(category?.discount_amount, category?.discount_type)}
-                        </span>
-                        )}
-                        <Link to={`/products/?category=${category?.slug}`}>
-                        <div className="relative group cursor-pointer min-w-[150px]">
-                            <img
-                            src={category?.image}
-                            alt={category?.name}
-                            className="w-full h-36 object-cover rounded-lg transition-transform transform group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-opacity-50 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-lg font-semibold">{category?.name}</span>
-                            </div>
-                        </div>
-                        </Link>
-                        </div>
+                      <CategoryTile key={category?.id} category={category} />
                     ))}
                 </div>
                 }

@@ -21,9 +21,9 @@ export const saveCheckoutDraft = (formData) => {
   FIELDS.forEach((field) => {
     if (typeof formData?.[field] === 'string' && formData[field]) draft[field] = formData[field];
   });
+  if (!Object.keys(draft).length) return; // an empty form never wipes the draft: a new page starts empty, and React's StrictMode starts it twice
   try {
-    if (Object.keys(draft).length) store.setItem(KEY, JSON.stringify(draft));
-    else store.removeItem(KEY);
+    store.setItem(KEY, JSON.stringify(draft));
   } catch {
     // storage full or refused: nothing to keep
   }
