@@ -11,16 +11,16 @@ vi.mock('../components/sections', () => {
     return Stub;
   };
   return {
-    HeroSection: stub('hero'), CategoryStrip: stub('strip'), FlashSale: stub('flash'), BestSelling: stub('best'), NewArrival: stub('new'),
+    HeroSection: stub('hero'), CategoryStrip: stub('strip'), CartReminder: stub('cart'), FlashSale: stub('flash'), BestSelling: stub('best'), NewArrival: stub('new'),
     FeaturedProducts: stub('featured'), RecentlyViewed: stub('recent'), Testimonials: stub('testimonials'), MidBanner: stub('mid'), AllProducts: stub('all'),
   };
 });
 
 describe('Home', () => {
-  it('goes from the offer to a way into any category, then what is on sale, what sells, the promotion, what is new, the picks, where they left off, what customers say, and everything', () => {
+  it('goes from the offer to a way into any category, then what is in the cart, what is on sale, what sells, the promotion, what is new, the picks, where they left off, what customers say, and everything', () => {
     const {container} = render(<Home />);
     const page = container.textContent;
-    const order = ['[hero]', '[strip]', '[flash]', '[best]', '[mid]', '[new]', '[featured]', '[recent]', '[testimonials]', '[all]'];
+    const order = ['[hero]', '[strip]', '[cart]', '[flash]', '[best]', '[mid]', '[new]', '[featured]', '[recent]', '[testimonials]', '[all]'];
 
     order.forEach((label) => expect(page).toContain(label));
     order.slice(1).forEach((label, index) => expect(page.indexOf(order[index])).toBeLessThan(page.indexOf(label)));
