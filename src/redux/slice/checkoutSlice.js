@@ -5,6 +5,7 @@ import publicApi from '../../api/publicApi';
 import {validateCoupon, getAvailableOffers} from '../../services/couponService';
 import {divisionsData, districtsData, upazilasData} from '../../data/location';
 import {loadCheckoutDraft} from '../../utils/checkoutDraft';
+import {forgetOrderKey, orderKeyFor} from '../../utils/orderKey';
 
 const initialState = {
   isLoading: false,
@@ -53,12 +54,17 @@ export const handleCheckout = createAsyncThunk('checkout/handleCheckout', async 
      const api = (await import('../../api/axiosSetup')).default;
      const isAuthenticated = getState().auth.isAuthenticated;
      let response = null;
+     // The same order sent again (a retry after a lost answer) carries the same key, so the shop answers with the order it already placed
+     const config = { section: "checkout", headers: { 'Idempotency-Key': orderKeyFor(formData) } };
      if (isAuthenticated) {
-      response = await api.post('/orders/', formData, { section: "checkout"});
+      response = await api.post('/orders/', formData, config);
      }else{
-      response = await publicApi.post(`/orders/`, formData, { section: "checkout"});
+      response = await publicApi.post(`/orders/`, formData, config);
      }
-     response.data.success && dispatch(clearCart());
+     if (response.data.success) {
+      forgetOrderKey(); // the order is placed: the next one is another order
+      dispatch(clearCart());
+     }
     return response?.data?.data;
   } catch (error) {
     return rejectWithValue(error?.response?.data);
