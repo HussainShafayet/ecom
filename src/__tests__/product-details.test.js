@@ -206,6 +206,53 @@ describe('Only a few left', () => {
   });
 });
 
+describe('A colour sold without sizes', () => {
+  // The colour itself is the variant: it carries its own variant_id, price, availability and stock_left (sizes: [])
+  const SCARF = {
+    ...VARIANT, id: 3, name: 'Wool Scarf', slug: 'scarf', minimum_order_quantity: 1,
+    colors: [
+      {name: 'Red', hex_code: '#ff0000', media_files: [media(5)], sizes: [], variant_id: 21, base_price: 500, discount_price: 400, availability_status: true, stock_left: 3},
+      {name: 'Blue', hex_code: '#0000ff', media_files: [media(6)], sizes: [], variant_id: 22, base_price: 520, discount_price: 420, availability_status: false, stock_left: null},
+      {name: 'Green', hex_code: '#00ff00', media_files: [media(7)], sizes: [size('L', 23)]},
+    ],
+  };
+
+  it('can be bought: not "Out of Stock", with its own price and how many are left', async () => {
+    await renderPage(SCARF);
+    expect(screen.queryByText('Out of Stock')).toBeNull();
+    expect(screen.getByText('Add to Cart')).toBeTruthy();
+    expect(screen.getByText('Buy Now')).toBeTruthy();
+    expect(screen.getAllByText('৳400').length).toBeGreaterThan(0); // the colour's price, not the product's ৳900
+    expect(screen.getByText('Only 3 left in stock - order soon')).toBeTruthy();
+    expect(screen.queryByText('Size:')).toBeNull(); // nothing to choose
+  });
+
+  it('puts the colour\'s variant in the cart, at the colour\'s price', async () => {
+    const {store} = await renderPage(SCARF);
+    fireEvent.click(screen.getByText('Add to Cart'));
+    expect(await screen.findByText('✓ Added · View cart')).toBeTruthy();
+    expect(store.getState().cart.cartItems[0]).toMatchObject({id: 3, variant_id: 21, color_name: 'Red', discount_price: 400});
+  });
+
+  it('says so when that colour is sold out, and offers the next colour', async () => {
+    await renderPage(SCARF);
+    fireEvent.click(screen.getByLabelText('Blue'));
+    expect(screen.getByText('Out of Stock')).toBeTruthy();
+    expect(screen.queryByText('Add to Cart')).toBeNull();
+    expect(screen.queryByText(/left in stock/)).toBeNull();
+
+    fireEvent.click(screen.getByLabelText('Red'));
+    expect(screen.getByText('Add to Cart')).toBeTruthy();
+  });
+
+  it('goes back to choosing a size when the next colour has sizes', async () => {
+    await renderPage(SCARF);
+    fireEvent.click(screen.getByLabelText('Green'));
+    expect(screen.getByText('Size:').textContent).toBe('Size: L');
+    expect(screen.getByText('Add to Cart')).toBeTruthy();
+  });
+});
+
 describe('The quantity', () => {
   it('starts at the minimum order and says so, and − stops there', async () => {
     await renderPage();
