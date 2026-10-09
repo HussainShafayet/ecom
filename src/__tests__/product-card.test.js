@@ -124,6 +124,40 @@ describe('A product with a minimum order', () => {
   });
 });
 
+describe('A product with only a few left', () => {
+  it('says how many on the image, so the buttons under it line up with the other cards', () => {
+    renderCards(<ProductCard product={{...KETTLE, stock_left: 3}} />);
+    const note = screen.getByText('Only 3 left');
+    expect(note.closest('a')).toBeTruthy(); // inside the clickable image area...
+    const buttons = screen.getByText('Add to Cart').closest('button').parentElement;
+    expect(buttons.parentElement.contains(note)).toBe(false); // ...not in the block with the buttons
+  });
+
+  it('says nothing when the shop did not (plenty in stock, or an older answer without the field)', () => {
+    const {unmount} = render(
+      <Provider store={makeStore()}><MemoryRouter><ProductCard product={{...KETTLE, stock_left: null}} /></MemoryRouter></Provider>
+    );
+    expect(screen.queryByText(/left/)).toBeNull();
+    unmount();
+    renderCards(<ProductCard product={KETTLE} />);
+    expect(screen.queryByText(/left/)).toBeNull();
+  });
+
+  it('says nothing for a product that cannot be bought', () => {
+    renderCards(<ProductCard product={{...KETTLE, stock_left: 2, availability_status: false}} />);
+    expect(screen.queryByText(/left/)).toBeNull();
+    expect(screen.getByText('Out of Stock')).toBeTruthy();
+  });
+
+  it('shares one corner with the minimum-order note, the stock first', () => {
+    renderCards(<ProductCard product={{...KETTLE, stock_left: 4, minimum_order_quantity: 3}} />);
+    const stock = screen.getByText('Only 4 left');
+    const minimum = screen.getByText('Minimum order: 3');
+    expect(stock.parentElement).toBe(minimum.parentElement);
+    expect(stock.compareDocumentPosition(minimum) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});
+
 describe('The action area of the card', () => {
   it('is one row of the same height whether the product can be added, needs options or is sold out', () => {
     const controls = [];

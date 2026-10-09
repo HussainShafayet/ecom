@@ -12,6 +12,8 @@ export { default as QuantitySelector }
 from './product/QuantitySelector';
 export { default as PurchaseBar }
 from './product/PurchaseBar';
+export { default as StockLeft }
+from './product/StockLeft';
 export { default as CollapsibleSection }
 from './product/CollapsibleSection';
 export { default as ShareMenu }

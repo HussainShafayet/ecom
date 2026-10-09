@@ -26,11 +26,20 @@ const TrendingBadge = ({ isHot }) => (
 );
 
 // Over the image, not under the buttons: a line under the buttons makes this card taller than its neighbours, and the
-// buttons of one row stop lining up.
-const MinimumOrderBadge = ({ quantity }) => (
-  <span className="absolute bottom-2 left-2 z-10 max-w-[calc(100%-1rem)] truncate rounded bg-gray-900/75 px-1.5 py-0.5 text-[10px] font-medium text-white">
-    Minimum order: {quantity}
-  </span>
+// buttons of one row stop lining up. Two can apply at once, so they share one corner and stack.
+const ImageNotes = ({ quantity, stockLeft }) => (
+  <div className="absolute bottom-2 left-2 z-10 flex max-w-[calc(100%-1rem)] flex-col items-start gap-1">
+    {stockLeft > 0 && (
+      <span className="max-w-full truncate rounded bg-red-600/90 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+        Only {stockLeft} left
+      </span>
+    )}
+    {quantity > 1 && (
+      <span className="max-w-full truncate rounded bg-gray-900/75 px-1.5 py-0.5 text-[10px] font-medium text-white">
+        Minimum order: {quantity}
+      </span>
+    )}
+  </div>
 );
 
 const WishlistButton = ({ isFavourite, onAdd, onRemove }) => (
@@ -231,7 +240,9 @@ const ProductCard = ({ product, cardForTrending }) => {
             onLoad={() => setIsImageLoaded(true)}
             inStock={product.availability_status}
           />
-          {product.availability_status && startQuantity > 1 && <MinimumOrderBadge quantity={startQuantity} />}
+          {product.availability_status && (startQuantity > 1 || product.stock_left > 0) && (
+            <ImageNotes quantity={startQuantity} stockLeft={product.stock_left} />
+          )}
         </div>
 
         <div className="mt-2 flex flex-1 flex-col gap-1">
