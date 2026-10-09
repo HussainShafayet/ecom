@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
-  CollapsibleSection, ProductGallery, ProductOptions, ProductSection, PurchaseBar, QuantitySelector, RatingAndReview,
+  CollapsibleSection, ProductGallery, ProductOptions, ProductSection, PurchaseBar, QuantitySelector, RatingAndReview, StockLeft,
   RatingStars, RichTextToHTML, SectionError, ShareMenu, TrustPoints,
 } from '../components/common/';
 import {useDispatch, useSelector} from 'react-redux';
@@ -130,6 +130,7 @@ const ProductDetails = () => {
   // A product with colours/sizes is bought as the chosen variant; a plain one as itself
   const canBuy = hasOptions ? Boolean(selectedSize?.availability_status) : Boolean(product.availability_status);
   const priced = selectedSize || product;
+  const stockLeft = hasOptions ? selectedSize?.stock_left : product.stock_left; // "Only 3 left": of the size chosen, or of the product
   const price = formatPrice(product.has_discount ? priced.discount_price : priced.base_price);
   const oldPrice = product.has_discount ? formatPrice(priced.base_price) : null;
   const saving = product.has_discount ? Number(priced.base_price) - Number(priced.discount_price) : 0; // what the discount takes off one unit
@@ -190,6 +191,8 @@ const ProductDetails = () => {
             onSelectColor={handleSelectColor}
             onSelectSize={handleSelectSize}
           />
+
+          {canBuy && <StockLeft count={stockLeft} />}
 
           {canBuy && <QuantitySelector quantity={quantity} minimum={minimumQuantity} onChange={(value) => dispatch(setQuantity(value))} />}
 

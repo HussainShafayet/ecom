@@ -168,6 +168,44 @@ describe('Choosing', () => {
   });
 });
 
+describe('Only a few left', () => {
+  it('says so under the choices for a plain product, and says nothing when the shop did not', async () => {
+    await renderPage({...PLAIN, stock_left: 2});
+    expect(screen.getByText('Only 2 left in stock - order soon')).toBeTruthy();
+    cleanup();
+    await renderPage({...PLAIN, stock_left: null});
+    expect(screen.queryByText(/left in stock/)).toBeNull();
+  });
+
+  it('follows the size chosen, and the colour that offers other sizes', async () => {
+    const shirt = {
+      ...VARIANT,
+      colors: [
+        {...VARIANT.colors[0], sizes: [size('S', 11, {stock_left: 2}), size('M', 12), size('XL', 14, {stock_left: 1})]},
+        {...VARIANT.colors[1], sizes: [size('L', 13)]},
+      ],
+    };
+    await renderPage(shirt);
+    expect(screen.getByText('Only 2 left in stock - order soon')).toBeTruthy(); // S, the first size, is chosen
+
+    fireEvent.click(screen.getByRole('button', {name: 'M'}));
+    expect(screen.queryByText(/left in stock/)).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', {name: 'XL'}));
+    expect(screen.getByText('Only 1 left in stock - order soon')).toBeTruthy();
+
+    fireEvent.click(screen.getByLabelText('Blue')); // its one size, with plenty
+    expect(screen.queryByText(/left in stock/)).toBeNull();
+  });
+
+  it('is not said for a size that is sold out', async () => {
+    const shirt = {...VARIANT, colors: [{...VARIANT.colors[0], sizes: [size('S', 11, {availability_status: false, stock_left: null})]}]};
+    await renderPage(shirt);
+    expect(screen.getByText('Out of Stock')).toBeTruthy();
+    expect(screen.queryByText(/left in stock/)).toBeNull();
+  });
+});
+
 describe('The quantity', () => {
   it('starts at the minimum order and says so, and − stops there', async () => {
     await renderPage();
