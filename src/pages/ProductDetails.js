@@ -128,9 +128,12 @@ const ProductDetails = () => {
 
   const hasOptions = product.colors?.length > 0 || product.sizes?.length > 0;
   // A product with colours/sizes is bought as the chosen variant; a plain one as itself
-  const canBuy = hasOptions ? Boolean(selectedSize?.availability_status) : Boolean(product.availability_status);
-  const priced = selectedSize || product;
-  const stockLeft = hasOptions ? selectedSize?.stock_left : product.stock_left; // "Only 3 left": of the size chosen, or of the product
+  // What is bought: the chosen size, or the colour itself when it is sold without sizes (then it carries its own variant_id, price,
+  // availability and stock_left, and there is no size to choose)
+  const chosen = selectedSize || (selectedColor?.sizes?.length ? null : selectedColor);
+  const canBuy = hasOptions ? Boolean(chosen?.availability_status) : Boolean(product.availability_status);
+  const priced = chosen || product;
+  const stockLeft = hasOptions ? chosen?.stock_left : product.stock_left; // "Only 3 left": of what is chosen, or of the product
   const price = formatPrice(product.has_discount ? priced.discount_price : priced.base_price);
   const oldPrice = product.has_discount ? formatPrice(priced.base_price) : null;
   const saving = product.has_discount ? Number(priced.base_price) - Number(priced.discount_price) : 0; // what the discount takes off one unit
