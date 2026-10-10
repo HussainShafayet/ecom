@@ -1,5 +1,5 @@
 export { default as ProductCard }
-from './product/ProductCard ';
+from './product/ProductCard';
 export { default as ProductSection }
 from './ProductSection';
 export { default as RatingStars }
