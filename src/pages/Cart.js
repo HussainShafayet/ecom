@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import {useDispatch, useSelector} from 'react-redux';
@@ -58,8 +58,8 @@ const Cart = () => {
     return () => clearTimeout(timer);
   }, [undo]);
 
-   // Debounced API call
-   const debouncedUpdateQuantity = useCallback(
+   // Debounced API call: one debounced function for the life of the page (useMemo, not useCallback(debounce(...)), which builds a new one every render)
+   const debouncedUpdateQuantity = useMemo(() =>
 
     debounce(async (product, difference) => {
       if (difference !== 0) {
@@ -90,7 +90,7 @@ const Cart = () => {
 
       }
     }, 1000),
-    []
+    [dispatch]
   );
 
   if (fetchCartError) {

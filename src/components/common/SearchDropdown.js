@@ -1,5 +1,5 @@
 import {debounce} from "lodash";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {searchSuggestions, suggestionsInputTime} from "../../redux/slice/productSlice";
 import {Link, useNavigate} from "react-router-dom";
@@ -28,12 +28,12 @@ const SearchDropdown = () => {
     };
   }, []);
 
-  // Debounced API call
-  const debouncedAfterInput = useCallback(
-    debounce((searchValue) => {
+  // Debounced API call: one debounced function for the life of the box (useMemo, not useCallback(debounce(...)), which builds a new one every render)
+  const debouncedAfterInput = useMemo(
+    () => debounce((searchValue) => {
       dispatch(searchSuggestions(searchValue));
     }, 1000),
-    [dispatch] // Add dispatch as a dependency
+    [dispatch]
   );
 
   const handleInput = (e) => {
