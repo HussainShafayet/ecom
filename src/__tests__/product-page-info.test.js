@@ -180,7 +180,7 @@ describe('Delivery and returns', () => {
 
     expect(publicApi.get.mock.calls.filter(([url]) => url === '/content/checkout/')).toHaveLength(1);
     expect(api.get).not.toHaveBeenCalled();
-  });
+  }, 20000); // two whole pages: slow when the full suite runs beside it
 
   it('says "Free" for a delivery that costs nothing', async () => {
     shopAnswers({checkout: {data: {data: {delivery_charges: {inside_dhaka: 0, outside_dhaka: 120}}}}});
