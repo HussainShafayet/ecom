@@ -1,4 +1,4 @@
-// What the product page tells a shopper before they decide: where they are (breadcrumb), the brand and whether it is in stock, the price card,
+// What the product page tells a shopper before they decide: where they are (breadcrumb), the brand and whether it is in stock, the price,
 // Save to the wishlist, what delivery costs and how long it takes, the shop's suggested coupons, and the table of contents that keeps the
 // long page reachable. The delivery charges and the coupons are the shop's answers (`/content/checkout/`, `/coupons/available/`): nothing
 // about them is written in the page.
@@ -116,13 +116,24 @@ describe('Where the shopper is', () => {
     expect(screen.queryByText('In stock')).toBeNull();
   });
 
-  it('puts the price, the old price, the discount and what is saved on one card, with the product\'s code beside the rating', async () => {
+  it('puts the price, the old price, the discount and what is saved together, the deal price in red, with the product\'s code beside the rating', async () => {
     await renderPage();
-    const card = screen.getAllByText('৳900').map((element) => element.closest('.rounded-2xl')).find(Boolean);
-    expect(within(card).getByText('৳1,200').className).toContain('line-through');
-    expect(within(card).getByText('25% OFF')).toBeTruthy();
-    expect(within(card).getByText('You save ৳300')).toBeTruthy();
+    const price = screen.getAllByText('৳900').find((element) => element.className.includes('text-3xl'));
+    expect(price.className).toContain('text-red-600'); // a price with a discount reads as a deal
+    const block = price.parentElement.parentElement;
+    expect(block.className).not.toContain('rounded'); // no longer a card stretched across the column
+    expect(within(block).getByText('৳1,200').className).toContain('line-through');
+    expect(within(block).getByText('25% OFF')).toBeTruthy();
+    expect(within(block).getByText('You save ৳300')).toBeTruthy();
     expect(screen.getByText('SKU: K-1')).toBeTruthy();
+  });
+
+  it('is plain dark, with nothing else, for a product without a discount', async () => {
+    await renderPage({...PRODUCT, has_discount: false});
+    const price = screen.getAllByText('৳1,200').find((element) => element.className.includes('text-3xl'));
+    expect(price.className).toContain('text-gray-900');
+    expect(price.className).not.toContain('text-red-600');
+    expect(price.parentElement.children).toHaveLength(1);
   });
 
   it('draws no discount or saving for a product that has none', async () => {

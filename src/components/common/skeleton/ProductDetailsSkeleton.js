@@ -2,7 +2,7 @@ import React from "react";
 import { GALLERY_COLUMN, PICTURE_CAP, PRODUCT_GRID, PRODUCT_PAGE } from "../product/layout";
 
 // The product page while it loads, in the page's own shape (`product/layout.js` is shared with the page and the gallery): the breadcrumb, the picture at the
-// size the page will draw it, the details column block by block (brand and stock chip, name, rating, price card, choices, buttons, the delivery card),
+// size the page will draw it, the details column block by block (brand and stock chip, name, rating, the price, choices, buttons, the delivery card),
 // the tab bar and the sections. The blocks have the heights of what replaces them, so nothing jumps when the page arrives.
 const Block = ({ className = "" }) => <div className={`rounded bg-gray-300 ${className}`} />;
 
@@ -27,7 +27,7 @@ const ProductDetailsSkeleton = () => (
         </div>
         <Block className="h-8 w-3/4 sm:h-9" />{/* name */}
         <Block className="h-7 w-2/3 max-w-xs" />{/* rating, orders */}
-        <Block className="h-[92px] w-full rounded-2xl" />{/* the price card */}
+        <Block className="h-[60px] w-56 max-w-full rounded-lg" />{/* the price and what it saves */}
         <div className="space-y-2">
           <Block className="h-4 w-full" />
           <Block className="h-4 w-5/6" />

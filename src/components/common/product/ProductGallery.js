@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { FaExpand, FaPlay } from 'react-icons/fa';
@@ -22,6 +22,10 @@ const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
 // `onLens({x, y})` tells the gallery where the lens is (its top-left corner, in % of the picture) so the pane can follow, `onLens(null)` that it left.
 const Picture = ({ src, alt, eager, sidePane, onOpen, onLens }) => {
   const [lens, setLens] = useState(null);
+  // The picture fades in when it has arrived instead of appearing in one piece. One that was already in the browser's cache is complete before
+  // React has attached `onLoad`, so it is also looked at when the element is created, or it would stay invisible.
+  const [loaded, setLoaded] = useState(false);
+  const arrived = useCallback((image) => { if (image && image.complete && image.naturalWidth > 0) setLoaded(true); }, []);
 
   const follow = (event) => {
     const box = event.currentTarget.getBoundingClientRect();
@@ -46,14 +50,16 @@ const Picture = ({ src, alt, eager, sidePane, onOpen, onLens }) => {
       className={`relative block w-full overflow-hidden ${sidePane ? 'cursor-crosshair' : ''}`}
     >
       <img
+        ref={arrived}
         src={src}
         alt={alt}
         loading={eager ? 'eager' : 'lazy'}
+        onLoad={() => setLoaded(true)}
         onError={(event) => {
           event.currentTarget.onerror = null;
           event.currentTarget.src = defaultImage;
         }}
-        className="aspect-square w-full object-contain"
+        className={`aspect-square w-full object-contain transition-opacity duration-300 motion-reduce:transition-none ${loaded ? 'opacity-100' : 'opacity-0'}`}
       />
       {lens && (
         <span
