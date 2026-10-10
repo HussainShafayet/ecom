@@ -128,7 +128,8 @@ describe('The review stars', () => {
       middleware: (getDefaultMiddleware) => getDefaultMiddleware({serializableCheck: false}),
     });
     render(<Provider store={store}><MemoryRouter><RatingAndReview product={{id: 23}} /></MemoryRouter></Provider>);
-    return screen.findByRole('radiogroup', {name: /Your Rating/});
+    fireEvent.click(await screen.findByRole('button', {name: 'Write a review'})); // the form is in a sheet that opens from this button
+    return screen.findByRole('radiogroup', {name: /Your rating/});
   };
 
   it('are five radio buttons a keyboard and a screen reader can reach, named by what they are worth', async () => {

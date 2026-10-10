@@ -4,6 +4,11 @@ import {logoutUser} from "./authSlice";
 const initialState = {
     reviewLoading: false,
     reviews: [],
+    reviewsFor: null, // the product the reviews in the list belong to
+    reviewsCount: 0, // how many the shop has (the list holds the pages read so far, 30 each, newest first)
+    reviewsPage: 0, // the last page read
+    reviewsHasMore: false,
+    reviewsMoreLoading: false,
     reviewError: null,
     can_review: false,
     // Why the signed-in customer may not review yet: 'can_review' | 'reviewed' | 'waiting_for_delivery' |
@@ -34,6 +39,21 @@ export const fetchReviews = createAsyncThunk('review/fetchRevies', async (produc
        return rejectWithValue(error.response.data);
      }
 } );
+
+// the next page of the same product's reviews (30 each), added under the ones already there
+export const fetchMoreReviews = createAsyncThunk('review/fetchMoreReviews', async (product_id, {getState, rejectWithValue}) =>{
+    try {
+        const api = (await import('../../api/axiosSetup')).default;
+        const page = getState().review.reviewsPage + 1;
+        const response = await api.get(`/products/reviews/?product_id=${product_id}&page=${page}`, { section: "more-reviews", optionalAuth: true});
+        return { ...response.data.data, page };
+    } catch (error) {
+        return rejectWithValue(error.response?.data);
+    }
+}, {
+    // one page at a time: a second tap while the first is on its way would ask for the same page twice
+    condition: (_, {getState}) => !getState().review.reviewsMoreLoading,
+});
 
 //add reivew 
 export const createReview = createAsyncThunk('review/createReview', async (formData, {rejectWithValue}) =>{
@@ -69,6 +89,10 @@ const reviewSlice = createSlice({
         updateReviewFormData : (state, action ) => {
             state.reviewFormData = {...state.reviewFormData, ...action.payload}
         },
+        // a picked file the customer changed their mind about (an index of `reviewFormData.media`)
+        removeMediaAt: (state, action) => {
+            state.reviewFormData.media = state.reviewFormData.media.filter((_, index) => index !== action.payload)
+        },
         resetReviewFormData: (state)=> {
             state.reviewFormData = {
                 product_id: '',
@@ -81,13 +105,24 @@ const reviewSlice = createSlice({
     extraReducers: ((builder)=>{
         builder
         //fetch to reviews 
-        .addCase(fetchReviews.pending, (state)=>{
+        .addCase(fetchReviews.pending, (state, action)=>{
             state.reviewLoading = true;
+            if (state.reviewsFor !== action.meta.arg) {
+                // another product: the previous one's reviews must not stay under it while these arrive
+                state.reviews = [];
+                state.reviewsCount = 0;
+                state.reviewsPage = 0;
+                state.reviewsHasMore = false;
+                state.reviewsFor = action.meta.arg;
+            }
         })
         .addCase(fetchReviews.fulfilled, (state, action)=>{
             state.reviewLoading = false;
             state.reviewError = false;
             state.reviews = action.payload?.results || [];
+            state.reviewsCount = action.payload?.count ?? state.reviews.length;
+            state.reviewsPage = 1;
+            state.reviewsHasMore = Boolean(action.payload?.next);
             state.can_review = action.payload?.can_review || false;
             state.review_status = action.payload?.review_status || null;
             state.review_order_id = action.payload?.order_id || null;
@@ -97,16 +132,35 @@ const reviewSlice = createSlice({
             state.reviewError = action.payload?.error || 'Something wend wrong!';
         })
 
+        //more reviews (the next page)
+        .addCase(fetchMoreReviews.pending, (state)=>{
+            state.reviewsMoreLoading = true;
+        })
+        .addCase(fetchMoreReviews.fulfilled, (state, action)=>{
+            state.reviewsMoreLoading = false;
+            const known = new Set(state.reviews.map((review) => review.id));
+            // a review written meanwhile moves the pages by one: what is already in the list is not added twice
+            state.reviews = [...state.reviews, ...(action.payload?.results || []).filter((review) => !known.has(review.id))];
+            state.reviewsCount = action.payload?.count ?? state.reviewsCount;
+            state.reviewsPage = action.payload.page;
+            state.reviewsHasMore = Boolean(action.payload?.next);
+        })
+        .addCase(fetchMoreReviews.rejected, (state)=>{
+            state.reviewsMoreLoading = false;
+        })
+
 
          //create to review 
          .addCase(createReview.pending, (state)=>{
             state.addReviewLoading = true;
+            state.addReviewCompleted = false;
         })
         .addCase(createReview.fulfilled, (state, action)=>{
             state.addReviewLoading = false;
             state.addReviewError = false;
             state.addReviewCompleted = false;
-            state.reviews = [...state.reviews, action.payload];
+            state.reviews = [action.payload, ...state.reviews]; // newest first, like the list the shop sends
+            state.reviewsCount += 1;
             state.addReviewCompleted = true;
             // one review per product: the form must not stay open for a second one
             state.can_review = false;
@@ -144,5 +198,5 @@ const reviewSlice = createSlice({
     }),
 });
 
-export const {setMediaFiles,updateReviewFormData, resetReviewFormData} = reviewSlice.actions;
+export const {setMediaFiles, removeMediaAt, updateReviewFormData, resetReviewFormData} = reviewSlice.actions;
 export default reviewSlice.reducer;
