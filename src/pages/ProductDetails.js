@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
-  CollapsibleSection, DeliveryCard, OffersCard, PriceCard, ProductBreadcrumb, ProductGallery, ProductOptions, ProductSection, PurchaseBar,
+  AddedToCartSheet, BrandProducts, CollapsibleSection, DeliveryCard, OffersCard, PriceTag, ProductBreadcrumb, ProductGallery, ProductOptions, ProductSection, PurchaseBar,
   QuantitySelector, RatingAndReview, SaveButton, SectionTabs, StockLeft,
-  RatingStars, RichTextToHTML, SectionError, ShareMenu, TrustPoints,
+  LazySection, RatingStars, RichTextToHTML, SectionError, ShareMenu, TrustPoints,
 } from '../components/common/';
 import {useDispatch, useSelector} from 'react-redux';
 import {setMainImage, setQuantity, fetchProductById, fetchAllProducts, setSelectedColor, setSelectedSize} from '../redux/slice/productSlice';
@@ -13,6 +13,7 @@ import {ProductDetailsSkeleton, SectionSkeleton} from '../components/common/skel
 import {discountLabel, formatPrice} from '../utils/formatPrice';
 import usePageTitle from '../hooks/usePageTitle';
 import {GALLERY_COLUMN, PRODUCT_GRID, PRODUCT_PAGE} from '../components/common/product/layout';
+import {RecentlyViewed} from '../components/sections';
 
 const RELATED_COUNT = 12;
 
@@ -40,7 +41,7 @@ const ProductDetails = () => {
   usePageTitle(product?.name);
 
   const [busy, setBusy] = useState(false); // this page is talking to the server
-  const [added, setAdded] = useState(false); // the last Add to Cart worked (for a moment)
+  const [addedLine, setAddedLine] = useState(null); // the cart line the last Add to Cart put in the cart: the sheet that says so is open while it is set
   const [message, setMessage] = useState(null); // why the shop said no
   const reviewsRef = useRef(null);
   const [openSections, setOpenSections] = useState({ description: true, specs: false, policy: false }); // the folded sections of a phone
@@ -48,10 +49,12 @@ const ProductDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const asked = useRef(false); // the product has been asked for (before that an `error` in the store is an old one, from another page)
   useEffect(() => {
+    asked.current = true;
     dispatch(fetchProductById(slug));
     setMessage(null);
-    setAdded(false);
+    setAddedLine(null);
   }, [dispatch, slug]);
 
   useEffect(() => {
@@ -67,12 +70,6 @@ const ProductDetails = () => {
     }
   }, [dispatch, product]); // a new answer for the same product refreshes its snapshot; recordViewed moves it to the front, never duplicates it
 
-  useEffect(() => {
-    if (!added) return undefined;
-    const timer = setTimeout(() => setAdded(false), 4000);
-    return () => clearTimeout(timer);
-  }, [added]);
-
   const handleSelectColor = (color) => {
     dispatch(setSelectedColor(color));
     dispatch(setMainImage(color?.media_files[0]));
@@ -85,7 +82,7 @@ const ProductDetails = () => {
     setMessage(null);
   };
 
-  // Puts what is on the page in the cart (the account's on the server, a guest's here); true when the shop took it
+  // Puts what is on the page in the cart (the account's on the server, a guest's here); the cart line when the shop took it, else false
   const putInCart = async () => {
     setMessage(null);
     setBusy(true);
@@ -108,7 +105,7 @@ const ProductDetails = () => {
 
       if (!clonedProduct) return false;
       dispatch(addToCart(clonedProduct));
-      return true;
+      return clonedProduct;
     } catch (failure) {
       setMessage(failure?.errors?.[0] || failure?.error || 'Could not add this item. Please try again.');
       return false;
@@ -118,19 +115,23 @@ const ProductDetails = () => {
   };
 
   const handleAddToCart = async () => {
-    if (await putInCart()) setAdded(true);
+    const line = await putInCart();
+    if (line) setAddedLine(line);
   };
 
   const handleBuyNow = async () => {
     if (await putInCart()) navigate('/checkout');
   };
 
-  // The skeleton also stands in for the two moments before the answer: the very first render (nothing asked yet, no product) and a move to another
-  // product, when the one in the store is still the previous one (it was drawn for a frame under the new address)
+  // The skeleton and the error are for a page that has NO product to show yet: the very first render (nothing asked yet), the wait for the answer, and a
+  // move to another product while the store still holds the previous one (it was drawn for a frame under the new address). `isLoading` and `error` are
+  // shared with the products LIST, which this page also asks for (the related products): the list's pending turned `isLoading` on and brought the
+  // skeleton back over a page that was already there (the page blinked twice), and a failed list replaced the whole product with its error.
   const showsAnother = product && product.slug && slug && String(product.slug).toLowerCase() !== String(slug).toLowerCase();
-  if (isLoading) return <ProductDetailsSkeleton />;
-  if (error) return <SectionError message={error} onRetry={() => dispatch(fetchProductById(slug))} />;
-  if (!product || showsAnother) return <ProductDetailsSkeleton />;
+  const noProductYet = !product || showsAnother;
+  if (noProductYet && isLoading) return <ProductDetailsSkeleton />;
+  if (noProductYet && error && asked.current) return <SectionError message={error} onRetry={() => dispatch(fetchProductById(slug))} />;
+  if (noProductYet) return <ProductDetailsSkeleton />;
 
   const hasOptions = product.colors?.length > 0 || product.sizes?.length > 0;
   // A product with colours/sizes is bought as the chosen variant; a plain one as itself
@@ -216,7 +217,7 @@ const ProductDetails = () => {
             </div>
           )}
 
-          <PriceCard price={price} oldPrice={oldPrice} discount={oldPrice ? discountLabel(product.discount_value, product.discount_type) : null} saving={saving > 0 ? formatPrice(saving) : null} />
+          <PriceTag price={price} oldPrice={oldPrice} discount={oldPrice ? discountLabel(product.discount_value, product.discount_type) : null} saving={saving > 0 ? formatPrice(saving) : null} />
 
           <RichTextToHTML content={product.short_description} />
 
@@ -237,7 +238,6 @@ const ProductDetails = () => {
             oldPrice={oldPrice}
             canBuy={canBuy}
             busy={busy}
-            added={added}
             message={message}
             onAddToCart={handleAddToCart}
             onBuyNow={handleBuyNow}
@@ -314,6 +314,17 @@ const ProductDetails = () => {
           <ProductSection className="my-10" title="Related Products" products={related} carousel />
         )}
       </div>
+
+      {/* Somewhere to go next, so a shopper who is not sold on this one stays: the brand's other products (asked for only when they are about to
+          be reached) and what they looked at before (kept on their device, this product left out) */}
+      {product.brand?.name && (
+        <LazySection placeholder={<div aria-hidden="true" className="h-10" />}>
+          <BrandProducts brand={product.brand.name} excludeId={product.id} />
+        </LazySection>
+      )}
+      <RecentlyViewed exclude={product.id} />
+
+      {addedLine && <AddedToCartSheet line={addedLine} suggestions={related} onClose={() => setAddedLine(null)} />}
     </div>
   );
 };

@@ -16,8 +16,8 @@ export { default as StockLeft }
 from './product/StockLeft';
 export { default as ProductBreadcrumb }
 from './product/ProductBreadcrumb';
-export { default as PriceCard }
-from './product/PriceCard';
+export { default as PriceTag }
+from './product/PriceTag';
 export { default as SaveButton }
 from './product/SaveButton';
 export { default as DeliveryCard }
@@ -26,6 +26,10 @@ export { default as OffersCard }
 from './product/OffersCard';
 export { default as SectionTabs }
 from './product/SectionTabs';
+export { default as AddedToCartSheet }
+from './product/AddedToCartSheet';
+export { default as BrandProducts }
+from './product/BrandProducts';
 export { default as CollapsibleSection }
 from './product/CollapsibleSection';
 export { default as ShareMenu }

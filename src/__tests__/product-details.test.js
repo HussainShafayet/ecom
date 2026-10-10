@@ -253,7 +253,7 @@ describe('A colour sold without sizes', () => {
   it('puts the colour\'s variant in the cart, at the colour\'s price', async () => {
     const {store} = await renderPage(SCARF);
     fireEvent.click(screen.getByText('Add to Cart'));
-    expect(await screen.findByText('✓ Added · View cart')).toBeTruthy();
+    expect(await screen.findByRole('dialog', {name: 'Added to your cart'})).toBeTruthy();
     expect(store.getState().cart.cartItems[0]).toMatchObject({id: 3, variant_id: 21, color_name: 'Red', discount_price: 400});
   });
 
@@ -320,15 +320,16 @@ describe('The quantity', () => {
 });
 
 describe('The buy buttons', () => {
-  it('put the quantity in the cart, and Add to Cart turns into a link to the cart for a moment', async () => {
+  it('put the quantity in the cart, and a sheet says so with where to go next (product-page-retention.test.js)', async () => {
     const {store} = await renderPage();
     fireEvent.click(screen.getByLabelText('Increase quantity'));
 
     fireEvent.click(screen.getByText('Add to Cart'));
 
-    expect(await screen.findByText('✓ Added · View cart')).toBeTruthy();
+    const sheet = await screen.findByRole('dialog', {name: 'Added to your cart'});
     expect(store.getState().cart.cartItems[0]).toMatchObject({id: 1, quantity: 4});
-    expect(screen.getByText('✓ Added · View cart').closest('a').getAttribute('href')).toBe('/cart');
+    expect(within(sheet).getByRole('link', {name: 'View cart'}).getAttribute('href')).toBe('/cart');
+    expect(within(sheet).getByRole('link', {name: 'Checkout'}).getAttribute('href')).toBe('/checkout');
   });
 
   it('Buy Now buys and goes to checkout, also for a product with variants (it used to send it to its own page)', async () => {
@@ -351,7 +352,7 @@ describe('The buy buttons', () => {
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toBe('Only 1 of Blue Kettle left in stock.');
     expect(alert.parentElement.textContent).toContain('Add to Cart'); // in the buy bar, not at the top of the page
-    expect(screen.queryByText('✓ Added · View cart')).toBeNull();
+    expect(screen.queryByRole('dialog')).toBeNull(); // nothing was added: no "Added to your cart"
   });
 
   it('are a bar fixed above the bottom navigation on a phone and an ordinary row from md up', async () => {

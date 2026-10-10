@@ -25,6 +25,13 @@ export const getAllProducts = async (page_size = null, ordering = null, page = n
   return await api.get(`/products?${parts.join('&')}`, { section: "products", optionalAuth: true});
 };
 
+// The products of one brand (the product page's "More from ..."): its own request and section, so a failure of this hint is never mixed up with the
+// product lists' (`products`). The caller leaves out the product it is on, so ask for one more than will be shown.
+export const getBrandProducts = async (brand, pageSize = 13) => {
+  const api = (await import('../api/axiosSetup')).default;
+  return await api.get(`/products?brands=${encodeURIComponent(brand)}&page_size=${pageSize}`, { section: "brand-products", optionalAuth: true });
+};
+
 // new arrival products
 export const getNewArrivalProducts = async (page, page_size) => {
   let query = '';
