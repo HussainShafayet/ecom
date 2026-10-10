@@ -7,7 +7,7 @@ import { formatPrice } from '../../utils/formatPrice';
 //   offers    [{ code, public_title, min_order_amount, max_discount_amount, eligible, amount_short }]
 //   disabled  true while a code is being checked
 //   onUse     (offer) => void
-const conditions = (offer) => [
+export const conditions = (offer) => [
   offer.min_order_amount ? `Min order ${formatPrice(offer.min_order_amount)}` : null,
   offer.max_discount_amount ? `Up to ${formatPrice(offer.max_discount_amount)} off` : null,
 ].filter(Boolean).join(' · ');

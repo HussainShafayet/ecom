@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
-  CollapsibleSection, ProductGallery, ProductOptions, ProductSection, PurchaseBar, QuantitySelector, RatingAndReview, StockLeft,
+  CollapsibleSection, DeliveryCard, OffersCard, PriceCard, ProductBreadcrumb, ProductGallery, ProductOptions, ProductSection, PurchaseBar,
+  QuantitySelector, RatingAndReview, SaveButton, SectionTabs, StockLeft,
   RatingStars, RichTextToHTML, SectionError, ShareMenu, TrustPoints,
 } from '../components/common/';
 import {useDispatch, useSelector} from 'react-redux';
@@ -11,6 +12,7 @@ import {recordViewed} from '../redux/slice/recentlyViewedSlice';
 import {ProductDetailsSkeleton, SectionSkeleton} from '../components/common/skeleton';
 import {discountLabel, formatPrice} from '../utils/formatPrice';
 import usePageTitle from '../hooks/usePageTitle';
+import {GALLERY_COLUMN, PRODUCT_GRID, PRODUCT_PAGE} from '../components/common/product/layout';
 
 const RELATED_COUNT = 12;
 
@@ -41,6 +43,7 @@ const ProductDetails = () => {
   const [added, setAdded] = useState(false); // the last Add to Cart worked (for a moment)
   const [message, setMessage] = useState(null); // why the shop said no
   const reviewsRef = useRef(null);
+  const [openSections, setOpenSections] = useState({ description: true, specs: false, policy: false }); // the folded sections of a phone
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -122,9 +125,12 @@ const ProductDetails = () => {
     if (await putInCart()) navigate('/checkout');
   };
 
+  // The skeleton also stands in for the two moments before the answer: the very first render (nothing asked yet, no product) and a move to another
+  // product, when the one in the store is still the previous one (it was drawn for a frame under the new address)
+  const showsAnother = product && product.slug && slug && String(product.slug).toLowerCase() !== String(slug).toLowerCase();
   if (isLoading) return <ProductDetailsSkeleton />;
   if (error) return <SectionError message={error} onRetry={() => dispatch(fetchProductById(slug))} />;
-  if (!product) return null;
+  if (!product || showsAnother) return <ProductDetailsSkeleton />;
 
   const hasOptions = product.colors?.length > 0 || product.sizes?.length > 0;
   // A product with colours/sizes is bought as the chosen variant; a plain one as itself
@@ -145,20 +151,56 @@ const ProductDetails = () => {
   const hasSpecs = product.categories?.length > 0 || product.brand?.name || product.tags?.length > 0 || product.model || product.weight || dimension || product.material || product.features;
   const hasPolicies = product.warranty_information || product.shipping_information || product.return_policy;
 
+  // The category in the breadcrumb: the product's main one
+  const category = product.categories?.find((item) => item.slug === product.category) || product.categories?.[0] || null;
+  const unitPrice = Number(product.has_discount ? priced.discount_price : priced.base_price) || 0;
+
+  // The page's table of contents: only the parts this product has
+  const hasReturnPolicy = Boolean(product.return_policy);
+  const tabs = [
+    product.long_description && { id: 'section-description', label: 'Description' },
+    hasSpecs && { id: 'section-specs', label: 'Specifications' },
+    (hasPolicies || product.qrcode_image_url) && { id: 'section-policy', label: 'Returns' },
+    { id: 'section-reviews', label: `Reviews${product.total_reviews > 0 ? ` (${product.total_reviews})` : ''}` },
+    related.length > 0 && { id: 'section-related', label: 'Related' },
+  ].filter(Boolean);
+  const openFolded = (id) => {
+    const key = { 'section-description': 'description', 'section-specs': 'specs', 'section-policy': 'policy' }[id];
+    key && setOpenSections((current) => ({ ...current, [key]: true }));
+  };
+  const toggleFolded = (key) => setOpenSections((current) => ({ ...current, [key]: !current[key] }));
+
   return (
-    <div className="container mx-auto my-4 pb-40 md:my-6 md:pb-0">{/* phone: room for the fixed buy bar (64 px) and the bottom nav (56 px) */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8">
-        <ProductGallery
-          media={(selectedColor ? selectedColor : product)?.media_files}
-          selected={mainImage}
-          onSelect={(media) => dispatch(setMainImage(media))}
-          name={product.name}
-        />
+    <div className={`${PRODUCT_PAGE} pb-40 motion-safe:animate-fade-in md:pb-0 short:pb-16`}>{/* phone: room for the fixed buy bar (64 px) and the bottom nav (56 px); sideways only the nav */}
+      <ProductBreadcrumb category={category} name={product.name} />
+
+      <div className={PRODUCT_GRID}>
+        {/* From md the gallery stays in view while the details scroll, when the screen is tall enough to hold it (a taller gallery than the
+            screen would hide its thumbnails behind the end of the column) */}
+        <div className={GALLERY_COLUMN}>
+          <ProductGallery
+            media={(selectedColor ? selectedColor : product)?.media_files}
+            selected={mainImage}
+            onSelect={(media) => dispatch(setMainImage(media))}
+            name={product.name}
+          />
+        </div>
 
         <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            {product.brand?.name ? (
+              <Link to={`/products?brands=${encodeURIComponent(product.brand.name)}`} className="rounded py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700 hover:underline">
+                {product.brand.name}
+              </Link>
+            ) : <span />}
+            <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${canBuy ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+              {canBuy ? 'In stock' : 'Out of stock'}
+            </span>
+          </div>
+
           <h1 className="text-xl font-bold text-gray-900 sm:text-2xl lg:text-3xl">{product.name}</h1>
 
-          {(product.avg_rating > 0 || product.total_orders > 0) && (
+          {(product.avg_rating > 0 || product.total_orders > 0 || product.sku) && (
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
               {product.avg_rating > 0 && (
                 <button
@@ -170,20 +212,11 @@ const ProductDetails = () => {
                 </button>
               )}
               {product.total_orders > 0 && <span className="text-sm text-gray-500">{product.total_orders} orders</span>}
+              {product.sku && <span className="hidden text-sm text-gray-400 sm:inline">SKU: {product.sku}</span>}
             </div>
           )}
 
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="text-2xl font-bold text-gray-900">{price}</span>
-            {oldPrice && <span className="text-base text-gray-400 line-through">{oldPrice}</span>}
-            {oldPrice && (
-              <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">
-                {discountLabel(product.discount_value, product.discount_type)}
-              </span>
-            )}
-          </div>
-
-          {saving > 0 && <p className="-mt-2 text-sm font-medium text-green-700">You save {formatPrice(saving)}</p>}
+          <PriceCard price={price} oldPrice={oldPrice} discount={oldPrice ? discountLabel(product.discount_value, product.discount_type) : null} saving={saving > 0 ? formatPrice(saving) : null} />
 
           <RichTextToHTML content={product.short_description} />
 
@@ -210,21 +243,36 @@ const ProductDetails = () => {
             onBuyNow={handleBuyNow}
           />
 
-          <TrustPoints />
+          <div className="flex flex-wrap items-center gap-2">
+            <SaveButton key={product.id} product={product} />
+            <ShareMenu name={product.name} />
+          </div>
 
-          <ShareMenu name={product.name} />
+          <DeliveryCard
+            hasReturnPolicy={hasReturnPolicy}
+            onShowReturns={() => {
+              openFolded('section-policy');
+              requestAnimationFrame(() => document.getElementById('section-policy')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+            }}
+          />
+
+          <OffersCard subtotal={unitPrice * quantity} />
+
+          <TrustPoints />
         </div>
       </div>
 
+      <SectionTabs tabs={tabs} onSelect={openFolded} />
+
       <div className="mt-6 space-y-3">
         {product.long_description && (
-          <CollapsibleSection title="Description" defaultOpen>
+          <CollapsibleSection sectionId="section-description" title="Description" open={openSections.description} onToggle={() => toggleFolded('description')}>
             <RichTextToHTML content={product.long_description} />
           </CollapsibleSection>
         )}
 
         {hasSpecs && (
-          <CollapsibleSection title="Specifications">
+          <CollapsibleSection sectionId="section-specs" title="Specifications" open={openSections.specs} onToggle={() => toggleFolded('specs')}>
             <dl className="space-y-2 text-sm">
               {product.categories?.length > 0 && <Fact label="Category"><ProductLinks items={product.categories} to={(item) => `/products/?category=${item.slug}`} /></Fact>}
               {product.brand?.name && <Fact label="Brand"><ProductLinks items={[product.brand]} to={(item) => `/products/?brands=${item.name}`} /></Fact>}
@@ -239,7 +287,7 @@ const ProductDetails = () => {
         )}
 
         {(hasPolicies || product.qrcode_image_url) && (
-          <CollapsibleSection title="Return & Warranty">
+          <CollapsibleSection sectionId="section-policy" title="Return & Warranty" open={openSections.policy} onToggle={() => toggleFolded('policy')}>
             <div className="flex gap-4">
               <dl className="flex-1 space-y-2 text-sm">
                 {product.warranty_information && <Fact label="Warranty">{product.warranty_information}</Fact>}
@@ -257,13 +305,15 @@ const ProductDetails = () => {
         )}
       </div>
 
-      <section className="mt-6" ref={reviewsRef}>
+      <section id="section-reviews" className="mt-6 scroll-mt-32 md:scroll-mt-40" ref={reviewsRef}>
         <RatingAndReview product={product} />
       </section>
 
-      {relatedProductsLoading ? <SectionSkeleton /> : (
-        <ProductSection className="my-10" title="Related Products" products={related} carousel />
-      )}
+      <div id="section-related" className="scroll-mt-32 md:scroll-mt-40">
+        {relatedProductsLoading ? <SectionSkeleton /> : (
+          <ProductSection className="my-10" title="Related Products" products={related} carousel />
+        )}
+      </div>
     </div>
   );
 };

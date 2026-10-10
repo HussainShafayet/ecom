@@ -143,6 +143,29 @@ describe('The gallery', () => {
   });
 });
 
+describe('The picture on every screen', () => {
+  it('is never taller than the screen can show: capped by the screen\'s height, with room for the fixed bars on a phone and less on a phone held sideways', async () => {
+    const {container} = await renderPage();
+    const gallery = [...container.querySelectorAll('div')].find((element) => element.className.includes('max-w-[clamp('));
+    expect(gallery.contains(container.querySelector('[data-testid="swiper"]'))).toBe(true);
+    expect(gallery.className).toContain('mx-auto');
+    expect(gallery.className).toContain('max-w-[clamp(16rem,calc(100vh_-_19rem),100%)]'); // a phone: the header, breadcrumb, fixed buy bar and bottom nav are around it
+    expect(gallery.className).toContain('[@media(min-width:768px)_and_(min-height:501px)]:max-w-[clamp(16rem,calc(100vh_-_17rem),100%)]'); // a laptop: no fixed bars
+    expect(gallery.className).toContain('short:max-w-[clamp(12rem,calc(100vh_-_17rem),100%)]'); // a phone held sideways: hardly any height
+    // and from md the picture's COLUMN is that wide, so the picture fills it (no gap on both sides on a wide, short laptop screen); the details beside it, centred as a pair
+    expect(container.querySelector('.grid').className).toContain('md:grid-cols-[minmax(0,min(50%,max(16rem,calc(100vh_-_17rem))))_minmax(0,48rem)]');
+    expect(container.querySelector('.grid').className).toContain('md:justify-center');
+  });
+
+  it('puts the details beside the picture on a phone held sideways, and leaves the buy buttons in the page there instead of in a bar over the navigation', async () => {
+    const {container} = await renderPage();
+    expect(container.querySelector('.grid').className).toContain('short:grid-cols-2');
+    const bar = screen.getByText('Add to Cart').closest('div.fixed');
+    expect(bar.className).toContain('short:static');
+    expect(bar.className).toContain('short:shadow-none');
+  });
+});
+
 describe('Choosing', () => {
   it('names the chosen colour and size, and offers the sizes of that colour', async () => {
     await renderPage(VARIANT);
@@ -344,9 +367,11 @@ describe('The sections', () => {
   it('fold up under their title on a phone (the description open), and only show what has a value', async () => {
     await renderPage();
 
-    const description = screen.getByText('Description').closest('button');
+    // the title of a section is the button that folds it (the tab bar has a "Description" button too, which only scrolls)
+    const folds = (name) => screen.getAllByText(name).map((element) => element.closest('button')).find((button) => button?.hasAttribute('aria-expanded'));
+    const description = folds('Description');
     expect(description.getAttribute('aria-expanded')).toBe('true');
-    const specs = screen.getByText('Specifications').closest('button');
+    const specs = folds('Specifications');
     expect(specs.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(specs);
     expect(specs.getAttribute('aria-expanded')).toBe('true');
@@ -359,9 +384,38 @@ describe('The sections', () => {
     expect(screen.getByText('Return policy:')).toBeTruthy();
   });
 
+  it('slide open and shut, and while shut their content is inert (Tab and screen readers skip what is not shown)', async () => {
+    await renderPage();
+    const folds = (name) => screen.getAllByText(name).map((element) => element.closest('button')).find((button) => button?.hasAttribute('aria-expanded'));
+    const contentOf = (name) => document.getElementById(folds(name).getAttribute('aria-controls'));
+
+    expect(contentOf('Specifications').firstElementChild.hasAttribute('inert')).toBe(true);
+    expect(contentOf('Specifications').className).toContain('grid-rows-[0fr]');
+    expect(contentOf('Description').firstElementChild.hasAttribute('inert')).toBe(false);
+    expect(contentOf('Description').className).toContain('grid-rows-[1fr]');
+
+    fireEvent.click(folds('Specifications'));
+    expect(contentOf('Specifications').firstElementChild.hasAttribute('inert')).toBe(false);
+    expect(contentOf('Specifications').className).toContain('grid-rows-[1fr]');
+  });
+
+  it('are never folded or inert on a wide screen, where the title is only a title', async () => {
+    const original = window.matchMedia;
+    window.matchMedia = (query) => ({matches: query.includes('min-width: 768px'), addEventListener() {}, removeEventListener() {}});
+    try {
+      await renderPage();
+      const specs = screen.getAllByText('Specifications').map((element) => element.closest('button')).find((button) => button?.hasAttribute('aria-expanded'));
+      const content = document.getElementById(specs.getAttribute('aria-controls'));
+      expect(content.firstElementChild.hasAttribute('inert')).toBe(false);
+      expect(content.className).toContain('grid-rows-[1fr]');
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+
   it('link category and brand in this tab, and keep the QR code for a computer\'s screen', async () => {
     const {container} = await renderPage();
-    const category = screen.getByText('Home', {selector: 'a'});
+    const category = within(screen.getByRole('heading', {name: 'Specifications'}).closest('section')).getByText('Home', {selector: 'a'});
     expect(category.getAttribute('href')).toBe('/products/?category=home');
     expect(category.getAttribute('target')).toBeNull();
     const qr = container.querySelector('img[alt="QR code of this page"]').parentElement.className;
@@ -411,7 +465,7 @@ describe('Related products', () => {
 
     expect(await screen.findByText('Related Products')).toBeTruthy();
     expect(screen.getAllByText(/^Other \d+$/)).toHaveLength(12);
-    expect(screen.getAllByText('Blue Kettle')).toHaveLength(1); // only the heading, not a card of itself
+    expect(screen.getAllByRole('heading', {name: 'Blue Kettle'})).toHaveLength(1); // only the page's own heading, not a card of itself
     expect(container.querySelector('.snap-x')).toBeTruthy();
     expect(getAllProducts.mock.calls[0][0]).toBe(13); // asked for one more than it shows
   });

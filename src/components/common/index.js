@@ -14,6 +14,18 @@ export { default as PurchaseBar }
 from './product/PurchaseBar';
 export { default as StockLeft }
 from './product/StockLeft';
+export { default as ProductBreadcrumb }
+from './product/ProductBreadcrumb';
+export { default as PriceCard }
+from './product/PriceCard';
+export { default as SaveButton }
+from './product/SaveButton';
+export { default as DeliveryCard }
+from './product/DeliveryCard';
+export { default as OffersCard }
+from './product/OffersCard';
+export { default as SectionTabs }
+from './product/SectionTabs';
 export { default as CollapsibleSection }
 from './product/CollapsibleSection';
 export { default as ShareMenu }
