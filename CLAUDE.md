@@ -77,7 +77,6 @@ Tailwind CSS, utility-first, with **no theme customization** — no semantic col
 These are pre-existing bugs and inconsistencies worth knowing before touching related code, so they aren't mistaken for intentional behavior or accidentally reintroduced elsewhere:
 
 - **Cart/wishlist "remove" endpoints use `PUT`, not `DELETE`** (`/accounts/cart/`, `/accounts/favourite/`) — intentional per the backend contract, not a bug to "fix" without checking the backend.
-- **`ProductCard .js`** (under `src/components/common/product/`) has a literal trailing space in the filename, and `common/index.js` imports it with that space — copy the exact filename if touching this component.
 - **`logoutUser` in `authSlice.js`** (and the token renewal in `api/session.js`, deliberately) bypass both axios clients and call raw `axios` directly — no shared interceptor error handling.
 
 ## Extending the app

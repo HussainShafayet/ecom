@@ -1,6 +1,6 @@
 import React from 'react';
 import SectionHeader from './SectionHeader';
-import ProductCard from './product/ProductCard ';
+import ProductCard from './product/ProductCard';
 
 const GRID = 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6';
 // A phone swipes through one row of cards (snapping to each) instead of scrolling past a long 2-column grid;

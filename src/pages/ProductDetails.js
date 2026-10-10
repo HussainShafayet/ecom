@@ -62,7 +62,7 @@ const ProductDetails = () => {
       const snapshot = dispatch(handleClonedProduct(product, null, null, 1));
       dispatch(recordViewed(snapshot));
     }
-  }, [dispatch, product?.id]);
+  }, [dispatch, product]); // a new answer for the same product refreshes its snapshot; recordViewed moves it to the front, never duplicates it
 
   useEffect(() => {
     if (!added) return undefined;
