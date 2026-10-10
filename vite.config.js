@@ -44,5 +44,8 @@ module.exports = defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    // The page tests render a whole product page; with the files running side by side a test that takes 1-2 s alone can take 6-10 s, past the
+    // 5 s default (the same test passes alone). It is a time limit for a slow machine, not a place to hide a slow test.
+    testTimeout: 20000,
   },
 });
