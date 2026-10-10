@@ -5,6 +5,7 @@ import { FaExpand, FaPlay } from 'react-icons/fa';
 import defaultImage from '../../../assets/images/default_product_image.jpg';
 import useMediaQuery from '../../../hooks/useMediaQuery';
 import ImageViewer from './ImageViewer';
+import { PICTURE_CAP } from './layout';
 
 // The Alibaba / Amazon way, for a computer: the picture itself stays where it is; a translucent square (the lens) follows the mouse over it and
 // the area under the lens is shown ENLARGED in a separate pane beside the picture, over the details column. Only for a mouse (it can hover and it
@@ -15,6 +16,7 @@ const LENS = 100 / ZOOM; // the lens is this many % of the picture's width and h
 const MOUSE = '(hover: hover) and (pointer: fine)';
 const TWO_COLUMNS = '(min-width: 768px)';
 const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+
 
 // One picture on the page: a button that opens the viewer (a tap or a click) and, under a mouse, the lens that follows the pointer.
 // `onLens({x, y})` tells the gallery where the lens is (its top-left corner, in % of the picture) so the pane can follow, `onLens(null)` that it left.
@@ -95,11 +97,11 @@ const ProductGallery = ({ media, selected, onSelect, name }) => {
   }, [selectedIndex]);
 
   if (items.length === 0) {
-    return <img src={defaultImage} alt={name} className="aspect-square w-full rounded-lg bg-gray-50 object-contain" />;
+    return <img src={defaultImage} alt={name} className={`aspect-square rounded-lg bg-gray-50 object-contain ${PICTURE_CAP}`} />;
   }
 
   return (
-    <div className="relative">
+    <div className={`relative ${PICTURE_CAP}`}>
       <div className="relative overflow-hidden rounded-lg bg-gray-50">
         <Swiper
           key={setKey}
@@ -177,7 +179,7 @@ const ProductGallery = ({ media, selected, onSelect, name }) => {
               onClick={() => onSelect(item)}
               aria-label={`Show ${item.file_type === 'video' ? 'video' : 'picture'} ${index + 1}`}
               aria-current={index === selectedIndex}
-              className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border-2 bg-gray-50 ${index === selectedIndex ? 'border-blue-600' : 'border-gray-200'}`}
+              className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border-2 bg-gray-50 transition duration-200 hover:border-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ${index === selectedIndex ? 'border-blue-600' : 'border-gray-200'}`}
             >
               <img src={item.thumbnail_url || item.file_url} alt="" loading="lazy" className="h-full w-full object-cover" />
               {item.file_type === 'video' && (

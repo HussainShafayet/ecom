@@ -24,7 +24,7 @@ const ProductOptions = ({ product, selectedColor, selectedSize, onSelectColor, o
                   aria-pressed={chosen}
                   title={color?.name}
                   style={{ backgroundColor: color?.hex_code }}
-                  className={`h-10 w-10 rounded-full border-2 transition-transform ${chosen ? 'scale-110 border-blue-600 ring-2 ring-blue-200' : 'border-gray-300'}`}
+                  className={`h-10 w-10 rounded-full border-2 transition duration-200 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 motion-reduce:transition-none ${chosen ? 'scale-110 border-blue-600 ring-2 ring-blue-200' : 'border-gray-300'}`}
                 />
               );
             })}
@@ -44,7 +44,7 @@ const ProductOptions = ({ product, selectedColor, selectedSize, onSelectColor, o
                   type="button"
                   onClick={() => onSelectSize(size)}
                   aria-pressed={chosen}
-                  className={`min-h-10 min-w-10 rounded-lg border px-3 text-sm font-medium ${
+                  className={`min-h-10 min-w-10 rounded-lg border px-3 text-sm font-medium transition duration-200 hover:border-blue-400 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 motion-reduce:transition-none ${
                     chosen ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-300 text-gray-700'
                   } ${size?.availability_status === false ? 'text-gray-400 line-through' : ''}`}
                 >
