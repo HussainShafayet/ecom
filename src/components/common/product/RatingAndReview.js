@@ -1,346 +1,133 @@
-import { useEffect, useState } from "react";
-import { FaEdit, FaStar, FaUserCircle } from "react-icons/fa";
-import {useDispatch, useSelector} from "react-redux";
-import {Link, useLocation, useNavigate} from "react-router-dom";
-import {createReview, fetchReviews, resetReviewFormData, setMediaFiles, updateReview, updateReviewFormData} from "../../../redux/slice/reviewSlice";
-import Loader from "../Loader";
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { FaPen } from 'react-icons/fa';
+import { fetchMoreReviews, fetchReviews, resetReviewFormData, updateReviewFormData } from '../../../redux/slice/reviewSlice';
+import { allReviewMedia, averageOf, countReviews, filterReviews, sortReviews } from '../../../utils/reviews';
+import ReviewSummary from '../../reviews/ReviewSummary';
+import ReviewFilters from '../../reviews/ReviewFilters';
+import ReviewItem from '../../reviews/ReviewItem';
+import ReviewSheet from '../../reviews/ReviewSheet';
+import ImageViewer from './ImageViewer';
 
 // Why the signed-in customer can not write a review (yet). `status` is the backend's review_status; `orderId` is the
 // order they are waiting for when it is 'waiting_for_delivery'. Anything else (an older backend sends no status) gets
 // the general rule.
 const ReviewEligibility = ({ status, orderId }) => {
   if (status === 'reviewed') {
-    return <p className="text-gray-600">You have already reviewed this product. Use the edit icon on your review to change it.</p>;
+    return <p className="text-sm text-gray-600">You have already reviewed this product. Use the Edit button on your review to change it.</p>;
   }
   if (status === 'waiting_for_delivery') {
     return (
-      <p className="text-gray-600">
+      <p className="text-sm text-gray-600">
         You can review this product once your order has been delivered.{' '}
         {orderId && <Link to={`/orders/${orderId}`} className="text-blue-500 underline">View my order</Link>}
       </p>
     );
   }
-  return <p className="text-gray-600">You can review a product once you have bought it and your order has been delivered.</p>;
+  return <p className="text-sm text-gray-600">You can review a product once you have bought it and your order has been delivered.</p>;
 };
 
+const PRIMARY = 'flex h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white transition active:scale-[0.98] hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400';
+
+// The reviews of a product, phone first: the summary (average, stars, how many, the customers' photos and the way to write one), the filters,
+// the reviews, "Load more" for the next 30, and the form in a sheet (`ReviewSheet`) instead of open in the middle of the page.
+// The filters and the order work on the reviews read so far (the shop sends 30 at a time); the average and the count are the shop's own.
 const RatingAndReview = ({ product }) => {
-  const [hoverRating, setHoverRating] = useState(0);
-  const [can_edited, setCanEdited] = useState(null);
-  const {isAuthenticated} = useSelector((state)=>state.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-
-  const {reviewLoading, reviews, can_review, review_status, review_order_id, reviewFormData, addReviewCompleted, updateReviewCompleted} = useSelector((state)=> state.review);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    product.id && dispatch(fetchReviews(product.id));
-    product && dispatch(updateReviewFormData({ product_id: product.id }))
-  }, [product, dispatch]);
-
-  useEffect(() => {
-    addReviewCompleted && dispatch(resetReviewFormData());
-  }, [addReviewCompleted, dispatch]);
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { reviews, reviewsCount, reviewsHasMore, reviewsMoreLoading, can_review, review_status, review_order_id } = useSelector((state) => state.review);
+  const [filter, setFilter] = useState('all');
+  const [sort, setSort] = useState('newest');
+  const [sheet, setSheet] = useState(null); // null, or { editing: the review's id | null }
+  const [viewer, setViewer] = useState(null); // null, or { media, index }
+  const [moreProblem, setMoreProblem] = useState('');
 
   useEffect(() => {
-    updateReviewCompleted && setCanEdited(null);
-  }, [updateReviewCompleted])
+    if (!product?.id) return;
+    dispatch(fetchReviews(product.id));
+    dispatch(updateReviewFormData({ product_id: product.id }));
+    setFilter('all');
+    setSort('newest');
+  }, [product?.id, dispatch]);
 
-  const getFileType = (url) => {
-    if (!url) return "unknown";
-  
-    const extension = url.split(".").pop().toLowerCase();
-    const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"];
-    const videoExtensions = ["mp4", "webm", "ogg", "mov", "avi", "mkv"];
-  
-    if (imageExtensions.includes(extension)) return "image";
-    if (videoExtensions.includes(extension)) return "video";
-    
-    return "unknown";
+  const total = reviewsCount || Number(product?.total_reviews) || 0;
+  // With every review in hand the average is worked out here (it is right at once after the customer's own); else it is the shop's
+  const rating = total > 0 && reviews.length === total ? averageOf(reviews) : Number(product?.avg_rating) || averageOf(reviews);
+  const counts = countReviews(reviews);
+  const shown = sortReviews(filterReviews(reviews, filter), sort);
+
+  const signIn = () => navigate('/signin', { state: { from: location } });
+  const write = () => {
+    dispatch(resetReviewFormData());
+    dispatch(updateReviewFormData({ product_id: product.id }));
+    setSheet({ editing: null });
+  };
+  const edit = (review) => {
+    dispatch(updateReviewFormData({ product_id: review.product_id, rating: review.rating, comment: review.comment, media: review.media_urls || [] }));
+    setSheet({ editing: review.id });
+  };
+  const loadMore = async () => {
+    setMoreProblem('');
+    const result = await dispatch(fetchMoreReviews(product.id));
+    if (fetchMoreReviews.rejected.match(result) && !result.meta?.condition) setMoreProblem('Could not load more reviews. Please try again.');
   };
 
-  const handleRedirectSignIn = () => {
-    navigate('/signin', { state: { from: location } });
+  let action;
+  if (!isAuthenticated) {
+    action = <button type="button" onClick={signIn} className={PRIMARY}><FaPen aria-hidden="true" />Sign in to write a review</button>;
+  } else if (can_review) {
+    action = <button type="button" onClick={write} className={PRIMARY}><FaPen aria-hidden="true" />Write a review</button>;
+  } else {
+    action = <ReviewEligibility status={review_status} orderId={review_order_id} />;
   }
 
-   // Handle File Upload
-   const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    
-    files.length > 0 && dispatch(setMediaFiles(files));
-    
-  };
+  const photos = allReviewMedia(reviews);
 
-  const handleSubmitReview = (e) => {
-    e.preventDefault();
-    if (!isAuthenticated) {
-     handleRedirectSignIn();
-      return;
-    }
-
-    // Initialize FormData
-    const formData = new FormData();
-    formData.append("product_id", reviewFormData.product_id);
-    formData.append("rating", reviewFormData.rating);
-    formData.append("comment", reviewFormData.comment);
-
-    // Append media files
-    reviewFormData.media.forEach((file) => formData.append("media", file));
-
-    if (can_edited) {
-      dispatch(updateReview({formData, review_id:can_edited}));
-    } else {
-      dispatch(createReview(formData));
-    }
-  };
-
-  const handleCanEdited = (review) => {
-    setCanEdited(review.id);
-   dispatch(updateReviewFormData({ product_id: review.product_id }));
-  dispatch(updateReviewFormData({ rating: review.rating }));
-  dispatch(updateReviewFormData({ comment: review.comment }));
-  dispatch(updateReviewFormData({ media: review.media_urls }));
-    
-  }
   return (
-    <div className="shadow-md rounded-lg p-4">
-      {/* Header */}
-      <h3 className="text-2xl font-semibold mb-6 text-gray-800">
-        Customer Reviews
-      </h3>
+    <section aria-labelledby="reviews-title" className="rounded-2xl border border-gray-200 bg-white p-3 sm:p-5">
+      <h2 id="reviews-title" className="mb-4 text-xl font-bold text-gray-900">Customer reviews</h2>
 
-      {/* Existing Reviews */}
-      {reviews.length > 0 ? (
-        <div className="space-y-6 mb-8">
-          {reviews?.map((review, index) => (
-            <div
-              key={index}
-              className="p-4 border border-gray-200 rounded-lg bg-white transition-transform"
-            >
-              <div className="flex justify-between items-center mb-3">
-                {/* Reviewer Name */}
-                <div className="flex items-center space-x-2">
-                  <FaUserCircle className="text-gray-400 w-6 h-6" />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-gray-800">
-                    {review.user_name}
-                    </span>
-                    {/* Review Date */}
-                    <span className="text-xs text-gray-500">{new Date(review.created_at).toLocaleDateString()}</span>
-                  </div>
-                  
-                </div>
-                {/* edit */}
-                {review.can_edited &&
-                  <FaEdit className="text-gray-500 hover:text-blue-500 w-6 h-6 cursor-pointer"
-                  onClick={() => handleCanEdited(review)}
-                   />
-                }
-              </div>
-              {/* Review Rating */}
-              <div className="flex items-center mb-2">
-                {Array(5)
-                  .fill(0)
-                  .map((_, i) => (
-                    <FaStar
-                      key={i}
-                      className={`h-5 w-5 ${
-                        i < review.rating
-                          ? "text-yellow-500"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-              </div>
-              {/* Review Text */}
-              <p className="text-gray-700 text-sm">{review.comment}</p>
-              <div className="flex overflow-x-auto space-x-4 p-2">
-                {review?.media_urls?.map((file, index) => (
-                  <div key={index} className="flex-none w-36 sm:w-44 md:w-52 h-36 sm:h-44 md:h-52">
-                    {getFileType(file.file) === 'image' ? (
-                      <img
-                        src={file.file}
-                        className="w-full h-full rounded-lg shadow-md object-cover"
-                        alt={`Review media ${index}`}
-                      />
-                    ) : getFileType(file.file) === 'video' ? (
-                      <video controls className="w-full h-full rounded-lg shadow-md">
-                        <source src={file.file} type={file.type} />
-                        Your browser does not support the video tag.
-                      </video>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
+      <ReviewSummary rating={rating} total={total} photos={photos} onOpenPhoto={(index) => setViewer({ media: photos, index })} action={action} />
 
+      {reviews.length > 1 && <ReviewFilters counts={counts} filter={filter} onFilter={setFilter} sort={sort} onSort={setSort} />}
 
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-600 mb-8">
-          No reviews yet. Be the first to share your experience!
-        </p>
+      {reviews.length > 0 && (
+        shown.length > 0 ? (
+          <ul className="mt-4 space-y-3">
+            {shown.map((review) => (
+              <ReviewItem key={review.id} review={review} onEdit={edit} onOpenMedia={(media, index) => setViewer({ media, index })} />
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-4 text-sm text-gray-600">
+            No reviews match this filter.{' '}
+            <button type="button" onClick={() => setFilter('all')} className="font-medium text-indigo-700 underline">Show all reviews</button>
+          </p>
+        )
       )}
 
-      {/* Add Review Section */}
-      <div className="border-t border-gray-300 pt-6">
-        <h4 className="text-lg font-semibold mb-4 text-gray-800">
-          Write a Review
-        </h4>
-
-        {isAuthenticated ?
-        <div className="space-y-4">
-          {can_review || can_edited ? 
-          <form onSubmit={handleSubmitReview} className="space-y-4 p-4 border rounded-md shadow-md">
-            {/* Rating Selector: five radio buttons (a keyboard and a screen reader can use them), the stars drawn inside */}
-            <div className="flex items-center">
-              <span id="review-rating-label" className="text-gray-600 font-medium mr-4">Your Rating:</span>
-              <div role="radiogroup" aria-labelledby="review-rating-label" className="flex">
-                {[1, 2, 3, 4, 5].map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    role="radio"
-                    aria-checked={reviewFormData.rating === value}
-                    aria-label={`${value} ${value === 1 ? 'star' : 'stars'}`}
-                    onClick={() => dispatch(updateReviewFormData({ 'rating': value }))}
-                    onMouseEnter={() => setHoverRating(value)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    className="flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-                  >
-                    <FaStar
-                      aria-hidden="true"
-                      className={`h-8 w-8 ${value <= (hoverRating || reviewFormData.rating) ? 'text-yellow-500' : 'text-gray-300'}`}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Review Textarea */}
-            <textarea
-              placeholder="Share your experience..."
-              value={reviewFormData.comment}
-              onChange={(e) => dispatch(updateReviewFormData({ 'comment': e.target.value }))}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              rows="4"
-            ></textarea>
-
-            {/* File Input Field */}
-            <input
-              type="file"
-              multiple
-              accept="image/*,video/*"
-              onChange={handleFileChange}
-              className="w-full border border-gray-300 p-2 rounded-md cursor-pointer"
-            />
-
-            {/* Preview Selected Files */}
-            {reviewFormData.media.length > 0 && (
-              
-                <div className="flex overflow-x-auto space-x-4 mt-2 p-2">
-                  {reviewFormData?.media?.map((file, index) => (
-                    <div key={index} className="flex-none w-24 h-24">
-                      {file instanceof Blob  ? (
-                        file.type.startsWith("image/") ? (
-                          <img
-                            src={URL.createObjectURL(file) || file.file}
-                            className="w-full h-full rounded-lg shadow-md object-cover"
-                            alt={`Upload ${index}`}
-                            onLoad={(e) => URL.revokeObjectURL(e.target.src)} // Cleanup URL
-                          />
-                        ) : file.type.startsWith("video/") ? (
-                          <video
-                            controls
-                            className="w-full h-full rounded-lg shadow-md"
-                            onLoadedData={(e) => URL.revokeObjectURL(e.target.currentSrc)} // Cleanup URL
-                          >
-                            <source src={URL.createObjectURL(file)} type={file.type} />
-                            Your browser does not support the video tag.
-                          </video>
-                        ) : null
-                      ) : file.file ? 
-                      (
-                        getFileType(file.file) === 'image' ? (
-                          <img
-                            src={file.file}
-                            className="w-full h-full rounded-lg shadow-md object-cover"
-                            alt={`Upload ${index}`}
-                            //onLoad={(e) => URL.revokeObjectURL(e.target.src)} // Cleanup URL
-                          />
-                          ) : getFileType(file.file) === 'video' ? (
-                            <video
-                              controls
-                              className="w-full h-full rounded-lg shadow-md"
-                              //onLoadedData={(e) => URL.revokeObjectURL(e.target.currentSrc)} // Cleanup URL
-                            >
-                              <source src={file.file} />
-                              Your browser does not support the video tag.
-                            </video>
-                        ): null
-                      
-                      )
-                       : null}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-
-            {/* Submit Button */}
-            <div className="flex justify-center items-center space-x-2">
-            {can_edited && 
-            <button
-              type="button"
-              onClick={() => setCanEdited(false)}
-              className="px-4 py-2 w-full bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-            >
-              Cancel
-            </button>
-            }
-            <button
-              type="submit"
-              className={`w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all disabled:opacity-50 ${reviewLoading ? 'cursor-wait' : 'hover:scale-105'
-              }`}
-              disabled={!reviewFormData.rating || !reviewFormData.comment.trim() || reviewLoading}
-              
-            >
-            {reviewLoading ? (
-              <Loader message="Processing" />
-            ) : (
-              <>
-                {can_edited? 'Update Review' : 'Submit Review' }
-              </>
-            )}
-            
-              
-            </button>
-            
-            </div>
-          </form>
-        : 
-        <ReviewEligibility status={review_status} orderId={review_order_id} />
-        }
-
-        </div>
-        : (
-        <p className="text-gray-600">
+      {reviews.length > 0 && reviewsHasMore && (
+        <div className="mt-4 text-center">
+          <p className="mb-2 text-xs text-gray-500">Showing {reviews.length} of {reviewsCount} reviews{filter !== 'all' ? ' (the filter looks at these)' : ''}</p>
           <button
-            className="text-blue-500 underline"
-            onClick={handleRedirectSignIn}
+            type="button"
+            onClick={loadMore}
+            disabled={reviewsMoreLoading}
+            className="h-11 rounded-lg border border-indigo-200 px-6 text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-50 disabled:cursor-wait disabled:opacity-60"
           >
-            Sign in
-          </button>{' '}
-          to add a review.
-        </p>
+            {reviewsMoreLoading ? 'Loading...' : 'Load more reviews'}
+          </button>
+          {moreProblem && <p role="alert" className="mt-2 text-sm text-red-600">{moreProblem}</p>}
+        </div>
       )}
 
-      </div>
-    </div>
+      {sheet && <ReviewSheet editing={sheet.editing} onClose={() => setSheet(null)} />}
+      {viewer && <ImageViewer media={viewer.media} startIndex={viewer.index} name={`${product?.name || 'Product'} reviews`} onClose={() => setViewer(null)} />}
+    </section>
   );
 };
 
 export default RatingAndReview;
-
-

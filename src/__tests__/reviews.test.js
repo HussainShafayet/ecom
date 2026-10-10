@@ -60,19 +60,20 @@ describe('The review area says why a customer can not review yet', () => {
     expect(screen.queryByText('View my order')).toBeNull();
   });
 
-  it('says a customer who already reviewed it has, and points at the edit icon', async () => {
+  it('says a customer who already reviewed it has, and points at the Edit button', async () => {
     api.get.mockResolvedValue(page({review_status: 'reviewed'}));
     renderReviews();
     expect(await screen.findByText(/You have already reviewed this product/)).toBeTruthy();
   });
 
-  it('shows the form, and no excuse, when they can review', async () => {
+  it('offers to write one, and no excuse, when they can review (the form itself opens in a sheet: product-reviews.test.js)', async () => {
     api.get.mockResolvedValue(page({can_review: true, review_status: 'can_review'}));
     renderReviews();
 
-    expect(await screen.findByText('Submit Review')).toBeTruthy();
+    expect(await screen.findByRole('button', {name: 'Write a review'})).toBeTruthy();
     expect(screen.queryByText(/once your order has been delivered/)).toBeNull();
     expect(screen.queryByText(/already reviewed/)).toBeNull();
+    expect(screen.queryByRole('dialog')).toBeNull(); // nothing open in the middle of the page any more
   });
 
   it('falls back to the general rule when the backend sends no review_status', async () => {
@@ -85,7 +86,7 @@ describe('The review area says why a customer can not review yet', () => {
     api.get.mockResolvedValue(page({review_status: 'guest'}));
     renderReviews(false);
 
-    expect(await screen.findByText('Sign in')).toBeTruthy();
+    expect(await screen.findByRole('button', {name: 'Sign in to write a review'})).toBeTruthy();
     await waitFor(() => expect(api.get).toHaveBeenCalled());
     expect(screen.queryByText(/once your order has been delivered/)).toBeNull();
   });
