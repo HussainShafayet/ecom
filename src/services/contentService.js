@@ -35,3 +35,10 @@ export const getShopContent = async () => {
 export const getCategoriesContent = async () => {
   return await publicApi.get(`/content/pages/category`, { section: "category-content"});
 };
+
+// The shop's delivery charges and estimates, for the product page's "Delivery" card: the answer the checkout reads (GET /content/checkout/,
+// backend docs/API_CONTRACT.md section 5), asked WITHOUT the customer's token on purpose: a signed-in customer's name and addresses are not
+// needed to say "৳60 inside Dhaka". Only a hint, so a failure is kept in its own section and never shown.
+export const getDeliveryInfo = async () => {
+  return await publicApi.get(`/content/checkout/`, { section: "product-delivery" });
+};

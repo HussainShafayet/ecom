@@ -3,8 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToCart, handleAddtoCart, handleClonedProduct } from '../../../redux/slice/cartSlice';
 import { FaBolt, FaHeart, FaRegHeart } from 'react-icons/fa';
-import {addToWishlist, handleAddtoWishlist, handleRemovetoWishlist, removeFromWishlist} from '../../../redux/slice/wishlistSlice';
-import {pushToast} from '../../../redux/slice/toastSlice';
+import useWishlistToggle from '../../../hooks/useWishlistToggle';
 import {minimumOf} from '../../../utils/minimumOrder';
 import {discountLabel, formatPrice} from '../../../utils/formatPrice';
 import defaultImage from '../../../assets/images/default_product_image.jpg';
@@ -116,11 +115,10 @@ const OutOfStock = () => (
 
 const ProductCard = ({ product, cardForTrending }) => {
   const {isAuthenticated} = useSelector((state)=> state.auth);
-  const {favouriteIds} = useSelector ((state) => state.wishList);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isImageLoaded, setIsImageLoaded] = useState(false); // Track if the image has loaded
-  const [productFavourite, setProductFavourite] = useState(product?.is_favourite || false);
+  const {isFavourite, add: handleAddToWishlist, remove: handleRemoveToWishlist} = useWishlistToggle(product);
   const [cartMessage, setCartMessage] = useState(null); // why the shop did not take it (stock, ...)
   const [busy, setBusy] = useState(false); // this card is talking to the server; the other cards stay usable
   const startQuantity = minimumOf(product); // a product with a minimum order goes into the cart with that many
@@ -188,31 +186,6 @@ const ProductCard = ({ product, cardForTrending }) => {
       setBusy(false);
     }
   };
-
-  // The heart only fills when the shop took it, so a refusal must be said: nothing else on the page shows it
-  const handleAddToWishlist = async () =>{
-    if (!isAuthenticated) {
-      dispatch(addToWishlist(product));
-      return;
-    }
-    const result = await dispatch(handleAddtoWishlist({product_id: product.id}));
-    if (handleAddtoWishlist.rejected.match(result)) {
-      dispatch(pushToast(result.payload?.errors?.[0] || result.payload?.error || 'Could not add this to your wishlist. Please try again.', 'error'));
-    }
-  }
-  const handleRemoveToWishlist = async () =>{
-    try {
-      if (isAuthenticated) {
-          const response = await dispatch(handleRemovetoWishlist({ product_id: product.id })).unwrap();
-          response.success && setProductFavourite(false);
-      }
-      dispatch(removeFromWishlist(product.id));
-    } catch (failure) {
-      dispatch(pushToast(failure?.errors?.[0] || failure?.error || 'Could not remove this from your wishlist. Please try again.', 'error'));
-    }
-  }
-
-  const isFavourite = Boolean((favouriteIds && favouriteIds[product.id]) || productFavourite);
 
   return (
     <div className="group relative flex h-full w-full flex-col rounded-xl border border-gray-200 bg-white p-2 shadow-sm transition duration-200 hover:shadow-md">
